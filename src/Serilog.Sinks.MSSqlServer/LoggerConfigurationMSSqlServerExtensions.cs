@@ -37,6 +37,7 @@ namespace Serilog
         /// <param name="batchPostingLimit">The maximum number of events to post in a single batch.</param>
         /// <param name="period">The time to wait between checking for event batches.</param>
         /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
+        /// <param name="utcTimestamp">Use UTC timestamp.</param>
         /// <returns>Logger configuration, allowing configuration to continue.</returns>
         /// <exception cref="ArgumentNullException">A required parameter is null.</exception>
         public static LoggerConfiguration MSSqlServer(
@@ -45,14 +46,14 @@ namespace Serilog
             LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
             int batchPostingLimit = MSSqlServerSink.DefaultBatchPostingLimit,
             TimeSpan? period = null,
-            IFormatProvider formatProvider = null)
+            IFormatProvider formatProvider = null, bool utcTimestamp = true)
         {
             if (loggerConfiguration == null) throw new ArgumentNullException("loggerConfiguration");
      
             var defaultedPeriod = period ?? MSSqlServerSink.DefaultPeriod;
 
             return loggerConfiguration.Sink(
-                new MSSqlServerSink( connectionString, tableName, storeProperties,batchPostingLimit, defaultedPeriod, formatProvider),
+                new MSSqlServerSink(connectionString, tableName, storeProperties,batchPostingLimit, defaultedPeriod, formatProvider, utcTimestamp),
                 restrictedToMinimumLevel);
         }
     }
