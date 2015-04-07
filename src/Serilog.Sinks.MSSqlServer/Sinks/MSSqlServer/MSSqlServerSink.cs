@@ -47,7 +47,7 @@ namespace Serilog.Sinks.MSSqlServer
         readonly bool _includeProperties;
         readonly string _tableName;
         readonly CancellationTokenSource _token = new CancellationTokenSource();
-        readonly bool _utcTimestamp;
+        readonly bool _storeTimestampInUtc;
 
         /// <summary>
         ///     Construct a sink posting to the specified database.
@@ -58,9 +58,9 @@ namespace Serilog.Sinks.MSSqlServer
         /// <param name="batchPostingLimit">The maximum number of events to post in a single batch.</param>
         /// <param name="period">The time to wait between checking for event batches.</param>
         /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
-        /// <param name="utcTimestamp">Use UTC timestamp.</param>
+        /// <param name="storeTimestampInUtc">Store Timestamp In UTC</param>
         public MSSqlServerSink(string connectionString, string tableName, bool includeProperties, int batchPostingLimit,
-            TimeSpan period, IFormatProvider formatProvider, bool utcTimestamp)
+            TimeSpan period, IFormatProvider formatProvider, bool storeTimestampInUtc)
             : base(batchPostingLimit, period)
         {
             if (string.IsNullOrWhiteSpace(connectionString))
@@ -74,7 +74,7 @@ namespace Serilog.Sinks.MSSqlServer
             _tableName = tableName;
             _includeProperties = includeProperties;
             _formatProvider = formatProvider;
-            _utcTimestamp = utcTimestamp;
+            _storeTimestampInUtc = storeTimestampInUtc;
 
             // Prepare the data table
             _eventsTable = CreateDataTable();
@@ -180,8 +180,8 @@ namespace Serilog.Sinks.MSSqlServer
                 row["Message"] = logEvent.RenderMessage(_formatProvider);
                 row["MessageTemplate"] = logEvent.MessageTemplate;
                 row["Level"] = logEvent.Level;
-                row["TimeStamp"] = (_utcTimestamp) ? logEvent.Timestamp.DateTime.ToUniversalTime() 
-                                                   : logEvent.Timestamp.DateTime;
+                row["TimeStamp"] = (_storeTimestampInUtc) ? logEvent.Timestamp.DateTime.ToUniversalTime() 
+                                                          : logEvent.Timestamp.DateTime;
                 row["Exception"] = logEvent.Exception != null ? logEvent.Exception.ToString() : null;
 
                 if (_includeProperties)
