@@ -19,6 +19,8 @@ Make sure to set up security in such a way that the sink can write to the log ta
 
 **Using Additional Columns**
 
+This feature will still use all of the default columns and provide additional columns for that can be logged to (be sure to create the extra columns via SQL script first). This gives the flexibility to use as many extra columns as needed.
+
 ```csharp
 var dataColumns = new[]
         {
