@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data;
 using Serilog.Configuration;
 using Serilog.Events;
 using Serilog.Sinks.MSSqlServer;
@@ -38,6 +39,7 @@ namespace Serilog
         /// <param name="period">The time to wait between checking for event batches.</param>
         /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
         /// <param name="storeTimestampInUtc">Store Timestamp In UTC</param>
+        /// <param name="additionalDataColumns">Additional columns for data storage.</param>
         /// <returns>Logger configuration, allowing configuration to continue.</returns>
         /// <exception cref="ArgumentNullException">A required parameter is null.</exception>
         public static LoggerConfiguration MSSqlServer(
@@ -47,14 +49,15 @@ namespace Serilog
             int batchPostingLimit = MSSqlServerSink.DefaultBatchPostingLimit,
             TimeSpan? period = null,
             IFormatProvider formatProvider = null,
-            bool storeTimestampInUtc = false)
+            bool storeTimestampInUtc = false,
+            DataColumn[] additionalDataColumns = null)
         {
             if (loggerConfiguration == null) throw new ArgumentNullException("loggerConfiguration");
 
             var defaultedPeriod = period ?? MSSqlServerSink.DefaultPeriod;
 
             return loggerConfiguration.Sink(
-                new MSSqlServerSink(connectionString, tableName, storeProperties, batchPostingLimit, defaultedPeriod, formatProvider, storeTimestampInUtc),
+                new MSSqlServerSink(connectionString, tableName, storeProperties, batchPostingLimit, defaultedPeriod, formatProvider, storeTimestampInUtc, additionalDataColumns),
                 restrictedToMinimumLevel);
         }
     }

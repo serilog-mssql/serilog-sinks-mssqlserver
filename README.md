@@ -16,3 +16,19 @@ var log = new LoggerConfiguration()
 ```
 
 Make sure to set up security in such a way that the sink can write to the log table. If you don't plan on using the properties, then you can disable the storage of them. 
+
+**Using Additional Columns**
+
+This feature will still use all of the default columns and provide additional columns for that can be logged to (be sure to create the extra columns via SQL script first). This gives the flexibility to use as many extra columns as needed.
+
+```csharp
+var dataColumns = new[]
+        {
+            new DataColumn { DataType = Type.GetType( "System.String" ), ColumnName = "User" },
+            new DataColumn { DataType = Type.GetType( "System.String" ), ColumnName = "Other" },
+        };
+var log = new LoggerConfiguration()
+    .WriteTo.MSSqlServer(@"Server=.\SQLEXPRESS;Database=LogEvents;Trusted_Connection=True;", "Logs", additionalDataColumns: dataColumns)
+    .CreateLogger();
+```
+The properties 'User' and 'Other' will now be placed in the corresponding column upon logging. The property name must match a column name in your table.

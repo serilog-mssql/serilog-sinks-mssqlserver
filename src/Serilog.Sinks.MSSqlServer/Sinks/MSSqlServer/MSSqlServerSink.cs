@@ -1,4 +1,4 @@
-﻿// Copyright 2013 Serilog Contributors
+﻿// Copyright 2013 Serilog Contributors 
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -49,6 +49,8 @@ namespace Serilog.Sinks.MSSqlServer
         readonly CancellationTokenSource _token = new CancellationTokenSource();
         readonly bool _storeTimestampInUtc;
 
+        private DataColumn[] _additionalDataColumns;
+
         /// <summary>
         ///     Construct a sink posting to the specified database.
         /// </summary>
@@ -59,8 +61,9 @@ namespace Serilog.Sinks.MSSqlServer
         /// <param name="period">The time to wait between checking for event batches.</param>
         /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
         /// <param name="storeTimestampInUtc">Store Timestamp In UTC</param>
+        /// <param name="additionalDataColumns">Additional columns for data storage.</param>
         public MSSqlServerSink(string connectionString, string tableName, bool includeProperties, int batchPostingLimit,
-            TimeSpan period, IFormatProvider formatProvider, bool storeTimestampInUtc)
+            TimeSpan period, IFormatProvider formatProvider, bool storeTimestampInUtc, DataColumn[] additionalDataColumns = null )
             : base(batchPostingLimit, period)
         {
             if (string.IsNullOrWhiteSpace(connectionString))
@@ -75,6 +78,7 @@ namespace Serilog.Sinks.MSSqlServer
             _includeProperties = includeProperties;
             _formatProvider = formatProvider;
             _storeTimestampInUtc = storeTimestampInUtc;
+            _additionalDataColumns = additionalDataColumns;
 
             // Prepare the data table
             _eventsTable = CreateDataTable();
@@ -162,6 +166,10 @@ namespace Serilog.Sinks.MSSqlServer
             };
             eventsTable.Columns.Add(props);
 
+            if ( _additionalDataColumns != null )
+            {
+                eventsTable.Columns.AddRange(_additionalDataColumns);
+            }
 
             // Create an array for DataColumn objects.
             var keys = new DataColumn[1];
@@ -171,7 +179,7 @@ namespace Serilog.Sinks.MSSqlServer
             return eventsTable;
         }
 
-        void FillDataTable(IEnumerable<LogEvent> events)
+     void FillDataTable(IEnumerable<LogEvent> events)
         {
             // Add the new rows to the collection. 
             foreach (var logEvent in events)
@@ -187,6 +195,10 @@ namespace Serilog.Sinks.MSSqlServer
                 if (_includeProperties)
                 {
                     row["Properties"] = ConvertPropertiesToXmlStructure(logEvent.Properties);
+                }
+                if ( _additionalDataColumns != null )
+                {
+                    ConvertPropertiesToColumn( row, logEvent.Properties );
                 }
 
                 _eventsTable.Rows.Add(row);
@@ -213,6 +225,23 @@ namespace Serilog.Sinks.MSSqlServer
             return sb.ToString();
         }
 
+        /// <summary>
+        ///     Mapping values from properties which have a corresponding data row.
+        ///     Matching is done based on Column name and property key
+        /// </summary>
+        /// <param name="row"></param>
+        /// <param name="properties"></param>
+        private void ConvertPropertiesToColumn(
+            DataRow row, IReadOnlyDictionary<string, LogEventPropertyValue> properties)
+        {
+            foreach (var property in properties)
+            {
+                if (row.Table.Columns.Contains(property.Key))
+                {
+                    row[property.Key] = property.Value.ToString();
+                }
+            }
+        }
 
         /// <summary>
         ///     Disposes the connection
@@ -223,7 +252,7 @@ namespace Serilog.Sinks.MSSqlServer
             _token.Cancel();
 
             if (_eventsTable != null)
-                _eventsTable.Dispose();
+                _eventsTable.Dispose();           
 
             base.Dispose(disposing);
         }
