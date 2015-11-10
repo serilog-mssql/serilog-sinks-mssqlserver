@@ -21,6 +21,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Serilog.Events;
 using Serilog.Sinks.PeriodicBatching;
+using Serilog.Parsing;
+using System.Linq;
+
 
 namespace Serilog.Sinks.MSSqlServer
 {
@@ -50,6 +53,8 @@ namespace Serilog.Sinks.MSSqlServer
         readonly bool _storeTimestampInUtc;
 
         private DataColumn[] _additionalDataColumns;
+
+        private List<LogEvent> _internalLogEvents = new List<LogEvent>();
 
         /// <summary>
         ///     Construct a sink posting to the specified database.
@@ -94,7 +99,7 @@ namespace Serilog.Sinks.MSSqlServer
         ///     not both.
         /// </remarks>
         protected override async Task EmitBatchAsync(IEnumerable<LogEvent> events)
-        {
+        {            
             // Copy the events to the data table
             FillDataTable(events);
 
@@ -104,10 +109,27 @@ namespace Serilog.Sinks.MSSqlServer
                 using (var copy = new SqlBulkCopy(cn))
                 {
                     copy.DestinationTableName = _tableName;
-                    await copy.WriteToServerAsync(_eventsTable, _token.Token);
+                    try
+                    {
+                        await copy.WriteToServerAsync(_eventsTable, _token.Token);
+                    }
+                    catch (Exception ex)
+                    {
+                        // create LogEvent so exception can be added to DB during next batch run.
+                        var logEvent = new LogEvent(
+                            DateTimeOffset.Now,
+                            LogEventLevel.Error,
+                            ex,
+                            new MessageTemplate("", new[] {new TextToken("Internal error while trying to write events to database")}),
+                            Enumerable.Empty<LogEventProperty>());
 
-                    // Processed the items, clear for the next run
-                    _eventsTable.Clear();
+                        Emit(logEvent);
+                    }
+                    finally
+                    {
+                        // Processed the items, clear for the next run
+                        _eventsTable.Clear();   
+                    }
                 }
             }
         }
@@ -238,8 +260,35 @@ namespace Serilog.Sinks.MSSqlServer
             {
                 if (row.Table.Columns.Contains(property.Key))
                 {
-                    row[property.Key] = property.Value.ToString();
+                    var columnName = property.Key;
+                    var columnType = row.Table.Columns[columnName].DataType;
+                    object conversion;
+                    var scalarValue = property.Value as ScalarValue;
+                    if (TryChangeType( scalarValue.Value, columnType, out conversion))
+                    {
+                        row[columnName] = conversion;
+                    }
                 }
+            }
+        }
+
+        /// <summary>
+        ///     Try to convert the object to the given type
+        /// </summary>
+        /// <param name="obj">object</param>
+        /// <param name="type">type to convert to</param>
+        /// <param name="conversion">result of the converted value</param>        
+        private static bool TryChangeType(object obj, Type type, out object conversion)
+        {
+            conversion = null;
+            try
+            {                
+                conversion = Convert.ChangeType(obj, type);
+                return true;
+            }
+            catch
+            {                
+                return false;
             }
         }
 
