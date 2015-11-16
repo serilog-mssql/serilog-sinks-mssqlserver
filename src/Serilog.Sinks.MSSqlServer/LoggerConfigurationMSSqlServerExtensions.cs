@@ -40,24 +40,39 @@ namespace Serilog
         /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
         /// <param name="storeTimestampInUtc">Store Timestamp In UTC</param>
         /// <param name="additionalDataColumns">Additional columns for data storage.</param>
+        /// <param name="excludeAdditionalColumnsFromProperties">Exclude properties from the Properties column if they are being saved to additional columns.</param>
         /// <returns>Logger configuration, allowing configuration to continue.</returns>
         /// <exception cref="ArgumentNullException">A required parameter is null.</exception>
         public static LoggerConfiguration MSSqlServer(
             this LoggerSinkConfiguration loggerConfiguration,
-            string connectionString, string tableName, bool storeProperties = true,
+            string connectionString,
+            string tableName,
+            bool storeProperties = true,
             LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
             int batchPostingLimit = MSSqlServerSink.DefaultBatchPostingLimit,
             TimeSpan? period = null,
             IFormatProvider formatProvider = null,
             bool storeTimestampInUtc = false,
-            DataColumn[] additionalDataColumns = null)
+            DataColumn[] additionalDataColumns = null,
+            bool excludeAdditionalColumnsFromProperties = false
+            )
         {
             if (loggerConfiguration == null) throw new ArgumentNullException("loggerConfiguration");
 
             var defaultedPeriod = period ?? MSSqlServerSink.DefaultPeriod;
 
             return loggerConfiguration.Sink(
-                new MSSqlServerSink(connectionString, tableName, storeProperties, batchPostingLimit, defaultedPeriod, formatProvider, storeTimestampInUtc, additionalDataColumns),
+                new MSSqlServerSink(
+                    connectionString,
+                    tableName,
+                    storeProperties,
+                    batchPostingLimit,
+                    defaultedPeriod,
+                    formatProvider,
+                    storeTimestampInUtc,
+                    additionalDataColumns,
+                    excludeAdditionalColumnsFromProperties
+                    ),
                 restrictedToMinimumLevel);
         }
     }

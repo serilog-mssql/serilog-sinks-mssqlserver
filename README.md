@@ -43,3 +43,5 @@ var log = new LoggerConfiguration()
     .CreateLogger();
 ```
 The log event properties `User` and `Other` will now be placed in the corresponding column upon logging. The property name must match a column name in your table.
+
+By default the additional properties will still be included in the XML data saved to the Properties column (assuming that is not disabled). That's consistent with the idea behind structured logging, and makes it easier to convert the log data to another (NoSql) storage platform later if desired.  However, if the data is to stay in SQL Server, then the additional properties may not need to be saved in both columns and XML, so an option in the sink configuration allows you to exclude those properties from the XML.
