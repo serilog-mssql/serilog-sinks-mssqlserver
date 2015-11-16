@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -49,7 +50,9 @@ namespace Serilog.Sinks.MSSqlServer
         readonly CancellationTokenSource _token = new CancellationTokenSource();
         readonly bool _storeTimestampInUtc;
 
-        private DataColumn[] _additionalDataColumns;
+        private readonly DataColumn[] _additionalDataColumns;
+        private readonly bool _excludeAdditionalProperties;
+        private readonly HashSet<string> _additionalDataColumnNames;
 
         /// <summary>
         ///     Construct a sink posting to the specified database.
@@ -62,9 +65,18 @@ namespace Serilog.Sinks.MSSqlServer
         /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
         /// <param name="storeTimestampInUtc">Store Timestamp In UTC</param>
         /// <param name="additionalDataColumns">Additional columns for data storage.</param>
-        public MSSqlServerSink(string connectionString, string tableName, bool includeProperties, int batchPostingLimit,
-            TimeSpan period, IFormatProvider formatProvider, bool storeTimestampInUtc, DataColumn[] additionalDataColumns = null )
-            : base(batchPostingLimit, period)
+        /// <param name="excludeAdditionalProperties">Exclude properties from the Properties column if they are being saved to additional columns.</param>
+        public MSSqlServerSink(
+            string connectionString,
+            string tableName,
+            bool includeProperties,
+            int batchPostingLimit,
+            TimeSpan period,
+            IFormatProvider formatProvider,
+            bool storeTimestampInUtc,
+            DataColumn[] additionalDataColumns = null,
+            bool excludeAdditionalProperties = false
+            ) : base(batchPostingLimit, period)
         {
             if (string.IsNullOrWhiteSpace(connectionString))
                 throw new ArgumentNullException("connectionString");
@@ -72,13 +84,15 @@ namespace Serilog.Sinks.MSSqlServer
             if (string.IsNullOrWhiteSpace(tableName))
                 throw new ArgumentNullException("tableName");
 
-
             _connectionString = connectionString;
             _tableName = tableName;
             _includeProperties = includeProperties;
             _formatProvider = formatProvider;
             _storeTimestampInUtc = storeTimestampInUtc;
             _additionalDataColumns = additionalDataColumns;
+            if (_additionalDataColumns != null)
+                _additionalDataColumnNames = new HashSet<string>(_additionalDataColumns.Select(c => c.ColumnName), StringComparer.OrdinalIgnoreCase);
+            _excludeAdditionalProperties = excludeAdditionalProperties;
 
             // Prepare the data table
             _eventsTable = CreateDataTable();
@@ -207,9 +221,11 @@ namespace Serilog.Sinks.MSSqlServer
             _eventsTable.AcceptChanges();
         }
 
-        static string ConvertPropertiesToXmlStructure(
-            IEnumerable<KeyValuePair<string, LogEventPropertyValue>> properties)
+        private string ConvertPropertiesToXmlStructure(IEnumerable<KeyValuePair<string, LogEventPropertyValue>> properties)
         {
+            if (_excludeAdditionalProperties)
+                properties = properties.Where(p => !_additionalDataColumnNames.Contains(p.Key));
+
             var sb = new StringBuilder();
 
             sb.Append("<properties>");
@@ -234,12 +250,9 @@ namespace Serilog.Sinks.MSSqlServer
         private void ConvertPropertiesToColumn(
             DataRow row, IReadOnlyDictionary<string, LogEventPropertyValue> properties)
         {
-            foreach (var property in properties)
+            foreach (var property in properties.Where(p => _additionalDataColumnNames.Contains(p.Key)))
             {
-                if (row.Table.Columns.Contains(property.Key))
-                {
-                    row[property.Key] = property.Value.ToString();
-                }
+                row[property.Key] = property.Value.ToString();
             }
         }
 
