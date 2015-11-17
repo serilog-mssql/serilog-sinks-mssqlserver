@@ -45,7 +45,7 @@ namespace Serilog
         /// <exception cref="ArgumentNullException">A required parameter is null.</exception>
         public static LoggerConfiguration MSSqlServer(
             this LoggerSinkConfiguration loggerConfiguration,
-            string connectionString =null, string tableName=null, bool storeProperties = true,
+            string connectionString, string tableName, bool storeProperties = true,
             LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
             int batchPostingLimit = MSSqlServerSink.DefaultBatchPostingLimit,
             TimeSpan? period = null,
@@ -92,9 +92,6 @@ namespace Serilog
                 Array.Resize<DataColumn>( ref returnColumns, serviceConfigSection.Columns.Count + additionalColumns.Length);
                 i = additionalColumns.Length;
             }
-            //int arraySize = additionalColumns == null ? 0 : additionalColumns.Length;
-            //DataColumn[] returnColumns = new DataColumn[serviceConfigSection.Columns.Count];
-            //int i = 0;
 
             foreach (ColumnConfig c in serviceConfigSection.Columns)
             {
