@@ -55,7 +55,7 @@ namespace Serilog.Sinks.MSSqlServer
         private readonly bool _excludeAdditionalProperties;
         private readonly HashSet<string> _additionalDataColumnNames;
 
-        private readonly bool _saveLogEvent;
+        private readonly bool _storeLogEvent;
         private readonly JsonFormatter _jsonFormatter;
 
         /// <summary>
@@ -70,7 +70,7 @@ namespace Serilog.Sinks.MSSqlServer
         /// <param name="storeTimestampInUtc">Store Timestamp In UTC</param>
         /// <param name="additionalDataColumns">Additional columns for data storage.</param>
         /// <param name="excludeAdditionalProperties">Exclude properties from the Properties column if they are being saved to additional columns.</param>
-        /// <param name="saveLogEvent">Save the entire log event to the LogEvent column (nvarchar) as JSON.</param>
+        /// <param name="storeLogEvent">Save the entire log event to the LogEvent column (nvarchar) as JSON.</param>
         public MSSqlServerSink(
             string connectionString,
             string tableName,
@@ -81,7 +81,7 @@ namespace Serilog.Sinks.MSSqlServer
             bool storeTimestampInUtc,
             DataColumn[] additionalDataColumns = null,
             bool excludeAdditionalProperties = false,
-            bool saveLogEvent = false
+            bool storeLogEvent = true
             )
             : base(batchPostingLimit, period)
         {
@@ -101,8 +101,8 @@ namespace Serilog.Sinks.MSSqlServer
                 _additionalDataColumnNames = new HashSet<string>(_additionalDataColumns.Select(c => c.ColumnName), StringComparer.OrdinalIgnoreCase);
             _excludeAdditionalProperties = excludeAdditionalProperties;
 
-            _saveLogEvent = saveLogEvent;
-            if (_saveLogEvent)
+            _storeLogEvent = storeLogEvent;
+            if (_storeLogEvent)
                 _jsonFormatter = new JsonFormatter(formatProvider: formatProvider);
 
             // Prepare the data table
@@ -228,7 +228,7 @@ namespace Serilog.Sinks.MSSqlServer
                 if (_includeProperties)
                     row["Properties"] = ConvertPropertiesToXmlStructure(logEvent.Properties);
 
-                if (_saveLogEvent)
+                if (_storeLogEvent)
                     row["LogEvent"] = LogEventToJson(logEvent);
 
                 if (_additionalDataColumns != null)

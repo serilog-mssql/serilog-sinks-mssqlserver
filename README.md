@@ -7,15 +7,37 @@ A Serilog sink that writes events to Microsoft SQL Server. While a NoSql store a
 **Package** - [Serilog.Sinks.MSSqlServer](http://nuget.org/packages/serilog.sinks.mssqlserver)
 | **Platforms** - .NET 4.5
 
-You'll need to create a database and add a table like the one you can find in this [Gist](https://gist.github.com/mivano/10429656). 
-
 ```csharp
 var log = new LoggerConfiguration()
     .WriteTo.MSSqlServer(connectionString: @"Server=...", tableName: "Logs")
     .CreateLogger();
 ```
 
-Make sure to set up security in such a way that the sink can write to the log table. If you don't plan on using the properties, then you can disable the storage of them. 
+You'll need to create a table like this in your database:
+
+```
+CREATE TABLE [schema].[tablename] (
+   [Id] [int] IDENTITY(1,1) NOT NULL,
+   [Message] [nvarchar](max) NULL,
+   [MessageTemplate] [nvarchar](max) NULL,
+   [Level] [nvarchar](128) NULL,
+   [TimeStamp] [datetimeoffset](7) NOT NULL,
+   [Exception] [nvarchar](max) NULL,
+   [Properties] [xml] NULL,
+   [LogEvent] [nvarchar](max) NULL,
+   [Host] [nvarchar](255) NULL,
+   [User] [nvarchar](255) NULL,
+   CONSTRAINT [PK_tablename] PRIMARY KEY CLUSTERED (
+      [Id] ASC
+   ) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) 
+   ON [PRIMARY]
+) ON [PRIMARY];
+```
+
+Make sure to set up security in such a way that the sink can write to the log table. 
+
+If you don't plan on using the Properties or LogEvent columns, you can disable their use with the *storeProperties* and *storeLogEvent* parameters.
+
 
 ### XML configuration
 
@@ -44,14 +66,15 @@ var log = new LoggerConfiguration()
 ```
 The log event properties `User` and `Other` will now be placed in the corresponding column upon logging. The property name must match a column name in your table.
 
-#### Excluding redundant properties
+
+#### Excluding redundant items from the Properties column
 
 By default the additional properties will still be included in the XML data saved to the Properties column (assuming that is not disabled via the storeProperties parameter). That's consistent with the idea behind structured logging, and makes it easier to convert the log data to another (e.g. NoSql) storage platform later if desired.  
 
 However, if the data is to stay in SQL Server, then the additional properties may not need to be saved in both columns and XML.  Use the *excludeAdditionalProperties* parameter in the sink configuration to exclude the redundant properties from the XML.
 
 
-### Saving the Log Event
+### Saving the Log Event data
 
-If desired, the *saveLogEvent* parameter will save the event as JSON to the LogEvent column.  Default is false (leaving the column null).
+By default the log event JSON is stored to the LogEvent column.  This can be disabled with the *storeLogEvent* parameter.
 
