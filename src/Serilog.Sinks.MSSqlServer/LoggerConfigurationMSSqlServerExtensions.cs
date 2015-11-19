@@ -40,7 +40,8 @@ namespace Serilog
         /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
         /// <param name="storeTimestampInUtc">Store Timestamp In UTC</param>
         /// <param name="additionalDataColumns">Additional columns for data storage.</param>
-        /// <param name="excludeAdditionalColumnsFromProperties">Exclude properties from the Properties column if they are being saved to additional columns.</param>
+        /// <param name="excludeAdditionalProperties">Exclude properties from the Properties column if they are being saved to additional columns.</param>
+        /// <param name="saveLogEvent">Save the entire log event to the LogEvent column (nvarchar) as JSON.</param>
         /// <returns>Logger configuration, allowing configuration to continue.</returns>
         /// <exception cref="ArgumentNullException">A required parameter is null.</exception>
         public static LoggerConfiguration MSSqlServer(
@@ -54,7 +55,8 @@ namespace Serilog
             IFormatProvider formatProvider = null,
             bool storeTimestampInUtc = false,
             DataColumn[] additionalDataColumns = null,
-            bool excludeAdditionalColumnsFromProperties = false
+            bool excludeAdditionalProperties = false,
+            bool saveLogEvent = false
             )
         {
             if (loggerConfiguration == null) throw new ArgumentNullException("loggerConfiguration");
@@ -71,7 +73,8 @@ namespace Serilog
                     formatProvider,
                     storeTimestampInUtc,
                     additionalDataColumns,
-                    excludeAdditionalColumnsFromProperties
+                    excludeAdditionalProperties,
+                    saveLogEvent
                     ),
                 restrictedToMinimumLevel);
         }

@@ -21,6 +21,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Serilog.Events;
+using Serilog.Formatting.Json;
 using Serilog.Sinks.PeriodicBatching;
 
 namespace Serilog.Sinks.MSSqlServer
@@ -54,6 +55,9 @@ namespace Serilog.Sinks.MSSqlServer
         private readonly bool _excludeAdditionalProperties;
         private readonly HashSet<string> _additionalDataColumnNames;
 
+        private readonly bool _saveLogEvent;
+        private readonly JsonFormatter _jsonFormatter;
+
         /// <summary>
         ///     Construct a sink posting to the specified database.
         /// </summary>
@@ -66,6 +70,7 @@ namespace Serilog.Sinks.MSSqlServer
         /// <param name="storeTimestampInUtc">Store Timestamp In UTC</param>
         /// <param name="additionalDataColumns">Additional columns for data storage.</param>
         /// <param name="excludeAdditionalProperties">Exclude properties from the Properties column if they are being saved to additional columns.</param>
+        /// <param name="saveLogEvent">Save the entire log event to the LogEvent column (nvarchar) as JSON.</param>
         public MSSqlServerSink(
             string connectionString,
             string tableName,
@@ -75,8 +80,10 @@ namespace Serilog.Sinks.MSSqlServer
             IFormatProvider formatProvider,
             bool storeTimestampInUtc,
             DataColumn[] additionalDataColumns = null,
-            bool excludeAdditionalProperties = false
-            ) : base(batchPostingLimit, period)
+            bool excludeAdditionalProperties = false,
+            bool saveLogEvent = false
+            )
+            : base(batchPostingLimit, period)
         {
             if (string.IsNullOrWhiteSpace(connectionString))
                 throw new ArgumentNullException("connectionString");
@@ -93,6 +100,10 @@ namespace Serilog.Sinks.MSSqlServer
             if (_additionalDataColumns != null)
                 _additionalDataColumnNames = new HashSet<string>(_additionalDataColumns.Select(c => c.ColumnName), StringComparer.OrdinalIgnoreCase);
             _excludeAdditionalProperties = excludeAdditionalProperties;
+
+            _saveLogEvent = saveLogEvent;
+            if (_saveLogEvent)
+                _jsonFormatter = new JsonFormatter(formatProvider: formatProvider);
 
             // Prepare the data table
             _eventsTable = CreateDataTable();
@@ -180,7 +191,14 @@ namespace Serilog.Sinks.MSSqlServer
             };
             eventsTable.Columns.Add(props);
 
-            if ( _additionalDataColumns != null )
+            var eventData = new DataColumn
+            {
+                DataType = Type.GetType("System.String"),
+                ColumnName = "LogEvent"
+            };
+            eventsTable.Columns.Add(eventData);
+
+            if (_additionalDataColumns != null)
             {
                 eventsTable.Columns.AddRange(_additionalDataColumns);
             }
@@ -193,7 +211,7 @@ namespace Serilog.Sinks.MSSqlServer
             return eventsTable;
         }
 
-     void FillDataTable(IEnumerable<LogEvent> events)
+        void FillDataTable(IEnumerable<LogEvent> events)
         {
             // Add the new rows to the collection. 
             foreach (var logEvent in events)
@@ -202,18 +220,19 @@ namespace Serilog.Sinks.MSSqlServer
                 row["Message"] = logEvent.RenderMessage(_formatProvider);
                 row["MessageTemplate"] = logEvent.MessageTemplate;
                 row["Level"] = logEvent.Level;
-                row["TimeStamp"] = (_storeTimestampInUtc) ? logEvent.Timestamp.DateTime.ToUniversalTime() 
-                                                          : logEvent.Timestamp.DateTime;
+                row["TimeStamp"] = (_storeTimestampInUtc)
+                    ? logEvent.Timestamp.DateTime.ToUniversalTime()
+                    : logEvent.Timestamp.DateTime;
                 row["Exception"] = logEvent.Exception != null ? logEvent.Exception.ToString() : null;
 
                 if (_includeProperties)
-                {
                     row["Properties"] = ConvertPropertiesToXmlStructure(logEvent.Properties);
-                }
-                if ( _additionalDataColumns != null )
-                {
-                    ConvertPropertiesToColumn( row, logEvent.Properties );
-                }
+
+                if (_saveLogEvent)
+                    row["LogEvent"] = LogEventToJson(logEvent);
+
+                if (_additionalDataColumns != null)
+                    ConvertPropertiesToColumn(row, logEvent.Properties);
 
                 _eventsTable.Rows.Add(row);
             }
@@ -241,6 +260,14 @@ namespace Serilog.Sinks.MSSqlServer
             return sb.ToString();
         }
 
+        private string LogEventToJson(LogEvent logEvent)
+        {
+            var sb = new StringBuilder();
+            using (var writer = new System.IO.StringWriter(sb))
+                _jsonFormatter.Format(logEvent, writer);
+            return sb.ToString();
+        }
+
         /// <summary>
         ///     Mapping values from properties which have a corresponding data row.
         ///     Matching is done based on Column name and property key
@@ -251,9 +278,7 @@ namespace Serilog.Sinks.MSSqlServer
             DataRow row, IReadOnlyDictionary<string, LogEventPropertyValue> properties)
         {
             foreach (var property in properties.Where(p => _additionalDataColumnNames.Contains(p.Key)))
-            {
                 row[property.Key] = property.Value.ToString();
-            }
         }
 
         /// <summary>
@@ -265,7 +290,7 @@ namespace Serilog.Sinks.MSSqlServer
             _token.Cancel();
 
             if (_eventsTable != null)
-                _eventsTable.Dispose();           
+                _eventsTable.Dispose();
 
             base.Dispose(disposing);
         }
