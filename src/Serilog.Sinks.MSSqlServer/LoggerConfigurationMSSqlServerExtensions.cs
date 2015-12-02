@@ -25,24 +25,25 @@ namespace Serilog
     /// </summary>
     public static class LoggerConfigurationMSSqlServerExtensions
     {
-        /// <summary>
-        /// Adds a sink that writes log events to a table in a MSSqlServer database.
-        /// Create a database and execute the table creation script found here
-        /// https://gist.github.com/mivano/10429656
-        /// </summary>
-        /// <param name="loggerConfiguration">The logger configuration.</param>
-        /// <param name="connectionString">The connection string to the database where to store the events.</param>
-        /// <param name="tableName">Name of the table to store the events in.</param>
-        /// <param name="storeProperties">Indicates if the additional properties need to be stored as well.</param>
-        /// <param name="restrictedToMinimumLevel">The minimum log event level required in order to write an event to the sink.</param>
-        /// <param name="batchPostingLimit">The maximum number of events to post in a single batch.</param>
-        /// <param name="period">The time to wait between checking for event batches.</param>
-        /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
-        /// <param name="storeTimestampInUtc">Store Timestamp In UTC</param>
-        /// <param name="additionalDataColumns">Additional columns for data storage.</param>
-        /// <returns>Logger configuration, allowing configuration to continue.</returns>
-        /// <exception cref="ArgumentNullException">A required parameter is null.</exception>
-        public static LoggerConfiguration MSSqlServer(
+		/// <summary>
+		/// Adds a sink that writes log events to a table in a MSSqlServer database.
+		/// Create a database and execute the table creation script found here
+		/// https://gist.github.com/mivano/10429656
+		/// </summary>
+		/// <param name="loggerConfiguration">The logger configuration.</param>
+		/// <param name="connectionString">The connection string to the database where to store the events.</param>
+		/// <param name="tableName">Name of the table to store the events in.</param>
+		/// <param name="storeProperties">Indicates if the additional properties need to be stored as well.</param>
+		/// <param name="restrictedToMinimumLevel">The minimum log event level required in order to write an event to the sink.</param>
+		/// <param name="batchPostingLimit">The maximum number of events to post in a single batch.</param>
+		/// <param name="period">The time to wait between checking for event batches.</param>
+		/// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
+		/// <param name="storeTimestampInUtc">Store Timestamp In UTC</param>
+		/// <param name="additionalDataColumns">Additional columns for data storage.</param>
+		/// <param name="autoCreateSqlTable">Create log table with the provided name on destination sql server.</param>
+		/// <returns>Logger configuration, allowing configuration to continue.</returns>
+		/// <exception cref="ArgumentNullException">A required parameter is null.</exception>
+		public static LoggerConfiguration MSSqlServer(
             this LoggerSinkConfiguration loggerConfiguration,
             string connectionString, string tableName, bool storeProperties = true,
             LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
@@ -50,14 +51,15 @@ namespace Serilog
             TimeSpan? period = null,
             IFormatProvider formatProvider = null,
             bool storeTimestampInUtc = false,
-            DataColumn[] additionalDataColumns = null)
+            DataColumn[] additionalDataColumns = null,
+			bool autoCreateSqlTable = false)
         {
             if (loggerConfiguration == null) throw new ArgumentNullException("loggerConfiguration");
 
             var defaultedPeriod = period ?? MSSqlServerSink.DefaultPeriod;
 
             return loggerConfiguration.Sink(
-                new MSSqlServerSink(connectionString, tableName, storeProperties, batchPostingLimit, defaultedPeriod, formatProvider, storeTimestampInUtc, additionalDataColumns),
+                new MSSqlServerSink(connectionString, tableName, storeProperties, batchPostingLimit, defaultedPeriod, formatProvider, storeTimestampInUtc, additionalDataColumns, autoCreateSqlTable),
                 restrictedToMinimumLevel);
         }
     }
