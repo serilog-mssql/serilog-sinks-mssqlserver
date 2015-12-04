@@ -87,8 +87,16 @@ namespace Serilog.Sinks.MSSqlServer
 
 			if (autoCreateSqlTable)
 			{
-				SqlTableCreator tableCreator = new SqlTableCreator(connectionString);
-				tableCreator.CreateTable(_eventsTable);
+				try
+				{
+					SqlTableCreator tableCreator = new SqlTableCreator(connectionString);
+					tableCreator.CreateTable(_eventsTable);
+				}
+				catch (Exception)
+				{
+					//ignore the error and allow users to keep logging with other concurrent logging method they are using.
+				}
+				
 			}
 		}
 
@@ -175,10 +183,9 @@ namespace Serilog.Sinks.MSSqlServer
 
 			var props = new DataColumn
 			{
-				DataType = typeof(XmlElement),
+				DataType = typeof(string),
 				MaxLength = -1,
-				ColumnName = "Properties",
-				ColumnMapping = MappingType.Element
+				ColumnName = "Properties",				
 			};
 			eventsTable.Columns.Add(props);
 

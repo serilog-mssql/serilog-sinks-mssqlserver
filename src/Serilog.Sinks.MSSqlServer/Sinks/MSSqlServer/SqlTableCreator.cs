@@ -8,69 +8,36 @@ namespace Serilog.Sinks.MSSqlServer
 {
 	internal class SqlTableCreator
 	{
-		#region Instance Variables
-		private SqlConnection _connection;
-		public SqlConnection Connection
-		{
-			get { return _connection; }
-			private set
-			{
-				if (value == null) throw new ArgumentNullException(nameof(value));
-				_connection = value;
-			}
-		}
-
-		private SqlTransaction _transaction;
-		public SqlTransaction Transaction
-		{
-			get { return _transaction; }
-			private set
-			{
-				if (value == null) throw new ArgumentNullException(nameof(value));
-				_transaction = value;
-			}
-		}
-
+		private readonly string _connectionSring;
 		private string _tableName;
-		public string DestinationTableName
-		{
-			get { return _tableName; }
-			private set
-			{
-				if (value == null) throw new ArgumentNullException(nameof(value));
-				_tableName = value;
-			}
-		}
-		#endregion
+		
+		
 
 		#region Constructor
-		public SqlTableCreator() { }
-
+		
 		public SqlTableCreator(string connectionSring)
 		{
-			_connection = new SqlConnection(connectionSring);
-			_transaction = null;
+			_connectionSring = connectionSring;
 		}
-		public SqlTableCreator(SqlConnection connection) : this(connection, null) { }
-		public SqlTableCreator(SqlConnection connection, SqlTransaction transaction)
-		{
-			_connection = connection;
-			_transaction = transaction;
-		}
+
 		#endregion
 
 		#region Instance Methods				
 		public object CreateTable(DataTable table)
 		{
-			_tableName = table.TableName;
-			string sql = GetSqlFromDataTable(_tableName, table);
-			
-			SqlCommand cmd = new SqlCommand(sql, _connection);
+			if (!string.IsNullOrWhiteSpace(_tableName) && !string.IsNullOrWhiteSpace(_connectionSring))
+			{
+				_tableName = table.TableName;
+				using (var conn = new SqlConnection(_connectionSring))
+				{
+					string sql = GetSqlFromDataTable(_tableName, table);
+					SqlCommand cmd = new SqlCommand(sql, conn);
 
-			cmd.Connection.Open();
-			var result = cmd.ExecuteNonQuery();
-			cmd.Connection.Close();
-			return result;
+					conn.Open();
+					return cmd.ExecuteNonQuery();
+				}
+			}
+			return 0;
 		}
 		#endregion
 
@@ -142,9 +109,7 @@ namespace Serilog.Sinks.MSSqlServer
 					return "INT";
 
 				case "System.DateTime":
-					return "DATETIME";
-				case "System.Xml.XmlElement":
-					return "XML";
+					return "DATETIME";				
 				default:
 					throw new Exception(type + " not implemented.");
 			}
