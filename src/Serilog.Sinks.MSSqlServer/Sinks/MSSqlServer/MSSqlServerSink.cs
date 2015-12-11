@@ -104,6 +104,13 @@ namespace Serilog.Sinks.MSSqlServer
                 using (var copy = new SqlBulkCopy(cn))
                 {
                     copy.DestinationTableName = _tableName;
+                    foreach (var columun in _eventsTable.Columns)
+                    {
+                        var columnName = ((DataColumn)columun).ColumnName;
+                        var mapping = new SqlBulkCopyColumnMapping(columnName, columnName);
+                        copy.ColumnMappings.Add(mapping);
+                    }
+
                     await copy.WriteToServerAsync(_eventsTable, _token.Token);
 
                     // Processed the items, clear for the next run
