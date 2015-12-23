@@ -1,3 +1,6 @@
+2.0.28
+ * Added explicit column mappings (https://github.com/serilog/serilog-sinks-mssqlserver/pull/10) 
+
 2.0.27
  * Option added to automatically create a database table (by Kiran Varsani (https://github.com/varsanikp))
 
