@@ -8,37 +8,36 @@ namespace Serilog.Sinks.MSSqlServer
 {
 	internal class SqlTableCreator
 	{
-		private readonly string _connectionSring;
+		private readonly string _connectionString;
 		private string _tableName;
 				
 		#region Constructor
 		
-		public SqlTableCreator(string connectionSring)
+		public SqlTableCreator(string connectionString)
 		{
-			_connectionSring = connectionSring;
+			_connectionString = connectionString;
 		}
 
 		#endregion
 
 		#region Instance Methods				
-		public object CreateTable(DataTable table)
+		public int CreateTable(DataTable table)
 		{
-			if (table != null)
-			{
-				if (!string.IsNullOrWhiteSpace(table.TableName) && !string.IsNullOrWhiteSpace(_connectionSring))
-				{
-					_tableName = table.TableName;
-					using (var conn = new SqlConnection(_connectionSring))
-					{
-						string sql = GetSqlFromDataTable(_tableName, table);
-						SqlCommand cmd = new SqlCommand(sql, conn);
+		    if (table == null) return 0;
 
-						conn.Open();
-						return cmd.ExecuteNonQuery();
-					}
-				}
-			}
-			return 0;
+		    if (string.IsNullOrWhiteSpace(table.TableName) || string.IsNullOrWhiteSpace(_connectionString)) return 0;
+
+		    _tableName = table.TableName;
+		    using (var conn = new SqlConnection(_connectionString))
+		    {
+		        string sql = GetSqlFromDataTable(_tableName, table);
+		        using (SqlCommand cmd = new SqlCommand(sql, conn))
+		        {
+		            conn.Open();
+		            return cmd.ExecuteNonQuery();
+		        }
+
+		    }
 		}
 		#endregion
 
@@ -114,7 +113,7 @@ namespace Serilog.Sinks.MSSqlServer
 				case "System.DateTime":
 					return "DATETIME";				
 				default:
-					throw new Exception(type + " not implemented.");
+					throw new Exception(string.Format("{0} not implemented.", type));
 			}
 		}
 
@@ -123,6 +122,7 @@ namespace Serilog.Sinks.MSSqlServer
 		{
 			return SqlGetType(column.DataType, column.MaxLength, 10, 2);
 		}
+
 		#endregion
 	}
 }

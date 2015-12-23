@@ -19,6 +19,7 @@ using System.Data.SqlClient;
 using System.Data.SqlTypes;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -53,7 +54,7 @@ namespace Serilog.Sinks.MSSqlServer
 		readonly CancellationTokenSource _token = new CancellationTokenSource();
 		readonly bool _storeTimestampInUtc;
 
-		private DataColumn[] _additionalDataColumns;
+		private readonly DataColumn[] _additionalDataColumns;
 
 		/// <summary>
 		///     Construct a sink posting to the specified database.
@@ -119,11 +120,11 @@ namespace Serilog.Sinks.MSSqlServer
 
 			using (var cn = new SqlConnection(_connectionString))
 			{
-				await cn.OpenAsync(_token.Token);
+				await cn.OpenAsync(_token.Token).ConfigureAwait(false);
 				using (var copy = new SqlBulkCopy(cn))
 				{
 					copy.DestinationTableName = _tableName;
-					await copy.WriteToServerAsync(_eventsTable, _token.Token);
+					await copy.WriteToServerAsync(_eventsTable, _token.Token).ConfigureAwait(false);
 
 					// Processed the items, clear for the next run
 					_eventsTable.Clear();
@@ -233,8 +234,7 @@ namespace Serilog.Sinks.MSSqlServer
 			_eventsTable.AcceptChanges();
 		}
 
-		static string ConvertPropertiesToXmlStructure(
-			IEnumerable<KeyValuePair<string, LogEventPropertyValue>> properties)
+		static string ConvertPropertiesToXmlStructure(IEnumerable<KeyValuePair<string, LogEventPropertyValue>> properties)
 		{
 			var sb = new StringBuilder();
 
@@ -257,19 +257,15 @@ namespace Serilog.Sinks.MSSqlServer
 		/// </summary>
 		/// <param name="row"></param>
 		/// <param name="properties"></param>
-		private void ConvertPropertiesToColumn(
-			DataRow row, IReadOnlyDictionary<string, LogEventPropertyValue> properties)
+		private static void ConvertPropertiesToColumn(DataRow row, IReadOnlyDictionary<string, LogEventPropertyValue> properties)
 		{
-			foreach (var property in properties)
-			{
-				if (row.Table.Columns.Contains(property.Key))
-				{
-					row[property.Key] = property.Value.ToString();
-				}
-			}
+		    foreach (var property in properties.Where(property => row.Table.Columns.Contains(property.Key)))
+		    {
+		        row[property.Key] = property.Value.ToString();
+		    }
 		}
 
-		/// <summary>
+	    /// <summary>
 		///     Disposes the connection
 		/// </summary>
 		/// <param name="disposing"></param>
