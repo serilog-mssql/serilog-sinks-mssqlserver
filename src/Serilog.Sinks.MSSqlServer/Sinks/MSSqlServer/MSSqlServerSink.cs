@@ -17,10 +17,13 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Data.SqlTypes;
+using System.Diagnostics;
+using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
+using Serilog.Debugging;
 using Serilog.Events;
 using Serilog.Sinks.PeriodicBatching;
 namespace Serilog.Sinks.MSSqlServer
@@ -91,10 +94,11 @@ namespace Serilog.Sinks.MSSqlServer
 				{
 					SqlTableCreator tableCreator = new SqlTableCreator(connectionString);
 					tableCreator.CreateTable(_eventsTable);
+					throw  new Exception("Test exception");
 				}
-				catch (Exception)
-				{
-					//ignore the error and allow users to keep logging with other concurrent logging method they are using.
+				catch (Exception ex)
+				{					
+					SelfLog.WriteLine("Exception {0} caught while creating table {1} to the database specified in the Connection string.", (object)ex, (object)tableName);					
 				}
 				
 			}
