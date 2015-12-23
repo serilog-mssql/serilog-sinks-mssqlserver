@@ -25,16 +25,19 @@ namespace Serilog.Sinks.MSSqlServer
 		#region Instance Methods				
 		public object CreateTable(DataTable table)
 		{
-			if (!string.IsNullOrWhiteSpace(_tableName) && !string.IsNullOrWhiteSpace(_connectionSring))
+			if (table != null)
 			{
-				_tableName = table.TableName;
-				using (var conn = new SqlConnection(_connectionSring))
+				if (!string.IsNullOrWhiteSpace(table.TableName) && !string.IsNullOrWhiteSpace(_connectionSring))
 				{
-					string sql = GetSqlFromDataTable(_tableName, table);
-					SqlCommand cmd = new SqlCommand(sql, conn);
+					_tableName = table.TableName;
+					using (var conn = new SqlConnection(_connectionSring))
+					{
+						string sql = GetSqlFromDataTable(_tableName, table);
+						SqlCommand cmd = new SqlCommand(sql, conn);
 
-					conn.Open();
-					return cmd.ExecuteNonQuery();
+						conn.Open();
+						return cmd.ExecuteNonQuery();
+					}
 				}
 			}
 			return 0;
