@@ -49,6 +49,18 @@ If you are configuring Serilog with the `ReadFrom.AppSettings()` XML configurati
 <add key="serilog:write-to:MSSqlServer.tableName" value="Logs"/>
 ```
 
+In addition, columns can be defined with the name and data type of the column in SQL Server. Columns specified must match database table exactly. DataType is case sensitive, based on SQL type (excluding precision/length). 
+```xml
+  <configSections>
+    <section name="MSSqlServerSettingsSection" type="Serilog.Configuration.MSSqlServerConfigurationSection, Serilog.Sinks.MSSqlServer"/>
+  </configSections>
+  <MSSqlServerSettingsSection>
+    <Columns>
+      <add ColumnName="EventType" DataType="int"/>
+      <add ColumnName="Release" DataType="varchar"/>
+    </Columns>
+  </MSSqlServerSettingsSection>      
+```
 ### Writing properties as columns
 
 This feature will still use all of the default columns and provide additional columns for that can be logged to (be sure to create the extra columns via SQL script first). This gives the flexibility to use as many extra columns as needed.

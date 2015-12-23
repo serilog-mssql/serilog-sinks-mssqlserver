@@ -3,6 +3,7 @@ using System.Data;
 using Serilog.Configuration;
 using Serilog.Events;
 using Serilog.Sinks.MSSqlServer;
+using System.Configuration;
 
 // Copyright 2014 Serilog Contributors
 // 
@@ -66,6 +67,14 @@ namespace Serilog
 
             var defaultedPeriod = period ?? MSSqlServerSink.DefaultPeriod;
 
+            MSSqlServerConfigurationSection serviceConfigSection =
+               ConfigurationManager.GetSection("MSSqlServerSettingsSection") as MSSqlServerConfigurationSection;
+            // If we have additional columns from config, load them as well
+            if (serviceConfigSection.Columns.Count > 0)
+            {
+                additionalDataColumns = GenerateDataColumnsFromConfig(serviceConfigSection, additionalDataColumns);
+            }
+
             return loggerConfiguration.Sink(
                 new MSSqlServerSink(
                     connectionString,
@@ -81,6 +90,88 @@ namespace Serilog
                     storeLogEvent
                     ),
                 restrictedToMinimumLevel);
+        }
+
+        /// <summary>
+        /// Generate an array of DataColumns using the supplied MSSqlServerConfigurationSection,
+        ///     which is an array of keypairs defining the SQL column name and SQL data type
+        /// Entries are appended to an incoming list of DataColumns in addiitonalColumns
+        /// </summary>
+        /// <param name="serviceConfigSection">A previously loaded configuration section</param>
+        /// <param name="additionalColumns">Existing array of columns to append our config columns to</param>
+        /// <returns></returns>
+        private static DataColumn[] GenerateDataColumnsFromConfig(MSSqlServerConfigurationSection serviceConfigSection, DataColumn[] additionalColumns)
+        {
+            int i = 0;
+            DataColumn[] returnColumns;
+            if (additionalColumns == null)
+            {
+                returnColumns = new DataColumn[serviceConfigSection.Columns.Count];
+            }
+            else
+            {
+                returnColumns = additionalColumns;
+                Array.Resize<DataColumn>( ref returnColumns, serviceConfigSection.Columns.Count + additionalColumns.Length);
+                i = additionalColumns.Length;
+            }
+
+            foreach (ColumnConfig c in serviceConfigSection.Columns)
+            {
+                // Set the type based on the defined SQL type from config
+                DataColumn column = new DataColumn(c.ColumnName);
+                Type dataType = null;
+
+                switch (c.DataType)
+                {
+                    case "bigint":
+                        dataType = Type.GetType("System.Int64");
+                        break;
+                    case "bit":
+                        dataType = Type.GetType("System.Boolean");
+                        break;
+                    case "char":
+                    case "nchar":
+                    case "ntext":
+                    case "nvarchar":
+                    case "text":
+                    case "varchar":
+                        dataType = Type.GetType("System.String");
+                        break;
+                    case "date":
+                    case "datetime":
+                    case "datetime2":
+                    case "smalldatetime":
+                        dataType = Type.GetType("System.DateTime");
+                        break;
+                    case "decimal":
+                    case "money":
+                    case "numeric":
+                    case "smallmoney":
+                        dataType = Type.GetType("System.Decimal");
+                        break;
+                    case "float":
+                        dataType = Type.GetType("System.Double");
+                        break;
+                    case "int":
+                        dataType = Type.GetType("System.Int32");
+                        break;
+                    case "real":
+                        dataType = Type.GetType("System.Single");
+                        break;
+                    case "smallint":
+                        dataType = Type.GetType("System.Int16");
+                        break;
+                    case "time":
+                        dataType = Type.GetType("System.TimeSpan");
+                        break;
+                    case "uniqueidentifier":
+                        dataType = Type.GetType("System.Guid");
+                        break;
+                }
+                returnColumns[i++] = column;
+            }
+
+            return returnColumns;
         }
     }
 }
