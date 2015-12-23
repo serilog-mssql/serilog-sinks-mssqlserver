@@ -61,7 +61,7 @@ var dataColumns = new[]
     };
     
 var log = new LoggerConfiguration()
-    .WriteTo.MSSqlServer(@"Server=...", "Logs", additionalDataColumns: dataColumns)
+    .WriteTo.MSSqlServer(@"Server=.\SQLEXPRESS;Database=LogEvents;Trusted_Connection=True;", "Logs", additionalDataColumns: dataColumns)
     .CreateLogger();
 ```
 The log event properties `User` and `Other` will now be placed in the corresponding column upon logging. The property name must match a column name in your table.
