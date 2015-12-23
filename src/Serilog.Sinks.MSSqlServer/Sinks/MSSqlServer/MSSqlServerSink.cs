@@ -93,8 +93,7 @@ namespace Serilog.Sinks.MSSqlServer
 				try
 				{
 					SqlTableCreator tableCreator = new SqlTableCreator(connectionString);
-					tableCreator.CreateTable(_eventsTable);
-					throw  new Exception("Test exception");
+					tableCreator.CreateTable(_eventsTable);					
 				}
 				catch (Exception ex)
 				{					
