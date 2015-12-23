@@ -69,8 +69,9 @@ namespace Serilog
 
             MSSqlServerConfigurationSection serviceConfigSection =
                ConfigurationManager.GetSection("MSSqlServerSettingsSection") as MSSqlServerConfigurationSection;
+
             // If we have additional columns from config, load them as well
-            if (serviceConfigSection.Columns.Count > 0)
+            if (serviceConfigSection != null && serviceConfigSection.Columns.Count > 0)
             {
                 additionalDataColumns = GenerateDataColumnsFromConfig(serviceConfigSection, additionalDataColumns);
             }
@@ -119,6 +120,7 @@ namespace Serilog
             {
                 // Set the type based on the defined SQL type from config
                 DataColumn column = new DataColumn(c.ColumnName);
+                
                 Type dataType = null;
 
                 switch (c.DataType)
@@ -168,6 +170,7 @@ namespace Serilog
                         dataType = Type.GetType("System.Guid");
                         break;
                 }
+                column.DataType = dataType;
                 returnColumns[i++] = column;
             }
 
