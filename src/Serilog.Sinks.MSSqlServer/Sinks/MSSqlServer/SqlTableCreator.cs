@@ -10,9 +10,7 @@ namespace Serilog.Sinks.MSSqlServer
 	{
 		private readonly string _connectionSring;
 		private string _tableName;
-		
-		
-
+				
 		#region Constructor
 		
 		public SqlTableCreator(string connectionSring)
@@ -59,6 +57,8 @@ namespace Serilog.Sinks.MSSqlServer
 			foreach (DataColumn column in table.Columns)
 			{
 				sql.AppendFormat("[{0}] {1}", column.ColumnName, SqlGetType(column));
+			    if (column.ColumnName.ToUpper().Equals("ID"))
+			        sql.Append(" IDENTITY(1,1) ");
 				if (numOfColumns > i)
 					sql.AppendFormat(", ");
 				i++;
