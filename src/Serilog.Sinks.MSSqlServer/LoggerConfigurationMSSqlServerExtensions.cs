@@ -42,25 +42,44 @@ namespace Serilog
         /// <param name="storeTimestampInUtc">Store Timestamp In UTC</param>
         /// <param name="additionalDataColumns">Additional columns for data storage.</param>
         /// <param name="autoCreateSqlTable">Create log table with the provided name on destination sql server.</param>
+        /// <param name="excludeAdditionalProperties">Exclude properties from the Properties column if they are being saved to additional columns.</param>
+        /// <param name="storeLogEvent">Save the entire log event to the LogEvent column (nvarchar) as JSON.</param>
         /// <returns>Logger configuration, allowing configuration to continue.</returns>
         /// <exception cref="ArgumentNullException">A required parameter is null.</exception>
         public static LoggerConfiguration MSSqlServer(
             this LoggerSinkConfiguration loggerConfiguration,
-            string connectionString, string tableName, bool storeProperties = true,
+            string connectionString,
+            string tableName,
+            bool storeProperties = true,
             LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
             int batchPostingLimit = MSSqlServerSink.DefaultBatchPostingLimit,
             TimeSpan? period = null,
             IFormatProvider formatProvider = null,
             bool storeTimestampInUtc = false,
             DataColumn[] additionalDataColumns = null,
-            bool autoCreateSqlTable = false)
+            bool autoCreateSqlTable = false,
+            bool excludeAdditionalProperties = false,
+            bool storeLogEvent = false
+            )
         {
             if (loggerConfiguration == null) throw new ArgumentNullException("loggerConfiguration");
 
             var defaultedPeriod = period ?? MSSqlServerSink.DefaultPeriod;
 
             return loggerConfiguration.Sink(
-                new MSSqlServerSink(connectionString, tableName, storeProperties, batchPostingLimit, defaultedPeriod, formatProvider, storeTimestampInUtc, additionalDataColumns, autoCreateSqlTable),
+                new MSSqlServerSink(
+                    connectionString,
+                    tableName,
+                    storeProperties,
+                    batchPostingLimit,
+                    defaultedPeriod,
+                    formatProvider,
+                    storeTimestampInUtc,
+                    additionalDataColumns,
+                    autoCreateSqlTable,
+                    excludeAdditionalProperties,
+                    storeLogEvent
+                    ),
                 restrictedToMinimumLevel);
         }
     }

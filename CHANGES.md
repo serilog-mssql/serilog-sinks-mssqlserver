@@ -1,3 +1,6 @@
+2.0.30
+ * You can optionally save the log event inside the database too. Also added ability to exclude the properties if they are saved already inside additional columns. (https://github.com/serilog/serilog-sinks-mssqlserver/pull/7)
+
 2.0.28
  * Added explicit column mappings (https://github.com/serilog/serilog-sinks-mssqlserver/pull/10) 
 
