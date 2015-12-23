@@ -66,6 +66,19 @@ var log = new LoggerConfiguration()
 ```
 The log event properties `User` and `Other` will now be placed in the corresponding column upon logging. The property name must match a column name in your table.
 
+In addition, columns can be defined with the name and data type of the column in SQL Server. Columns specified must match database table exactly. DataType is case sensitive, based on SQL type (excluding precision/length). 
+```xml
+  <configSections>
+    <section name="MSSqlServerSettingsSection" type="Serilog.Configuration.MSSqlServerConfigurationSection, Serilog.Sinks.MSSqlServer"/>
+  </configSections>
+  <MSSqlServerSettingsSection>
+    <Columns>
+      <add ColumnName="EventType" DataType="int"/>
+      <add ColumnName="Release" DataType="varchar"/>
+    </Columns>
+  </MSSqlServerSettingsSection>      
+```
+
 ### Auto create table
 
 If you set the *autoCreateSqlTable* option to true, it will create a table for you in the database specified in the connection string. Make sure that the user associated with this connection string has enough rights to make schema changes.
