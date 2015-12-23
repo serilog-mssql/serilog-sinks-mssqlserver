@@ -7,7 +7,7 @@ A Serilog sink that writes events to Microsoft SQL Server. While a NoSql store a
 **Package** - [Serilog.Sinks.MSSqlServer](http://nuget.org/packages/serilog.sinks.mssqlserver)
 | **Platforms** - .NET 4.5
 
-You'll need to create a database and add a table like the one you can find in this [Gist](https://gist.github.com/mivano/10429656). 
+You'll need to create a database and add a table like the one you can find in this [Gist](https://gist.github.com/mivano/10429656) or use the auto create table option. 
 
 ```csharp
 var log = new LoggerConfiguration()
@@ -43,3 +43,7 @@ var log = new LoggerConfiguration()
     .CreateLogger();
 ```
 The log event properties `User` and `Other` will now be placed in the corresponding column upon logging. The property name must match a column name in your table.
+
+### Auto create table
+
+If you set the *autoCreateSqlTable* option to true, it will create a table for you in the database specified in the connection string. Make sure that the user associated with this connection string has enough rights to make schema changes.
