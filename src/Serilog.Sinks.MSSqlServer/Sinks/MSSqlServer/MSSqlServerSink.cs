@@ -24,6 +24,8 @@ using Serilog.Debugging;
 using Serilog.Events;
 using Serilog.Formatting.Json;
 using Serilog.Sinks.PeriodicBatching;
+using Serilog.Parsing;
+
 
 namespace Serilog.Sinks.MSSqlServer
 {
@@ -58,6 +60,7 @@ namespace Serilog.Sinks.MSSqlServer
 
         private readonly bool _storeLogEvent;
         private readonly JsonFormatter _jsonFormatter;
+
 
         /// <summary>
         ///     Construct a sink posting to the specified database.
@@ -140,24 +143,34 @@ namespace Serilog.Sinks.MSSqlServer
             // Copy the events to the data table
             FillDataTable(events);
 
-            using (var cn = new SqlConnection(_connectionString))
+            try
             {
-                await cn.OpenAsync(_token.Token).ConfigureAwait(false);
-                using (var copy = new SqlBulkCopy(cn))
+                using (var cn = new SqlConnection(_connectionString))
                 {
-                    copy.DestinationTableName = _tableName;
-                    foreach (var column in _eventsTable.Columns)
+                    await cn.OpenAsync(_token.Token).ConfigureAwait(false);
+                    using (var copy = new SqlBulkCopy(cn))
                     {
-                        var columnName = ((DataColumn)column).ColumnName;
-                        var mapping = new SqlBulkCopyColumnMapping(columnName, columnName);
-                        copy.ColumnMappings.Add(mapping);
+                        copy.DestinationTableName = _tableName;
+                        foreach (var column in _eventsTable.Columns)
+                        {
+                            var columnName = ((DataColumn)column).ColumnName;
+                            var mapping = new SqlBulkCopyColumnMapping(columnName, columnName);
+                            copy.ColumnMappings.Add(mapping);
+                        }
+
+                        await copy.WriteToServerAsync(_eventsTable, _token.Token).ConfigureAwait(false);
                     }
 
-                    await copy.WriteToServerAsync(_eventsTable, _token.Token).ConfigureAwait(false);
-
-                    // Processed the items, clear for the next run
-                    _eventsTable.Clear();
                 }
+            }
+            catch (Exception ex)
+            {
+                SelfLog.WriteLine("Unable to write {0} log events to the database due to following error: {1}", events.Count(), ex.Message);
+            }
+            finally
+            {
+                // Processed the items, clear for the next run
+                _eventsTable.Clear();
             }
         }
 
@@ -308,9 +321,47 @@ namespace Serilog.Sinks.MSSqlServer
         /// </summary>
         /// <param name="row"></param>
         /// <param name="properties"></param>
-        private void ConvertPropertiesToColumn(DataRow row, IReadOnlyDictionary<string, LogEventPropertyValue> properties) { 
-            foreach (var property in properties.Where(p => _additionalDataColumnNames.Contains(p.Key)))
-                row[property.Key] = property.Value.ToString();
+        private void ConvertPropertiesToColumn(
+            DataRow row, IReadOnlyDictionary<string, LogEventPropertyValue> properties)
+        {
+            foreach (var property in properties)
+            {
+                if (!row.Table.Columns.Contains(property.Key))
+                    continue;
+
+                var columnName = property.Key;
+                var columnType = row.Table.Columns[columnName].DataType;
+                object conversion;
+                var scalarValue = property.Value as ScalarValue;
+                if (scalarValue != null && TryChangeType(scalarValue.Value, columnType, out conversion))
+                {
+                    row[columnName] = conversion;
+                }
+                else
+                {
+                    row[columnName] = property.Value.ToString();
+                }
+            }
+        }
+
+        /// <summary>
+        ///     Try to convert the object to the given type
+        /// </summary>
+        /// <param name="obj">object</param>
+        /// <param name="type">type to convert to</param>
+        /// <param name="conversion">result of the converted value</param>        
+        private static bool TryChangeType(object obj, Type type, out object conversion)
+        {
+            conversion = null;
+            try
+            {
+                conversion = Convert.ChangeType(obj, type);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         /// <summary>

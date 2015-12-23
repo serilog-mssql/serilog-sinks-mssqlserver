@@ -1,3 +1,6 @@
+2.0.32
+ * Safe conversion of data types. Also included selflog for bulk operation errors. (https://github.com/serilog/serilog-sinks-mssqlserver/pull/4)
+
 2.0.31
  * Added the ability to configure additional columns via XML configuration (https://github.com/serilog/serilog-sinks-mssqlserver/pull/6)
 
