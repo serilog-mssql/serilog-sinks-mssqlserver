@@ -14,7 +14,6 @@
 
 using System.Linq;
 using System.Text;
-using System.Xml;
 using System.Xml.Linq;
 using Serilog.Events;
 
@@ -31,8 +30,9 @@ namespace Serilog.Sinks.MSSqlServer
         ///     representation easier.
         /// </summary>
         /// <param name="value">The value to simplify (possibly null).</param>
+        /// <param name="options">Options to use during formatting</param>
         /// <returns>A simplified representation.</returns>
-        public static string Simplify(LogEventPropertyValue value)
+        public static string Simplify(LogEventPropertyValue value, ColumnOptions.PropertiesColumnOptions options)
         {
             var scalar = value as ScalarValue;
             if (scalar != null)
@@ -43,15 +43,23 @@ namespace Serilog.Sinks.MSSqlServer
             {
                 var sb = new StringBuilder();
 
-                sb.Append("<dictionary>");
+                sb.AppendFormat("<{0}>", options.DictionaryElementName);
 
                 foreach (var element in dict.Elements)
                 {
                     var key = SimplifyScalar(element.Key);
-                    sb.AppendFormat("<item key='{0}'>{1}</item>", key, Simplify(element.Value));
+                    if (options.UsePropertyKeyAsElementName)
+                    {
+                        sb.AppendFormat("<{0}>{1}</{0}>", key, Simplify(element.Value, options));
+                    }
+                    else
+                    {
+                        sb.AppendFormat("<{0} key='{1}'>{2}</{0}>", options.ItemElementName,
+                            key, Simplify(element.Value, options));
+                    }
                 }
 
-                sb.Append("</dictionary>");
+                sb.AppendFormat("</{0}>", options.DictionaryElementName);
 
                 return sb.ToString();
             }
@@ -61,14 +69,14 @@ namespace Serilog.Sinks.MSSqlServer
             {
                 var sb = new StringBuilder();
 
-                sb.Append("<sequence>");
+                sb.AppendFormat("<{0}>", options.SequenceElementName);
 
                 foreach (var element in seq.Elements)
                 {
-                    sb.AppendFormat("<item>{0}</item>", Simplify(element));
+                    sb.AppendFormat("<{0}>{1}</{0}>", options.ItemElementName, Simplify(element, options));
                 }
 
-                sb.Append("</sequence>");
+                sb.AppendFormat("</{0}>", options.SequenceElementName);
 
                 return sb.ToString();
             }
@@ -76,18 +84,40 @@ namespace Serilog.Sinks.MSSqlServer
             var str = value as StructureValue;
             if (str != null)
             {
-                var props = str.Properties.ToDictionary(p => p.Name, p => Simplify(p.Value));
+                var props = str.Properties.ToDictionary(p => p.Name, p => Simplify(p.Value, options));
 
                 var sb = new StringBuilder();
 
-                sb.AppendFormat("<structure type='{0}'>", str.TypeTag);
+                if (options.UsePropertyKeyAsElementName)
+                {
+                    sb.AppendFormat("<{0}>", str.TypeTag);
+                }
+                else
+                {
+                    sb.AppendFormat("<{0} type='{1}'>", options.StructureElementName, str.TypeTag);
+                }
 
                 foreach (var element in props)
                 {
-                    sb.AppendFormat("<property key='{0}'>{1}</property>", element.Key, element.Value);
+                    if (options.UsePropertyKeyAsElementName)
+                    {
+                        sb.AppendFormat("<{0}>{1}</{0}>", element.Key, element.Value);
+                    }
+                    else
+                    {
+                        sb.AppendFormat("<{0} key='{1}'>{2}</{0}>", options.PropertyElementName,
+                            element.Key, element.Value);
+                    }
                 }
 
-                sb.Append("</structure>");
+                if (options.UsePropertyKeyAsElementName)
+                {
+                    sb.AppendFormat("</{0}>", str.TypeTag);
+                }
+                else
+                {
+                    sb.AppendFormat("</{0}>", options.StructureElementName);
+                }
 
                 return sb.ToString();
             }

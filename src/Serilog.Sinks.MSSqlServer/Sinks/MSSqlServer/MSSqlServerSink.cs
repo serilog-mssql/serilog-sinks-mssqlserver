@@ -312,19 +312,32 @@ namespace Serilog.Sinks.MSSqlServer
 
         private string ConvertPropertiesToXmlStructure(IEnumerable<KeyValuePair<string, LogEventPropertyValue>> properties)
         {
-            if (_columnOptions.Properties.ExcludeAdditionalProperties)
+            var options = _columnOptions.Properties;
+
+            if (options.ExcludeAdditionalProperties)
                 properties = properties.Where(p => !_additionalDataColumnNames.Contains(p.Key));
 
             var sb = new StringBuilder();
 
-            sb.Append("<properties>");
+            sb.AppendFormat("<{0}>", options.RootElementName);
 
             foreach (var property in properties)
             {
-                sb.AppendFormat("<property key='{0}'>{1}</property>", property.Key, XmlPropertyFormatter.Simplify(property.Value));
+                if (options.UsePropertyKeyAsElementName)
+                {
+                    sb.AppendFormat("<{0}>{1}</{0}>", property.Key,
+                        XmlPropertyFormatter.Simplify(property.Value, options));
+                }
+                else
+                {
+                    sb.AppendFormat("<{0} key='{1}'>{2}</{0}>",
+                        options.PropertyElementName,
+                        property.Key,
+                        XmlPropertyFormatter.Simplify(property.Value, options));
+                }
             }
 
-            sb.Append("</properties>");
+            sb.AppendFormat("</{0}>", options.RootElementName);
 
             return sb.ToString();
         }

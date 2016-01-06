@@ -76,9 +76,58 @@ namespace Serilog.Sinks.MSSqlServer
         public class PropertiesColumnOptions
         {
             /// <summary>
+            ///     Default constructor.
+            /// </summary>
+            public PropertiesColumnOptions()
+            {
+                DictionaryElementName = "dictionary";
+                ItemElementName = "item";
+                PropertyElementName = "property";
+                SequenceElementName = "sequence";
+                StructureElementName = "structure";
+                RootElementName = "properties";
+            }
+
+            /// <summary>
             ///     Exclude properties from the Properties column if they are being saved to additional columns.
             /// </summary>
             public bool ExcludeAdditionalProperties { get; set; }
+
+            /// <summary>
+            ///     The name to use for a dictionary element.
+            /// </summary>
+            public string DictionaryElementName { get; set; }
+
+            /// <summary>
+            ///     The name to use for a sequence element.
+            /// </summary>
+            public string SequenceElementName { get; set; }
+
+            /// <summary>
+            ///     The name to use for a structure element.
+            /// </summary>
+            public string StructureElementName { get; set; }
+
+
+            /// <summary>
+            ///     The name to use for an item element.
+            /// </summary>
+            public string ItemElementName { get; set; }
+
+            /// <summary>
+            ///     The name to use for a property element.
+            /// </summary>
+            public string PropertyElementName { get; set; }
+
+            /// <summary>
+            ///     The name to use for the root element.
+            /// </summary>
+            public string RootElementName { get; set; }
+
+            /// <summary>
+            ///     If true, will use the property key as the element name.
+            /// </summary>
+            public bool UsePropertyKeyAsElementName { get; set; }
         }
 
         /// <summary>
