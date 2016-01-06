@@ -12,8 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
+using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using Serilog.Events;
 
@@ -50,7 +53,7 @@ namespace Serilog.Sinks.MSSqlServer
                     var key = SimplifyScalar(element.Key);
                     if (options.UsePropertyKeyAsElementName)
                     {
-                        sb.AppendFormat("<{0}>{1}</{0}>", key, Simplify(element.Value, options));
+                        sb.AppendFormat("<{0}>{1}</{0}>", GetValidElementName(key), Simplify(element.Value, options));
                     }
                     else
                     {
@@ -90,7 +93,7 @@ namespace Serilog.Sinks.MSSqlServer
 
                 if (options.UsePropertyKeyAsElementName)
                 {
-                    sb.AppendFormat("<{0}>", str.TypeTag);
+                    sb.AppendFormat("<{0}>", GetValidElementName(str.TypeTag));
                 }
                 else
                 {
@@ -101,7 +104,7 @@ namespace Serilog.Sinks.MSSqlServer
                 {
                     if (options.UsePropertyKeyAsElementName)
                     {
-                        sb.AppendFormat("<{0}>{1}</{0}>", element.Key, element.Value);
+                        sb.AppendFormat("<{0}>{1}</{0}>", GetValidElementName(element.Key), element.Value);
                     }
                     else
                     {
@@ -112,7 +115,7 @@ namespace Serilog.Sinks.MSSqlServer
 
                 if (options.UsePropertyKeyAsElementName)
                 {
-                    sb.AppendFormat("</{0}>", str.TypeTag);
+                    sb.AppendFormat("</{0}>", GetValidElementName(str.TypeTag));
                 }
                 else
                 {
@@ -123,6 +126,25 @@ namespace Serilog.Sinks.MSSqlServer
             }
 
             return null;
+        }
+
+        internal static string GetValidElementName(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return "x";
+            }
+
+            string validName = name.Trim();
+
+            if (!char.IsLetter(validName[0]) || validName.StartsWith("xml", true, CultureInfo.CurrentCulture))
+            {
+                validName = "x" + name;
+            }
+
+            validName = Regex.Replace(validName, @"\s", "_");
+
+            return validName;
         }
 
         static string SimplifyScalar(object value)

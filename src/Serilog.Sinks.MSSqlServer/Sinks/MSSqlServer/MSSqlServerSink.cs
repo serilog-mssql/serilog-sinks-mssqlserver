@@ -325,7 +325,7 @@ namespace Serilog.Sinks.MSSqlServer
             {
                 if (options.UsePropertyKeyAsElementName)
                 {
-                    sb.AppendFormat("<{0}>{1}</{0}>", property.Key,
+                    sb.AppendFormat("<{0}>{1}</{0}>", XmlPropertyFormatter.GetValidElementName(property.Key),
                         XmlPropertyFormatter.Simplify(property.Value, options));
                 }
                 else
