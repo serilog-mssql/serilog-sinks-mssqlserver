@@ -97,6 +97,25 @@ namespace Serilog.Sinks.MSSqlServer
             ///     The name to use for a dictionary element.
             /// </summary>
             public string DictionaryElementName { get; set; }
+            /// <summary>
+            ///     The name to use for an item element.
+            /// </summary>
+            public string ItemElementName { get; set; }
+
+            /// <summary>
+            /// If true and the property value is empty, then don't include the element.
+            /// </summary>
+            public bool OmitElementIfEmpty { get; set; }
+
+            /// <summary>
+            ///     The name to use for a property element.
+            /// </summary>
+            public string PropertyElementName { get; set; }
+
+            /// <summary>
+            ///     The name to use for the root element.
+            /// </summary>
+            public string RootElementName { get; set; }
 
             /// <summary>
             ///     The name to use for a sequence element.
@@ -108,21 +127,6 @@ namespace Serilog.Sinks.MSSqlServer
             /// </summary>
             public string StructureElementName { get; set; }
 
-
-            /// <summary>
-            ///     The name to use for an item element.
-            /// </summary>
-            public string ItemElementName { get; set; }
-
-            /// <summary>
-            ///     The name to use for a property element.
-            /// </summary>
-            public string PropertyElementName { get; set; }
-
-            /// <summary>
-            ///     The name to use for the root element.
-            /// </summary>
-            public string RootElementName { get; set; }
 
             /// <summary>
             ///     If true, will use the property key as the element name.

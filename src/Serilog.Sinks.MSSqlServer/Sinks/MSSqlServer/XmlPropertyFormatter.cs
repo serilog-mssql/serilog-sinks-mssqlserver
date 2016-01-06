@@ -46,23 +46,37 @@ namespace Serilog.Sinks.MSSqlServer
             {
                 var sb = new StringBuilder();
 
-                sb.AppendFormat("<{0}>", options.DictionaryElementName);
+                bool isEmpty = true;
 
                 foreach (var element in dict.Elements)
                 {
+                    var itemValue = Simplify(element.Value, options);
+                    if (options.OmitElementIfEmpty && string.IsNullOrEmpty(itemValue))
+                    {
+                        continue;
+                    }
+
+                    if (isEmpty)
+                    {
+                        isEmpty = false;
+                        sb.AppendFormat("<{0}>", options.DictionaryElementName);
+                    }
+
                     var key = SimplifyScalar(element.Key);
                     if (options.UsePropertyKeyAsElementName)
                     {
-                        sb.AppendFormat("<{0}>{1}</{0}>", GetValidElementName(key), Simplify(element.Value, options));
+                        sb.AppendFormat("<{0}>{1}</{0}>", GetValidElementName(key), itemValue);
                     }
                     else
                     {
-                        sb.AppendFormat("<{0} key='{1}'>{2}</{0}>", options.ItemElementName,
-                            key, Simplify(element.Value, options));
+                        sb.AppendFormat("<{0} key='{1}'>{2}</{0}>", options.ItemElementName, key, itemValue);
                     }
                 }
 
-                sb.AppendFormat("</{0}>", options.DictionaryElementName);
+                if (!isEmpty)
+                {
+                    sb.AppendFormat("</{0}>", options.DictionaryElementName);
+                }
 
                 return sb.ToString();
             }
@@ -72,14 +86,29 @@ namespace Serilog.Sinks.MSSqlServer
             {
                 var sb = new StringBuilder();
 
-                sb.AppendFormat("<{0}>", options.SequenceElementName);
+                bool isEmpty = true;
 
                 foreach (var element in seq.Elements)
                 {
-                    sb.AppendFormat("<{0}>{1}</{0}>", options.ItemElementName, Simplify(element, options));
+                    var itemValue = Simplify(element, options);
+                    if (options.OmitElementIfEmpty && string.IsNullOrEmpty(itemValue))
+                    {
+                        continue;
+                    }
+
+                    if (isEmpty)
+                    {
+                        isEmpty = false;
+                        sb.AppendFormat("<{0}>", options.SequenceElementName);
+                    }
+
+                    sb.AppendFormat("<{0}>{1}</{0}>", options.ItemElementName, itemValue);
                 }
 
-                sb.AppendFormat("</{0}>", options.SequenceElementName);
+                if (!isEmpty)
+                {
+                    sb.AppendFormat("</{0}>", options.SequenceElementName);
+                }
 
                 return sb.ToString();
             }
@@ -91,35 +120,50 @@ namespace Serilog.Sinks.MSSqlServer
 
                 var sb = new StringBuilder();
 
-                if (options.UsePropertyKeyAsElementName)
-                {
-                    sb.AppendFormat("<{0}>", GetValidElementName(str.TypeTag));
-                }
-                else
-                {
-                    sb.AppendFormat("<{0} type='{1}'>", options.StructureElementName, str.TypeTag);
-                }
+                bool isEmpty = true;
 
                 foreach (var element in props)
                 {
+                    var itemValue = element.Value;
+                    if (options.OmitElementIfEmpty && string.IsNullOrEmpty(itemValue))
+                    {
+                        continue;
+                    }
+
+                    if (isEmpty)
+                    {
+                        isEmpty = false;
+                        if (options.UsePropertyKeyAsElementName)
+                        {
+                            sb.AppendFormat("<{0}>", GetValidElementName(str.TypeTag));
+                        }
+                        else
+                        {
+                            sb.AppendFormat("<{0} type='{1}'>", options.StructureElementName, str.TypeTag);
+                        }
+                    }
+
                     if (options.UsePropertyKeyAsElementName)
                     {
-                        sb.AppendFormat("<{0}>{1}</{0}>", GetValidElementName(element.Key), element.Value);
+                        sb.AppendFormat("<{0}>{1}</{0}>", GetValidElementName(element.Key), itemValue);
                     }
                     else
                     {
                         sb.AppendFormat("<{0} key='{1}'>{2}</{0}>", options.PropertyElementName,
-                            element.Key, element.Value);
+                            element.Key, itemValue);
                     }
                 }
 
-                if (options.UsePropertyKeyAsElementName)
+                if (!isEmpty)
                 {
-                    sb.AppendFormat("</{0}>", GetValidElementName(str.TypeTag));
-                }
-                else
-                {
-                    sb.AppendFormat("</{0}>", options.StructureElementName);
+                    if (options.UsePropertyKeyAsElementName)
+                    {
+                        sb.AppendFormat("</{0}>", GetValidElementName(str.TypeTag));
+                    }
+                    else
+                    {
+                        sb.AppendFormat("</{0}>", options.StructureElementName);
+                    }
                 }
 
                 return sb.ToString();

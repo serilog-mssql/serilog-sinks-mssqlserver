@@ -323,17 +323,23 @@ namespace Serilog.Sinks.MSSqlServer
 
             foreach (var property in properties)
             {
+                var value = XmlPropertyFormatter.Simplify(property.Value, options);
+                if (options.OmitElementIfEmpty && string.IsNullOrEmpty(value))
+                {
+                    continue;
+                }
+
                 if (options.UsePropertyKeyAsElementName)
                 {
                     sb.AppendFormat("<{0}>{1}</{0}>", XmlPropertyFormatter.GetValidElementName(property.Key),
-                        XmlPropertyFormatter.Simplify(property.Value, options));
+                        value);
                 }
                 else
                 {
                     sb.AppendFormat("<{0} key='{1}'>{2}</{0}>",
                         options.PropertyElementName,
                         property.Key,
-                        XmlPropertyFormatter.Simplify(property.Value, options));
+                        value);
                 }
             }
 
