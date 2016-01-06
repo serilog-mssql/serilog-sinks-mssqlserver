@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Data;
 using System.Data.SqlClient;
-using System.Linq;
 using System.Text;
 
 namespace Serilog.Sinks.MSSqlServer
@@ -85,42 +84,65 @@ namespace Serilog.Sinks.MSSqlServer
 		}
 
 		// Return T-SQL data type definition, based on schema definition for a column
-		private static string SqlGetType(object type, int columnSize, int numericPrecision, int numericScale)
-		{
-			switch (type.ToString())
-			{
-				case "System.String":
-					return "NVARCHAR(" + ((columnSize == -1) ? "MAX" : columnSize.ToString()) + ")";
+	    private static string SqlGetType(object type, int columnSize, int numericPrecision, int numericScale,
+	        bool allowDbNull)
+	    {
+	        string sqlType;
 
-				case "System.Decimal":
-					if (numericScale > 0)
-						return "REAL";
-					if (numericPrecision > 10)
-						return "BIGINT";
+	        switch (type.ToString())
+	        {
+	            case "System.Boolean":
+	                sqlType = "BIT";
+	                break;
 
-					return "INT";
-				case "System.Double":
-				case "System.Single":
-					return "REAL";
+	            case "System.String":
+	                sqlType = "NVARCHAR(" + ((columnSize == -1) ? "MAX" : columnSize.ToString()) + ")";
+	                break;
 
-				case "System.Int64":
-					return "BIGINT";
+	            case "System.Decimal":
+	                if (numericScale > 0)
+	                    sqlType = "REAL";
+	                else if (numericPrecision > 10)
+	                    sqlType = "BIGINT";
+	                else
+	                    sqlType = "INT";
+	                break;
 
-				case "System.Int16":
-				case "System.Int32":
-					return "INT";
+	            case "System.Double":
+	            case "System.Single":
+	                sqlType = "REAL";
+	                break;
 
-				case "System.DateTime":
-					return "DATETIME";				
-				default:
-					throw new Exception(string.Format("{0} not implemented.", type));
-			}
-		}
+	            case "System.Int64":
+	                sqlType = "BIGINT";
+	                break;
 
-		// Overload based on DataColumn from DataTable type
+	            case "System.Int16":
+	            case "System.Int32":
+	                sqlType = "INT";
+	                break;
+
+	            case "System.DateTime":
+	                sqlType = "DATETIME";
+	                break;
+
+	            case "System.Guid":
+	                sqlType = "UNIQUEIDENTIFIER";
+	                break;
+
+	            default:
+	                throw new Exception(string.Format("{0} not implemented.", type));
+	        }
+
+	        sqlType += " " + (allowDbNull ? "NULL" : "NOT NULL");
+
+	        return sqlType;
+	    }
+
+	    // Overload based on DataColumn from DataTable type
 		private static string SqlGetType(DataColumn column)
 		{
-			return SqlGetType(column.DataType, column.MaxLength, 10, 2);
+			return SqlGetType(column.DataType, column.MaxLength, 10, 2, column.AllowDBNull);
 		}
 
 		#endregion
