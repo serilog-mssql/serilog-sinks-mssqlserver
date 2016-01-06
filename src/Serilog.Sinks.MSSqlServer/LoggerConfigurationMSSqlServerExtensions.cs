@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Data;
 using Serilog.Configuration;
 using Serilog.Events;
@@ -35,32 +37,24 @@ namespace Serilog
         /// <param name="loggerConfiguration">The logger configuration.</param>
         /// <param name="connectionString">The connection string to the database where to store the events.</param>
         /// <param name="tableName">Name of the table to store the events in.</param>
-        /// <param name="storeProperties">Indicates if the additional properties need to be stored as well.</param>
         /// <param name="restrictedToMinimumLevel">The minimum log event level required in order to write an event to the sink.</param>
         /// <param name="batchPostingLimit">The maximum number of events to post in a single batch.</param>
         /// <param name="period">The time to wait between checking for event batches.</param>
         /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
-        /// <param name="storeTimestampInUtc">Store Timestamp In UTC</param>
-        /// <param name="additionalDataColumns">Additional columns for data storage.</param>
         /// <param name="autoCreateSqlTable">Create log table with the provided name on destination sql server.</param>
-        /// <param name="excludeAdditionalProperties">Exclude properties from the Properties column if they are being saved to additional columns.</param>
-        /// <param name="storeLogEvent">Save the entire log event to the LogEvent column (nvarchar) as JSON.</param>
+        /// <param name="columnOptions"></param>
         /// <returns>Logger configuration, allowing configuration to continue.</returns>
         /// <exception cref="ArgumentNullException">A required parameter is null.</exception>
         public static LoggerConfiguration MSSqlServer(
             this LoggerSinkConfiguration loggerConfiguration,
             string connectionString,
             string tableName,
-            bool storeProperties = true,
             LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
             int batchPostingLimit = MSSqlServerSink.DefaultBatchPostingLimit,
             TimeSpan? period = null,
             IFormatProvider formatProvider = null,
-            bool storeTimestampInUtc = false,
-            DataColumn[] additionalDataColumns = null,
             bool autoCreateSqlTable = false,
-            bool excludeAdditionalProperties = false,
-            bool storeLogEvent = false
+            ColumnOptions columnOptions = null
             )
         {
             if (loggerConfiguration == null) throw new ArgumentNullException("loggerConfiguration");
@@ -73,22 +67,22 @@ namespace Serilog
             // If we have additional columns from config, load them as well
             if (serviceConfigSection != null && serviceConfigSection.Columns.Count > 0)
             {
-                additionalDataColumns = GenerateDataColumnsFromConfig(serviceConfigSection, additionalDataColumns);
+                if (columnOptions == null)
+                {
+                    columnOptions = new ColumnOptions();
+                }
+                GenerateDataColumnsFromConfig(serviceConfigSection, columnOptions);
             }
 
             return loggerConfiguration.Sink(
                 new MSSqlServerSink(
                     connectionString,
                     tableName,
-                    storeProperties,
                     batchPostingLimit,
                     defaultedPeriod,
                     formatProvider,
-                    storeTimestampInUtc,
-                    additionalDataColumns,
                     autoCreateSqlTable,
-                    excludeAdditionalProperties,
-                    storeLogEvent
+                    columnOptions
                     ),
                 restrictedToMinimumLevel);
         }
@@ -96,31 +90,18 @@ namespace Serilog
         /// <summary>
         /// Generate an array of DataColumns using the supplied MSSqlServerConfigurationSection,
         ///     which is an array of keypairs defining the SQL column name and SQL data type
-        /// Entries are appended to an incoming list of DataColumns in addiitonalColumns
+        /// Entries are appended to a list of DataColumns in column options
         /// </summary>
         /// <param name="serviceConfigSection">A previously loaded configuration section</param>
-        /// <param name="additionalColumns">Existing array of columns to append our config columns to</param>
-        /// <returns></returns>
-        private static DataColumn[] GenerateDataColumnsFromConfig(MSSqlServerConfigurationSection serviceConfigSection, DataColumn[] additionalColumns)
+        /// <param name="columnOptions">column options with existing array of columns to append our config columns to</param>
+        private static void GenerateDataColumnsFromConfig(MSSqlServerConfigurationSection serviceConfigSection,
+            ColumnOptions columnOptions)
         {
-            int i = 0;
-            DataColumn[] returnColumns;
-            if (additionalColumns == null)
-            {
-                returnColumns = new DataColumn[serviceConfigSection.Columns.Count];
-            }
-            else
-            {
-                returnColumns = additionalColumns;
-                Array.Resize<DataColumn>( ref returnColumns, serviceConfigSection.Columns.Count + additionalColumns.Length);
-                i = additionalColumns.Length;
-            }
-
             foreach (ColumnConfig c in serviceConfigSection.Columns)
             {
                 // Set the type based on the defined SQL type from config
                 DataColumn column = new DataColumn(c.ColumnName);
-                
+
                 Type dataType = null;
 
                 switch (c.DataType)
@@ -171,10 +152,12 @@ namespace Serilog
                         break;
                 }
                 column.DataType = dataType;
-                returnColumns[i++] = column;
+                if (columnOptions.AdditionalDataColumns == null)
+                {
+                    columnOptions.AdditionalDataColumns = new Collection<DataColumn>();
+                }
+                columnOptions.AdditionalDataColumns.Add(column);
             }
-
-            return returnColumns;
         }
     }
 }

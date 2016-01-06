@@ -49,16 +49,12 @@ namespace Serilog.Sinks.MSSqlServer
 
         readonly DataTable _eventsTable;
         readonly IFormatProvider _formatProvider;
-        readonly bool _includeProperties;
         readonly string _tableName;
         readonly CancellationTokenSource _token = new CancellationTokenSource();
-        readonly bool _storeTimestampInUtc;
+        private readonly ColumnOptions _columnOptions;
 
-        private readonly DataColumn[] _additionalDataColumns;
-        private readonly bool _excludeAdditionalProperties;
         private readonly HashSet<string> _additionalDataColumnNames;
 
-        private readonly bool _storeLogEvent;
         private readonly JsonFormatter _jsonFormatter;
 
 
@@ -67,27 +63,19 @@ namespace Serilog.Sinks.MSSqlServer
         /// </summary>
         /// <param name="connectionString">Connection string to access the database.</param>
         /// <param name="tableName">Name of the table to store the data in.</param>
-        /// <param name="includeProperties">Specifies if the properties need to be saved as well.</param>
         /// <param name="batchPostingLimit">The maximum number of events to post in a single batch.</param>
         /// <param name="period">The time to wait between checking for event batches.</param>
         /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
-        /// <param name="storeTimestampInUtc">Store Timestamp In UTC</param>
-        /// <param name="additionalDataColumns">Additional columns for data storage.</param>
         /// <param name="autoCreateSqlTable">Create log table with the provided name on destination sql server.</param>
-        /// <param name="excludeAdditionalProperties">Exclude properties from the Properties column if they are being saved to additional columns.</param>
-        /// <param name="storeLogEvent">Save the entire log event to the LogEvent column (nvarchar) as JSON.</param>
+        /// <param name="columnOptions">Options that pertain to columns</param>
         public MSSqlServerSink(
             string connectionString,
             string tableName,
-            bool includeProperties,
             int batchPostingLimit,
             TimeSpan period,
             IFormatProvider formatProvider,
-            bool storeTimestampInUtc,
-            DataColumn[] additionalDataColumns = null,
             bool autoCreateSqlTable = false,
-            bool excludeAdditionalProperties = false,
-            bool storeLogEvent = false
+            ColumnOptions columnOptions = null
             )
             : base(batchPostingLimit, period)
         {
@@ -99,16 +87,12 @@ namespace Serilog.Sinks.MSSqlServer
 
             _connectionString = connectionString;
             _tableName = tableName;
-            _includeProperties = includeProperties;
             _formatProvider = formatProvider;
-            _storeTimestampInUtc = storeTimestampInUtc;
-            _additionalDataColumns = additionalDataColumns;
-            if (_additionalDataColumns != null)
-                _additionalDataColumnNames = new HashSet<string>(_additionalDataColumns.Select(c => c.ColumnName), StringComparer.OrdinalIgnoreCase);
-            _excludeAdditionalProperties = excludeAdditionalProperties;
+            _columnOptions = columnOptions ?? new ColumnOptions();
+            if (_columnOptions.AdditionalDataColumns != null)
+                _additionalDataColumnNames = new HashSet<string>(_columnOptions.AdditionalDataColumns.Select(c => c.ColumnName), StringComparer.OrdinalIgnoreCase);
 
-            _storeLogEvent = storeLogEvent;
-            if (_storeLogEvent)
+            if (_columnOptions.Store.Contains(StandardColumn.LogEvent))
                 _jsonFormatter = new JsonFormatter(formatProvider: formatProvider);
 
             // Prepare the data table
@@ -186,56 +170,74 @@ namespace Serilog.Sinks.MSSqlServer
             };
             eventsTable.Columns.Add(id);
 
-            var message = new DataColumn
+            if (_columnOptions.Store.Contains(StandardColumn.Message))
             {
-                DataType = typeof(string),
-                MaxLength = -1,
-                ColumnName = "Message"
-            };
-            eventsTable.Columns.Add(message);
+                var message = new DataColumn
+                {
+                    DataType = typeof (string),
+                    MaxLength = -1,
+                    ColumnName = "Message"
+                };
+                eventsTable.Columns.Add(message);
+            }
 
-            var messageTemplate = new DataColumn
+            if (_columnOptions.Store.Contains(StandardColumn.MessageTemplate))
             {
-                DataType = typeof(string),
-                MaxLength = -1,
-                ColumnName = "MessageTemplate",
+                var messageTemplate = new DataColumn
+                {
+                    DataType = typeof (string),
+                    MaxLength = -1,
+                    ColumnName = "MessageTemplate",
 
-            };
-            eventsTable.Columns.Add(messageTemplate);
+                };
+                eventsTable.Columns.Add(messageTemplate);
+            }
 
-            var level = new DataColumn
+            if (_columnOptions.Store.Contains(StandardColumn.Level))
             {
-                DataType = typeof(string),
-                MaxLength = 128,
-                ColumnName = "Level"
-            };
-            eventsTable.Columns.Add(level);
+                var level = new DataColumn
+                {
+                    DataType = typeof (string),
+                    MaxLength = 128,
+                    ColumnName = "Level"
+                };
+                eventsTable.Columns.Add(level);
+            }
 
-            var timestamp = new DataColumn
+            if (_columnOptions.Store.Contains(StandardColumn.TimeStamp))
             {
-                DataType = Type.GetType("System.DateTime"),
-                ColumnName = "TimeStamp",
-                AllowDBNull = false
-            };
-            eventsTable.Columns.Add(timestamp);
+                var timestamp = new DataColumn
+                {
+                    DataType = Type.GetType("System.DateTime"),
+                    ColumnName = "TimeStamp",
+                    AllowDBNull = false
+                };
+                eventsTable.Columns.Add(timestamp);
+            }
 
-            var exception = new DataColumn
+            if (_columnOptions.Store.Contains(StandardColumn.Exception))
             {
-                DataType = typeof(string),
-                MaxLength = -1,
-                ColumnName = "Exception"
-            };
-            eventsTable.Columns.Add(exception);
+                var exception = new DataColumn
+                {
+                    DataType = typeof (string),
+                    MaxLength = -1,
+                    ColumnName = "Exception"
+                };
+                eventsTable.Columns.Add(exception);
+            }
 
-            var props = new DataColumn
+            if (_columnOptions.Store.Contains(StandardColumn.Properties))
             {
-                DataType = typeof(string),
-                MaxLength = -1,
-                ColumnName = "Properties",
-            };
-            eventsTable.Columns.Add(props);
+                var props = new DataColumn
+                {
+                    DataType = typeof (string),
+                    MaxLength = -1,
+                    ColumnName = "Properties",
+                };
+                eventsTable.Columns.Add(props);
+            }
 
-            if (_storeLogEvent)
+            if (_columnOptions.Store.Contains(StandardColumn.LogEvent))
             {
                 var eventData = new DataColumn
                 {
@@ -245,9 +247,9 @@ namespace Serilog.Sinks.MSSqlServer
                 eventsTable.Columns.Add(eventData);
             }
 
-            if (_additionalDataColumns != null)
+            if (_columnOptions.AdditionalDataColumns != null)
             {
-                eventsTable.Columns.AddRange(_additionalDataColumns);
+                eventsTable.Columns.AddRange(_columnOptions.AdditionalDataColumns.ToArray());
             }
 
             // Create an array for DataColumn objects.
@@ -264,22 +266,43 @@ namespace Serilog.Sinks.MSSqlServer
             foreach (var logEvent in events)
             {
                 var row = _eventsTable.NewRow();
-                row["Message"] = logEvent.RenderMessage(_formatProvider);
-                row["MessageTemplate"] = logEvent.MessageTemplate;
-                row["Level"] = logEvent.Level;
-                row["TimeStamp"] = (_storeTimestampInUtc)
-                    ? logEvent.Timestamp.DateTime.ToUniversalTime()
-                    : logEvent.Timestamp.DateTime;
-                row["Exception"] = logEvent.Exception != null ? logEvent.Exception.ToString() : null;
 
-                if (_includeProperties)
-                    row["Properties"] = ConvertPropertiesToXmlStructure(logEvent.Properties);
+                foreach (var column in _columnOptions.Store)
+                {
+                    switch (column)
+                    {
+                        case StandardColumn.Message:
+                            row["Message"] = logEvent.RenderMessage(_formatProvider);
+                            break;
+                        case StandardColumn.MessageTemplate:
+                            row["MessageTemplate"] = logEvent.MessageTemplate;
+                            break;
+                        case StandardColumn.Level:
+                            row["Level"] = logEvent.Level;
+                            break;
+                        case StandardColumn.TimeStamp:
+                            row["TimeStamp"] = _columnOptions.TimeStamp.ConvertToUtc
+                                ? logEvent.Timestamp.DateTime.ToUniversalTime()
+                                : logEvent.Timestamp.DateTime;
+                            break;
+                        case StandardColumn.Exception:
+                            row["Exception"] = logEvent.Exception != null ? logEvent.Exception.ToString() : null;
+                            break;
+                        case StandardColumn.Properties:
+                            row["Properties"] = ConvertPropertiesToXmlStructure(logEvent.Properties);
+                            break;
+                        case StandardColumn.LogEvent:
+                            row["LogEvent"] = LogEventToJson(logEvent);
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
+                }
 
-                if (_storeLogEvent)
-                    row["LogEvent"] = LogEventToJson(logEvent);
-
-                if (_additionalDataColumns != null)
+                if (_columnOptions.AdditionalDataColumns != null)
+                {
                     ConvertPropertiesToColumn(row, logEvent.Properties);
+                }
 
                 _eventsTable.Rows.Add(row);
             }
@@ -289,7 +312,7 @@ namespace Serilog.Sinks.MSSqlServer
 
         private string ConvertPropertiesToXmlStructure(IEnumerable<KeyValuePair<string, LogEventPropertyValue>> properties)
         {
-            if (_excludeAdditionalProperties)
+            if (_columnOptions.Properties.ExcludeAdditionalProperties)
                 properties = properties.Where(p => !_additionalDataColumnNames.Contains(p.Key));
 
             var sb = new StringBuilder();
@@ -298,8 +321,7 @@ namespace Serilog.Sinks.MSSqlServer
 
             foreach (var property in properties)
             {
-                sb.AppendFormat("<property key='{0}'>{1}</property>", property.Key,
-                    XmlPropertyFormatter.Simplify(property.Value));
+                sb.AppendFormat("<property key='{0}'>{1}</property>", property.Key, XmlPropertyFormatter.Simplify(property.Value));
             }
 
             sb.Append("</properties>");
@@ -321,8 +343,7 @@ namespace Serilog.Sinks.MSSqlServer
         /// </summary>
         /// <param name="row"></param>
         /// <param name="properties"></param>
-        private void ConvertPropertiesToColumn(
-            DataRow row, IReadOnlyDictionary<string, LogEventPropertyValue> properties)
+        private void ConvertPropertiesToColumn(DataRow row, IReadOnlyDictionary<string, LogEventPropertyValue> properties)
         {
             foreach (var property in properties)
             {

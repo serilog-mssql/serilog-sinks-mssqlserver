@@ -35,7 +35,7 @@ CREATE TABLE [Logs] (
 ) ON [PRIMARY];
 ```
 
-If you don't plan on using the Properties or LogEvent columns, you can disable their use with the *storeProperties* and *storeLogEvent* parameters.
+If you don't plan on using one or more columns, you can specify which columns to include in the *columnOptions.Store* parameter.
 
 NOTE Make sure to set up security in such a way that the sink can write to the log table. 
 
@@ -54,14 +54,17 @@ If you are configuring Serilog with the `ReadFrom.AppSettings()` XML configurati
 This feature will still use all of the default columns and provide additional columns for that can be logged to (be sure to create the extra columns via SQL script first). This gives the flexibility to use as many extra columns as needed.
 
 ```csharp
-var dataColumns = new[]
+var columnOptions = new ColumnOptions
+{
+    AdditionalDataColumns = new Collection<DataColumn>
     {
-        new DataColumn { DataType = typeof(string), ColumnName = "User" },
-        new DataColumn { DataType = typeof(string), ColumnName = "Other" },
-    };
-    
+        new DataColumn {DataType = typeof (string), ColumnName = "User"},
+        new DataColumn {DataType = typeof (string), ColumnName = "Other"},
+    }
+};
+
 var log = new LoggerConfiguration()
-    .WriteTo.MSSqlServer(@"Server=.\SQLEXPRESS;Database=LogEvents;Trusted_Connection=True;", "Logs", additionalDataColumns: dataColumns)
+    .WriteTo.MSSqlServer(@"Server=.\SQLEXPRESS;Database=LogEvents;Trusted_Connection=True;", "Logs", columnOptions: columnOptions)
     .CreateLogger();
 ```
 The log event properties `User` and `Other` will now be placed in the corresponding column upon logging. The property name must match a column name in your table.
@@ -85,10 +88,10 @@ If you set the *autoCreateSqlTable* option to true, it will create a table for y
 
 #### Excluding redundant items from the Properties column
 
-By default the additional properties will still be included in the XML data saved to the Properties column (assuming that is not disabled via the storeProperties parameter). That's consistent with the idea behind structured logging, and makes it easier to convert the log data to another (e.g. NoSql) storage platform later if desired.  
+By default the additional properties will still be included in the XML data saved to the Properties column (assuming that is not disabled via the columnOptions.Store parameter). That's consistent with the idea behind structured logging, and makes it easier to convert the log data to another (e.g. NoSql) storage platform later if desired.  
 
-However, if the data is to stay in SQL Server, then the additional properties may not need to be saved in both columns and XML.  Use the *excludeAdditionalProperties* parameter in the sink configuration to exclude the redundant properties from the XML.
+However, if the data is to stay in SQL Server, then the additional properties may not need to be saved in both columns and XML.  Use the *columnOptions.Properties.ExcludeAdditionalProperties* parameter in the sink configuration to exclude the redundant properties from the XML.
 
 ### Saving the Log Event data
 
-The log event JSON can be stored to the LogEvent column. This can be enabled with the *storeLogEvent* parameter.
+The log event JSON can be stored to the LogEvent column. This can be enabled with the *columnOptions.Store* parameter.
