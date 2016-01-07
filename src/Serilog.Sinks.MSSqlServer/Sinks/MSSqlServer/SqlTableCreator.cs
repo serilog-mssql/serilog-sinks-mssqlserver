@@ -89,7 +89,10 @@ namespace Serilog.Sinks.MSSqlServer
 		{
 			switch (type.ToString())
 			{
-				case "System.String":
+                case "System.Byte":
+                    return "TINYINT";
+
+                case "System.String":
 					return "NVARCHAR(" + ((columnSize == -1) ? "MAX" : columnSize.ToString()) + ")";
 
 				case "System.Decimal":

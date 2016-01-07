@@ -197,10 +197,19 @@ namespace Serilog.Sinks.MSSqlServer
             {
                 var level = new DataColumn
                 {
-                    DataType = typeof (string),
-                    MaxLength = 128,
                     ColumnName = "Level"
                 };
+
+                if (_columnOptions.Level.StoreAsEnum)
+                {
+                    level.DataType = typeof (byte);
+                }
+                else
+                {
+                    level.DataType = typeof (string);
+                    level.MaxLength = 128;
+                }
+
                 eventsTable.Columns.Add(level);
             }
 

@@ -17,6 +17,8 @@ namespace Serilog.Sinks.MSSqlServer
         /// </summary>
         public ColumnOptions()
         {
+            Level = new LevelColumnOptions();
+
             Properties = new PropertiesColumnOptions();
 
             Store = new Collection<StandardColumn>
@@ -61,14 +63,30 @@ namespace Serilog.Sinks.MSSqlServer
         public ICollection<DataColumn> AdditionalDataColumns { get; set; }
 
         /// <summary>
-        ///     Options for the TimeStamp column.
+        ///     Options for the Level column.
         /// </summary>
-        public TimeStampColumnOptions TimeStamp { get; private set; }
+        public LevelColumnOptions Level { get; private set; }
 
         /// <summary>
         ///     Options for the Properties column.
         /// </summary>
         public PropertiesColumnOptions Properties { get; private set; }
+
+        /// <summary>
+        ///     Options for the TimeStamp column.
+        /// </summary>
+        public TimeStampColumnOptions TimeStamp { get; private set; }
+
+        /// <summary>
+        ///     Options for the Level column.
+        /// </summary>
+        public class LevelColumnOptions
+        {
+            /// <summary>
+            ///     If true will store Level as an enum in a tinyint column as opposed to a string.
+            /// </summary>
+            public bool StoreAsEnum { get; set; }
+        }
 
         /// <summary>
         ///     Options for the Properties column.
@@ -97,28 +115,29 @@ namespace Serilog.Sinks.MSSqlServer
             ///     The name to use for a dictionary element.
             /// </summary>
             public string DictionaryElementName { get; set; }
+
             /// <summary>
             ///     The name to use for an item element.
             /// </summary>
             public string ItemElementName { get; set; }
 
             /// <summary>
-            /// If true will omit the "dictionary" container element, and will only include child elements.
+            ///     If true will omit the "dictionary" container element, and will only include child elements.
             /// </summary>
             public bool OmitDictionaryContainerElement { get; set; }
 
             /// <summary>
-            /// If true will omit the "sequence" container element, and will only include child elements.
+            ///     If true will omit the "sequence" container element, and will only include child elements.
             /// </summary>
             public bool OmitSequenceContainerElement { get; set; }
 
             /// <summary>
-            /// If true will omit the "structure" container element, and will only include child elements.
+            ///     If true will omit the "structure" container element, and will only include child elements.
             /// </summary>
             public bool OmitStructureContainerElement { get; set; }
 
             /// <summary>
-            /// If true and the property value is empty, then don't include the element.
+            ///     If true and the property value is empty, then don't include the element.
             /// </summary>
             public bool OmitElementIfEmpty { get; set; }
 

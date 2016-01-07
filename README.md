@@ -36,6 +36,7 @@ CREATE TABLE [Logs] (
 ```
 
 If you don't plan on using one or more columns, you can specify which columns to include in the *columnOptions.Store* parameter.
+The Level column should be defined as a TinyInt if the *columnOptions.Level.StoreAsEnum* is set to true.
 
 NOTE Make sure to set up security in such a way that the sink can write to the log table. 
 
