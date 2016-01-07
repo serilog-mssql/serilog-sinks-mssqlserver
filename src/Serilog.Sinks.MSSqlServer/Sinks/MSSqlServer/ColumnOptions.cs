@@ -103,6 +103,21 @@ namespace Serilog.Sinks.MSSqlServer
             public string ItemElementName { get; set; }
 
             /// <summary>
+            /// If true will omit the "dictionary" container element, and will only include child elements.
+            /// </summary>
+            public bool OmitDictionaryContainerElement { get; set; }
+
+            /// <summary>
+            /// If true will omit the "sequence" container element, and will only include child elements.
+            /// </summary>
+            public bool OmitSequenceContainerElement { get; set; }
+
+            /// <summary>
+            /// If true will omit the "structure" container element, and will only include child elements.
+            /// </summary>
+            public bool OmitStructureContainerElement { get; set; }
+
+            /// <summary>
             /// If true and the property value is empty, then don't include the element.
             /// </summary>
             public bool OmitElementIfEmpty { get; set; }

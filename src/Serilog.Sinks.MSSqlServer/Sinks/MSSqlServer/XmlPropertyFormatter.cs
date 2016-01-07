@@ -59,7 +59,10 @@ namespace Serilog.Sinks.MSSqlServer
                     if (isEmpty)
                     {
                         isEmpty = false;
-                        sb.AppendFormat("<{0}>", options.DictionaryElementName);
+                        if (!options.OmitDictionaryContainerElement)
+                        {
+                            sb.AppendFormat("<{0}>", options.DictionaryElementName);
+                        }
                     }
 
                     var key = SimplifyScalar(element.Key);
@@ -73,7 +76,7 @@ namespace Serilog.Sinks.MSSqlServer
                     }
                 }
 
-                if (!isEmpty)
+                if (!isEmpty && !options.OmitDictionaryContainerElement)
                 {
                     sb.AppendFormat("</{0}>", options.DictionaryElementName);
                 }
@@ -99,13 +102,16 @@ namespace Serilog.Sinks.MSSqlServer
                     if (isEmpty)
                     {
                         isEmpty = false;
-                        sb.AppendFormat("<{0}>", options.SequenceElementName);
+                        if (!options.OmitSequenceContainerElement)
+                        {
+                            sb.AppendFormat("<{0}>", options.SequenceElementName);
+                        }
                     }
 
                     sb.AppendFormat("<{0}>{1}</{0}>", options.ItemElementName, itemValue);
                 }
 
-                if (!isEmpty)
+                if (!isEmpty && !options.OmitSequenceContainerElement)
                 {
                     sb.AppendFormat("</{0}>", options.SequenceElementName);
                 }
@@ -133,13 +139,16 @@ namespace Serilog.Sinks.MSSqlServer
                     if (isEmpty)
                     {
                         isEmpty = false;
-                        if (options.UsePropertyKeyAsElementName)
+                        if (!options.OmitStructureContainerElement)
                         {
-                            sb.AppendFormat("<{0}>", GetValidElementName(str.TypeTag));
-                        }
-                        else
-                        {
-                            sb.AppendFormat("<{0} type='{1}'>", options.StructureElementName, str.TypeTag);
+                            if (options.UsePropertyKeyAsElementName)
+                            {
+                                sb.AppendFormat("<{0}>", GetValidElementName(str.TypeTag));
+                            }
+                            else
+                            {
+                                sb.AppendFormat("<{0} type='{1}'>", options.StructureElementName, str.TypeTag);
+                            }
                         }
                     }
 
@@ -154,7 +163,7 @@ namespace Serilog.Sinks.MSSqlServer
                     }
                 }
 
-                if (!isEmpty)
+                if (!isEmpty && !options.OmitStructureContainerElement)
                 {
                     if (options.UsePropertyKeyAsElementName)
                     {

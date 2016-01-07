@@ -103,4 +103,6 @@ The serialization of the properties column can be controlled by setting values i
 Names of elements can be controlled by the *RootElementName*, *PropertyElementName*, *ItemElementName*, *DictionaryElementName*, *SequenceElementName*, *StructureElementName* and *UsePropertyKeyAsElementName* options.
 The *UsePropertyKeyAsElementName* option, if set to true, will use the property key as the element name instead of "property" for the name with the key as an attribute.
 
+If *OmitDictionaryContainerElement*, *OmitSequenceContainerElement* or *OmitStructureContainerElement* are true then the "dictionary", "sequence" or "structure" container elements will be omitted and only child elements are included.
+
 If *OmitElementIfEmpty* is true then if a property is empty, it will not be serialized.
