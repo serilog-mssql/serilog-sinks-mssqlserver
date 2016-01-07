@@ -99,6 +99,7 @@ The log event JSON can be stored to the LogEvent column. This can be enabled wit
 ### Options for serialization of the Properties column
 
 The serialization of the properties column can be controlled by setting values in the in the *columnOptions.Properties* parameter.
+
 Names of elements can be controlled by the *RootElementName*, *PropertyElementName*, *ItemElementName*, *DictionaryElementName*, *SequenceElementName*, *StructureElementName* and *UsePropertyKeyAsElementName* options.
 The *UsePropertyKeyAsElementName* option, if set to true, will use the property key as the element name instead of "property" for the name with the key as an attribute.
 
