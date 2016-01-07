@@ -96,9 +96,10 @@ However, if the data is to stay in SQL Server, then the additional properties ma
 
 The log event JSON can be stored to the LogEvent column. This can be enabled with the *columnOptions.Store* parameter.
 
-### Options for serialization of the properties column
+### Options for serialization of the Properties column
 
 The serialization of the properties column can be controlled by setting values in the in the *columnOptions.Properties* parameter.
 Names of elements can be controlled by the *RootElementName*, *PropertyElementName*, *ItemElementName*, *DictionaryElementName*, *SequenceElementName*, *StructureElementName* and *UsePropertyKeyAsElementName* options.
 The *UsePropertyKeyAsElementName* option, if set to true, will use the property key as the element name instead of "property" for the name with the key as an attribute.
+
 If *OmitElementIfEmpty* is true then if a property is empty, it will not be serialized.
