@@ -95,7 +95,11 @@ namespace Serilog.Sinks.MSSqlServer
 	                sqlType = "BIT";
 	                break;
 
-	            case "System.String":
+                case "System.Byte":
+                    sqlType = "TINYINT";
+                    break;
+
+                case "System.String":
 	                sqlType = "NVARCHAR(" + ((columnSize == -1) ? "MAX" : columnSize.ToString()) + ")";
 	                break;
 
