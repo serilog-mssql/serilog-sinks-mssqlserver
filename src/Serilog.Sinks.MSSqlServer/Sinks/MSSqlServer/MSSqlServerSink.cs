@@ -24,8 +24,6 @@ using Serilog.Debugging;
 using Serilog.Events;
 using Serilog.Formatting.Json;
 using Serilog.Sinks.PeriodicBatching;
-using Serilog.Parsing;
-
 
 namespace Serilog.Sinks.MSSqlServer
 {
@@ -381,8 +379,21 @@ namespace Serilog.Sinks.MSSqlServer
                 var columnName = property.Key;
                 var columnType = row.Table.Columns[columnName].DataType;
                 object conversion;
+
                 var scalarValue = property.Value as ScalarValue;
-                if (scalarValue != null && TryChangeType(scalarValue.Value, columnType, out conversion))
+                if (scalarValue == null)
+                {
+                    row[columnName] = property.Value.ToString();
+                    continue;                    
+                }
+
+                if (scalarValue.Value == null && row.Table.Columns[columnName].AllowDBNull)
+                {
+                    row[columnName] = DBNull.Value;
+                    continue;
+                }
+                
+                if (TryChangeType(scalarValue.Value, columnType, out conversion))
                 {
                     row[columnName] = conversion;
                 }
