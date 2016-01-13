@@ -72,8 +72,10 @@
     <Compile Include="..\..\assets\CommonAssemblyInfo.cs">
       <Link>Properties\CommonAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="Sinks\MSSqlServer\ColumnOptions.cs" />
     <Compile Include="Sinks\MSSqlServer\MSSqlServerSink.cs" />
     <Compile Include="Sinks\MSSqlServer\SqlTableCreator.cs" />
+    <Compile Include="Sinks\MSSqlServer\StandardColumn.cs" />
     <Compile Include="Sinks\MSSqlServer\XmlPropertyFormatter.cs" />
   </ItemGroup>
   <ItemGroup>
