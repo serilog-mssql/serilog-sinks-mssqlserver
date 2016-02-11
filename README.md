@@ -29,7 +29,8 @@ CREATE TABLE [Logs] (
 
    CONSTRAINT [PK_Logs] 
      PRIMARY KEY CLUSTERED ([Id] ASC) 
-	 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) 
+	 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF,
+	       ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) 
      ON [PRIMARY]
 
 ) ON [PRIMARY];
@@ -71,9 +72,11 @@ var log = new LoggerConfiguration()
 The log event properties `User` and `Other` will now be placed in the corresponding column upon logging. The property name must match a column name in your table.
 
 In addition, columns can be defined with the name and data type of the column in SQL Server. Columns specified must match database table exactly. DataType is case sensitive, based on SQL type (excluding precision/length). 
+
 ```xml
   <configSections>
-    <section name="MSSqlServerSettingsSection" type="Serilog.Configuration.MSSqlServerConfigurationSection, Serilog.Sinks.MSSqlServer"/>
+    <section name="MSSqlServerSettingsSection"
+             type="Serilog.Configuration.MSSqlServerConfigurationSection, Serilog.Sinks.MSSqlServer"/>
   </configSections>
   <MSSqlServerSettingsSection>
     <Columns>
@@ -83,27 +86,28 @@ In addition, columns can be defined with the name and data type of the column in
   </MSSqlServerSettingsSection>      
 ```
 
-### Auto create table
+### Auto-create Table
 
-If you set the *autoCreateSqlTable* option to true, it will create a table for you in the database specified in the connection string. Make sure that the user associated with this connection string has enough rights to make schema changes.
+If you set the `autoCreateSqlTable` option to `true`, it will create a table for you in the database specified in the connection string. Make sure that the user associated with this connection string has enough rights to make schema changes.
 
 #### Excluding redundant items from the Properties column
 
-By default the additional properties will still be included in the XML data saved to the Properties column (assuming that is not disabled via the columnOptions.Store parameter). That's consistent with the idea behind structured logging, and makes it easier to convert the log data to another (e.g. NoSql) storage platform later if desired.  
+By default the additional properties will still be included in the XML data saved to the Properties column (assuming that is not disabled via the `columnOptions.Store` parameter). That's consistent with the idea behind structured logging, and makes it easier to convert the log data to another (e.g. NoSQL) storage platform later if desired.  
 
-However, if the data is to stay in SQL Server, then the additional properties may not need to be saved in both columns and XML.  Use the *columnOptions.Properties.ExcludeAdditionalProperties* parameter in the sink configuration to exclude the redundant properties from the XML.
+However, if the data is to stay in SQL Server, then the additional properties may not need to be saved in both columns and XML.  Use the `columnOptions.Properties.ExcludeAdditionalProperties` parameter in the sink configuration to exclude the redundant properties from the XML.
 
-### Saving the Log Event data
+### Saving the Log Event Data
 
-The log event JSON can be stored to the LogEvent column. This can be enabled with the *columnOptions.Store* parameter.
+The log event JSON can be stored to the LogEvent column. This can be enabled with the `columnOptions.Store` parameter.
 
 ### Options for serialization of the Properties column
 
-The serialization of the properties column can be controlled by setting values in the in the *columnOptions.Properties* parameter.
+The serialization of the properties column can be controlled by setting values in the in the `columnOptions.Properties` parameter.
 
-Names of elements can be controlled by the *RootElementName*, *PropertyElementName*, *ItemElementName*, *DictionaryElementName*, *SequenceElementName*, *StructureElementName* and *UsePropertyKeyAsElementName* options.
-The *UsePropertyKeyAsElementName* option, if set to true, will use the property key as the element name instead of "property" for the name with the key as an attribute.
+Names of elements can be controlled by the `RootElementName`, `PropertyElementName`, `ItemElementName`, `DictionaryElementName`, `SequenceElementName`, `StructureElementName` and `UsePropertyKeyAsElementName` options.
 
-If *OmitDictionaryContainerElement*, *OmitSequenceContainerElement* or *OmitStructureContainerElement* are true then the "dictionary", "sequence" or "structure" container elements will be omitted and only child elements are included.
+The `UsePropertyKeyAsElementName` option, if set to `true`, will use the property key as the element name instead of "property" for the name with the key as an attribute.
 
-If *OmitElementIfEmpty* is true then if a property is empty, it will not be serialized.
+If `OmitDictionaryContainerElement`, `OmitSequenceContainerElement` or `OmitStructureContainerElement` are set then the "dictionary", "sequence" or "structure" container elements will be omitted and only child elements are included.
+
+If `OmitElementIfEmpty` is set then if a property is empty, it will not be serialized.
