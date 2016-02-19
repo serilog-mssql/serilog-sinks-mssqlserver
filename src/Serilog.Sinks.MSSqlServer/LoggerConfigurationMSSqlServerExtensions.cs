@@ -99,43 +99,21 @@ namespace Serilog
         private static string GetConnectionString(string nameOrConnectionString)
         {
             
-            // A raw connection string will always have more than one `=` while a ConnectionString name may have one or zero
-            var firstEquals = nameOrConnectionString.IndexOf('=');
-
-            // More than one equals means treat the whole thing as a connection string
-            if (firstEquals >= 0 && nameOrConnectionString.IndexOf('=', firstEquals + 1) >= 0)
+            // If there is an `=`, we assume this is a raw connection string not a named value
+            // If there are no `=`, attempt to pull the named value from config
+            if (nameOrConnectionString.IndexOf('=') < 0)
             {
-                // This would also capture a string that starts with `==`, but we aren't responsible for validating that
-                return nameOrConnectionString;
-            }
-
-            string connectionName = null;
-            
-            if (firstEquals < 0)
-            {
-                // Set our connection name to the incoming string because we have no `=`
-                connectionName = nameOrConnectionString;
-            }
-            else if (nameOrConnectionString.Substring(0, firstEquals).Trim().Equals(
-                "name", StringComparison.OrdinalIgnoreCase))
-            {
-                // If the keyword before the single '=' is "name" then return the value as connection name
-                connectionName = nameOrConnectionString.Substring(firstEquals + 1).Trim();
-            }
-
-            // If we think we have a named connection, try to find it in the ConnectionStrings and return it
-            if (connectionName != null)
-            {
-                var cs = ConfigurationManager.ConnectionStrings[connectionName];
+                var cs = ConfigurationManager.ConnectionStrings[nameOrConnectionString];
                 if (cs != null)
                 {
                     return cs.ConnectionString;
                 }
+                else
+                {
+                    SelfLog.WriteLine("MSSqlServer sink configured value {0} is not found in ConnectionStrings settings and does not appear to be a raw connection string.", nameOrConnectionString);
+                }
             }
 
-            // We believe we have a string that is not a valid SQL connection, but also not in ConnectionStrings section
-            // Log it and return the original value, maybe it works
-            SelfLog.WriteLine("MSSqlServer sink configured value {0} is not found in ConnectionStrings settings and does not appear to be a valid connection string.", nameOrConnectionString);
             return nameOrConnectionString;
         }
 
