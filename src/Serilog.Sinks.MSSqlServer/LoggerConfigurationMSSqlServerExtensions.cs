@@ -6,6 +6,7 @@ using Serilog.Configuration;
 using Serilog.Events;
 using Serilog.Sinks.MSSqlServer;
 using System.Configuration;
+using Serilog.Debugging;
 
 // Copyright 2014 Serilog Contributors
 // 
@@ -74,6 +75,8 @@ namespace Serilog
                 GenerateDataColumnsFromConfig(serviceConfigSection, columnOptions);
             }
 
+            connectionString = GetConnectionString(connectionString);
+
             return loggerConfiguration.Sink(
                 new MSSqlServerSink(
                     connectionString,
@@ -85,6 +88,33 @@ namespace Serilog
                     columnOptions
                     ),
                 restrictedToMinimumLevel);
+        }
+
+        /// <summary>
+        /// Examine if supplied connection string is a reference to an item in the "ConnectionStrings" section of web.config
+        /// If it is, return the ConnectionStrings item, if not, return string as supplied.
+        /// </summary>
+        /// <param name="nameOrConnectionString">The name of the ConnectionStrings key or raw connection string.</param>
+        /// <remarks>Pulled from review of Entity Framework 6 methodology for doing the same</remarks>
+        private static string GetConnectionString(string nameOrConnectionString)
+        {
+            
+            // If there is an `=`, we assume this is a raw connection string not a named value
+            // If there are no `=`, attempt to pull the named value from config
+            if (nameOrConnectionString.IndexOf('=') < 0)
+            {
+                var cs = ConfigurationManager.ConnectionStrings[nameOrConnectionString];
+                if (cs != null)
+                {
+                    return cs.ConnectionString;
+                }
+                else
+                {
+                    SelfLog.WriteLine("MSSqlServer sink configured value {0} is not found in ConnectionStrings settings and does not appear to be a raw connection string.", nameOrConnectionString);
+                }
+            }
+
+            return nameOrConnectionString;
         }
 
         /// <summary>
