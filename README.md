@@ -51,6 +51,8 @@ If you are configuring Serilog with the `ReadFrom.AppSettings()` XML configurati
 <add key="serilog:write-to:MSSqlServer.tableName" value="Logs"/>
 ```
 
+To use a connection string from the `<connectionStrings>` element, specify its _name_ as the value of the connection string property.
+
 ### Writing properties as columns
 
 This feature will still use all of the default columns and provide additional columns for that can be logged to (be sure to create the extra columns via SQL script first). This gives the flexibility to use as many extra columns as needed.
