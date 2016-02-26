@@ -113,3 +113,27 @@ The `UsePropertyKeyAsElementName` option, if set to `true`, will use the propert
 If `OmitDictionaryContainerElement`, `OmitSequenceContainerElement` or `OmitStructureContainerElement` are set then the "dictionary", "sequence" or "structure" container elements will be omitted and only child elements are included.
 
 If `OmitElementIfEmpty` is set then if a property is empty, it will not be serialized.
+
+### Querying the Log Property XML
+
+Extracting and querying the properties data directly can be helpful when looking for specific log sequences.
+
+Given the following XML property collection:
+
+```xml
+<properties>
+  <property key="Action">GetUsers</property>
+  <property key="Controller">UserController</property>
+</properties>
+```
+
+The following query will extract the `Action` property and restrict the query based on the `Controller` property using SQL Servers built-in XQuery support.
+
+```sql
+SELECT 	[Message]
+  , [TimeStamp]
+  , [Exception]
+  , [Properties].value('(//property[@key="Action"]/node())[1]', 'nvarchar(max)') as Action
+FROM [Logs]
+WHERE [Properties].value('(//property[@key="Controller"]/node())[1]', 'nvarchar(max)') = 'UserController'
+```
