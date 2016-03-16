@@ -65,7 +65,7 @@ namespace Serilog.Sinks.MSSqlServer
                         }
                     }
 
-                    var key = SimplifyScalar(element.Key);
+                    var key = SimplifyScalar(element.Key.Value);
                     if (options.UsePropertyKeyAsElementName)
                     {
                         sb.AppendFormat("<{0}>{1}</{0}>", GetValidElementName(key), itemValue);
@@ -204,10 +204,7 @@ namespace Serilog.Sinks.MSSqlServer
         {
             if (value == null) return null;
 
-            const string dummyTag = "toEscape";
-            var toEscape = new XElement(dummyTag, value.ToString());
-            var asElement = toEscape.ToString();
-            return asElement.Substring(dummyTag.Length + 2, asElement.Length - (dummyTag.Length*2 + 5));
+            return new XText(value.ToString()).ToString();
         }
     }
 }
