@@ -1,0 +1,22 @@
+{
+  "version": "4.0.0-beta-*",
+  "description": "A Serilog sink that writes events to Microsoft SQL Server",
+  "authors": [ "Serilog Contributors" ],
+  "tags": [ "serilog", "sinks", "mssqlserver" ],
+  "projectUrl": "http://serilog.net",
+  "licenseUrl": "http://www.apache.org/licenses/LICENSE-2.0",
+  "iconUrl": "http://serilog.net/images/serilog-sink-nuget.png",
+  "dependencies": {
+    "Serilog": "2.0.0-beta-523",
+    "Serilog.Sinks.PeriodicBatching": "2.0.0-beta-700"
+  },
+  "compilationOptions": {
+    "keyFile": "../../assets/Serilog.snk"
+  },
+  "frameworks": {
+    "net45": {}
+  },
+  "runtimes": {
+    "win": {}
+  }
+}
