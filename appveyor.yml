@@ -1,4 +1,4 @@
-version: 4.0.0-beta-{build}
+version: build-{build}
 configuration: Debug
 build_script:
 - ps: ./Build.ps1 -majorMinor "4.0" -patch "0-beta-$env:APPVEYOR_BUILD_VERSION" -customLogger "C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
@@ -11,3 +11,9 @@ deploy:
   skip_symbols: true
   on:
     branch: dev
+assembly_info:
+  patch: true
+  file: AssemblyInfo.*
+  assembly_version: "4.0.0-beta-{build}"
+  assembly_file_version: "{version}"
+  assembly_informational_version: "{version}"
