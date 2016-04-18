@@ -1,4 +1,4 @@
-version: build-{build}
+version: {build}
 configuration: Debug
 build_script:
 - ps: ./Build.ps1 -majorMinor "4.0" -patch "0-beta-$env:APPVEYOR_BUILD_VERSION" -customLogger "C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
