@@ -14,6 +14,6 @@ deploy:
 assembly_info:
   patch: true
   file: AssemblyInfo.*
-  assembly_version: "4.0.0-beta-{build}"
-  assembly_file_version: "{version}"
-  assembly_informational_version: "{version}"
+  assembly_version: "{build}"
+  assembly_file_version: "{build}"
+  assembly_informational_version: "4.0.0-beta-{build}"
