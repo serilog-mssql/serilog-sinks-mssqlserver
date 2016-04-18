@@ -1,0 +1,19 @@
+version: "{build}"
+configuration: Debug
+build_script:
+- ps: ./Build.ps1 -majorMinor "4.0" -patch "0-beta-$env:APPVEYOR_BUILD_VERSION" -customLogger "C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+artifacts:
+- path: Serilog.Sinks.MSSqlServer.*.nupkg
+deploy:
+- provider: NuGet
+  api_key:
+    secure: nvZ/z+pMS91b3kG4DgfES5AcmwwGoBYQxr9kp4XiJHj25SAlgdIxFx++1N0lFH2x
+  skip_symbols: true
+  on:
+    branch: dev
+assembly_info:
+  patch: true
+  file: AssemblyInfo.*
+  assembly_version: "{build}"
+  assembly_file_version: "{build}"
+  assembly_informational_version: "4.0.0-beta-{build}"
