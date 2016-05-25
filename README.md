@@ -7,11 +7,35 @@ A Serilog sink that writes events to Microsoft SQL Server. While a NoSql store a
 **Package** - [Serilog.Sinks.MSSqlServer](http://nuget.org/packages/serilog.sinks.mssqlserver)
 | **Platforms** - .NET 4.5
 
+## Configuration
+
+At minimum a connection string and table name are required.
+
+To use a connection string from the `<connectionStrings>` element of your application config file, specify its name as the value of the connection string.
+
+#### Code
+
 ```csharp
+var connectionString = @"Server=...";  // or the name of a connection string in your .config file
+var tableName = "Logs";
+var columnOptions = new ColumnOptions();  // optional
+
 var log = new LoggerConfiguration()
-    .WriteTo.MSSqlServer(connectionString: @"Server=...", tableName: "Logs")
+    .WriteTo.MSSqlServer(connectionString, tableName, columnOptions: columnOptions)
     .CreateLogger();
 ```
+
+#### XML
+
+If you are configuring Serilog with the `ReadFrom.AppSettings()` XML configuration support, you can use:
+
+```xml
+<add key="serilog:using:MSSqlSever" value="Serilog.Sinks.MSSqlServer" />
+<add key="serilog:write-to:MSSqlServer.connectionString" value="Server=..."/>
+<add key="serilog:write-to:MSSqlServer.tableName" value="Logs"/>
+```
+
+## Table definition
 
 You'll need to create a table like this in your database:
 
@@ -36,26 +60,46 @@ CREATE TABLE [Logs] (
 ) ON [PRIMARY];
 ```
 
-If you don't plan on using one or more columns, you can specify which columns to include in the *columnOptions.Store* parameter.
+**Remember to grant the necessary permissions for the sink to be able to write to the log table.**
+
+If you don't plan on using one or more columns, you can specify which columns to include in the *columnOptions.Store* parameter (see below). 
+
 The Level column should be defined as a TinyInt if the *columnOptions.Level.StoreAsEnum* is set to true.
 
-NOTE Make sure to set up security in such a way that the sink can write to the log table. 
 
-### XML configuration
+### Automatic table creation
 
-If you are configuring Serilog with the `ReadFrom.AppSettings()` XML configuration support, you can use:
+If you set the `autoCreateSqlTable` option to `true`, the sink will create a table for you in the database specified in the connection string.  Make sure that the user associated with this connection string has enough rights to make schema changes.
 
-```xml
-<add key="serilog:using:MSSqlSever" value="Serilog.Sinks.MSSqlServer" />
-<add key="serilog:write-to:MSSqlServer.connectionString" value="Server=..."/>
-<add key="serilog:write-to:MSSqlServer.tableName" value="Logs"/>
+
+## Standard columns
+
+The "standard columns" used by this sink (apart from obvious required columns like Id) are described by the StandardColumn enumeration and controlled by `columnOptions.Store`.
+
+By default (and consistent with the SQL command to create a table, above) these columns are included:
+ - StandardColumn.Message
+ - StandardColumn.MessageTemplate
+ - StandardColumn.Level
+ - StandardColumn.TimeStamp
+ - StandardColumn.Exception
+ - StandardColumn.Properties
+
+You can change this list, as long as the table definition is consistent:
+
+```csharp
+// Don't include the Properties XML column.
+columnOptions.Store.Remove(StandardColumn.Properties);
+
+// Do include the log event data as JSON.
+columnOptions.Store.Add(StandardColumn.LogEvent);
 ```
 
-To use a connection string from the `<connectionStrings>` element, specify its _name_ as the value of the connection string property.
+You can also store your own log event properties as additional columns; see below.
 
-### Writing properties as columns
 
-This feature will still use all of the default columns and provide additional columns for that can be logged to (be sure to create the extra columns via SQL script first). This gives the flexibility to use as many extra columns as needed.
+### Saving properties in additional columns
+
+By default any log event properties you include in your log statements will be saved to the Properties column (and/or LogEvent column, per columnOption.Store).  But they can also be stored in their own columns via the AdditionalDataColumns setting.
 
 ```csharp
 var columnOptions = new ColumnOptions
@@ -71,9 +115,20 @@ var log = new LoggerConfiguration()
     .WriteTo.MSSqlServer(@"Server=.\SQLEXPRESS;Database=LogEvents;Trusted_Connection=True;", "Logs", columnOptions: columnOptions)
     .CreateLogger();
 ```
-The log event properties `User` and `Other` will now be placed in the corresponding column upon logging. The property name must match a column name in your table.
 
-In addition, columns can be defined with the name and data type of the column in SQL Server. Columns specified must match database table exactly. DataType is case sensitive, based on SQL type (excluding precision/length). 
+The log event properties `User` and `Other` will now be placed in the corresponding column upon logging. The property name must match a column name in your table. Be sure to include them in the table definition.
+
+
+#### Excluding redundant items from the Properties column
+
+By default, additional properties will still be included in the XML data saved to the Properties column (assuming that is not disabled via the `columnOptions.Store` parameter). This is consistent with the idea behind structured logging, and makes it easier to convert the log data to another (e.g. NoSQL) storage platform later if desired. 
+
+However, if necessary, then the properties being saved in their own columns can be excluded from the XML.  Use the `columnOptions.Properties.ExcludeAdditionalProperties` parameter in the sink configuration to exclude the redundant properties from the XML. 
+
+
+### XML configuration for columns
+
+Columns can be defined with the name and data type of the column in SQL Server. Columns specified must match database table exactly. DataType is case sensitive, based on SQL type (excluding precision/length). 
 
 ```xml
   <configSections>
@@ -88,23 +143,17 @@ In addition, columns can be defined with the name and data type of the column in
   </MSSqlServerSettingsSection>      
 ```
 
-### Auto-create Table
+### Options for serialization of the log event data
 
-If you set the `autoCreateSqlTable` option to `true`, it will create a table for you in the database specified in the connection string. Make sure that the user associated with this connection string has enough rights to make schema changes.
+#### JSON (LogEvent column)
 
-#### Excluding redundant items from the Properties column
+The log event JSON can be stored to the LogEvent column. This can be enabled by adding the LogEvent column to the `columnOptions.Store` collection.
 
-By default the additional properties will still be included in the XML data saved to the Properties column (assuming that is not disabled via the `columnOptions.Store` parameter). That's consistent with the idea behind structured logging, and makes it easier to convert the log data to another (e.g. NoSQL) storage platform later if desired.  
+#### XML (Properties column)
 
-However, if the data is to stay in SQL Server, then the additional properties may not need to be saved in both columns and XML.  Use the `columnOptions.Properties.ExcludeAdditionalProperties` parameter in the sink configuration to exclude the redundant properties from the XML.
+To take advantage of SQL Server's XML support, the default storage of the log event properties is in the Properties XML column.
 
-### Saving the Log Event Data
-
-The log event JSON can be stored to the LogEvent column. This can be enabled with the `columnOptions.Store` parameter.
-
-### Options for serialization of the Properties column
-
-The serialization of the properties column can be controlled by setting values in the in the `columnOptions.Properties` parameter.
+The serialization of the properties can be controlled by setting values in the in the `columnOptions.Properties` parameter.
 
 Names of elements can be controlled by the `RootElementName`, `PropertyElementName`, `ItemElementName`, `DictionaryElementName`, `SequenceElementName`, `StructureElementName` and `UsePropertyKeyAsElementName` options.
 
@@ -114,7 +163,7 @@ If `OmitDictionaryContainerElement`, `OmitSequenceContainerElement` or `OmitStru
 
 If `OmitElementIfEmpty` is set then if a property is empty, it will not be serialized.
 
-### Querying the Log Property XML
+##### Querying the properties XML
 
 Extracting and querying the properties data directly can be helpful when looking for specific log sequences.
 
