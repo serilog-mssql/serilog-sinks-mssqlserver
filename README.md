@@ -103,6 +103,8 @@ However, if the data is to stay in SQL Server, then the additional properties ma
 
 The log event JSON can be stored to the LogEvent column. This can be enabled with the `columnOptions.Store` parameter.
 
+Use the `columnOptions.LogEvent.ExcludeAdditionalProperties` parameter to exclude redundant properties from the JSON. This is analogue to excluding redundant items from XML in the Properties column.
+
 ### Options for serialization of the Properties column
 
 The serialization of the properties column can be controlled by setting values in the in the `columnOptions.Properties` parameter.
