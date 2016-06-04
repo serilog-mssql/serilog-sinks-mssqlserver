@@ -49,6 +49,7 @@ If you are configuring Serilog with the `ReadFrom.AppSettings()` XML configurati
 <add key="serilog:using:MSSqlSever" value="Serilog.Sinks.MSSqlServer" />
 <add key="serilog:write-to:MSSqlServer.connectionString" value="Server=..."/>
 <add key="serilog:write-to:MSSqlServer.tableName" value="Logs"/>
+<add key="serilog:write-to:MSSqlServer.autoCreateSqlTable" value="true"/>
 ```
 
 To use a connection string from the `<connectionStrings>` element, specify its _name_ as the value of the connection string property.
