@@ -357,6 +357,12 @@ namespace Serilog.Sinks.MSSqlServer
 
         private string LogEventToJson(LogEvent logEvent)
         {
+            if (_columnOptions.LogEvent.ExcludeAdditionalProperties)
+            {
+                var filteredProperties = logEvent.Properties.Where(p => !_additionalDataColumnNames.Contains(p.Key));
+                logEvent = new LogEvent(logEvent.Timestamp, logEvent.Level, logEvent.Exception, logEvent.MessageTemplate, filteredProperties.Select(x => new LogEventProperty(x.Key, x.Value)));
+            }
+
             var sb = new StringBuilder();
             using (var writer = new System.IO.StringWriter(sb))
                 _jsonFormatter.Format(logEvent, writer);
