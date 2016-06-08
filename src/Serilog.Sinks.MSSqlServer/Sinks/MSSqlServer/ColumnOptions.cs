@@ -32,6 +32,8 @@ namespace Serilog.Sinks.MSSqlServer
             };
 
             TimeStamp = new TimeStampColumnOptions();
+
+            LogEvent = new LogEventColumnOptions();
         }
 
         /// <summary>
@@ -76,6 +78,11 @@ namespace Serilog.Sinks.MSSqlServer
         ///     Options for the TimeStamp column.
         /// </summary>
         public TimeStampColumnOptions TimeStamp { get; private set; }
+
+        /// <summary>
+        ///     Options for the LogEvent column.
+        /// </summary>
+        public LogEventColumnOptions LogEvent { get; private set; }
 
         /// <summary>
         ///     Options for the Level column.
@@ -177,6 +184,17 @@ namespace Serilog.Sinks.MSSqlServer
             ///     If true, the time is converted to universal time.
             /// </summary>
             public bool ConvertToUtc { get; set; }
+        }
+
+        /// <summary>
+        ///     Options for the LogEvent column.
+        /// </summary>
+        public class LogEventColumnOptions
+        {
+            /// <summary>
+            ///     Exclude properties from the LogEvent column if they are being saved to additional columns.
+            /// </summary>
+            public bool ExcludeAdditionalProperties { get; set; }
         }
     }
 }

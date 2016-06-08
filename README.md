@@ -148,7 +148,7 @@ Columns can be defined with the name and data type of the column in SQL Server. 
 
 #### JSON (LogEvent column)
 
-The log event JSON can be stored to the LogEvent column. This can be enabled by adding the LogEvent column to the `columnOptions.Store` collection.
+The log event JSON can be stored to the LogEvent column. This can be enabled by adding the LogEvent column to the `columnOptions.Store` collection. Use the `columnOptions.LogEvent.ExcludeAdditionalProperties` parameter to exclude redundant properties from the JSON. This is analogue to excluding redundant items from XML in the Properties column.
 
 #### XML (Properties column)
 
