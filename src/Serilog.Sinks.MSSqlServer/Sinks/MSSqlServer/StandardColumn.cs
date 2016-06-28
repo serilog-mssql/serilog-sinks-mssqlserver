@@ -31,7 +31,7 @@
         Exception,
 
         /// <summary>
-        /// Properties associated with the event, including those presented in MessageTemplate/>.
+        /// Properties associated with the event, including those presented in <see cref="MessageTemplate"/>.
         /// </summary>
         Properties,
 
