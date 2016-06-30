@@ -1,5 +1,6 @@
 ﻿using System;
 using Serilog.Configuration;
+using Serilog.Core;
 using Serilog.Debugging;
 using Serilog.Events;
 using Serilog.Sinks.MSSqlServer;
@@ -38,6 +39,7 @@ namespace Serilog
         /// <param name="batchPostingLimit">The maximum number of events to post in a single batch.</param>
         /// <param name="period">The time to wait between checking for event batches.</param>
         /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
+        /// <param name="levelSwitch">A switch allowing the pass-through minimum level to be changed at runtime.</param>
         /// <param name="autoCreateSqlTable">Create log table with the provided name on destination sql server.</param>
         /// <param name="columnOptions"></param>
         /// <returns>Logger configuration, allowing configuration to continue.</returns>
@@ -50,6 +52,7 @@ namespace Serilog
             int batchPostingLimit = MSSqlServerSink.DefaultBatchPostingLimit,
             TimeSpan? period = null,
             IFormatProvider formatProvider = null,
+            LoggingLevelSwitch levelSwitch = null,
             bool autoCreateSqlTable = false,
             ColumnOptions columnOptions = null
             )
@@ -77,7 +80,8 @@ namespace Serilog
                     autoCreateSqlTable,
                     columnOptions
                     ),
-                restrictedToMinimumLevel);
+                restrictedToMinimumLevel,
+                levelSwitch);
         }
     }
 }
