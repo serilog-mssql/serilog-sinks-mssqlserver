@@ -10,7 +10,7 @@ namespace Serilog.Sinks.MSSqlServer
     /// </summary>
     public class ColumnOptions
     {
-        private ICollection<StandardColumn> _store;
+        ICollection<StandardColumn> _store;
 
         /// <summary>
         ///     Default constructor.
@@ -167,7 +167,6 @@ namespace Serilog.Sinks.MSSqlServer
             ///     The name to use for a structure element.
             /// </summary>
             public string StructureElementName { get; set; }
-
 
             /// <summary>
             ///     If true, will use the property key as the element name.

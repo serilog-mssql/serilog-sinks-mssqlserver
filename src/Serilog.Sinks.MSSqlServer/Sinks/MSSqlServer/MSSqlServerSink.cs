@@ -1,4 +1,4 @@
-﻿// Copyright 2013 Serilog Contributors 
+﻿// Copyright 2016 Serilog Contributors
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -49,12 +49,11 @@ namespace Serilog.Sinks.MSSqlServer
         readonly IFormatProvider _formatProvider;
         readonly string _tableName;
         readonly CancellationTokenSource _token = new CancellationTokenSource();
-        private readonly ColumnOptions _columnOptions;
+        readonly ColumnOptions _columnOptions;
 
-        private readonly HashSet<string> _additionalDataColumnNames;
+        readonly HashSet<string> _additionalDataColumnNames;
 
-        private readonly JsonFormatter _jsonFormatter;
-
+        readonly JsonFormatter _jsonFormatter;
 
         /// <summary>
         ///     Construct a sink posting to the specified database.
@@ -78,10 +77,10 @@ namespace Serilog.Sinks.MSSqlServer
             : base(batchPostingLimit, period)
         {
             if (string.IsNullOrWhiteSpace(connectionString))
-                throw new ArgumentNullException("connectionString");
+                throw new ArgumentNullException(nameof(connectionString));
 
             if (string.IsNullOrWhiteSpace(tableName))
-                throw new ArgumentNullException("tableName");
+                throw new ArgumentNullException(nameof(tableName));
 
             _connectionString = connectionString;
             _tableName = tableName;
@@ -100,7 +99,7 @@ namespace Serilog.Sinks.MSSqlServer
             {
                 try
                 {
-                    SqlTableCreator tableCreator = new SqlTableCreator(connectionString);
+                    var tableCreator = new SqlTableCreator(connectionString);
                     tableCreator.CreateTable(_eventsTable);
                 }
                 catch (Exception ex)
@@ -185,7 +184,7 @@ namespace Serilog.Sinks.MSSqlServer
                 {
                     DataType = typeof (string),
                     MaxLength = -1,
-                    ColumnName = "MessageTemplate",
+                    ColumnName = "MessageTemplate"
 
                 };
                 eventsTable.Columns.Add(messageTemplate);
@@ -239,7 +238,7 @@ namespace Serilog.Sinks.MSSqlServer
                 {
                     DataType = typeof (string),
                     MaxLength = -1,
-                    ColumnName = "Properties",
+                    ColumnName = "Properties"
                 };
                 eventsTable.Columns.Add(props);
             }
@@ -317,7 +316,7 @@ namespace Serilog.Sinks.MSSqlServer
             _eventsTable.AcceptChanges();
         }
 
-        private string ConvertPropertiesToXmlStructure(IEnumerable<KeyValuePair<string, LogEventPropertyValue>> properties)
+        string ConvertPropertiesToXmlStructure(IEnumerable<KeyValuePair<string, LogEventPropertyValue>> properties)
         {
             var options = _columnOptions.Properties;
 
@@ -355,7 +354,7 @@ namespace Serilog.Sinks.MSSqlServer
             return sb.ToString();
         }
 
-        private string LogEventToJson(LogEvent logEvent)
+        string LogEventToJson(LogEvent logEvent)
         {
             if (_columnOptions.LogEvent.ExcludeAdditionalProperties)
             {
@@ -375,7 +374,7 @@ namespace Serilog.Sinks.MSSqlServer
         /// </summary>
         /// <param name="row"></param>
         /// <param name="properties"></param>
-        private void ConvertPropertiesToColumn(DataRow row, IReadOnlyDictionary<string, LogEventPropertyValue> properties)
+        void ConvertPropertiesToColumn(DataRow row, IReadOnlyDictionary<string, LogEventPropertyValue> properties)
         {
             foreach (var property in properties)
             {
@@ -416,7 +415,7 @@ namespace Serilog.Sinks.MSSqlServer
         /// <param name="obj">object</param>
         /// <param name="type">type to convert to</param>
         /// <param name="conversion">result of the converted value</param>        
-        private static bool TryChangeType(object obj, Type type, out object conversion)
+        static bool TryChangeType(object obj, Type type, out object conversion)
         {
             conversion = null;
             try

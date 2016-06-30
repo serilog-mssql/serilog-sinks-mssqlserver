@@ -1,9 +1,16 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.24720.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Serilog.Sinks.MSSqlServer", "src\Serilog.Sinks.MSSqlServer\Serilog.Sinks.MSSqlServer.csproj", "{31C64BE9-4EF6-42D5-A811-D7D24613EEF6}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{9888A767-8F33-40FC-9081-8B0D2D94065A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{CA516792-EFEE-48FE-9C93-91A26F9730A3}"
+	ProjectSection(SolutionItems) = preProject
+		global.json = global.json
+	EndProjectSection
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Serilog.Sinks.MSSqlServer", "src\Serilog.Sinks.MSSqlServer\Serilog.Sinks.MSSqlServer.xproj", "{31C64BE9-4EF6-42D5-A811-D7D24613EEF6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -18,5 +25,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{31C64BE9-4EF6-42D5-A811-D7D24613EEF6} = {9888A767-8F33-40FC-9081-8B0D2D94065A}
 	EndGlobalSection
 EndGlobal
