@@ -86,7 +86,12 @@
       "Serilog >= 2.0.0",
       "Serilog.Sinks.PeriodicBatching >= 2.0.0"
     ],
-    ".NETFramework,Version=v4.5": []
+    ".NETFramework,Version=v4.5": [
+      "System.Configuration",
+      "System.Data",
+      "System.Xml",
+      "System.Xml.Linq"
+    ]
   },
   "tools": {},
   "projectFileToolGroups": {}
