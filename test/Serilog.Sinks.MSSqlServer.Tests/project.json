@@ -1,0 +1,19 @@
+{
+  "testRunner": "xunit",
+
+  "dependencies": {
+    "Serilog.Sinks.MSSqlServer": { "target": "project" },
+    "xunit": "2.1.0",
+    "dotnet-test-xunit": "1.0.0-rc2-build10025"
+  },
+
+  "buildOptions": {
+    "keyFile": "../../assets/Serilog.snk"
+  },
+  "frameworks": {
+    "net4.5.2": {}
+  },
+  "runtimes": {
+    "win": {}
+  }
+}
