@@ -1,33 +1,40 @@
-{
-  "version": "4.0.0-rc-*",
-  "description": "A Serilog sink that writes events to Microsoft SQL Server.",
-  "authors": [ "Serilog Contributors" ],
-
+﻿{
+  "version": "4.0.0-*",
+  "description": "A Serilog sink that writes events to Microsoft SQL Server",
+  "authors": [
+    "Michiel van Oudheusden",
+    "Serilog Contributors"
+  ],
+  "packOptions": {
+    "projectUrl": "https://github/serilog/serilog-sinks-mssqlserver",
+    "licenseUrl": "http://www.apache.org/licenses/LICENSE-2.0",
+    "iconUrl": "http://serilog.net/images/serilog-sink-nuget.png",
+    "tags": [
+      "serilog",
+      "sinks",
+      "mssqlserver"
+    ]
+  },
   "dependencies": {
-    "Microsoft.Extensions.Configuration": "1.0.0",
     "Serilog": "2.0.0",
     "Serilog.Sinks.PeriodicBatching": "2.0.0"
   },
-
+  "buildOptions": {
+    "keyFile": "../../assets/Serilog.snk",
+    "xmlDoc": true,
+    "warningsAsErrors": true
+  },
   "frameworks": {
-    "net452": {
+    "net4.5": {
       "frameworkAssemblies": {
-        "System.Data": "4.0.0.0",
-        "System.Xml": "4.0.0.0",
-        "System.Xml.Linq": "4.0.0.0",
-        "System.Xml.XDocument": "4.0.0.0"
+        "System.Data": "",
+        "System.Xml": "",
+        "System.Xml.Linq": "",
+        "System.Configuration": ""
       }
     }
   },
-
-  "buildOptions": {
-    "keyFile": "../../assets/Serilog.snk"
-  },
-
-  "packOptions": {
-    "iconUrl": "http://serilog.net/images/serilog-sink-nuget.png",
-    "licenseUrl": "http://www.apache.org/licenses/LICENSE-2.0",
-    "projectUrl": "http://serilog.net",
-    "tags": [ "serilog", "sinks", "mssqlserver" ]
+  "runtimes": {
+    "win": {}
   }
 }

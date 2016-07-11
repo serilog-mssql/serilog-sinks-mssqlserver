@@ -3,14 +3,22 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{9888A767-8F33-40FC-9081-8B0D2D94065A}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{04226074-C72F-42BC-AB02-4D70A7BAE7E1}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{CA516792-EFEE-48FE-9C93-91A26F9730A3}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Serilog.Sinks.MSSqlServer", "src\Serilog.Sinks.MSSqlServer\Serilog.Sinks.MSSqlServer.xproj", "{803CD13A-D54B-4CEC-A55F-E22AE3D93B3C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{F02D6513-6F45-452E-85A0-41A872A2C1F8}"
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Serilog.Sinks.MSSqlServer.Tests", "test\Serilog.Sinks.MSSqlServer.Tests\Serilog.Sinks.MSSqlServer.Tests.xproj", "{3C2D8E01-5580-426A-BDD9-EC59CD98E618}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{70667ADA-A2FD-4821-A6A1-8D18D0D71507}"
 	ProjectSection(SolutionItems) = preProject
+		appveyor.yml = appveyor.yml
+		Build.ps1 = Build.ps1
+		CHANGES.md = CHANGES.md
 		global.json = global.json
+		README.md = README.md
 	EndProjectSection
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Serilog.Sinks.MSSqlServer", "src\Serilog.Sinks.MSSqlServer\Serilog.Sinks.MSSqlServer.xproj", "{31C64BE9-4EF6-42D5-A811-D7D24613EEF6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -18,15 +26,20 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{31C64BE9-4EF6-42D5-A811-D7D24613EEF6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{31C64BE9-4EF6-42D5-A811-D7D24613EEF6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{31C64BE9-4EF6-42D5-A811-D7D24613EEF6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{31C64BE9-4EF6-42D5-A811-D7D24613EEF6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{803CD13A-D54B-4CEC-A55F-E22AE3D93B3C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{803CD13A-D54B-4CEC-A55F-E22AE3D93B3C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{803CD13A-D54B-4CEC-A55F-E22AE3D93B3C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{803CD13A-D54B-4CEC-A55F-E22AE3D93B3C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3C2D8E01-5580-426A-BDD9-EC59CD98E618}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3C2D8E01-5580-426A-BDD9-EC59CD98E618}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3C2D8E01-5580-426A-BDD9-EC59CD98E618}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3C2D8E01-5580-426A-BDD9-EC59CD98E618}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{31C64BE9-4EF6-42D5-A811-D7D24613EEF6} = {9888A767-8F33-40FC-9081-8B0D2D94065A}
+		{803CD13A-D54B-4CEC-A55F-E22AE3D93B3C} = {04226074-C72F-42BC-AB02-4D70A7BAE7E1}
+		{3C2D8E01-5580-426A-BDD9-EC59CD98E618} = {F02D6513-6F45-452E-85A0-41A872A2C1F8}
 	EndGlobalSection
 EndGlobal

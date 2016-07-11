@@ -6,10 +6,11 @@
   </PropertyGroup>
   <Import Project="$(VSToolsPath)\DotNet\Microsoft.DotNet.Props" Condition="'$(VSToolsPath)' != ''" />
   <PropertyGroup Label="Globals">
-    <ProjectGuid>803cd13a-d54b-4cec-a55f-e22ae3d93b3c</ProjectGuid>
-    <RootNamespace>Serilog</RootNamespace>
+    <ProjectGuid>3c2d8e01-5580-426a-bdd9-ec59cd98e618</ProjectGuid>
+    <RootNamespace>Serilog.Sinks.MSSqlServer.Tests</RootNamespace>
     <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)'=='' ">.\obj</BaseIntermediateOutputPath>
-    <OutputPath Condition="'$(OutputPath)'=='' ">.\bin\</OutputPath>  </PropertyGroup>
+    <OutputPath Condition="'$(OutputPath)'=='' ">.\bin\</OutputPath>
+  </PropertyGroup>
   <PropertyGroup>
     <SchemaVersion>2.0</SchemaVersion>
   </PropertyGroup>
