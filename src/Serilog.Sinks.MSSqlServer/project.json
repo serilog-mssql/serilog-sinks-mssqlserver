@@ -6,7 +6,7 @@
     "Serilog Contributors"
   ],
   "packOptions": {
-    "projectUrl": "https://github/serilog/serilog-sinks-mssqlserver",
+    "projectUrl": "https://github.com/serilog/serilog-sinks-mssqlserver",
     "licenseUrl": "http://www.apache.org/licenses/LICENSE-2.0",
     "iconUrl": "http://serilog.net/images/serilog-sink-nuget.png",
     "tags": [
