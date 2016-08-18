@@ -27,7 +27,7 @@ namespace Serilog.Sinks.MSSqlServer
                 { StandardColumn.Level, StandardColumn.Level.ToString()},
                 { StandardColumn.TimeStamp, StandardColumn.TimeStamp.ToString()},
                 { StandardColumn.Exception,StandardColumn.Exception.ToString()},
-                { StandardColumn.Properties, StandardColumn.Exception.ToString()}
+                { StandardColumn.Properties, StandardColumn.Properties.ToString()}
             };
 
             TimeStamp = new TimeStampColumnOptions();
