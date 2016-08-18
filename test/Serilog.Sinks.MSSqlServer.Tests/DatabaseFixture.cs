@@ -51,7 +51,7 @@ DROP DATABASE [{Database}]
                 conn.Open();
                 var databases = conn.Query("select name from sys.databases");
 
-                //if (databases.Any(d => d.name == Database)) conn.Execute(DropLogEventsDatabase);
+                if (databases.Any(d => d.name == Database)) conn.Execute(DropLogEventsDatabase);
             }
         }
 

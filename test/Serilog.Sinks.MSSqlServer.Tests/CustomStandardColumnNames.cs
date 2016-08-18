@@ -39,7 +39,6 @@ namespace Serilog.Sinks.MSSqlServer.Tests
 
                 foreach (var column in options.Store.Values)
                 {
-                    Console.WriteLine($"Testing {column}");
                     infoSchemata.Should().Contain(columns => columns.ColumnName == column);
                 }
             }
