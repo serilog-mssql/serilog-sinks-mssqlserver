@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Data;
 
 namespace Serilog.Sinks.MSSqlServer
@@ -10,7 +9,7 @@ namespace Serilog.Sinks.MSSqlServer
     /// </summary>
     public class ColumnOptions
     {
-        private ICollection<StandardColumn> _store;
+        private IDictionary<StandardColumn, string> _store;
 
         /// <summary>
         ///     Default constructor.
@@ -21,14 +20,14 @@ namespace Serilog.Sinks.MSSqlServer
 
             Properties = new PropertiesColumnOptions();
 
-            Store = new Collection<StandardColumn>
+            Store = new Dictionary<StandardColumn, string>
             {
-                StandardColumn.Message,
-                StandardColumn.MessageTemplate,
-                StandardColumn.Level,
-                StandardColumn.TimeStamp,
-                StandardColumn.Exception,
-                StandardColumn.Properties
+                { StandardColumn.Message, StandardColumn.Message.ToString()},
+                { StandardColumn.MessageTemplate, StandardColumn.MessageTemplate.ToString()},
+                { StandardColumn.Level, StandardColumn.Level.ToString()},
+                { StandardColumn.TimeStamp, StandardColumn.TimeStamp.ToString()},
+                { StandardColumn.Exception,StandardColumn.Exception.ToString()},
+                { StandardColumn.Properties, StandardColumn.Exception.ToString()}
             };
 
             TimeStamp = new TimeStampColumnOptions();
@@ -39,17 +38,17 @@ namespace Serilog.Sinks.MSSqlServer
         /// <summary>
         ///     A list of columns that will be stored in the logs table in the database.
         /// </summary>
-        public ICollection<StandardColumn> Store
+        public IDictionary<StandardColumn, string> Store
         {
             get { return _store; }
             set
             {
                 if (value == null)
                 {
-                    _store = new Collection<StandardColumn>();
+                    _store = new Dictionary<StandardColumn, string>();
                     foreach (StandardColumn column in Enum.GetValues(typeof (StandardColumn)))
                     {
-                        _store.Add(column);
+                        _store.Add(column, column.ToString());
                     }
                 }
                 else
