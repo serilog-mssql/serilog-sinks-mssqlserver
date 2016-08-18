@@ -163,7 +163,7 @@ namespace Serilog.Sinks.MSSqlServer
             var id = new DataColumn
             {
                 DataType = Type.GetType("System.Int32"),
-                ColumnName = "Id",
+                ColumnName = !string.IsNullOrWhiteSpace(_columnOptions.Id.ColumnName) ? _columnOptions.Id.ColumnName : "Id",
                 AutoIncrement = true
             };
             eventsTable.Columns.Add(id);
