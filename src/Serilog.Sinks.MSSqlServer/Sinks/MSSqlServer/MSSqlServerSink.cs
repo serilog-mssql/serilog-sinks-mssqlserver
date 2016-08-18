@@ -184,7 +184,7 @@ namespace Serilog.Sinks.MSSqlServer
                         eventsTable.Columns.Add(new DataColumn
                         {
                             DataType = Type.GetType("System.DateTime"),
-                            ColumnName = "TimeStamp",
+                            ColumnName = standardColumn.Value,
                             AllowDBNull = false
                         });
                         break;
@@ -192,7 +192,7 @@ namespace Serilog.Sinks.MSSqlServer
                         eventsTable.Columns.Add(new DataColumn
                         {
                             DataType = Type.GetType("System.String"),
-                            ColumnName = "LogEvent"
+                            ColumnName = standardColumn.Value
                         });
                         break;
                     default:
