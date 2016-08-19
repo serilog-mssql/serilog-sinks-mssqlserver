@@ -11,6 +11,50 @@ namespace Serilog.Sinks.MSSqlServer.Tests
     public class CustomStandardColumnNames : IClassFixture<DatabaseFixture>
     {
         [Fact]
+        public void CustomIdColumn()
+        {
+            // arrange
+            var options = new ColumnOptions();
+            var customIdName = "CustomIdName";
+            options.Id.ColumnName = customIdName;
+
+            // act
+            var logTableName = $"{DatabaseFixture.LogTableName}CustomId";
+            var sink = new MSSqlServerSink(DatabaseFixture.LogEventsConnectionString, logTableName, 1, TimeSpan.FromSeconds(1), null, true, options);
+
+            // assert
+            using (var conn = new SqlConnection(DatabaseFixture.MasterConnectionString))
+            {
+                conn.Execute($"use {DatabaseFixture.Database}");
+                var logEvents = conn.Query<InfoSchema>($@"SELECT COLUMN_NAME AS ColumnName FROM {DatabaseFixture.Database}.INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{logTableName}'");
+                var infoSchema = logEvents as InfoSchema[] ?? logEvents.ToArray();
+
+                infoSchema.Should().Contain(columns => columns.ColumnName == customIdName);
+            }
+        }
+
+        [Fact]
+        public void DefaultIdColumn()
+        {
+            // arrange
+            var options = new ColumnOptions();
+
+            // act
+            var logTableName = $"{DatabaseFixture.LogTableName}DefaultId";
+            var sink = new MSSqlServerSink(DatabaseFixture.LogEventsConnectionString, logTableName, 1, TimeSpan.FromSeconds(1), null, true, options);
+
+            // assert
+            using (var conn = new SqlConnection(DatabaseFixture.MasterConnectionString))
+            {
+                conn.Execute($"use {DatabaseFixture.Database}");
+                var logEvents = conn.Query<InfoSchema>($@"SELECT COLUMN_NAME AS ColumnName FROM {DatabaseFixture.Database}.INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{logTableName}'");
+                var infoSchema = logEvents as InfoSchema[] ?? logEvents.ToArray();
+
+                infoSchema.Should().Contain(columns => columns.ColumnName == "Id");
+            }
+        }
+
+        [Fact]
         public void TableCreatedWithCustomNames()
         {
             // arrange
@@ -38,6 +82,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 {
                     infoSchema.Should().Contain(columns => columns.ColumnName == column);
                 }
+
+                infoSchema.Should().Contain(columns => columns.ColumnName == "Id");
             }
         }
 
@@ -49,8 +95,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             var standardNames = new List<string> { "Message", "MessageTemplate", "Level", "TimeStamp", "Exception", "Properties" };
 
             // act
-            var logTableName = $"{DatabaseFixture.LogTableName}Standard";
-            System.Diagnostics.Debugger.Launch();
+            var logTableName = $"{DatabaseFixture.LogTableName}DefaultStandard";
             var sink = new MSSqlServerSink(DatabaseFixture.LogEventsConnectionString, logTableName, 1, TimeSpan.FromSeconds(1), null, true, options);
 
             // assert
