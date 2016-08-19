@@ -16,6 +16,8 @@ namespace Serilog.Sinks.MSSqlServer
         /// </summary>
         public ColumnOptions()
         {
+            Id = new IdColumnOptions();
+
             Level = new LevelColumnOptions();
 
             Properties = new PropertiesColumnOptions();
@@ -64,6 +66,11 @@ namespace Serilog.Sinks.MSSqlServer
         public ICollection<DataColumn> AdditionalDataColumns { get; set; }
 
         /// <summary>
+        ///     Options for the Id column.
+        /// </summary>
+        public IdColumnOptions Id { get; private set; }
+
+        /// <summary>
         ///     Options for the Level column.
         /// </summary>
         public LevelColumnOptions Level { get; private set; }
@@ -82,6 +89,17 @@ namespace Serilog.Sinks.MSSqlServer
         ///     Options for the LogEvent column.
         /// </summary>
         public LogEventColumnOptions LogEvent { get; private set; }
+
+        /// <summary>
+        ///     Options for the Id column.
+        /// </summary>
+        public class IdColumnOptions
+        {
+            /// <summary>
+            ///     The name of the Id column. "Id" is used if not set.
+            /// </summary>
+            public string ColumnName { get; set; }
+        }
 
         /// <summary>
         ///     Options for the Level column.
