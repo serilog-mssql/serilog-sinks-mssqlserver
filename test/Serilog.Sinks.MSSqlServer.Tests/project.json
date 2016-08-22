@@ -8,7 +8,6 @@
     "FluentAssertions": "4.13.0",
     "Dapper.StrongName": "1.50.2"
   },
-
   "buildOptions": {
     "keyFile": "../../assets/Serilog.snk"
   },
