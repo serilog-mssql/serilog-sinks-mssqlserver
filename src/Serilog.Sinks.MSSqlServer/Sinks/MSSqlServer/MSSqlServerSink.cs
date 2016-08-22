@@ -436,12 +436,12 @@ namespace Serilog.Sinks.MSSqlServer
         /// <param name="disposing"></param>
         protected override void Dispose(bool disposing)
         {
-            _token.Cancel();
-
             if (_eventsTable != null)
                 _eventsTable.Dispose();
 
             base.Dispose(disposing);
+
+            _token.Cancel();
         }
     }
 }
