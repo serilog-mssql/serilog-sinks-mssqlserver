@@ -362,7 +362,7 @@
           "lib/net35/xunit.runner.utility.desktop.dll": {}
         }
       },
-      "Serilog.Sinks.MSSqlServer/4.0.0": {
+      "Serilog.Sinks.MSSqlServer/4.1.0": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.5",
         "dependencies": {
@@ -708,7 +708,7 @@
           "lib/net35/xunit.runner.utility.desktop.dll": {}
         }
       },
-      "Serilog.Sinks.MSSqlServer/4.0.0": {
+      "Serilog.Sinks.MSSqlServer/4.1.0": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.5",
         "dependencies": {
@@ -1166,7 +1166,7 @@
         "xunit.runner.utility.nuspec"
       ]
     },
-    "Serilog.Sinks.MSSqlServer/4.0.0": {
+    "Serilog.Sinks.MSSqlServer/4.1.0": {
       "type": "project",
       "path": "../../src/Serilog.Sinks.MSSqlServer/project.json",
       "msbuildProject": "../../src/Serilog.Sinks.MSSqlServer/Serilog.Sinks.MSSqlServer.xproj"
