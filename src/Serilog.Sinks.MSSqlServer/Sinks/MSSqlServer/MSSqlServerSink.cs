@@ -48,7 +48,6 @@ namespace Serilog.Sinks.MSSqlServer
         readonly DataTable _eventsTable;
         readonly IFormatProvider _formatProvider;
         readonly string _tableName;
-        readonly CancellationTokenSource _token = new CancellationTokenSource();
         private readonly ColumnOptions _columnOptions;
 
         private readonly HashSet<string> _additionalDataColumnNames;
@@ -129,7 +128,7 @@ namespace Serilog.Sinks.MSSqlServer
             {
                 using (var cn = new SqlConnection(_connectionString))
                 {
-                    await cn.OpenAsync(_token.Token).ConfigureAwait(false);
+                    await cn.OpenAsync().ConfigureAwait(false);
                     using (var copy = new SqlBulkCopy(cn))
                     {
                         copy.DestinationTableName = _tableName;
@@ -140,9 +139,8 @@ namespace Serilog.Sinks.MSSqlServer
                             copy.ColumnMappings.Add(mapping);
                         }
 
-                        await copy.WriteToServerAsync(_eventsTable, _token.Token).ConfigureAwait(false);
+                        await copy.WriteToServerAsync(_eventsTable).ConfigureAwait(false);
                     }
-
                 }
             }
             catch (Exception ex)
@@ -393,8 +391,6 @@ namespace Serilog.Sinks.MSSqlServer
                 _eventsTable.Dispose();
 
             base.Dispose(disposing);
-
-            _token.Cancel();
         }
     }
 }
