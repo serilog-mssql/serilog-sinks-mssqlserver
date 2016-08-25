@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Data;
 
 namespace Serilog.Sinks.MSSqlServer
@@ -9,7 +10,7 @@ namespace Serilog.Sinks.MSSqlServer
     /// </summary>
     public class ColumnOptions
     {
-        private IDictionary<StandardColumn, string> _store;
+        ICollection<StandardColumn> _store;
 
         /// <summary>
         ///     Default constructor.
@@ -22,35 +23,37 @@ namespace Serilog.Sinks.MSSqlServer
 
             Properties = new PropertiesColumnOptions();
 
-            Store = new Dictionary<StandardColumn, string>
+            Store = new Collection<StandardColumn>
             {
-                { StandardColumn.Message, StandardColumn.Message.ToString()},
-                { StandardColumn.MessageTemplate, StandardColumn.MessageTemplate.ToString()},
-                { StandardColumn.Level, StandardColumn.Level.ToString()},
-                { StandardColumn.TimeStamp, StandardColumn.TimeStamp.ToString()},
-                { StandardColumn.Exception,StandardColumn.Exception.ToString()},
-                { StandardColumn.Properties, StandardColumn.Properties.ToString()}
+                StandardColumn.Message,
+                StandardColumn.MessageTemplate,
+                StandardColumn.Level,
+                StandardColumn.TimeStamp,
+                StandardColumn.Exception,
+                StandardColumn.Properties
             };
 
+            Message = new MessageColumnOptions();
+            MessageTemplate = new MessageTemplateColumnOptions();
             TimeStamp = new TimeStampColumnOptions();
-
+            Exception = new ExceptionColumnOptions();
             LogEvent = new LogEventColumnOptions();
         }
 
         /// <summary>
         ///     A list of columns that will be stored in the logs table in the database.
         /// </summary>
-        public IDictionary<StandardColumn, string> Store
+        public ICollection<StandardColumn> Store
         {
             get { return _store; }
             set
             {
                 if (value == null)
                 {
-                    _store = new Dictionary<StandardColumn, string>();
-                    foreach (StandardColumn column in Enum.GetValues(typeof (StandardColumn)))
+                    _store = new Collection<StandardColumn>();
+                    foreach (StandardColumn column in Enum.GetValues(typeof(StandardColumn)))
                     {
-                        _store.Add(column, column.ToString());
+                        _store.Add(column);
                     }
                 }
                 else
@@ -65,10 +68,19 @@ namespace Serilog.Sinks.MSSqlServer
         /// </summary>
         public ICollection<DataColumn> AdditionalDataColumns { get; set; }
 
-        /// <summary>
-        ///     Options for the Id column.
+        /// Options for the Exception column.
         /// </summary>
-        public IdColumnOptions Id { get; private set; }
+        public ExceptionColumnOptions Exception { get; set; }
+
+        /// <summary>
+        /// Options for the MessageTemplate column.
+        /// </summary>
+        public MessageTemplateColumnOptions MessageTemplate { get; set; }
+
+        /// <summary>
+        /// Options for the Message column.
+        /// </summary>
+        public MessageColumnOptions Message { get; set; }
 
         /// <summary>
         ///     Options for the Level column.
@@ -104,7 +116,7 @@ namespace Serilog.Sinks.MSSqlServer
         /// <summary>
         ///     Options for the Level column.
         /// </summary>
-        public class LevelColumnOptions
+        public class LevelColumnOptions : CommonColumnOptions
         {
             /// <summary>
             ///     If true will store Level as an enum in a tinyint column as opposed to a string.
@@ -115,7 +127,7 @@ namespace Serilog.Sinks.MSSqlServer
         /// <summary>
         ///     Options for the Properties column.
         /// </summary>
-        public class PropertiesColumnOptions
+        public class PropertiesColumnOptions : CommonColumnOptions
         {
             /// <summary>
             ///     Default constructor.
@@ -193,9 +205,20 @@ namespace Serilog.Sinks.MSSqlServer
         }
 
         /// <summary>
+        /// Shared column customization options.
+        /// </summary>
+        public class CommonColumnOptions
+        {
+            /// <summary>
+            /// The name of the column in the database.
+            /// </summary>
+            public string ColumnName { get; set; }
+        }
+
+        /// <summary>
         ///     Options for the TimeStamp column.
         /// </summary>
-        public class TimeStampColumnOptions
+        public class TimeStampColumnOptions : CommonColumnOptions
         {
             /// <summary>
             ///     If true, the time is converted to universal time.
@@ -206,12 +229,27 @@ namespace Serilog.Sinks.MSSqlServer
         /// <summary>
         ///     Options for the LogEvent column.
         /// </summary>
-        public class LogEventColumnOptions
+        public class LogEventColumnOptions : CommonColumnOptions
         {
             /// <summary>
             ///     Exclude properties from the LogEvent column if they are being saved to additional columns.
             /// </summary>
             public bool ExcludeAdditionalProperties { get; set; }
         }
+
+        /// <summary>
+        /// Options for the message column
+        /// </summary>
+        public class MessageColumnOptions : CommonColumnOptions {}
+
+        /// <summary>
+        /// Options for the Exception column.
+        /// </summary>
+        public class ExceptionColumnOptions : CommonColumnOptions {}
+
+        /// <summary>
+        /// Options for the MessageTemplate column.
+        /// </summary>
+        public class MessageTemplateColumnOptions : CommonColumnOptions {}
     }
 }
