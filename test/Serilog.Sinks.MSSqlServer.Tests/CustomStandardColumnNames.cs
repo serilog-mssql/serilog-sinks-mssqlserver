@@ -65,11 +65,12 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             var options = new ColumnOptions();
             var standardNames = new List<string> { "CustomMessage", "CustomMessageTemplate", "CustomLevel", "CustomTimeStamp", "CustomException", "CustomProperties" };
 
-            options.Store.ToList().ForEach(c =>
-            {
-                options.Store.Remove(c.Key);
-                options.Store.Add(c.Key, $"Custom{c.Key.ToString()}");
-            });
+            options.Message.ColumnName = "CustomMessage";
+            options.MessageTemplate.ColumnName = "CustomMessageTemplate";
+            options.Level.ColumnName = "CustomLevel";
+            options.TimeStamp.ColumnName = "CustomTimeStamp";
+            options.Exception.ColumnName = "CustomException";
+            options.Properties.ColumnName = "CustomProperties";
 
             // act
             var logTableName = $"{DatabaseFixture.LogTableName}Custom";
