@@ -166,90 +166,66 @@ namespace Serilog.Sinks.MSSqlServer
             };
             eventsTable.Columns.Add(id);
 
-            if (_columnOptions.Store.Contains(StandardColumn.Message))
+            foreach (var standardColumn in _columnOptions.Store)
             {
-                var message = new DataColumn
+                switch (standardColumn)
                 {
-                    DataType = typeof (string),
-                    MaxLength = -1,
-                    ColumnName = "Message"
-                };
-                eventsTable.Columns.Add(message);
-            }
-
-            if (_columnOptions.Store.Contains(StandardColumn.MessageTemplate))
-            {
-                var messageTemplate = new DataColumn
-                {
-                    DataType = typeof (string),
-                    MaxLength = -1,
-                    ColumnName = "MessageTemplate",
-
-                };
-                eventsTable.Columns.Add(messageTemplate);
-            }
-
-            if (_columnOptions.Store.Contains(StandardColumn.Level))
-            {
-                var level = new DataColumn
-                {
-                    ColumnName = "Level"
-                };
-
-                if (_columnOptions.Level.StoreAsEnum)
-                {
-                    level.DataType = typeof (byte);
+                    case StandardColumn.Level:
+                        eventsTable.Columns.Add(new DataColumn
+                        {
+                            DataType = _columnOptions.Level.StoreAsEnum ? typeof(byte) : typeof(string),
+                            MaxLength = _columnOptions.Level.StoreAsEnum ? 0 : 128,
+                            ColumnName = _columnOptions.Level.ColumnName ?? StandardColumn.Level.ToString()
+                        });
+                        break;
+                    case StandardColumn.TimeStamp:
+                        eventsTable.Columns.Add(new DataColumn
+                        {
+                            DataType = typeof(DateTime),
+                            ColumnName = _columnOptions.TimeStamp.ColumnName ?? StandardColumn.TimeStamp.ToString(),
+                            AllowDBNull = false
+                        });
+                        break;
+                    case StandardColumn.LogEvent:
+                        eventsTable.Columns.Add(new DataColumn
+                        {
+                            DataType = typeof(string),
+                            ColumnName = _columnOptions.LogEvent.ColumnName ?? StandardColumn.LogEvent.ToString()
+                        });
+                        break;
+                    case StandardColumn.Message:
+                        eventsTable.Columns.Add(new DataColumn
+                        {
+                            DataType = typeof(string),
+                            MaxLength = -1,
+                            ColumnName = _columnOptions.Message.ColumnName ?? StandardColumn.Message.ToString()
+                        });
+                        break;
+                    case StandardColumn.MessageTemplate:
+                        eventsTable.Columns.Add(new DataColumn
+                        {
+                            DataType = typeof(string),
+                            MaxLength = -1,
+                            ColumnName = _columnOptions.MessageTemplate.ColumnName ?? StandardColumn.MessageTemplate.ToString()
+                        });
+                        break;
+                    case StandardColumn.Exception:
+                        eventsTable.Columns.Add(new DataColumn
+                        {
+                            DataType = typeof(string),
+                            MaxLength = -1,
+                            ColumnName = _columnOptions.Exception.ColumnName ?? StandardColumn.Exception.ToString()
+                        });
+                        break;
+                    case StandardColumn.Properties:
+                        eventsTable.Columns.Add(new DataColumn
+                        {
+                            DataType = typeof(string),
+                            MaxLength = -1,
+                            ColumnName = _columnOptions.Properties.ColumnName ?? StandardColumn.Properties.ToString()
+                        });
+                        break;
                 }
-                else
-                {
-                    level.DataType = typeof (string);
-                    level.MaxLength = 128;
-                }
-
-                eventsTable.Columns.Add(level);
-            }
-
-            if (_columnOptions.Store.Contains(StandardColumn.TimeStamp))
-            {
-                var timestamp = new DataColumn
-                {
-                    DataType = Type.GetType("System.DateTime"),
-                    ColumnName = "TimeStamp",
-                    AllowDBNull = false
-                };
-                eventsTable.Columns.Add(timestamp);
-            }
-
-            if (_columnOptions.Store.Contains(StandardColumn.Exception))
-            {
-                var exception = new DataColumn
-                {
-                    DataType = typeof (string),
-                    MaxLength = -1,
-                    ColumnName = "Exception"
-                };
-                eventsTable.Columns.Add(exception);
-            }
-
-            if (_columnOptions.Store.Contains(StandardColumn.Properties))
-            {
-                var props = new DataColumn
-                {
-                    DataType = typeof (string),
-                    MaxLength = -1,
-                    ColumnName = "Properties",
-                };
-                eventsTable.Columns.Add(props);
-            }
-
-            if (_columnOptions.Store.Contains(StandardColumn.LogEvent))
-            {
-                var eventData = new DataColumn
-                {
-                    DataType = Type.GetType("System.String"),
-                    ColumnName = "LogEvent"
-                };
-                eventsTable.Columns.Add(eventData);
             }
 
             if (_columnOptions.AdditionalDataColumns != null)
@@ -286,9 +262,7 @@ namespace Serilog.Sinks.MSSqlServer
                             row["Level"] = logEvent.Level;
                             break;
                         case StandardColumn.TimeStamp:
-                            row["TimeStamp"] = _columnOptions.TimeStamp.ConvertToUtc
-                                ? logEvent.Timestamp.DateTime.ToUniversalTime()
-                                : logEvent.Timestamp.DateTime;
+                            row["TimeStamp"] = _columnOptions.TimeStamp.ConvertToUtc ? logEvent.Timestamp.DateTime.ToUniversalTime() : logEvent.Timestamp.DateTime;
                             break;
                         case StandardColumn.Exception:
                             row["Exception"] = logEvent.Exception != null ? logEvent.Exception.ToString() : null;
@@ -336,15 +310,11 @@ namespace Serilog.Sinks.MSSqlServer
 
                 if (options.UsePropertyKeyAsElementName)
                 {
-                    sb.AppendFormat("<{0}>{1}</{0}>", XmlPropertyFormatter.GetValidElementName(property.Key),
-                        value);
+                    sb.AppendFormat("<{0}>{1}</{0}>", XmlPropertyFormatter.GetValidElementName(property.Key), value);
                 }
                 else
                 {
-                    sb.AppendFormat("<{0} key='{1}'>{2}</{0}>",
-                        options.PropertyElementName,
-                        property.Key,
-                        value);
+                    sb.AppendFormat("<{0} key='{1}'>{2}</{0}>", options.PropertyElementName, property.Key, value);
                 }
             }
 
@@ -388,7 +358,7 @@ namespace Serilog.Sinks.MSSqlServer
                 if (scalarValue == null)
                 {
                     row[columnName] = property.Value.ToString();
-                    continue;                    
+                    continue;
                 }
 
                 if (scalarValue.Value == null && row.Table.Columns[columnName].AllowDBNull)
@@ -396,7 +366,7 @@ namespace Serilog.Sinks.MSSqlServer
                     row[columnName] = DBNull.Value;
                     continue;
                 }
-                
+
                 if (TryChangeType(scalarValue.Value, columnType, out conversion))
                 {
                     row[columnName] = conversion;
