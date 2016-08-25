@@ -68,6 +68,22 @@ namespace Serilog.Sinks.MSSqlServer
         /// </summary>
         public ICollection<DataColumn> AdditionalDataColumns { get; set; }
 
+        /// <summary>
+        ///     Options for the Id column.
+        /// </summary>
+        public IdColumnOptions Id { get; private set; }
+
+        /// <summary>
+        ///     Options for the Level column.
+        /// </summary>
+        public LevelColumnOptions Level { get; private set; }
+
+        /// <summary>
+        ///     Options for the Properties column.
+        /// </summary>
+        public PropertiesColumnOptions Properties { get; private set; }
+
+        /// <summary>
         /// Options for the Exception column.
         /// </summary>
         public ExceptionColumnOptions Exception { get; set; }
@@ -81,17 +97,7 @@ namespace Serilog.Sinks.MSSqlServer
         /// Options for the Message column.
         /// </summary>
         public MessageColumnOptions Message { get; set; }
-
-        /// <summary>
-        ///     Options for the Level column.
-        /// </summary>
-        public LevelColumnOptions Level { get; private set; }
-
-        /// <summary>
-        ///     Options for the Properties column.
-        /// </summary>
-        public PropertiesColumnOptions Properties { get; private set; }
-
+        
         /// <summary>
         ///     Options for the TimeStamp column.
         /// </summary>
@@ -105,13 +111,7 @@ namespace Serilog.Sinks.MSSqlServer
         /// <summary>
         ///     Options for the Id column.
         /// </summary>
-        public class IdColumnOptions
-        {
-            /// <summary>
-            ///     The name of the Id column. "Id" is used if not set.
-            /// </summary>
-            public string ColumnName { get; set; }
-        }
+        public class IdColumnOptions : CommonColumnOptions { }
 
         /// <summary>
         ///     Options for the Level column.
