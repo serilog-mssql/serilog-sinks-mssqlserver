@@ -10,13 +10,15 @@ namespace Serilog.Sinks.MSSqlServer
     /// </summary>
     public class ColumnOptions
     {
-        private ICollection<StandardColumn> _store;
+        ICollection<StandardColumn> _store;
 
         /// <summary>
         ///     Default constructor.
         /// </summary>
         public ColumnOptions()
         {
+            Id = new IdColumnOptions();
+
             Level = new LevelColumnOptions();
 
             Properties = new PropertiesColumnOptions();
@@ -31,8 +33,10 @@ namespace Serilog.Sinks.MSSqlServer
                 StandardColumn.Properties
             };
 
+            Message = new MessageColumnOptions();
+            MessageTemplate = new MessageTemplateColumnOptions();
             TimeStamp = new TimeStampColumnOptions();
-
+            Exception = new ExceptionColumnOptions();
             LogEvent = new LogEventColumnOptions();
         }
 
@@ -47,7 +51,7 @@ namespace Serilog.Sinks.MSSqlServer
                 if (value == null)
                 {
                     _store = new Collection<StandardColumn>();
-                    foreach (StandardColumn column in Enum.GetValues(typeof (StandardColumn)))
+                    foreach (StandardColumn column in Enum.GetValues(typeof(StandardColumn)))
                     {
                         _store.Add(column);
                     }
@@ -65,6 +69,11 @@ namespace Serilog.Sinks.MSSqlServer
         public ICollection<DataColumn> AdditionalDataColumns { get; set; }
 
         /// <summary>
+        ///     Options for the Id column.
+        /// </summary>
+        public IdColumnOptions Id { get; private set; }
+
+        /// <summary>
         ///     Options for the Level column.
         /// </summary>
         public LevelColumnOptions Level { get; private set; }
@@ -74,6 +83,21 @@ namespace Serilog.Sinks.MSSqlServer
         /// </summary>
         public PropertiesColumnOptions Properties { get; private set; }
 
+        /// <summary>
+        /// Options for the Exception column.
+        /// </summary>
+        public ExceptionColumnOptions Exception { get; set; }
+
+        /// <summary>
+        /// Options for the MessageTemplate column.
+        /// </summary>
+        public MessageTemplateColumnOptions MessageTemplate { get; set; }
+
+        /// <summary>
+        /// Options for the Message column.
+        /// </summary>
+        public MessageColumnOptions Message { get; set; }
+        
         /// <summary>
         ///     Options for the TimeStamp column.
         /// </summary>
@@ -85,9 +109,14 @@ namespace Serilog.Sinks.MSSqlServer
         public LogEventColumnOptions LogEvent { get; private set; }
 
         /// <summary>
+        ///     Options for the Id column.
+        /// </summary>
+        public class IdColumnOptions : CommonColumnOptions { }
+
+        /// <summary>
         ///     Options for the Level column.
         /// </summary>
-        public class LevelColumnOptions
+        public class LevelColumnOptions : CommonColumnOptions
         {
             /// <summary>
             ///     If true will store Level as an enum in a tinyint column as opposed to a string.
@@ -98,7 +127,7 @@ namespace Serilog.Sinks.MSSqlServer
         /// <summary>
         ///     Options for the Properties column.
         /// </summary>
-        public class PropertiesColumnOptions
+        public class PropertiesColumnOptions : CommonColumnOptions
         {
             /// <summary>
             ///     Default constructor.
@@ -176,9 +205,20 @@ namespace Serilog.Sinks.MSSqlServer
         }
 
         /// <summary>
+        /// Shared column customization options.
+        /// </summary>
+        public class CommonColumnOptions
+        {
+            /// <summary>
+            /// The name of the column in the database.
+            /// </summary>
+            public string ColumnName { get; set; }
+        }
+
+        /// <summary>
         ///     Options for the TimeStamp column.
         /// </summary>
-        public class TimeStampColumnOptions
+        public class TimeStampColumnOptions : CommonColumnOptions
         {
             /// <summary>
             ///     If true, the time is converted to universal time.
@@ -189,12 +229,27 @@ namespace Serilog.Sinks.MSSqlServer
         /// <summary>
         ///     Options for the LogEvent column.
         /// </summary>
-        public class LogEventColumnOptions
+        public class LogEventColumnOptions : CommonColumnOptions
         {
             /// <summary>
             ///     Exclude properties from the LogEvent column if they are being saved to additional columns.
             /// </summary>
             public bool ExcludeAdditionalProperties { get; set; }
         }
+
+        /// <summary>
+        /// Options for the message column
+        /// </summary>
+        public class MessageColumnOptions : CommonColumnOptions {}
+
+        /// <summary>
+        /// Options for the Exception column.
+        /// </summary>
+        public class ExceptionColumnOptions : CommonColumnOptions {}
+
+        /// <summary>
+        /// Options for the MessageTemplate column.
+        /// </summary>
+        public class MessageTemplateColumnOptions : CommonColumnOptions {}
     }
 }
