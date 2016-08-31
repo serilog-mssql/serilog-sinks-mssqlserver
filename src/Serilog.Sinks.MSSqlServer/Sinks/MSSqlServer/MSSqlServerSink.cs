@@ -174,7 +174,7 @@ namespace Serilog.Sinks.MSSqlServer
                         eventsTable.Columns.Add(new DataColumn
                         {
                             DataType = _columnOptions.Level.StoreAsEnum ? typeof(byte) : typeof(string),
-                            MaxLength = _columnOptions.Level.StoreAsEnum ? 0 : 128,
+                            MaxLength = _columnOptions.Level.StoreAsEnum ? -1 : 128,
                             ColumnName = _columnOptions.Level.ColumnName ?? StandardColumn.Level.ToString()
                         });
                         break;

@@ -2,6 +2,7 @@
 using System.Data.SqlClient;
 using System.Linq;
 using Dapper;
+using Xunit;
 
 namespace Serilog.Sinks.MSSqlServer.Tests
 {
@@ -70,4 +71,7 @@ DROP DATABASE [{Database}]
             }
         }
     }
+
+    [CollectionDefinition("LogTest")]
+    public class PatientSecureFixtureCollection : ICollectionFixture<DatabaseFixture> { }
 }
