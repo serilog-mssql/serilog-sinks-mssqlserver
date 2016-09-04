@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Dapper;
 using Xunit;
 using FluentAssertions;
@@ -12,7 +10,8 @@ using Serilog.Events;
 
 namespace Serilog.Sinks.MSSqlServer.Tests
 {
-    public class CustomStandardColumnNames : IClassFixture<DatabaseFixture>
+    [Collection("LogTest")]
+    public class CustomStandardColumnNames
     {
         [Fact]
         public void CustomIdColumn()
@@ -131,14 +130,12 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 columnOptions: new ColumnOptions())
                 .CreateLogger();
 
-            var file = File.CreateText("Self.log");
+            var file = File.CreateText("StandardColumns.Self.log");
             Serilog.Debugging.SelfLog.Enable(TextWriter.Synchronized(file));
 
             // act
             const string loggingInformationMessage = "Logging Information message";
             Log.Information(loggingInformationMessage);
-
-            //Thread.Sleep(50);
 
             Log.CloseAndFlush();
 
