@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
+using System.Data.SqlTypes;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Dapper;
 using Xunit;
 using FluentAssertions;
-using Serilog.Events;
 
 namespace Serilog.Sinks.MSSqlServer.Tests
 {
@@ -117,6 +118,46 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         }
 
         [Fact]
+        public void WriteEventToCustomStandardColumns()
+        {
+            // arrange
+            var options = new ColumnOptions();
+
+            options.Message.ColumnName = "CustomMessage";
+            options.MessageTemplate.ColumnName = "CustomMessageTemplate";
+            options.Level.ColumnName = "CustomLevel";
+            options.TimeStamp.ColumnName = "CustomTimeStamp";
+            options.Exception.ColumnName = "CustomException";
+            options.Properties.ColumnName = "CustomProperties";
+            options.Id.ColumnName = "CustomId";
+
+            var logTableName = $"{DatabaseFixture.LogTableName}CustomEvent";
+            var loggerConfiguration = new LoggerConfiguration();
+            Log.Logger = loggerConfiguration.WriteTo.MSSqlServer(
+                connectionString: DatabaseFixture.LogEventsConnectionString,
+                tableName: logTableName,
+                autoCreateSqlTable: true,
+                columnOptions: options)
+                .CreateLogger();
+
+            var file = File.CreateText("CustomColumnsEvent.Self.log");
+            Serilog.Debugging.SelfLog.Enable(TextWriter.Synchronized(file));
+
+            // act
+            const string loggingInformationMessage = "Logging Information message";
+            Log.Information(loggingInformationMessage);
+            Log.CloseAndFlush();
+
+            // assert
+            using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
+            {
+                var logEvents = conn.Query<CustomStandardLogColumns>($"SELECT * FROM {logTableName}");
+
+                logEvents.Should().Contain(e => e.CustomMessage.Contains(loggingInformationMessage));
+            }
+        }
+
+        [Fact]
         public void WriteEventToDefaultStandardColumns()
         {
             // arrange
@@ -147,12 +188,5 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 logEvents.Should().Contain(e => e.Message.Contains(loggingInformationMessage));
             }
         }
-    }
-
-    public class DefaultStandardLogColumns
-    {
-        public string Message { get; set; }
-
-        public LogEventLevel Level { get; set; }
     }
 }
