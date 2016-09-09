@@ -132,9 +132,9 @@ namespace Serilog.Sinks.MSSqlServer
                     using (var copy = new SqlBulkCopy(cn))
                     {
                         copy.DestinationTableName = _tableName;
-                        foreach (var column in _eventsTable.Columns)
+                        foreach (DataColumn column in _eventsTable.Columns)
                         {
-                            var columnName = ((DataColumn)column).ColumnName;
+                            var columnName = column.ColumnName;
                             var mapping = new SqlBulkCopyColumnMapping(columnName, columnName);
                             copy.ColumnMappings.Add(mapping);
                         }
@@ -256,7 +256,7 @@ namespace Serilog.Sinks.MSSqlServer
                             row[_columnOptions.Message.ColumnName ?? "Message"] = logEvent.RenderMessage(_formatProvider);
                             break;
                         case StandardColumn.MessageTemplate:
-                            row[_columnOptions.MessageTemplate.ColumnName ?? "MessageTemplate"] = logEvent.MessageTemplate;
+                            row[_columnOptions.MessageTemplate.ColumnName ?? "MessageTemplate"] = logEvent.MessageTemplate?.ToString();
                             break;
                         case StandardColumn.Level:
                             row[_columnOptions.Level.ColumnName ?? "Level"] = logEvent.Level;

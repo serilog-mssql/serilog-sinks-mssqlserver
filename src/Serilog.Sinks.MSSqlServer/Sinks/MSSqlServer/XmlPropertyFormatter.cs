@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using Serilog.Events;
+using System;
 
 namespace Serilog.Sinks.MSSqlServer
 {
@@ -189,7 +189,7 @@ namespace Serilog.Sinks.MSSqlServer
 
             string validName = name.Trim();
 
-            if (!char.IsLetter(validName[0]) || validName.StartsWith("xml", true, CultureInfo.CurrentCulture))
+            if (!char.IsLetter(validName[0]) || validName.StartsWith("xml", StringComparison.CurrentCultureIgnoreCase))
             {
                 validName = "x" + name;
             }

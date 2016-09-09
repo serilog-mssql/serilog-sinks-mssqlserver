@@ -32,9 +32,13 @@
         "System.Xml.Linq": "",
         "System.Configuration": ""
       }
+    },
+    "netstandard1.3": {
+      "dependencies": {
+        "System.Data.SqlClient": "4.1.0",
+        "System.Xml.XDocument": "4.0.11",
+        "FastMember.Signed": "1.1.0"
+      }
     }
-  },
-  "runtimes": {
-    "win": {}
   }
 }

@@ -434,7 +434,7 @@
           "lib/net45/xunit.runner.utility.desktop.dll": {}
         }
       },
-      "Serilog.Sinks.MSSqlServer/4.1.1": {
+      "Serilog.Sinks.MSSqlServer/4.1.2": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.5",
         "dependencies": {
@@ -852,7 +852,7 @@
           "lib/net45/xunit.runner.utility.desktop.dll": {}
         }
       },
-      "Serilog.Sinks.MSSqlServer/4.1.1": {
+      "Serilog.Sinks.MSSqlServer/4.1.2": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.5",
         "dependencies": {
@@ -1239,7 +1239,7 @@
       ]
     },
     "System.Collections.Immutable/1.2.0": {
-      "sha512": "Cma8cBW6di16ZLibL8LYQ+cLjGzoKxpOTu/faZfDcx94ZjAGq6Nv5RO7+T1YZXqEXTZP9rt1wLVEONVpURtUqw==",
+      "sha512": "I/SmQ7XJuwHuXA+zPa5dxYQ5bUbxJw/SFOXdn8jDezzHKzFn4KJaZ9jGWLthqqj+yhv8cHnTLlhrz/56+PdeyQ==",
       "type": "package",
       "path": "System.Collections.Immutable/1.2.0",
       "files": [
@@ -1320,7 +1320,7 @@
       ]
     },
     "System.Reflection.Metadata/1.3.0": {
-      "sha512": "jMSCxA4LSyKBGRDm/WtfkO03FkcgRzHxwvQRib1bm2GZ8ifKM1MX1al6breGCEQK280mdl9uQS7JNPXRYk90jw==",
+      "sha512": "D9G0gzU1BP5485YxvE5fyjJ+5PH0VFzXg53r9cfQ5bkSH6qwyrIRnM8uZQpd3Ng76rByXQi99xJ1QO+dNFqYfQ==",
       "type": "package",
       "path": "System.Reflection.Metadata/1.3.0",
       "files": [
@@ -1622,7 +1622,7 @@
         "xunit.runner.utility.nuspec"
       ]
     },
-    "Serilog.Sinks.MSSqlServer/4.1.1": {
+    "Serilog.Sinks.MSSqlServer/4.1.2": {
       "type": "project",
       "path": "../../src/Serilog.Sinks.MSSqlServer/project.json",
       "msbuildProject": "../../src/Serilog.Sinks.MSSqlServer/Serilog.Sinks.MSSqlServer.xproj"
