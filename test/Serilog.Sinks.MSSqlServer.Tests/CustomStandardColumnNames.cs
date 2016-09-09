@@ -140,8 +140,11 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 columnOptions: options)
                 .CreateLogger();
 
-            var file = File.CreateText("CustomColumnsEvent.Self.log");
-            Serilog.Debugging.SelfLog.Enable(TextWriter.Synchronized(file));
+            TextWriter file = File.CreateText("CustomColumnsEvent.Self.log");
+#if !NETCOREAPP1_0
+            file = TextWriter.Synchronized(file);
+#endif
+            Serilog.Debugging.SelfLog.Enable(file);
 
             // act
             const string loggingInformationMessage = "Logging Information message";
@@ -171,8 +174,11 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 columnOptions: new ColumnOptions())
                 .CreateLogger();
 
-            var file = File.CreateText("StandardColumns.Self.log");
-            Serilog.Debugging.SelfLog.Enable(TextWriter.Synchronized(file));
+            TextWriter file = File.CreateText("StandardColumns.Self.log");
+#if !NETCOREAPP1_0
+            file = TextWriter.Synchronized(file);
+#endif
+            Serilog.Debugging.SelfLog.Enable(file);
 
             // act
             const string loggingInformationMessage = "Logging Information message";

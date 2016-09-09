@@ -27,8 +27,13 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 columnOptions: new ColumnOptions { Level = { StoreAsEnum = true } })
                 .CreateLogger();
 
-            var file = File.CreateText("LevelAsEnum.True.Enum.Self.log");
-            Serilog.Debugging.SelfLog.Enable(TextWriter.Synchronized(file));
+            TextWriter file = File.CreateText("LevelAsEnum.True.Enum.Self.log");
+
+#if !NETCOREAPP1_0
+            file = TextWriter.Synchronized(file);
+#endif
+            Serilog.Debugging.SelfLog.Enable(file);
+
 
             // act
             const string loggingInformationMessage = "Logging Information message";
@@ -59,8 +64,11 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 columnOptions: new ColumnOptions { Level = { StoreAsEnum = false } })
                 .CreateLogger();
 
-            var file = File.CreateText("LevelAsEnum.False.Self.log");
-            Serilog.Debugging.SelfLog.Enable(TextWriter.Synchronized(file));
+            TextWriter file = File.CreateText("LevelAsEnum.False.Self.log");
+#if !NETCOREAPP1_0
+            file = TextWriter.Synchronized(file);
+#endif
+            Serilog.Debugging.SelfLog.Enable(file);
 
             // act
             const string loggingInformationMessage = "Logging Information message";
