@@ -1,3 +1,7 @@
+4.0.0
+ * Serilog 2.0
+ * [Documentation fix](https://github.com/serilog/serilog-sinks-mssqlserver/pull/32)
+
 2.0.33
  * Option added to exclude redundant properties from serialized JSON in column LogEvent. (https://github.com/serilog/serilog-sinks-mssqlserver/pull/27)
 
