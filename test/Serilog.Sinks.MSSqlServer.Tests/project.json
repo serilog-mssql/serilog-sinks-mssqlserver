@@ -12,6 +12,16 @@
     "keyFile": "../../assets/Serilog.snk"
   },
   "frameworks": {
+    "netcoreapp1.0": {
+      "dependencies": {
+        "Microsoft.NETCore.App": {
+          "type": "platform",
+          "version": "1.0.0"
+        }
+      },
+
+      "imports": "dnxcore50"
+    },
     "net4.5.2": {}
   },
   "runtimes": {

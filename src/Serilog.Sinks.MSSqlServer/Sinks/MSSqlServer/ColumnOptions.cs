@@ -197,7 +197,6 @@ namespace Serilog.Sinks.MSSqlServer
             /// </summary>
             public string StructureElementName { get; set; }
 
-
             /// <summary>
             ///     If true, will use the property key as the element name.
             /// </summary>

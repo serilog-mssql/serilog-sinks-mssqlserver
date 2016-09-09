@@ -27,8 +27,8 @@ WITH ROLLBACK IMMEDIATE
 DROP DATABASE [{Database}]
 ";
 
-        public static string MasterConnectionString => @"Data Source=(LocalDb)\v11.0;Initial Catalog=Master;Integrated Security=True";
-        public static string LogEventsConnectionString => $@"Data Source=(LocalDb)\v11.0;Initial Catalog={Database};Integrated Security=True";
+        public static string MasterConnectionString => @"Data Source=(LocalDb)\MSSqlLocalDb;Initial Catalog=Master;Integrated Security=True";
+        public static string LogEventsConnectionString => $@"Data Source=(LocalDb)\MSSqlLocalDb;Initial Catalog={Database};Integrated Security=True";
 
         public class FileName
         {

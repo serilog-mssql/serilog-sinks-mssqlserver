@@ -1,4 +1,4 @@
-﻿// Copyright 2015 Serilog Contributors
+﻿// Copyright 2016 Serilog Contributors
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,13 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
-using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using Serilog.Events;
+using System;
 
 namespace Serilog.Sinks.MSSqlServer
 {
@@ -190,7 +189,7 @@ namespace Serilog.Sinks.MSSqlServer
 
             string validName = name.Trim();
 
-            if (!char.IsLetter(validName[0]) || validName.StartsWith("xml", true, CultureInfo.CurrentCulture))
+            if (!char.IsLetter(validName[0]) || validName.StartsWith("xml", StringComparison.CurrentCultureIgnoreCase))
             {
                 validName = "x" + name;
             }

@@ -5,150 +5,152 @@ using System.Text;
 
 namespace Serilog.Sinks.MSSqlServer
 {
-	internal class SqlTableCreator
-	{
-		private readonly string _connectionString;
-		private string _tableName;
-				
-		#region Constructor
-		
-		public SqlTableCreator(string connectionString)
-		{
-			_connectionString = connectionString;
-		}
+    class SqlTableCreator
+    {
+        readonly string _connectionString;
+        string _tableName;
 
-		#endregion
+        #region Constructor
 
-		#region Instance Methods				
-		public int CreateTable(DataTable table)
-		{
-		    if (table == null) return 0;
+        public SqlTableCreator(string connectionString)
+        {
+            _connectionString = connectionString;
+        }
 
-		    if (string.IsNullOrWhiteSpace(table.TableName) || string.IsNullOrWhiteSpace(_connectionString)) return 0;
+        #endregion
 
-		    _tableName = table.TableName;
-		    using (var conn = new SqlConnection(_connectionString))
-		    {
-		        string sql = GetSqlFromDataTable(_tableName, table);
-		        using (SqlCommand cmd = new SqlCommand(sql, conn))
-		        {
-		            conn.Open();
-		            return cmd.ExecuteNonQuery();
-		        }
+        #region Instance Methods
 
-		    }
-		}
-		#endregion
+        public int CreateTable(DataTable table)
+        {
+            if (table == null) return 0;
 
-		#region Static Methods
+            if (string.IsNullOrWhiteSpace(table.TableName) || string.IsNullOrWhiteSpace(_connectionString)) return 0;
 
-		private static string GetSqlFromDataTable(string tableName, DataTable table)
-		{
-			StringBuilder sql = new StringBuilder();
-			sql.AppendFormat("IF NOT EXISTS (SELECT * FROM sysobjects WHERE name = '{0}' AND xtype = 'U')", tableName);
-			sql.AppendLine(" BEGIN");
-			sql.AppendFormat(" CREATE TABLE [{0}] ( ", tableName);
+            _tableName = table.TableName;
+            using (var conn = new SqlConnection(_connectionString))
+            {
+                string sql = GetSqlFromDataTable(_tableName, table);
+                using (SqlCommand cmd = new SqlCommand(sql, conn))
+                {
+                    conn.Open();
+                    return cmd.ExecuteNonQuery();
+                }
 
-			// columns
-			int numOfColumns = table.Columns.Count;
-			int i = 1;
-			foreach (DataColumn column in table.Columns)
-			{
-				sql.AppendFormat("[{0}] {1}", column.ColumnName, SqlGetType(column));
-			    if (column.ColumnName.ToUpper().Equals("ID"))
-			        sql.Append(" IDENTITY(1,1) ");
-				if (numOfColumns > i)
-					sql.AppendFormat(", ");
-				i++;
-			}
+            }
+        }
 
-			// primary keys
-			if (table.PrimaryKey.Length > 0)
-			{
-				sql.AppendFormat(" CONSTRAINT [PK_{0}] PRIMARY KEY CLUSTERED (", tableName);
+        #endregion
 
-				int numOfKeys = table.PrimaryKey.Length;
-				i = 1;
-				foreach (DataColumn column in table.PrimaryKey)
-				{
-					sql.AppendFormat("[{0}]", column.ColumnName);
-					if (numOfKeys > i)
-						sql.AppendFormat(", ");
+        #region Static Methods
 
-					i++;
-				}
-				sql.Append("))");
-			}
-			sql.AppendLine(" END");
-			return sql.ToString();
-		}
+        static string GetSqlFromDataTable(string tableName, DataTable table)
+        {
+            var sql = new StringBuilder();
+            sql.AppendFormat("IF NOT EXISTS (SELECT * FROM sysobjects WHERE name = '{0}' AND xtype = 'U')", tableName);
+            sql.AppendLine(" BEGIN");
+            sql.AppendFormat(" CREATE TABLE [{0}] ( ", tableName);
 
-		// Return T-SQL data type definition, based on schema definition for a column
-	    private static string SqlGetType(object type, int columnSize, int numericPrecision, int numericScale,
-	        bool allowDbNull)
-	    {
-	        string sqlType;
+            // columns
+            int numOfColumns = table.Columns.Count;
+            int i = 1;
+            foreach (DataColumn column in table.Columns)
+            {
+                sql.AppendFormat("[{0}] {1}", column.ColumnName, SqlGetType(column));
+                if (column.AutoIncrement)
+                    sql.Append(" IDENTITY(1,1) ");
+                if (numOfColumns > i)
+                    sql.AppendFormat(", ");
+                i++;
+            }
 
-	        switch (type.ToString())
-	        {
-	            case "System.Boolean":
-	                sqlType = "BIT";
-	                break;
+            // primary keys
+            if (table.PrimaryKey.Length > 0)
+            {
+                sql.AppendFormat(" CONSTRAINT [PK_{0}] PRIMARY KEY CLUSTERED (", tableName);
+
+                int numOfKeys = table.PrimaryKey.Length;
+                i = 1;
+                foreach (DataColumn column in table.PrimaryKey)
+                {
+                    sql.AppendFormat("[{0}]", column.ColumnName);
+                    if (numOfKeys > i)
+                        sql.AppendFormat(", ");
+
+                    i++;
+                }
+                sql.Append("))");
+            }
+            sql.AppendLine(" END");
+            return sql.ToString();
+        }
+
+        // Return T-SQL data type definition, based on schema definition for a column
+        static string SqlGetType(object type, int columnSize, int numericPrecision, int numericScale,
+            bool allowDbNull)
+        {
+            string sqlType;
+
+            switch (type.ToString())
+            {
+                case "System.Boolean":
+                    sqlType = "BIT";
+                    break;
 
                 case "System.Byte":
                     sqlType = "TINYINT";
                     break;
 
                 case "System.String":
-	                sqlType = "NVARCHAR(" + ((columnSize == -1) ? "MAX" : columnSize.ToString()) + ")";
-	                break;
+                    sqlType = "NVARCHAR(" + ((columnSize == -1) ? "MAX" : columnSize.ToString()) + ")";
+                    break;
 
-	            case "System.Decimal":
-	                if (numericScale > 0)
-	                    sqlType = "REAL";
-	                else if (numericPrecision > 10)
-	                    sqlType = "BIGINT";
-	                else
-	                    sqlType = "INT";
-	                break;
+                case "System.Decimal":
+                    if (numericScale > 0)
+                        sqlType = "REAL";
+                    else if (numericPrecision > 10)
+                        sqlType = "BIGINT";
+                    else
+                        sqlType = "INT";
+                    break;
 
-	            case "System.Double":
-	            case "System.Single":
-	                sqlType = "REAL";
-	                break;
+                case "System.Double":
+                case "System.Single":
+                    sqlType = "REAL";
+                    break;
 
-	            case "System.Int64":
-	                sqlType = "BIGINT";
-	                break;
+                case "System.Int64":
+                    sqlType = "BIGINT";
+                    break;
 
-	            case "System.Int16":
-	            case "System.Int32":
-	                sqlType = "INT";
-	                break;
+                case "System.Int16":
+                case "System.Int32":
+                    sqlType = "INT";
+                    break;
 
-	            case "System.DateTime":
-	                sqlType = "DATETIME";
-	                break;
+                case "System.DateTime":
+                    sqlType = "DATETIME";
+                    break;
 
-	            case "System.Guid":
-	                sqlType = "UNIQUEIDENTIFIER";
-	                break;
+                case "System.Guid":
+                    sqlType = "UNIQUEIDENTIFIER";
+                    break;
 
-	            default:
-	                throw new Exception(string.Format("{0} not implemented.", type));
-	        }
+                default:
+                    throw new Exception(string.Format("{0} not implemented.", type));
+            }
 
-	        sqlType += " " + (allowDbNull ? "NULL" : "NOT NULL");
+            sqlType += " " + (allowDbNull ? "NULL" : "NOT NULL");
 
-	        return sqlType;
-	    }
+            return sqlType;
+        }
 
-	    // Overload based on DataColumn from DataTable type
-		private static string SqlGetType(DataColumn column)
-		{
-			return SqlGetType(column.DataType, column.MaxLength, 10, 2, column.AllowDBNull);
-		}
+        // Overload based on DataColumn from DataTable type
+        static string SqlGetType(DataColumn column)
+        {
+            return SqlGetType(column.DataType, column.MaxLength, 10, 2, column.AllowDBNull);
+        }
 
-		#endregion
-	}
+        #endregion
+    }
 }
