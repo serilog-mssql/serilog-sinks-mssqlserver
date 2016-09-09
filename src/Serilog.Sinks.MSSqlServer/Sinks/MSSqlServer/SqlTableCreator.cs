@@ -52,7 +52,7 @@ namespace Serilog.Sinks.MSSqlServer
 			// columns
 			int numOfColumns = table.Columns.Count;
 			int i = 1;
-			foreach (DataColumn column in table.Columns)
+			foreach (System.Data.DataColumn column in table.Columns)
 			{
 				sql.AppendFormat("[{0}] {1}", column.ColumnName, SqlGetType(column));
 			    if (column.ColumnName.ToUpper().Equals("ID"))
@@ -69,7 +69,7 @@ namespace Serilog.Sinks.MSSqlServer
 
 				int numOfKeys = table.PrimaryKey.Length;
 				i = 1;
-				foreach (DataColumn column in table.PrimaryKey)
+				foreach (var column in table.PrimaryKey)
 				{
 					sql.AppendFormat("[{0}]", column.ColumnName);
 					if (numOfKeys > i)
@@ -144,7 +144,7 @@ namespace Serilog.Sinks.MSSqlServer
 	    }
 
 	    // Overload based on DataColumn from DataTable type
-		private static string SqlGetType(DataColumn column)
+		private static string SqlGetType(System.Data.DataColumn column)
 		{
 			return SqlGetType(column.DataType, column.MaxLength, 10, 2, column.AllowDBNull);
 		}
