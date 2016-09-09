@@ -253,25 +253,25 @@ namespace Serilog.Sinks.MSSqlServer
                     switch (column)
                     {
                         case StandardColumn.Message:
-                            row["Message"] = logEvent.RenderMessage(_formatProvider);
+                            row[_columnOptions.Message.ColumnName ?? "Message"] = logEvent.RenderMessage(_formatProvider);
                             break;
                         case StandardColumn.MessageTemplate:
-                            row["MessageTemplate"] = logEvent.MessageTemplate;
+                            row[_columnOptions.MessageTemplate.ColumnName ?? "MessageTemplate"] = logEvent.MessageTemplate;
                             break;
                         case StandardColumn.Level:
-                            row["Level"] = logEvent.Level;
+                            row[_columnOptions.Level.ColumnName ?? "Level"] = logEvent.Level;
                             break;
                         case StandardColumn.TimeStamp:
-                            row["TimeStamp"] = _columnOptions.TimeStamp.ConvertToUtc ? logEvent.Timestamp.DateTime.ToUniversalTime() : logEvent.Timestamp.DateTime;
+                            row[_columnOptions.TimeStamp.ColumnName ?? "TimeStamp"] = _columnOptions.TimeStamp.ConvertToUtc ? logEvent.Timestamp.DateTime.ToUniversalTime() : logEvent.Timestamp.DateTime;
                             break;
                         case StandardColumn.Exception:
-                            row["Exception"] = logEvent.Exception != null ? logEvent.Exception.ToString() : null;
+                            row[_columnOptions.Exception.ColumnName ?? "Exception"] = logEvent.Exception != null ? logEvent.Exception.ToString() : null;
                             break;
                         case StandardColumn.Properties:
-                            row["Properties"] = ConvertPropertiesToXmlStructure(logEvent.Properties);
+                            row[_columnOptions.Properties.ColumnName ?? "Properties"] = ConvertPropertiesToXmlStructure(logEvent.Properties);
                             break;
                         case StandardColumn.LogEvent:
-                            row["LogEvent"] = LogEventToJson(logEvent);
+                            row[_columnOptions.LogEvent.ColumnName ?? "LogEvent"] = LogEventToJson(logEvent);
                             break;
                         default:
                             throw new ArgumentOutOfRangeException();
