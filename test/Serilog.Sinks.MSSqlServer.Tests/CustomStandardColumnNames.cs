@@ -120,7 +120,6 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         [Fact]
         public void WriteEventToCustomStandardColumns()
         {
-            Debugger.Launch();
             // arrange
             var options = new ColumnOptions();
 
