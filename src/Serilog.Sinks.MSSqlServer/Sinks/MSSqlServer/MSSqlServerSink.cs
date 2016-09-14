@@ -134,7 +134,7 @@ namespace Serilog.Sinks.MSSqlServer
                         copy.DestinationTableName = _tableName;
                         foreach (var column in _eventsTable.Columns)
                         {
-                            var columnName = ((DataColumn)column).ColumnName;
+                            var columnName = ((System.Data.DataColumn)column).ColumnName;
                             var mapping = new SqlBulkCopyColumnMapping(columnName, columnName);
                             copy.ColumnMappings.Add(mapping);
                         }
@@ -158,85 +158,83 @@ namespace Serilog.Sinks.MSSqlServer
         {
             var eventsTable = new DataTable(_tableName);
 
-            var id = new DataColumn
+            var id = new LogTableColumn
             {
                 DataType = Type.GetType("System.Int32"),
                 ColumnName = !string.IsNullOrWhiteSpace(_columnOptions.Id.ColumnName) ? _columnOptions.Id.ColumnName : "Id",
                 AutoIncrement = true
             };
-            eventsTable.Columns.Add(id);
+            eventsTable.Columns.Add(id.AsSystemDataColumn);
 
             foreach (var standardColumn in _columnOptions.Store)
             {
                 switch (standardColumn)
                 {
                     case StandardColumn.Level:
-                        eventsTable.Columns.Add(new DataColumn
+                        eventsTable.Columns.Add(new LogTableColumn
                         {
                             DataType = _columnOptions.Level.StoreAsEnum ? typeof(byte) : typeof(string),
                             MaxLength = _columnOptions.Level.StoreAsEnum ? -1 : 128,
                             ColumnName = _columnOptions.Level.ColumnName ?? StandardColumn.Level.ToString()
-                        });
+                        }.AsSystemDataColumn);
                         break;
                     case StandardColumn.TimeStamp:
-                        eventsTable.Columns.Add(new DataColumn
+                        eventsTable.Columns.Add(new LogTableColumn
                         {
                             DataType = typeof(DateTime),
                             ColumnName = _columnOptions.TimeStamp.ColumnName ?? StandardColumn.TimeStamp.ToString(),
                             AllowDBNull = false
-                        });
+                        }.AsSystemDataColumn);
                         break;
                     case StandardColumn.LogEvent:
-                        eventsTable.Columns.Add(new DataColumn
+                        eventsTable.Columns.Add(new LogTableColumn
                         {
                             DataType = typeof(string),
                             ColumnName = _columnOptions.LogEvent.ColumnName ?? StandardColumn.LogEvent.ToString()
-                        });
+                        }.AsSystemDataColumn);
                         break;
                     case StandardColumn.Message:
-                        eventsTable.Columns.Add(new DataColumn
+                        eventsTable.Columns.Add(new LogTableColumn
                         {
                             DataType = typeof(string),
                             MaxLength = -1,
                             ColumnName = _columnOptions.Message.ColumnName ?? StandardColumn.Message.ToString()
-                        });
+                        }.AsSystemDataColumn);
                         break;
                     case StandardColumn.MessageTemplate:
-                        eventsTable.Columns.Add(new DataColumn
+                        eventsTable.Columns.Add(new LogTableColumn
                         {
                             DataType = typeof(string),
                             MaxLength = -1,
                             ColumnName = _columnOptions.MessageTemplate.ColumnName ?? StandardColumn.MessageTemplate.ToString()
-                        });
+                        }.AsSystemDataColumn);
                         break;
                     case StandardColumn.Exception:
-                        eventsTable.Columns.Add(new DataColumn
+                        eventsTable.Columns.Add(new LogTableColumn
                         {
                             DataType = typeof(string),
                             MaxLength = -1,
-                            ColumnName = _columnOptions.Exception.ColumnName ?? StandardColumn.Exception.ToString()
-                        });
+                            ColumnName = _columnOptions.Exception.ColumnName ?? StandardColumn.Exception.ToString(),
+                            AllowDBNull = true
+                        }.AsSystemDataColumn);
                         break;
                     case StandardColumn.Properties:
-                        eventsTable.Columns.Add(new DataColumn
+                        eventsTable.Columns.Add(new LogTableColumn
                         {
                             DataType = typeof(string),
                             MaxLength = -1,
                             ColumnName = _columnOptions.Properties.ColumnName ?? StandardColumn.Properties.ToString()
-                        });
+                        }.AsSystemDataColumn);
                         break;
                 }
             }
 
             if (_columnOptions.AdditionalDataColumns != null)
             {
-                eventsTable.Columns.AddRange(_columnOptions.AdditionalDataColumns.ToArray());
+                eventsTable.Columns.AddRange(_columnOptions.AdditionalDataColumns.Select(c => c.AsSystemDataColumn).ToArray());
             }
 
-            // Create an array for DataColumn objects.
-            var keys = new DataColumn[1];
-            keys[0] = id;
-            eventsTable.PrimaryKey = keys;
+            eventsTable.PrimaryKey = new[] { eventsTable.Columns[_columnOptions.Id.ColumnName ?? "Id"] };
 
             return eventsTable;
         }

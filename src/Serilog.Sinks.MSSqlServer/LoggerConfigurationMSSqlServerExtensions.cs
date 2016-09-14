@@ -130,7 +130,7 @@ namespace Serilog
             foreach (ColumnConfig c in serviceConfigSection.Columns)
             {
                 // Set the type based on the defined SQL type from config
-                DataColumn column = new DataColumn(c.ColumnName);
+                LogTableColumn column = new LogTableColumn(c.ColumnName);
 
                 Type dataType = null;
 
@@ -184,7 +184,7 @@ namespace Serilog
                 column.DataType = dataType;
                 if (columnOptions.AdditionalDataColumns == null)
                 {
-                    columnOptions.AdditionalDataColumns = new Collection<DataColumn>();
+                    columnOptions.AdditionalDataColumns = new Collection<LogTableColumn>();
                 }
                 columnOptions.AdditionalDataColumns.Add(column);
             }

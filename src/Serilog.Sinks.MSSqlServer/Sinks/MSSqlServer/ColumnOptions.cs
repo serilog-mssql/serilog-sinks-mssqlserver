@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Data;
 
 namespace Serilog.Sinks.MSSqlServer
 {
@@ -66,7 +65,7 @@ namespace Serilog.Sinks.MSSqlServer
         /// <summary>
         ///     Additional columns for data storage.
         /// </summary>
-        public ICollection<DataColumn> AdditionalDataColumns { get; set; }
+        public ICollection<LogTableColumn> AdditionalDataColumns { get; set; }
 
         /// <summary>
         ///     Options for the Id column.
