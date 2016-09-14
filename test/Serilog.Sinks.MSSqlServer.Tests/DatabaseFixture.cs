@@ -42,7 +42,7 @@ DROP DATABASE [{Database}]
         
         public void Dispose()
         {
-            //DeleteDatabase();
+            DeleteDatabase();
         }
 
         private static void DeleteDatabase()
