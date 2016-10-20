@@ -55,7 +55,7 @@ namespace Serilog.Sinks.MSSqlServer
 			foreach (DataColumn column in table.Columns)
 			{
 				sql.AppendFormat("[{0}] {1}", column.ColumnName, SqlGetType(column));
-			    if (column.ColumnName.ToUpper().Equals("ID"))
+			    if (column.ColumnName.ToUpper().Equals("ID") || column.AutoIncrement)
 			        sql.Append(" IDENTITY(1,1) ");
 				if (numOfColumns > i)
 					sql.AppendFormat(", ");

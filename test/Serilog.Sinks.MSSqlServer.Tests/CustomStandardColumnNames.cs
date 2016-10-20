@@ -35,6 +35,18 @@ namespace Serilog.Sinks.MSSqlServer.Tests
 
                 infoSchema.Should().Contain(columns => columns.ColumnName == customIdName);
             }
+
+            // verify Id column has identity property
+            using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
+            {
+                var isIdentity = conn.Query<IdentityQuery>($"SELECT COLUMNPROPERTY(object_id('{logTableName}'), '{customIdName}', 'IsIdentity') AS IsIdentity");
+                isIdentity.Should().Contain(i => i.IsIdentity == 1);
+            }
+        }
+
+        internal class IdentityQuery
+        {
+            public int IsIdentity { get; set; }
         }
 
         [Fact]
@@ -48,13 +60,21 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             var sink = new MSSqlServerSink(DatabaseFixture.LogEventsConnectionString, logTableName, 1, TimeSpan.FromSeconds(1), null, true, options);
 
             // assert
+            var idColumnName = "Id";
             using (var conn = new SqlConnection(DatabaseFixture.MasterConnectionString))
             {
                 conn.Execute($"use {DatabaseFixture.Database}");
                 var logEvents = conn.Query<InfoSchema>($@"SELECT COLUMN_NAME AS ColumnName FROM {DatabaseFixture.Database}.INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{logTableName}'");
                 var infoSchema = logEvents as InfoSchema[] ?? logEvents.ToArray();
 
-                infoSchema.Should().Contain(columns => columns.ColumnName == "Id");
+                infoSchema.Should().Contain(columns => columns.ColumnName == idColumnName);
+            }
+
+            // verify Id column has identity property
+            using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
+            {
+                var isIdentity = conn.Query<IdentityQuery>($"SELECT COLUMNPROPERTY(object_id('{logTableName}'), '{idColumnName}', 'IsIdentity') AS IsIdentity");
+                isIdentity.Should().Contain(i => i.IsIdentity == 1);
             }
         }
 
