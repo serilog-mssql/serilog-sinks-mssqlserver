@@ -64,6 +64,11 @@ namespace Serilog.Sinks.MSSqlServer
         }
 
         /// <summary>
+        /// Indicates if triggers should be disabled when inserting log entries.
+        /// </summary>
+        public bool DisableTriggers { get; set; }
+
+        /// <summary>
         ///     Additional columns for data storage.
         /// </summary>
         public ICollection<DataColumn> AdditionalDataColumns { get; set; }

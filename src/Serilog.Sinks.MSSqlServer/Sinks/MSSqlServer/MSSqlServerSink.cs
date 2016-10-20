@@ -129,7 +129,10 @@ namespace Serilog.Sinks.MSSqlServer
                 using (var cn = new SqlConnection(_connectionString))
                 {
                     await cn.OpenAsync().ConfigureAwait(false);
-                    using (var copy = new SqlBulkCopy(cn))
+                    using (var copy = _columnOptions.DisableTriggers
+                            ? new SqlBulkCopy(cn)
+                            : new SqlBulkCopy(cn, SqlBulkCopyOptions.CheckConstraints | SqlBulkCopyOptions.FireTriggers, null)
+                    )
                     {
                         copy.DestinationTableName = _tableName;
                         foreach (var column in _eventsTable.Columns)
