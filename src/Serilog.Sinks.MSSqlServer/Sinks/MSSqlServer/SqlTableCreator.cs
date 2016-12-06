@@ -9,14 +9,14 @@ namespace Serilog.Sinks.MSSqlServer
 	{
 		private readonly string _connectionString;
 		private string _tableName;
-	    private string _schemaName;
+                private string _schemaName;
 				
 		#region Constructor
 		
 		public SqlTableCreator(string connectionString, string schemaName)
 		{
 		    _schemaName = schemaName;
-			_connectionString = connectionString;
+                    _connectionString = connectionString;
 		}
 
 		#endregion
