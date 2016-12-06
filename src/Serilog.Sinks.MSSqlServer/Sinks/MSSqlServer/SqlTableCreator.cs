@@ -9,12 +9,14 @@ namespace Serilog.Sinks.MSSqlServer
 	{
 		private readonly string _connectionString;
 		private string _tableName;
+                private string _schemaName;
 				
 		#region Constructor
 		
-		public SqlTableCreator(string connectionString)
+		public SqlTableCreator(string connectionString, string schemaName)
 		{
-			_connectionString = connectionString;
+		    _schemaName = schemaName;
+                    _connectionString = connectionString;
 		}
 
 		#endregion
@@ -29,7 +31,7 @@ namespace Serilog.Sinks.MSSqlServer
 		    _tableName = table.TableName;
 		    using (var conn = new SqlConnection(_connectionString))
 		    {
-		        string sql = GetSqlFromDataTable(_tableName, table);
+		        string sql = GetSqlFromDataTable(_tableName, table, _schemaName);
 		        using (SqlCommand cmd = new SqlCommand(sql, conn))
 		        {
 		            conn.Open();
@@ -42,12 +44,12 @@ namespace Serilog.Sinks.MSSqlServer
 
 		#region Static Methods
 
-		private static string GetSqlFromDataTable(string tableName, DataTable table)
+		private static string GetSqlFromDataTable(string tableName, DataTable table, string schema)
 		{
 			StringBuilder sql = new StringBuilder();
-			sql.AppendFormat("IF NOT EXISTS (SELECT * FROM sysobjects WHERE name = '{0}' AND xtype = 'U')", tableName);
+			sql.AppendFormat("IF NOT EXISTS (SELECT s.name, t.name FROM sys.tables t JOIN sys.schemas s ON t.schema_id = s.schema_id WHERE s.name = '{0}' AND t.name = '{1}')", schema, tableName);
 			sql.AppendLine(" BEGIN");
-			sql.AppendFormat(" CREATE TABLE [{0}] ( ", tableName);
+			sql.AppendFormat(" CREATE TABLE [{0}].[{1}] ( ", schema, tableName);
 
 			// columns
 			int numOfColumns = table.Columns.Count;
