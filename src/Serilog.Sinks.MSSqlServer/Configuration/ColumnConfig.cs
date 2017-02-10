@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#if NET45
 namespace Serilog.Configuration
 {
     using System;
@@ -60,3 +61,4 @@ namespace Serilog.Configuration
         }
     }
 }
+#endif

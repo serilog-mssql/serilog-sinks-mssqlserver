@@ -5,8 +5,13 @@ using System.Data;
 using Serilog.Configuration;
 using Serilog.Events;
 using Serilog.Sinks.MSSqlServer;
-using System.Configuration;
 using Serilog.Debugging;
+#if NET45
+using System.Configuration;
+#endif
+#if NETSTANDARD1_6
+using Serilog.Models;
+#endif
 
 // Copyright 2014 Serilog Contributors
 // 
@@ -64,6 +69,7 @@ namespace Serilog
 
             var defaultedPeriod = period ?? MSSqlServerSink.DefaultPeriod;
 
+#if NET45
             MSSqlServerConfigurationSection serviceConfigSection =
                ConfigurationManager.GetSection("MSSqlServerSettingsSection") as MSSqlServerConfigurationSection;
 
@@ -78,6 +84,7 @@ namespace Serilog
             }
 
             connectionString = GetConnectionString(connectionString);
+#endif
 
             return loggerConfiguration.Sink(
                 new MSSqlServerSink(
@@ -93,6 +100,7 @@ namespace Serilog
                 restrictedToMinimumLevel);
         }
 
+#if NET45
         /// <summary>
         /// Examine if supplied connection string is a reference to an item in the "ConnectionStrings" section of web.config
         /// If it is, return the ConnectionStrings item, if not, return string as supplied.
@@ -192,5 +200,6 @@ namespace Serilog
                 columnOptions.AdditionalDataColumns.Add(column);
             }
         }
+#endif
     }
 }
