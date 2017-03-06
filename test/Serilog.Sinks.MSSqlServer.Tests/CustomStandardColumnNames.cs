@@ -8,6 +8,7 @@ using System.Linq;
 using Dapper;
 using Xunit;
 using FluentAssertions;
+using System.Data;
 
 namespace Serilog.Sinks.MSSqlServer.Tests
 {
@@ -208,5 +209,52 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 logEvents.Should().Contain(e => e.Message.Contains(loggingInformationMessage));
             }
         }
+
+        [Fact]
+        public void WriteCustomObject()
+        {
+            // arrange
+
+            var options = new ColumnOptions()
+            {
+                AdditionalDataColumns = new List<DataColumn>()
+                {
+                    new DataColumn("SubProperty")
+                }
+            };
+
+            var loggerConfiguration = new LoggerConfiguration();
+            Log.Logger = loggerConfiguration.WriteTo.MSSqlServer(
+                connectionString: DatabaseFixture.LogEventsConnectionString,
+                tableName: DatabaseFixture.LogTableName,
+                autoCreateSqlTable: true,
+                batchPostingLimit: 1,
+                period: TimeSpan.FromSeconds(10),
+                columnOptions: options)
+                .CreateLogger();
+
+            var file = File.CreateText("WriteCustomObject.Self.log");
+            Serilog.Debugging.SelfLog.Enable(TextWriter.Synchronized(file));
+
+            // act
+            var custom = new SomeObject() { SubProperty = "SomeValue" };
+            const string loggingInformationMessage = "Logging Information message {@custom}";
+            Log.Information(loggingInformationMessage, custom);
+
+            Log.CloseAndFlush();
+
+            // assert
+            using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
+            {
+                var logEvents = conn.Query($"SELECT Message, Level, SubProperty FROM {DatabaseFixture.LogTableName}");
+                var value = (string)logEvents.FirstOrDefault().SubProperty;
+                value.ShouldBeEquivalentTo("SomeValue");
+            }
+        }
+    }
+
+    public class SomeObject
+    {
+        public string SubProperty { get; set; }
     }
 }
