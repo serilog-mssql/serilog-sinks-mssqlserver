@@ -48,6 +48,7 @@ namespace Serilog.Sinks.MSSqlServer
         readonly DataTable _eventsTable;
         readonly IFormatProvider _formatProvider;
         readonly string _tableName;
+        readonly string _schemaName;
         private readonly ColumnOptions _columnOptions;
 
         private readonly HashSet<string> _additionalDataColumnNames;
@@ -60,6 +61,7 @@ namespace Serilog.Sinks.MSSqlServer
         /// </summary>
         /// <param name="connectionString">Connection string to access the database.</param>
         /// <param name="tableName">Name of the table to store the data in.</param>
+        /// <param name="schemaName">Name of the schema for the table to store the data in. The default is 'dbo'.</param>
         /// <param name="batchPostingLimit">The maximum number of events to post in a single batch.</param>
         /// <param name="period">The time to wait between checking for event batches.</param>
         /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
@@ -72,7 +74,8 @@ namespace Serilog.Sinks.MSSqlServer
             TimeSpan period,
             IFormatProvider formatProvider,
             bool autoCreateSqlTable = false,
-            ColumnOptions columnOptions = null
+            ColumnOptions columnOptions = null,
+            string schemaName = "dbo"
             )
             : base(batchPostingLimit, period)
         {
@@ -84,6 +87,7 @@ namespace Serilog.Sinks.MSSqlServer
 
             _connectionString = connectionString;
             _tableName = tableName;
+            _schemaName = schemaName;
             _formatProvider = formatProvider;
             _columnOptions = columnOptions ?? new ColumnOptions();
             if (_columnOptions.AdditionalDataColumns != null)
@@ -99,7 +103,7 @@ namespace Serilog.Sinks.MSSqlServer
             {
                 try
                 {
-                    SqlTableCreator tableCreator = new SqlTableCreator(connectionString);
+                    SqlTableCreator tableCreator = new SqlTableCreator(connectionString, _schemaName);
                     tableCreator.CreateTable(_eventsTable);
                 }
                 catch (Exception ex)
@@ -134,7 +138,7 @@ namespace Serilog.Sinks.MSSqlServer
                             : new SqlBulkCopy(cn, SqlBulkCopyOptions.CheckConstraints | SqlBulkCopyOptions.FireTriggers, null)
                     )
                     {
-                        copy.DestinationTableName = _tableName;
+                        copy.DestinationTableName = string.Format("[{0}].[{1}]", _schemaName, _tableName);
                         foreach (var column in _eventsTable.Columns)
                         {
                             var columnName = ((DataColumn)column).ColumnName;
