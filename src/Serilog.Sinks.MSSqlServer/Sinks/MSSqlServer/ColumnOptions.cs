@@ -1,7 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+#if NET45
 using System.Data;
+#endif
+#if NETSTANDARD1_6
+using Serilog.Models;
+#endif
 
 namespace Serilog.Sinks.MSSqlServer
 {

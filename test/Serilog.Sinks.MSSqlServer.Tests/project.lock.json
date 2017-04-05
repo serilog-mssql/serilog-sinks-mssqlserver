@@ -434,7 +434,7 @@
           "lib/net45/xunit.runner.utility.desktop.dll": {}
         }
       },
-      "Serilog.Sinks.MSSqlServer/4.1.1": {
+      "Serilog.Sinks.MSSqlServer/5.0.0": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.5",
         "dependencies": {
@@ -852,7 +852,7 @@
           "lib/net45/xunit.runner.utility.desktop.dll": {}
         }
       },
-      "Serilog.Sinks.MSSqlServer/4.1.1": {
+      "Serilog.Sinks.MSSqlServer/5.0.0": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.5",
         "dependencies": {
@@ -1004,7 +1004,7 @@
       ]
     },
     "Microsoft.DiaSymReader/1.0.8": {
-      "sha512": "ABLULVhCAiyBFLBT5xX6vB4NhZDgwUylGRQK+zW5nZn2rbh1f8LOnFZ9gVSxzL6qOzPNb32Nu3QZ43iZerHOxA==",
+      "sha512": "HAhTmRgU+nnDVYxMZFAS1iwqg6CudbsSMZfSY9UJj4AJO4L69xZCtTOPKC5rW8+egNBWjDb0iBZV4ZdNI6dZnA==",
       "type": "package",
       "path": "Microsoft.DiaSymReader/1.0.8",
       "files": [
@@ -1622,7 +1622,7 @@
         "xunit.runner.utility.nuspec"
       ]
     },
-    "Serilog.Sinks.MSSqlServer/4.1.1": {
+    "Serilog.Sinks.MSSqlServer/5.0.0": {
       "type": "project",
       "path": "../../src/Serilog.Sinks.MSSqlServer/project.json",
       "msbuildProject": "../../src/Serilog.Sinks.MSSqlServer/Serilog.Sinks.MSSqlServer.xproj"
