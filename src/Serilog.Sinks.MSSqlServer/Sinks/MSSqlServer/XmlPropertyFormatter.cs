@@ -189,8 +189,12 @@ namespace Serilog.Sinks.MSSqlServer
             }
 
             string validName = name.Trim();
-
+#if NET45
             if (!char.IsLetter(validName[0]) || validName.StartsWith("xml", true, CultureInfo.CurrentCulture))
+#endif
+#if NETSTANDARD1_6
+            if (!char.IsLetter(validName[0]) || validName.StartsWith("xml", StringComparison.CurrentCultureIgnoreCase))
+#endif
             {
                 validName = "x" + name;
             }

@@ -1,5 +1,10 @@
 ﻿using System;
+#if NET45
 using System.Data;
+#endif
+#if NETSTANDARD1_6
+using Serilog.Models;
+#endif
 using System.Data.SqlClient;
 using System.Text;
 

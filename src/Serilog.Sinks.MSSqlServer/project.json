@@ -32,6 +32,13 @@
         "System.Xml.Linq": "",
         "System.Configuration": ""
       }
+    },
+    "netstandard1.6": {
+      "imports": "dnxcore50",
+      "dependencies": {
+        "NETStandard.Library": "1.6.1",
+        "System.Data.SqlClient": "4.3.0"
+      }
     }
   },
   "runtimes": {
