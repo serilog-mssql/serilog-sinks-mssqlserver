@@ -8,6 +8,10 @@ EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Serilog.Sinks.MSSqlServer", "src\Serilog.Sinks.MSSqlServer\Serilog.Sinks.MSSqlServer.xproj", "{803CD13A-D54B-4CEC-A55F-E22AE3D93B3C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{F02D6513-6F45-452E-85A0-41A872A2C1F8}"
+	ProjectSection(SolutionItems) = preProject
+		src\Serilog.Sinks.MSSqlServer\project.json = src\Serilog.Sinks.MSSqlServer\project.json
+		src\Serilog.Sinks.MSSqlServer\project.lock.json = src\Serilog.Sinks.MSSqlServer\project.lock.json
+	EndProjectSection
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Serilog.Sinks.MSSqlServer.Tests", "test\Serilog.Sinks.MSSqlServer.Tests\Serilog.Sinks.MSSqlServer.Tests.xproj", "{3C2D8E01-5580-426A-BDD9-EC59CD98E618}"
 EndProject
