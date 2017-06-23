@@ -167,7 +167,7 @@ namespace Serilog.Sinks.MSSqlServer
 
             var id = new DataColumn
             {
-                DataType = Type.GetType("System.Int32"),
+                DataType = _columnOptions.Id.ColumnType ?? Type.GetType("System.Int32"),
                 ColumnName = !string.IsNullOrWhiteSpace(_columnOptions.Id.ColumnName) ? _columnOptions.Id.ColumnName : "Id",
                 AutoIncrement = true
             };
@@ -188,7 +188,7 @@ namespace Serilog.Sinks.MSSqlServer
                     case StandardColumn.TimeStamp:
                         eventsTable.Columns.Add(new DataColumn
                         {
-                            DataType = typeof(DateTime),
+                            DataType = _columnOptions.TimeStamp.ColumnType ?? typeof(DateTime),
                             ColumnName = _columnOptions.TimeStamp.ColumnName ?? StandardColumn.TimeStamp.ToString(),
                             AllowDBNull = false
                         });
@@ -196,14 +196,14 @@ namespace Serilog.Sinks.MSSqlServer
                     case StandardColumn.LogEvent:
                         eventsTable.Columns.Add(new DataColumn
                         {
-                            DataType = typeof(string),
+                            DataType = _columnOptions.LogEvent.ColumnType ?? typeof(string),
                             ColumnName = _columnOptions.LogEvent.ColumnName ?? StandardColumn.LogEvent.ToString()
                         });
                         break;
                     case StandardColumn.Message:
                         eventsTable.Columns.Add(new DataColumn
                         {
-                            DataType = typeof(string),
+                            DataType = _columnOptions.Message.ColumnType ?? typeof(string),
                             MaxLength = -1,
                             ColumnName = _columnOptions.Message.ColumnName ?? StandardColumn.Message.ToString()
                         });
@@ -211,7 +211,7 @@ namespace Serilog.Sinks.MSSqlServer
                     case StandardColumn.MessageTemplate:
                         eventsTable.Columns.Add(new DataColumn
                         {
-                            DataType = typeof(string),
+                            DataType = _columnOptions.MessageTemplate.ColumnType ?? typeof(string),
                             MaxLength = -1,
                             ColumnName = _columnOptions.MessageTemplate.ColumnName ?? StandardColumn.MessageTemplate.ToString()
                         });
@@ -219,7 +219,7 @@ namespace Serilog.Sinks.MSSqlServer
                     case StandardColumn.Exception:
                         eventsTable.Columns.Add(new DataColumn
                         {
-                            DataType = typeof(string),
+                            DataType = _columnOptions.Exception.ColumnType ?? typeof(string),
                             MaxLength = -1,
                             ColumnName = _columnOptions.Exception.ColumnName ?? StandardColumn.Exception.ToString()
                         });
@@ -227,7 +227,7 @@ namespace Serilog.Sinks.MSSqlServer
                     case StandardColumn.Properties:
                         eventsTable.Columns.Add(new DataColumn
                         {
-                            DataType = typeof(string),
+                            DataType = _columnOptions.Exception.ColumnType ?? typeof(string),
                             MaxLength = -1,
                             ColumnName = _columnOptions.Properties.ColumnName ?? StandardColumn.Properties.ToString()
                         });

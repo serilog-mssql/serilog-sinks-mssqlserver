@@ -218,6 +218,11 @@ namespace Serilog.Sinks.MSSqlServer
             /// The name of the column in the database.
             /// </summary>
             public string ColumnName { get; set; }
+
+            /// <summary>
+            /// The type of the column in the database.
+            /// </summary>
+            public Type ColumnType { get; set; }
         }
 
         /// <summary>
