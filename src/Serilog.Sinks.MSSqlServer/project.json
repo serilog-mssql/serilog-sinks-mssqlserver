@@ -1,5 +1,5 @@
 {
-  "version": "5.0.0-*",
+  "version": "5.0.1-*",
   "description": "A Serilog sink that writes events to Microsoft SQL Server",
   "authors": [
     "Michiel van Oudheusden",
