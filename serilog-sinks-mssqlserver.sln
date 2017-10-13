@@ -1,24 +1,23 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.16
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{04226074-C72F-42BC-AB02-4D70A7BAE7E1}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Serilog.Sinks.MSSqlServer", "src\Serilog.Sinks.MSSqlServer\Serilog.Sinks.MSSqlServer.xproj", "{803CD13A-D54B-4CEC-A55F-E22AE3D93B3C}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{F02D6513-6F45-452E-85A0-41A872A2C1F8}"
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Serilog.Sinks.MSSqlServer.Tests", "test\Serilog.Sinks.MSSqlServer.Tests\Serilog.Sinks.MSSqlServer.Tests.xproj", "{3C2D8E01-5580-426A-BDD9-EC59CD98E618}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{70667ADA-A2FD-4821-A6A1-8D18D0D71507}"
 	ProjectSection(SolutionItems) = preProject
 		appveyor.yml = appveyor.yml
 		Build.ps1 = Build.ps1
 		CHANGES.md = CHANGES.md
-		global.json = global.json
 		README.md = README.md
 	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Serilog.Sinks.MSSqlServer", "src\Serilog.Sinks.MSSqlServer\Serilog.Sinks.MSSqlServer.csproj", "{803CD13A-D54B-4CEC-A55F-E22AE3D93B3C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Serilog.Sinks.MSSqlServer.Tests", "test\Serilog.Sinks.MSSqlServer.Tests\Serilog.Sinks.MSSqlServer.Tests.csproj", "{3C2D8E01-5580-426A-BDD9-EC59CD98E618}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -41,5 +40,8 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{803CD13A-D54B-4CEC-A55F-E22AE3D93B3C} = {04226074-C72F-42BC-AB02-4D70A7BAE7E1}
 		{3C2D8E01-5580-426A-BDD9-EC59CD98E618} = {F02D6513-6F45-452E-85A0-41A872A2C1F8}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {AAA6BF8D-7B53-4A5F-A79A-D1B306383B45}
 	EndGlobalSection
 EndGlobal
