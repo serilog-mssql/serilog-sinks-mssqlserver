@@ -4,7 +4,7 @@
     <Description>A Serilog sink that writes events to Microsoft SQL Server</Description>
     <VersionPrefix>5.0.1</VersionPrefix>
     <Authors>Michiel van Oudheusden;Serilog Contributors</Authors>
-    <TargetFrameworks>netstandard2.0;net45</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net45;net452</TargetFrameworks>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <AssemblyName>Serilog.Sinks.MSSqlServer</AssemblyName>
@@ -36,6 +36,15 @@
   </ItemGroup>
   
   <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System" />
+    <Reference Include="Microsoft.CSharp" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net452' ">
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
