@@ -303,6 +303,18 @@ namespace Serilog.Sinks.MSSqlServer
             if (options.ExcludeAdditionalProperties)
                 properties = properties.Where(p => !_additionalDataColumnNames.Contains(p.Key));
 
+            if (options.PropertiesFilter != null)
+            {
+                try
+                {
+                    properties = properties.Where(p => options.PropertiesFilter(p.Key));
+                }
+                catch (Exception ex)
+                {
+                    SelfLog.WriteLine("Unable to filter properties to store in {0} due to following error: {1}", this, ex);
+                }
+            }
+
             var sb = new StringBuilder();
 
             sb.AppendFormat("<{0}>", options.RootElementName);
@@ -414,7 +426,7 @@ namespace Serilog.Sinks.MSSqlServer
             base.Dispose(disposing);
 
             if (_eventsTable != null)
-            { 
+            {
                 _eventsTable.Dispose();
                 _eventsTable = null;
             }

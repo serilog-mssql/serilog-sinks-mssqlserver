@@ -207,6 +207,11 @@ namespace Serilog.Sinks.MSSqlServer
             ///     If true, will use the property key as the element name.
             /// </summary>
             public bool UsePropertyKeyAsElementName { get; set; }
+
+            /// <summary>
+            ///     If set, will only store properties allowed by the filter.
+            /// </summary>
+            public Predicate<string> PropertiesFilter { get; set; }
         }
 
         /// <summary>
