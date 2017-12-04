@@ -304,15 +304,16 @@ namespace Serilog.Sinks.MSSqlServer
                 properties = properties.Where(p => !_additionalDataColumnNames.Contains(p.Key));
 
             if (options.PropertiesFilter != null)
+            {
                 try
                 {
                     properties = properties.Where(p => options.PropertiesFilter(p.Key));
                 }
                 catch (Exception ex)
                 {
-                    SelfLog.WriteLine("Unable to filter properties to store due to following error: {0}", ex.Message);
+                    SelfLog.WriteLine("Unable to filter properties to store in {0} due to following error: {1}", this, ex);
                 }
-
+            }
 
             var sb = new StringBuilder();
 
