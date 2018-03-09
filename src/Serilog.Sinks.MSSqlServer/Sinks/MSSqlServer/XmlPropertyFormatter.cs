@@ -1,4 +1,4 @@
-﻿// Copyright 2015 Serilog Contributors
+// Copyright 2015 Serilog Contributors
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -28,6 +28,14 @@ namespace Serilog.Sinks.MSSqlServer
     /// </summary>
     public static class XmlPropertyFormatter
     {
+
+        /// <summary>
+        /// Regex to trasnform any non-xml char into ?, acoiding any exceptions on inserting the xml properties into the database
+        /// </summary>
+        private static Regex _invalidXMLChars = new Regex(
+        @"(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F\uFEFF\uFFFE\uFFFF]",
+        RegexOptions.Compiled);
+
         /// <summary>
         ///     Simplify the object so as to make handling the serialized
         ///     representation easier.
@@ -204,7 +212,7 @@ namespace Serilog.Sinks.MSSqlServer
         {
             if (value == null) return null;
 
-            return new XText(value.ToString()).ToString();
+            return new XText(_invalidXMLChars.Replace(value.ToString(), m => "\\u" + ((int)(byte)m.Value[0]).ToString("x4"))).ToString();
         }
     }
 }
