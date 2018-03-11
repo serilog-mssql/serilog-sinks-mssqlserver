@@ -212,7 +212,7 @@ namespace Serilog.Sinks.MSSqlServer
         {
             if (value == null) return null;
 
-            return new XText(_invalidXMLChars.Replace(value.ToString(), m => "\\u" + (ushort)m.Value[0]).ToString("x4"))).ToString();
+            return new XText(_invalidXMLChars.Replace(value.ToString(), m => "\\u" + ((ushort)m.Value[0]).ToString("x4"))).ToString();
         }
     }
 }
