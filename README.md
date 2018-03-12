@@ -28,7 +28,7 @@ var log = new LoggerConfiguration()
 If you are configuring Serilog with the `ReadFrom.AppSettings()` XML configuration support, you can use:
 
 ```xml
-<add key="serilog:using:MSSqlSever" value="Serilog.Sinks.MSSqlServer" />
+<add key="serilog:using:MSSqlServer" value="Serilog.Sinks.MSSqlServer" />
 <add key="serilog:write-to:MSSqlServer.connectionString" value="Server=..."/>
 <add key="serilog:write-to:MSSqlServer.tableName" value="Logs"/>
 <add key="serilog:write-to:MSSqlServer.autoCreateSqlTable" value="true"/>
