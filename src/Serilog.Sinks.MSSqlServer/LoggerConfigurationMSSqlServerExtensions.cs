@@ -142,6 +142,10 @@ namespace Serilog
                     case "bigint":
                         dataType = Type.GetType("System.Int64");
                         break;
+                    case "binary":
+                        dataType = Type.GetType("System.Byte[]");
+                        column.ExtendedProperties["DataLength"] = c.DataLength;
+                        break;
                     case "bit":
                         dataType = Type.GetType("System.Boolean");
                         break;
@@ -152,6 +156,7 @@ namespace Serilog
                     case "text":
                     case "varchar":
                         dataType = Type.GetType("System.String");
+                        column.MaxLength = c.DataLength;
                         break;
                     case "date":
                     case "datetime":
@@ -184,11 +189,14 @@ namespace Serilog
                         dataType = Type.GetType("System.Guid");
                         break;
                 }
+
                 column.DataType = dataType;
+                column.AllowDBNull = c.AllowNull;
                 if (columnOptions.AdditionalDataColumns == null)
                 {
                     columnOptions.AdditionalDataColumns = new Collection<DataColumn>();
                 }
+
                 columnOptions.AdditionalDataColumns.Add(column);
             }
         }

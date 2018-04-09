@@ -101,6 +101,10 @@ namespace Serilog.Sinks.MSSqlServer
                     sqlType = "TINYINT";
                     break;
 
+                case "System.Byte[]":
+                    sqlType = columnSize == -1 ? "VARBINARY" : "BINARY(" + columnSize.ToString() + ")";
+                    break;
+
                 case "System.String":
 	                sqlType = "NVARCHAR(" + ((columnSize == -1) ? "MAX" : columnSize.ToString()) + ")";
 	                break;
@@ -148,7 +152,13 @@ namespace Serilog.Sinks.MSSqlServer
 	    // Overload based on DataColumn from DataTable type
 		private static string SqlGetType(DataColumn column)
 		{
-			return SqlGetType(column.DataType, column.MaxLength, 10, 2, column.AllowDBNull);
+            int dataLength = -1;
+            if (!column.ExtendedProperties.ContainsKey("DataLength") || !int.TryParse(column.ExtendedProperties["DataLength"].ToString(), out dataLength))
+            {
+                dataLength = column.MaxLength;
+            }
+
+            return SqlGetType(column.DataType, dataLength, 10, 2, column.AllowDBNull);
 		}
 
 		#endregion
