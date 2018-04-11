@@ -4,7 +4,7 @@
     <Description>A Serilog sink that writes events to Microsoft SQL Server</Description>
     <VersionPrefix>5.1.2</VersionPrefix>
     <Authors>Michiel van Oudheusden;Serilog Contributors</Authors>
-    <TargetFrameworks>netstandard2.0;net45;net452</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net45</TargetFrameworks>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <AssemblyName>Serilog.Sinks.MSSqlServer</AssemblyName>
@@ -27,12 +27,23 @@
     <PackageReference Include="Serilog.Sinks.PeriodicBatching" Version="2.1.1" />
   </ItemGroup>
 
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0'">
-    <DefineConstants>NETCORE;NETSTANDARD;NETSTANDARD2_0</DefineConstants>
-  </PropertyGroup>
+  <ItemGroup>
+    <Folder Include="BuildTargets\net452\" />
+    <Folder Include="BuildTargets\netstandard2_0\" />
+
+    <!-- Common .NET Standard 2.0 libraries -->
+    
+    <!-- Ensure MSBuild ignores everyting in the folder by default -->
+    <Compile Remove="BuildTargets\**\*.*" />
+    
+    <!-- Shown in VStudio, but None = MSBuild ignores (not code, publish-content, etc.) -->
+    <None Include="BuildTargets\**\*.*" />
+  </ItemGroup>
+ 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0'">
     <PackageReference Include="System.Data.SqlClient" Version="4.4.0" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.4.0" />
+    <Compile Include="BuildTargets\netstandard2_0\*.cs" />
   </ItemGroup>
   
   <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
@@ -42,15 +53,7 @@
     <Reference Include="System.Configuration" />
     <Reference Include="System" />
     <Reference Include="Microsoft.CSharp" />
+    <Compile Include="BuildTargets\net452\*.cs" />
   </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net452' ">
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Configuration" />
-    <Reference Include="System" />
-    <Reference Include="Microsoft.CSharp" />
-  </ItemGroup>
-
+  
 </Project>
