@@ -28,22 +28,17 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="BuildTargets\net452\" />
-    <Folder Include="BuildTargets\netstandard2_0\" />
-
-    <!-- Common .NET Standard 2.0 libraries -->
-    
     <!-- Ensure MSBuild ignores everyting in the folder by default -->
     <Compile Remove="BuildTargets\**\*.*" />
-    
-    <!-- Shown in VStudio, but None = MSBuild ignores (not code, publish-content, etc.) -->
+    <!-- Shown in VStudio, but None tells MSBuild to ignore it (files are not code, publish-content, etc.) -->
     <None Include="BuildTargets\**\*.*" />
+    <!-- ItemGroups below with TFM conditions will re-include the compile targets -->
   </ItemGroup>
  
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0'">
     <PackageReference Include="System.Data.SqlClient" Version="4.4.0" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.4.0" />
-    <Compile Include="BuildTargets\netstandard2_0\*.cs" />
+    <Compile Include="BuildTargets\netstandard2_0\**\*.cs" />
   </ItemGroup>
   
   <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
@@ -53,7 +48,7 @@
     <Reference Include="System.Configuration" />
     <Reference Include="System" />
     <Reference Include="Microsoft.CSharp" />
-    <Compile Include="BuildTargets\net452\*.cs" />
+    <Compile Include="BuildTargets\net452\**\*.cs" />
   </ItemGroup>
   
 </Project>
