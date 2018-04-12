@@ -4,8 +4,8 @@ using System.Data;
 using Serilog.Configuration;
 using Serilog.Events;
 using Serilog.Sinks.MSSqlServer;
-using System.Configuration;
 using Serilog.Debugging;
+using Microsoft.Extensions.Configuration;
 
 // Copyright 2014 Serilog Contributors
 // 
@@ -37,19 +37,21 @@ namespace Serilog
         /// <param name="loggerConfiguration">The logger configuration.</param>
         /// <param name="connectionString">The connection string to the database where to store the events.</param>
         /// <param name="tableName">Name of the table to store the events in.</param>
-        /// <param name="schemaName">Name of the schema for the table to store the data in. The default is 'dbo'.</param>
+        /// <param name="appConfiguration">Additional application-level configuration.</param>
         /// <param name="restrictedToMinimumLevel">The minimum log event level required in order to write an event to the sink.</param>
         /// <param name="batchPostingLimit">The maximum number of events to post in a single batch.</param>
         /// <param name="period">The time to wait between checking for event batches.</param>
         /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
         /// <param name="autoCreateSqlTable">Create log table with the provided name on destination sql server.</param>
         /// <param name="columnOptions"></param>
+        /// <param name="schemaName">Name of the schema for the table to store the data in. The default is 'dbo'.</param>
         /// <returns>Logger configuration, allowing configuration to continue.</returns>
         /// <exception cref="ArgumentNullException">A required parameter is null.</exception>
         public static LoggerConfiguration MSSqlServer(
             this LoggerSinkConfiguration loggerConfiguration,
             string connectionString,
             string tableName,
+            IConfiguration appConfiguration = null,
             LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
             int batchPostingLimit = MSSqlServerSink.DefaultBatchPostingLimit,
             TimeSpan? period = null,
@@ -63,20 +65,9 @@ namespace Serilog
 
             var defaultedPeriod = period ?? MSSqlServerSink.DefaultPeriod;
 
-            MSSqlServerConfigurationSection serviceConfigSection =
-               ConfigurationManager.GetSection("MSSqlServerSettingsSection") as MSSqlServerConfigurationSection;
+            GenerateDataColumnsFromConfig(appConfiguration, columnOptions);
 
-            // If we have additional columns from config, load them as well
-            if (serviceConfigSection != null && serviceConfigSection.Columns.Count > 0)
-            {
-                if (columnOptions == null)
-                {
-                    columnOptions = new ColumnOptions();
-                }
-                GenerateDataColumnsFromConfig(serviceConfigSection, columnOptions);
-            }
-
-            connectionString = GetConnectionString(connectionString);
+            connectionString = GetConnectionString(connectionString, appConfiguration);
 
             return loggerConfiguration.Sink(
                 new MSSqlServerSink(
@@ -97,98 +88,57 @@ namespace Serilog
         /// If it is, return the ConnectionStrings item, if not, return string as supplied.
         /// </summary>
         /// <param name="nameOrConnectionString">The name of the ConnectionStrings key or raw connection string.</param>
+        /// <param name="appConfiguration">Additional application-level configuration.</param>
         /// <remarks>Pulled from review of Entity Framework 6 methodology for doing the same</remarks>
-        private static string GetConnectionString(string nameOrConnectionString)
+        private static string GetConnectionString(string nameOrConnectionString, IConfiguration appConfiguration)
         {
-            
             // If there is an `=`, we assume this is a raw connection string not a named value
             // If there are no `=`, attempt to pull the named value from config
-            if (nameOrConnectionString.IndexOf('=') < 0)
+            if(nameOrConnectionString.IndexOf('=') > -1)
             {
-                var cs = ConfigurationManager.ConnectionStrings[nameOrConnectionString];
-                if (cs != null)
-                {
-                    return cs.ConnectionString;
-                }
-                else
-                {
-                    SelfLog.WriteLine("MSSqlServer sink configured value {0} is not found in ConnectionStrings settings and does not appear to be a raw connection string.", nameOrConnectionString);
-                }
+                return nameOrConnectionString;
             }
-
-            return nameOrConnectionString;
+            string cs = appConfiguration?.GetConnectionString(nameOrConnectionString);
+            if(string.IsNullOrEmpty(cs))
+            {
+                SelfLog.WriteLine("MSSqlServer sink configured value {0} is not found in ConnectionStrings settings and does not appear to be a raw connection string.", nameOrConnectionString);
+            }
+            return cs;
         }
 
         /// <summary>
-        /// Generate an array of DataColumns using the supplied MSSqlServerConfigurationSection,
-        ///     which is an array of keypairs defining the SQL column name and SQL data type
-        /// Entries are appended to a list of DataColumns in column options
+        ///     Generate an array of DataColumns using the supplied app configuration.
+        ///     Entries are appended to any existing DataColumns the client may have defined programmatically.
         /// </summary>
-        /// <param name="serviceConfigSection">A previously loaded configuration section</param>
+        /// <param name="appConfiguration">Additional application-level configuration.</param>
         /// <param name="columnOptions">column options with existing array of columns to append our config columns to</param>
-        private static void GenerateDataColumnsFromConfig(MSSqlServerConfigurationSection serviceConfigSection,
-            ColumnOptions columnOptions)
+        private static void GenerateDataColumnsFromConfig(IConfiguration appConfiguration, ColumnOptions columnOptions)
         {
-            foreach (ColumnConfig c in serviceConfigSection.Columns)
+            var columnCollection = appConfiguration?.GetSection(MSSqlServerSink.ConfigurationSectionName).Get<ColumnCollection>();
+
+            if(columnCollection == null || columnCollection.Columns.Count == 0)
             {
-                // Set the type based on the defined SQL type from config
-                DataColumn column = new DataColumn(c.ColumnName);
+                return;
+            }
 
-                Type dataType = null;
+            if(columnOptions == null)
+            {
+                columnOptions = new ColumnOptions();
+            }
 
-                switch (c.DataType)
+            foreach (Column c in columnCollection.Columns)
+            {
+                // Validate here since the .NET Standard config binding system doesn't offer validation
+                if(!string.IsNullOrEmpty(c.ColumnName) && !string.IsNullOrEmpty(c.DataType))
                 {
-                    case "bigint":
-                        dataType = Type.GetType("System.Int64");
-                        break;
-                    case "bit":
-                        dataType = Type.GetType("System.Boolean");
-                        break;
-                    case "char":
-                    case "nchar":
-                    case "ntext":
-                    case "nvarchar":
-                    case "text":
-                    case "varchar":
-                        dataType = Type.GetType("System.String");
-                        break;
-                    case "date":
-                    case "datetime":
-                    case "datetime2":
-                    case "smalldatetime":
-                        dataType = Type.GetType("System.DateTime");
-                        break;
-                    case "decimal":
-                    case "money":
-                    case "numeric":
-                    case "smallmoney":
-                        dataType = Type.GetType("System.Decimal");
-                        break;
-                    case "float":
-                        dataType = Type.GetType("System.Double");
-                        break;
-                    case "int":
-                        dataType = Type.GetType("System.Int32");
-                        break;
-                    case "real":
-                        dataType = Type.GetType("System.Single");
-                        break;
-                    case "smallint":
-                        dataType = Type.GetType("System.Int16");
-                        break;
-                    case "time":
-                        dataType = Type.GetType("System.TimeSpan");
-                        break;
-                    case "uniqueidentifier":
-                        dataType = Type.GetType("System.Guid");
-                        break;
+                    if(columnOptions.AdditionalDataColumns == null)
+                    {
+                        columnOptions.AdditionalDataColumns = new Collection<DataColumn>();
+                    }
+                    columnOptions.AdditionalDataColumns.Add(
+                        new DataColumn(c.ColumnName, ConvertSqlDataType.GetEquivalentType(c.DataType))
+                        );
                 }
-                column.DataType = dataType;
-                if (columnOptions.AdditionalDataColumns == null)
-                {
-                    columnOptions.AdditionalDataColumns = new Collection<DataColumn>();
-                }
-                columnOptions.AdditionalDataColumns.Add(column);
             }
         }
     }

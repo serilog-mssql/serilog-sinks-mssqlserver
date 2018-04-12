@@ -3,18 +3,18 @@
 A Serilog sink that writes events to Microsoft SQL Server. While a NoSql store allows for more flexibility to store the different kinds of properties, it sometimes is easier to use an already existing MS SQL server. This sink will write the logevent data to a table and can optionally also store the properties inside an Xml column so they can be queried.
 
 **Package** - [Serilog.Sinks.MSSqlServer](http://nuget.org/packages/serilog.sinks.mssqlserver)
-| **Platforms** - .NET 4.5 and .NET Standard 2.0
+| **Platforms** - .NET Framework 4.5 and .NET Standard 2.0
 
 ## Configuration
 
-At minimum a connection string and table name are required.
+At minimum a connection string and table name are required. 
 
-To use a connection string from the `<connectionStrings>` element of your application config file, specify its name as the value of the connection string.
+To use a connection string from the `connectionStrings` section of your application config, specify its name as the value of the connection string.
 
-#### Code
+#### Code (.NET Framework)
 
 ```csharp
-var connectionString = @"Server=...";  // or the name of a connection string in your .config file
+var connectionString = @"Server=...";  // or the name of a connection string in the app config
 var tableName = "Logs";
 var columnOptions = new ColumnOptions();  // optional
 
@@ -23,9 +23,28 @@ var log = new LoggerConfiguration()
     .CreateLogger();
 ```
 
-#### XML
+#### Code (.NET Standard / .NET Core)
 
-If you are configuring Serilog with the `ReadFrom.AppSettings()` XML configuration support, you can use:
+The application configuration parameter is optional for .NET Standard libraries or .NET Core applications:
+
+```csharp
+var appSettings = new ConfigurationBuilder()
+    .SetBasePath(Directory.GetCurrentDirectory())
+    .AddJsonFile("appsettings.json")
+    .Build(); // more likely you will inject an IConfiguration reference
+
+var connectionString = @"Server=...";  // or the name of a connection string in the app config
+var tableName = "Logs";
+var columnOptions = new ColumnOptions();  // optional
+
+var log = new LoggerConfiguration()
+    .WriteTo.MSSqlServer(connectionString, tableName, appConfiguration: appSettings, columnOptions: columnOptions)
+    .CreateLogger();
+```
+
+#### AppSettings package (.NET Framework)
+
+.NET Framework libraries or applications can call `ReadFrom.AppSettings()` to configure Serilog using the [Serilog.Settings.AppSettings](https://github.com/serilog/serilog-settings-appsettings) package. This will apply configuration parameters from the `app.config` or `web.config` file:
 
 ```xml
 <add key="serilog:using:MSSqlServer" value="Serilog.Sinks.MSSqlServer" />
@@ -33,6 +52,29 @@ If you are configuring Serilog with the `ReadFrom.AppSettings()` XML configurati
 <add key="serilog:write-to:MSSqlServer.tableName" value="Logs"/>
 <add key="serilog:write-to:MSSqlServer.autoCreateSqlTable" value="true"/>
 ```
+
+#### Configuration package (.NET Standard / .NET Core)
+
+.NET Standard libraries and .NET Core applications can call `ReadFrom.Configuration(IConfiguration)` to configure Serilog using the [Serilog.Settings.Configuration](https://github.com/serilog/serilog-settings-configuration) package. This will apply configuration parameters from the application configuration (not only `appsettings.json` as shown here, but any other valid `IConfiguration` source):
+
+```json
+{
+  "Serilog": {
+    "Using":  ["Serilog.Sinks.MSSqlServer"],
+    "MinimumLevel": "Debug",
+    "WriteTo": [
+      { "Name": "MSSqlServer", 
+                "Args": { 
+                  "connectionString": "Server...",
+                  "tableName": "Logs"
+                } 
+      }
+    ]
+  }
+}
+```
+
+Do not use the `IConfigurationSection` version of `ReadFrom.Configuration(...)`. That would prevent this package from locating any custom columns defined in the `MSSqlServerSettingsSection` section because that section is separate from the Serilog section.
 
 ## Table definition
 
@@ -125,9 +167,13 @@ By default, additional properties will still be included in the XML data saved t
 However, if necessary, then the properties being saved in their own columns can be excluded from the XML.  Use the `columnOptions.Properties.ExcludeAdditionalProperties` parameter in the sink configuration to exclude the redundant properties from the XML. 
 
 
-### XML configuration for columns
+### Columns defined by configuration
 
 Columns can be defined with the name and data type of the column in SQL Server. Columns specified must match database table exactly. DataType is case sensitive, based on SQL type (excluding precision/length). 
+
+#### .NET Framework
+
+This section will be processed automatically if it exists in the application's `web.config` or `app.config` file.
 
 ```xml
   <configSections>
@@ -140,6 +186,27 @@ Columns can be defined with the name and data type of the column in SQL Server. 
       <add ColumnName="Release" DataType="varchar"/>
     </Columns>
   </MSSqlServerSettingsSection>      
+```
+
+#### .NET Standard / .NET Core
+
+To add custom columns, you must provide the `IConfiguration appConfiguration` parameter during sink configuration. There are many provider extensions supporting many configuration formats in the `Microsoft.Extensions.Configuration` namespace, but `appsettings.json` is well known:
+
+```json
+{
+  "MSSqlServerSettingsSection" : {
+    "Columns" : [
+      {
+        "ColumnName" : "EventType",
+        "DataType" : "int"
+      },
+      {
+        "ColumnName" : "Release",
+        "DataType" : "varchar"
+      }
+    ]
+  }
+}
 ```
 
 ### Options for serialization of the log event data

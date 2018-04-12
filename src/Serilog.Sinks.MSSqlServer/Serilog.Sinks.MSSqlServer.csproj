@@ -28,16 +28,17 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- Ensure MSBuild ignores everyting in the folder by default -->
+    <!-- Ensure MSBuild ignores all build-target-specific files by default -->
     <Compile Remove="BuildTargets\**\*.*" />
-    <!-- Shown in VStudio, but None tells MSBuild to ignore it (files are not code, publish-content, etc.) -->
+    <!-- Show in VStudio, but MSBuild ignores these (indicates files are not code, non-published-content, etc.) -->
     <None Include="BuildTargets\**\*.*" />
     <!-- ItemGroups below with TFM conditions will re-include the compile targets -->
   </ItemGroup>
  
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0'">
     <PackageReference Include="System.Data.SqlClient" Version="4.4.0" />
-    <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.4.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="2.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="2.0.0" />
     <Compile Include="BuildTargets\netstandard2_0\**\*.cs" />
   </ItemGroup>
   

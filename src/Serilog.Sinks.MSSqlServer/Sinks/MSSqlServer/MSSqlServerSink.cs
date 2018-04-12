@@ -42,6 +42,11 @@ namespace Serilog.Sinks.MSSqlServer
         /// </summary>
         public static readonly TimeSpan DefaultPeriod = TimeSpan.FromSeconds(5);
 
+        /// <summary>
+        ///     The name of the configuration file section for this sink.
+        /// </summary>
+        public static readonly string ConfigurationSectionName = "MSSqlServerSettings";
+
         readonly string _connectionString;
 
         private DataTable _eventsTable;

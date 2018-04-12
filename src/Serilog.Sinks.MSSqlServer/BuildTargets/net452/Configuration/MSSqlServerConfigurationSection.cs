@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Serilog.Sinks.MSSqlServer;
 using System.Configuration;
 
 namespace Serilog.Configuration
@@ -22,7 +23,7 @@ namespace Serilog.Configuration
     public class MSSqlServerConfigurationSection : ConfigurationSection
     {
         private static MSSqlServerConfigurationSection settings =
-            ConfigurationManager.GetSection("MSSqlServerSettings") as MSSqlServerConfigurationSection;
+            ConfigurationManager.GetSection(MSSqlServerSink.ConfigurationSectionName) as MSSqlServerConfigurationSection;
 
         /// <summary>
         /// Access to the settings stored in the config file

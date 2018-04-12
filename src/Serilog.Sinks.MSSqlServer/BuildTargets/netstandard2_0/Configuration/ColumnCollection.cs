@@ -12,32 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Configuration;
+using System.Collections.Generic;
 
 namespace Serilog.Configuration
 {
     /// <summary>
-    /// Collection of configuration items for use in generating DataColumn[]
+    /// All of the custom columns defined in the app config.
     /// </summary>
-    public class ColumnCollection : ConfigurationElementCollection
+    public class ColumnCollection
     {
         /// <summary>
-        /// Create new element
+        /// All of the custom columns defined in the app config.
         /// </summary>
-        /// <returns>new ColumnConfig instance</returns>
-        protected override ConfigurationElement CreateNewElement()
-        {
-            return new ColumnConfig();
-        }
-
-        /// <summary>
-        /// Fetch Key for the Element
-        /// </summary>
-        /// <param name="element"></param>
-        /// <returns>ColumnName</returns>
-        protected override object GetElementKey(ConfigurationElement element)
-        {
-            return ((ColumnConfig)element).ColumnName;
-        }
+        public List<Column> Columns { get; set; } = new List<Column>();
     }
 }
