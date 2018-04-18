@@ -64,17 +64,15 @@ var log = new LoggerConfiguration()
     "MinimumLevel": "Debug",
     "WriteTo": [
       { "Name": "MSSqlServer", 
-                "Args": { 
-                  "connectionString": "Server...",
-                  "tableName": "Logs"
-                } 
+        "Args": { 
+            "connectionString": "Server...",
+            "tableName": "Logs"
+        } 
       }
     ]
   }
 }
 ```
-
-Do not use the `IConfigurationSection` version of `ReadFrom.Configuration(...)`. That would prevent this package from locating any custom columns defined in the `MSSqlServerSettingsSection` section because that section is separate from the Serilog section.
 
 ## Table definition
 
@@ -190,19 +188,29 @@ This section will be processed automatically if it exists in the application's `
 
 #### .NET Standard / .NET Core
 
-To add custom columns, you must provide the `IConfiguration appConfiguration` parameter during sink configuration. There are many provider extensions supporting many configuration formats in the `Microsoft.Extensions.Configuration` namespace, but `appsettings.json` is well known:
+To add custom columns, add a list of column names and data types for the `customColumns` argument:
 
 ```json
 {
-  "MSSqlServerSettingsSection" : {
-    "Columns" : [
-      {
-        "ColumnName" : "EventType",
-        "DataType" : "int"
-      },
-      {
-        "ColumnName" : "Release",
-        "DataType" : "varchar"
+  "Serilog": {
+    "Using":  ["Serilog.Sinks.MSSqlServer"],
+    "MinimumLevel": "Debug",
+    "WriteTo": [
+      { "Name": "MSSqlServer", 
+        "Args": { 
+            "connectionString": "Server...",
+            "tableName": "Logs"
+            "customColumns": [
+                {
+                "ColumnName" : "EventType",
+                "DataType" : "int"
+                },
+                {
+                "ColumnName" : "Release",
+                "DataType" : "varchar"
+                }
+            ]
+        } 
       }
     ]
   }

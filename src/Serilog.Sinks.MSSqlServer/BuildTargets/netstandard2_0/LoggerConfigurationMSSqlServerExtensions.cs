@@ -6,6 +6,7 @@ using Serilog.Events;
 using Serilog.Sinks.MSSqlServer;
 using Serilog.Debugging;
 using Microsoft.Extensions.Configuration;
+using System.Collections.Generic;
 
 // Copyright 2014 Serilog Contributors
 // 
@@ -37,7 +38,8 @@ namespace Serilog
         /// <param name="loggerConfiguration">The logger configuration.</param>
         /// <param name="connectionString">The connection string to the database where to store the events.</param>
         /// <param name="tableName">Name of the table to store the events in.</param>
-        /// <param name="appConfiguration">Additional application-level configuration.</param>
+        /// <param name="appConfiguration">Additional application-level configuration. Required if connectionString is a name.</param>
+        /// <param name="customColumns">Additional columns to store log event properties of the same name.</param>
         /// <param name="restrictedToMinimumLevel">The minimum log event level required in order to write an event to the sink.</param>
         /// <param name="batchPostingLimit">The maximum number of events to post in a single batch.</param>
         /// <param name="period">The time to wait between checking for event batches.</param>
@@ -52,6 +54,7 @@ namespace Serilog
             string connectionString,
             string tableName,
             IConfiguration appConfiguration = null,
+            List<Column> customColumns = null,
             LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
             int batchPostingLimit = MSSqlServerSink.DefaultBatchPostingLimit,
             TimeSpan? period = null,
@@ -65,13 +68,13 @@ namespace Serilog
 
             var defaultedPeriod = period ?? MSSqlServerSink.DefaultPeriod;
 
-            GenerateDataColumnsFromConfig(appConfiguration, columnOptions);
+            AddCustomColumns(customColumns, columnOptions);
 
-            connectionString = GetConnectionString(connectionString, appConfiguration);
+            var connectionStr = GetConnectionString(connectionString, appConfiguration);
 
             return loggerConfiguration.Sink(
                 new MSSqlServerSink(
-                    connectionString,
+                    connectionStr,
                     tableName,
                     batchPostingLimit,
                     defaultedPeriod,
@@ -94,10 +97,7 @@ namespace Serilog
         {
             // If there is an `=`, we assume this is a raw connection string not a named value
             // If there are no `=`, attempt to pull the named value from config
-            if(nameOrConnectionString.IndexOf('=') > -1)
-            {
-                return nameOrConnectionString;
-            }
+            if(nameOrConnectionString.IndexOf('=') > -1) return nameOrConnectionString;
             string cs = appConfiguration?.GetConnectionString(nameOrConnectionString);
             if(string.IsNullOrEmpty(cs))
             {
@@ -107,39 +107,26 @@ namespace Serilog
         }
 
         /// <summary>
-        ///     Generate an array of DataColumns using the supplied app configuration.
-        ///     Entries are appended to any existing DataColumns the client may have defined programmatically.
+        /// Custom columns are stored in the AdditionalDataColumns collection.
         /// </summary>
-        /// <param name="appConfiguration">Additional application-level configuration.</param>
-        /// <param name="columnOptions">column options with existing array of columns to append our config columns to</param>
-        private static void GenerateDataColumnsFromConfig(IConfiguration appConfiguration, ColumnOptions columnOptions)
+        /// <param name="columns"></param>
+        /// <param name="columnOptions"></param>
+        private static void AddCustomColumns(List<Column> columns, ColumnOptions columnOptions)
         {
-            var columnCollection = appConfiguration?.GetSection(MSSqlServerSink.ConfigurationSectionName).Get<ColumnCollection>();
+            if(columns == null) return;
 
-            if(columnCollection == null || columnCollection.Columns.Count == 0)
-            {
-                return;
-            }
+            if(columnOptions == null) columnOptions = new ColumnOptions();
 
-            if(columnOptions == null)
+            foreach(Column c in columns)
             {
-                columnOptions = new ColumnOptions();
-            }
-
-            foreach (Column c in columnCollection.Columns)
-            {
-                // Validate here since the .NET Standard config binding system doesn't offer validation
+                // Validate here since the config binding system used by the Serilog config package doesn't offer validation
                 if(!string.IsNullOrEmpty(c.ColumnName) && !string.IsNullOrEmpty(c.DataType))
                 {
-                    if(columnOptions.AdditionalDataColumns == null)
-                    {
-                        columnOptions.AdditionalDataColumns = new Collection<DataColumn>();
-                    }
-                    columnOptions.AdditionalDataColumns.Add(
-                        new DataColumn(c.ColumnName, ConvertSqlDataType.GetEquivalentType(c.DataType))
-                        );
+                    if(columnOptions.AdditionalDataColumns == null) columnOptions.AdditionalDataColumns = new Collection<DataColumn>();
+                    columnOptions.AdditionalDataColumns.Add(new DataColumn(c.ColumnName, ConvertSqlDataType.GetEquivalentType(c.DataType)));
                 }
             }
         }
+
     }
 }
