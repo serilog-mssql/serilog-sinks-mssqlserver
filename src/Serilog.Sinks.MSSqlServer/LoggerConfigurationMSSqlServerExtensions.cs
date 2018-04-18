@@ -94,6 +94,60 @@ namespace Serilog
         }
 
         /// <summary>
+        /// Adds a sink that writes log events to a table in a MSSqlServer database.
+        /// Create a database and execute the table creation script found here
+        /// https://gist.github.com/mivano/10429656
+        /// or use the autoCreateSqlTable option.
+        /// </summary>
+        /// <param name="loggerAuditSinkConfiguration">The logger configuration.</param>
+        /// <param name="connectionString">The connection string to the database where to store the events.</param>
+        /// <param name="tableName">Name of the table to store the events in.</param>
+        /// <param name="schemaName">Name of the schema for the table to store the data in. The default is 'dbo'.</param>
+        /// <param name="restrictedToMinimumLevel">The minimum log event level required in order to write an event to the sink.</param>
+        /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
+        /// <param name="autoCreateSqlTable">Create log table with the provided name on destination sql server.</param>
+        /// <param name="columnOptions"></param>
+        /// <returns>Logger configuration, allowing configuration to continue.</returns>
+        /// <exception cref="ArgumentNullException">A required parameter is null.</exception>
+        public static LoggerConfiguration MSSqlServer(this LoggerAuditSinkConfiguration loggerAuditSinkConfiguration,
+                                                      string connectionString,
+                                                      string tableName,
+                                                      LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
+                                                      IFormatProvider formatProvider = null,
+                                                      bool autoCreateSqlTable = false,
+                                                      ColumnOptions columnOptions = null,
+                                                      string schemaName = "dbo")
+        {
+            if (loggerAuditSinkConfiguration == null) throw new ArgumentNullException("loggerAuditSinkConfiguration");
+
+            MSSqlServerConfigurationSection serviceConfigSection =
+               ConfigurationManager.GetSection("MSSqlServerSettingsSection") as MSSqlServerConfigurationSection;
+
+            // If we have additional columns from config, load them as well
+            if (serviceConfigSection != null && serviceConfigSection.Columns.Count > 0)
+            {
+                if (columnOptions == null)
+                {
+                    columnOptions = new ColumnOptions();
+                }
+                GenerateDataColumnsFromConfig(serviceConfigSection, columnOptions);
+            }
+
+            connectionString = GetConnectionString(connectionString);
+
+            return loggerAuditSinkConfiguration.Sink(
+                new MSSqlServerAuditSink(
+                    connectionString,
+                    tableName,
+                    formatProvider,
+                    autoCreateSqlTable,
+                    columnOptions,
+                    schemaName
+                    ),
+                restrictedToMinimumLevel);
+        }
+
+        /// <summary>
         /// Examine if supplied connection string is a reference to an item in the "ConnectionStrings" section of web.config
         /// If it is, return the ConnectionStrings item, if not, return string as supplied.
         /// </summary>
@@ -101,7 +155,7 @@ namespace Serilog
         /// <remarks>Pulled from review of Entity Framework 6 methodology for doing the same</remarks>
         private static string GetConnectionString(string nameOrConnectionString)
         {
-            
+
             // If there is an `=`, we assume this is a raw connection string not a named value
             // If there are no `=`, attempt to pull the named value from config
             if (nameOrConnectionString.IndexOf('=') < 0)
@@ -140,10 +194,10 @@ namespace Serilog
                 switch (c.DataType)
                 {
                     case "bigint":
-                        dataType = Type.GetType("System.Int64");
+                        dataType = typeof(long);
                         break;
                     case "bit":
-                        dataType = Type.GetType("System.Boolean");
+                        dataType = typeof(bool);
                         break;
                     case "char":
                     case "nchar":
@@ -151,37 +205,37 @@ namespace Serilog
                     case "nvarchar":
                     case "text":
                     case "varchar":
-                        dataType = Type.GetType("System.String");
+                        dataType = typeof(string);
                         break;
                     case "date":
                     case "datetime":
                     case "datetime2":
                     case "smalldatetime":
-                        dataType = Type.GetType("System.DateTime");
+                        dataType = typeof(DateTime);
                         break;
                     case "decimal":
                     case "money":
                     case "numeric":
                     case "smallmoney":
-                        dataType = Type.GetType("System.Decimal");
+                        dataType = typeof(Decimal);
                         break;
                     case "float":
-                        dataType = Type.GetType("System.Double");
+                        dataType = typeof(double);
                         break;
                     case "int":
-                        dataType = Type.GetType("System.Int32");
+                        dataType = typeof(int);
                         break;
                     case "real":
-                        dataType = Type.GetType("System.Single");
+                        dataType = typeof(float);
                         break;
                     case "smallint":
-                        dataType = Type.GetType("System.Int16");
+                        dataType = typeof(short);
                         break;
                     case "time":
-                        dataType = Type.GetType("System.TimeSpan");
+                        dataType = typeof(TimeSpan);
                         break;
                     case "uniqueidentifier":
-                        dataType = Type.GetType("System.Guid");
+                        dataType = typeof(Guid);
                         break;
                 }
                 column.DataType = dataType;
