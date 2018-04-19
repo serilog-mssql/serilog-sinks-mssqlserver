@@ -11,6 +11,7 @@ At minimum a connection string and table name are required.
 
 To use a connection string from the `connectionStrings` section of your application config, specify its name as the value of the connection string.
 
+
 #### Code (.NET Framework)
 
 ```csharp
@@ -22,6 +23,7 @@ var log = new LoggerConfiguration()
     .WriteTo.MSSqlServer(connectionString, tableName, columnOptions: columnOptions)
     .CreateLogger();
 ```
+
 
 #### Code (.NET Standard / .NET Core)
 
@@ -42,7 +44,8 @@ var log = new LoggerConfiguration()
     .CreateLogger();
 ```
 
-#### AppSettings package (.NET Framework)
+
+#### Serilog AppSettings package (.NET Framework)
 
 .NET Framework libraries or applications can call `ReadFrom.AppSettings()` to configure Serilog using the [Serilog.Settings.AppSettings](https://github.com/serilog/serilog-settings-appsettings) package. This will apply configuration parameters from the `app.config` or `web.config` file:
 
@@ -53,7 +56,8 @@ var log = new LoggerConfiguration()
 <add key="serilog:write-to:MSSqlServer.autoCreateSqlTable" value="true"/>
 ```
 
-#### Configuration package (.NET Standard / .NET Core)
+
+#### Serilog Configuration package (.NET Standard / .NET Core)
 
 .NET Standard libraries and .NET Core applications can call `ReadFrom.Configuration(IConfiguration)` to configure Serilog using the [Serilog.Settings.Configuration](https://github.com/serilog/serilog-settings-configuration) package. This will apply configuration parameters from the application configuration (not only `appsettings.json` as shown here, but any other valid `IConfiguration` source):
 
@@ -73,6 +77,7 @@ var log = new LoggerConfiguration()
   }
 }
 ```
+
 
 ## Table definition
 
@@ -113,15 +118,15 @@ If you set the `autoCreateSqlTable` option to `true`, the sink will create a tab
 
 ## Standard columns
 
-The "standard columns" used by this sink (apart from obvious required columns like Id) are described by the StandardColumn enumeration and controlled by `columnOptions.Store`.
+The "standard columns" used by this sink (apart from obvious required columns like Id) are described by the StandardColumn enumeration and controlled through code by the `columnOptions.Store` collection.
 
 By default (and consistent with the SQL command to create a table, above) these columns are included:
- - StandardColumn.Message
- - StandardColumn.MessageTemplate
- - StandardColumn.Level
- - StandardColumn.TimeStamp
- - StandardColumn.Exception
- - StandardColumn.Properties
+ - `StandardColumn.Message`
+ - `StandardColumn.MessageTemplate`
+ - `StandardColumn.Level`
+ - `StandardColumn.TimeStamp`
+ - `StandardColumn.Exception`
+ - `StandardColumn.Properties`
 
 You can change this list, as long as the table definition is consistent:
 
@@ -160,18 +165,14 @@ The log event properties `User` and `Other` will now be placed in the correspond
 
 #### Excluding redundant items from the Properties column
 
-By default, additional properties will still be included in the XML data saved to the Properties column (assuming that is not disabled via the `columnOptions.Store` parameter). This is consistent with the idea behind structured logging, and makes it easier to convert the log data to another (e.g. NoSQL) storage platform later if desired. 
+By default, additional properties will still be included in the data saved to the XML Properties or JSON LogEvent column (assuming one or both are enabled via the `columnOptions.Store` parameter). This is consistent with the idea behind structured logging, and makes it easier to convert the log data to another (e.g. NoSQL) storage platform later if desired. 
 
-However, if necessary, then the properties being saved in their own columns can be excluded from the XML.  Use the `columnOptions.Properties.ExcludeAdditionalProperties` parameter in the sink configuration to exclude the redundant properties from the XML. 
+However, if necessary, then the properties being saved in their own columns can be excluded from the data.  Use the `columnOptions.Properties.ExcludeAdditionalProperties` parameter in the sink configuration to exclude the redundant properties from the XML. 
 
 
-### Columns defined by configuration
+### Columns defined by AppSettings (.NET Framework)
 
-Columns can be defined with the name and data type of the column in SQL Server. Columns specified must match database table exactly. DataType is case sensitive, based on SQL type (excluding precision/length). 
-
-#### .NET Framework
-
-This section will be processed automatically if it exists in the application's `web.config` or `app.config` file.
+Custom columns can be defined with the name and data type of the column in SQL Server. Columns specified must match database table exactly. DataType is case sensitive, based on SQL type (excluding precision/length). This section will be processed automatically if it exists in the application's `web.config` or `app.config` file.
 
 ```xml
   <configSections>
@@ -186,9 +187,11 @@ This section will be processed automatically if it exists in the application's `
   </MSSqlServerSettingsSection>      
 ```
 
-#### .NET Standard / .NET Core
+### ColumnOptions defined by Configuration (.NET Standard / .NET Core)
 
-To add custom columns, add a list of column names and data types for the `customColumns` argument:
+For projects using the Serilog Configuration package, most properties of the `ColumnOptions` object are configurable. (The only property not currently supported is the filter-predicate `columnOptions.Properties.PropertyFilter`).
+
+The equivalent of adding custom columns as shown in the .NET Framework example above looks like this:
 
 ```json
 {
@@ -199,23 +202,56 @@ To add custom columns, add a list of column names and data types for the `custom
       { "Name": "MSSqlServer", 
         "Args": { 
             "connectionString": "Server...",
-            "tableName": "Logs"
-            "customColumns": [
-                {
-                "ColumnName" : "EventType",
-                "DataType" : "int"
-                },
-                {
-                "ColumnName" : "Release",
-                "DataType" : "varchar"
-                }
-            ]
+            "tableName": "Logs",
+            "columnOptionsSection": {
+              "customColumns": [
+                { "ColumnName": "EventType", "DataType": "int" },
+                { "ColumnName": "Release", "DataType": "varchar" }
+              ]
+            }
         } 
       }
     ]
   }
 }
 ```
+
+As the name suggests, `columnOptionSection` is an entire configuration section in its own right. All possible entries and some sample values are shown below. All properties and subsections are optional.
+
+```json
+"columnOptionsSection": {
+    "addStandardColumns": [ "LogEvent" ],
+    "removeStandardColumns": [ "MessageTemplate", "Properties" ],
+    "customColumns": [
+        { "ColumnName": "EventType", "DataType": "int" },
+        { "ColumnName": "Release", "DataType": "varchar" }
+    ],
+    "disableTriggers": true,
+    "id": { "columnName": "Id" },
+    "level": { "columnName": "Level", "storeAsEnum": false },
+    "properties": { 
+        "columnName": "Properties",
+        "excludeAdditionalProperties": true, 
+        "dictionaryElementName": "dict",
+        "itemElementName": "item",
+        "omitDictionaryContainerElement": false, 
+        "omitSequenceContainerElement": false, 
+        "omitStructureContainerElement": false, 
+        "omitElementIfEmpty": true, 
+        "propertyElementName": "prop",
+        "rootElementName": "root",
+        "sequenceElementName": "seq",
+        "structureElementName": "struct",
+        "usePropertyKeyAsElementName": false
+    },
+    "timeStamp": { "columnName": "Timestamp", "convertToUtc": true },
+    "logEvent": { "columnName": "LogEvent", "excludeAdditionalProperties": true }
+    "message": { "columnName": "Message" },
+    "exception": { "columnName": "Exception" },
+    "messageTemplate": { "columnName": "MessageTemplate" },
+}
+```
+
 
 ### Options for serialization of the log event data
 

@@ -20,8 +20,10 @@
     <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
     <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
     <GenerateAssemblyCopyrightAttribute>false</GenerateAssemblyCopyrightAttribute>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>5.1.2.005</Version>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <Version>5.1.2</Version>
+    <AssemblyVersion>5.1.2</AssemblyVersion>
+    <FileVersion>5.1.2</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
