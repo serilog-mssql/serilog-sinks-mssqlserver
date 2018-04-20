@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
 using Serilog.Configuration;
@@ -65,7 +64,7 @@ namespace Serilog
             var defaultedPeriod = period ?? MSSqlServerSink.DefaultPeriod;
 
             MSSqlServerConfigurationSection serviceConfigSection =
-               ConfigurationManager.GetSection("MSSqlServerSettingsSection") as MSSqlServerConfigurationSection;
+               ConfigurationManager.GetSection(MSSqlServerSink.ConfigurationSectionName) as MSSqlServerConfigurationSection;
 
             // If we have additional columns from config, load them as well
             if (serviceConfigSection != null && serviceConfigSection.Columns.Count > 0)
@@ -127,69 +126,17 @@ namespace Serilog
         /// </summary>
         /// <param name="serviceConfigSection">A previously loaded configuration section</param>
         /// <param name="columnOptions">column options with existing array of columns to append our config columns to</param>
-        private static void GenerateDataColumnsFromConfig(MSSqlServerConfigurationSection serviceConfigSection,
-            ColumnOptions columnOptions)
+        private static void GenerateDataColumnsFromConfig(MSSqlServerConfigurationSection serviceConfigSection, ColumnOptions columnOptions)
         {
             foreach (ColumnConfig c in serviceConfigSection.Columns)
             {
-                // Set the type based on the defined SQL type from config
-                DataColumn column = new DataColumn(c.ColumnName);
-
-                Type dataType = null;
-
-                switch (c.DataType)
-                {
-                    case "bigint":
-                        dataType = Type.GetType("System.Int64");
-                        break;
-                    case "bit":
-                        dataType = Type.GetType("System.Boolean");
-                        break;
-                    case "char":
-                    case "nchar":
-                    case "ntext":
-                    case "nvarchar":
-                    case "text":
-                    case "varchar":
-                        dataType = Type.GetType("System.String");
-                        break;
-                    case "date":
-                    case "datetime":
-                    case "datetime2":
-                    case "smalldatetime":
-                        dataType = Type.GetType("System.DateTime");
-                        break;
-                    case "decimal":
-                    case "money":
-                    case "numeric":
-                    case "smallmoney":
-                        dataType = Type.GetType("System.Decimal");
-                        break;
-                    case "float":
-                        dataType = Type.GetType("System.Double");
-                        break;
-                    case "int":
-                        dataType = Type.GetType("System.Int32");
-                        break;
-                    case "real":
-                        dataType = Type.GetType("System.Single");
-                        break;
-                    case "smallint":
-                        dataType = Type.GetType("System.Int16");
-                        break;
-                    case "time":
-                        dataType = Type.GetType("System.TimeSpan");
-                        break;
-                    case "uniqueidentifier":
-                        dataType = Type.GetType("System.Guid");
-                        break;
-                }
-                column.DataType = dataType;
                 if (columnOptions.AdditionalDataColumns == null)
                 {
                     columnOptions.AdditionalDataColumns = new Collection<DataColumn>();
                 }
-                columnOptions.AdditionalDataColumns.Add(column);
+                columnOptions.AdditionalDataColumns.Add(
+                    new DataColumn(c.ColumnName, ConvertSqlDataType.GetEquivalentType(c.DataType))
+                    );
             }
         }
     }

@@ -12,11 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Configuration;
+
 namespace Serilog.Configuration
 {
-    using System;
-    using System.Configuration;
-
     /// <summary>
     /// Collection of configuration items for use in generating DataColumn[]
     /// </summary>

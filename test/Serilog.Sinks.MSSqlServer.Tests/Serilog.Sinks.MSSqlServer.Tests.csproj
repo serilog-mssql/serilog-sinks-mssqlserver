@@ -1,5 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+  <!-- 
+  Because this is a multi-targeted project/solution, run tests from the command line
+  with the current working directory set to the location of this csproj. Tests will not
+  execute within the VS IDE as of version 15.6.5 (April 2018).
+  
+  dotnet test [dash dash]framework net452
+  dotnet test [dash dash]framework netcoreapp2.0
+  
+  (XML doesn't allow double-dashes in comments...)
+  -->
+
   <PropertyGroup>
     <TargetFrameworks>netcoreapp2.0;net452</TargetFrameworks>
     <TargetFrameworks Condition=" '$(OS)' != 'Windows_NT' ">netstandard2.0</TargetFrameworks>
@@ -14,13 +25,18 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Serilog.Sinks.MSSqlServer\Serilog.Sinks.MSSqlServer.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>   
     <PackageReference Include="FluentAssertions" Version="4.19.4" />
     <PackageReference Include="Dapper.StrongName" Version="1.50.2" />
     <DotNetCliToolReference Include="dotnet-xunit" Version="2.3.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.5.0-preview-20171012-09" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Ensure MSBuild ignores all build-target-specific files by default -->
+    <Compile Remove="BuildTargets\**\*.*" />
+    <!-- Show in VStudio, but MSBuild ignores these (indicates files are not code, non-published-content, etc.) -->
+    <None Include="BuildTargets\**\*.*" />
+    <!-- ItemGroups below with TFM conditions will re-include the compile targets -->
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net452' ">
@@ -28,6 +44,7 @@
     <Reference Include="Microsoft.CSharp" />
     <PackageReference Include="xunit" Version="2.2.0" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0" NoWarn="NU1701" />
+    <Compile Include="BuildTargets\net452\**\*.cs" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.0' ">
@@ -40,7 +57,7 @@
     <PackageReference Include="xunit" Version="2.3.0" />
     <PackageReference Include="xunit.core" Version="2.3.0" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.3.0" NoWarn="NU1701" />
-    
+    <Compile Include="BuildTargets\netstandard2_0\**\*.cs" />
   </ItemGroup>
 
 </Project>

@@ -18,7 +18,6 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using Serilog.Debugging;
 using Serilog.Events;
@@ -42,6 +41,11 @@ namespace Serilog.Sinks.MSSqlServer
         ///     A reasonable default time to wait between checking for event batches.
         /// </summary>
         public static readonly TimeSpan DefaultPeriod = TimeSpan.FromSeconds(5);
+
+        /// <summary>
+        ///     The name of the configuration file section for this sink.
+        /// </summary>
+        public static readonly string ConfigurationSectionName = "MSSqlServerSettings";
 
         readonly string _connectionString;
 
@@ -119,8 +123,8 @@ namespace Serilog.Sinks.MSSqlServer
         /// </summary>
         /// <param name="events">The events to emit.</param>
         /// <remarks>
-        ///     Override either <see cref="PeriodicBatchingSink.EmitBatch" /> or <see cref="PeriodicBatchingSink.EmitBatchAsync" />
-        ///     ,
+        ///     Override either <see cref="PeriodicBatchingSink.EmitBatch" /> 
+        ///     or <see cref="PeriodicBatchingSink.EmitBatchAsync" />,
         ///     not both.
         /// </remarks>
         protected override async Task EmitBatchAsync(IEnumerable<LogEvent> events)

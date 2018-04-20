@@ -4,7 +4,7 @@
     <Description>A Serilog sink that writes events to Microsoft SQL Server</Description>
     <VersionPrefix>5.1.2</VersionPrefix>
     <Authors>Michiel van Oudheusden;Serilog Contributors</Authors>
-    <TargetFrameworks>netstandard2.0;net45;net452</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net45</TargetFrameworks>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <AssemblyName>Serilog.Sinks.MSSqlServer</AssemblyName>
@@ -20,6 +20,10 @@
     <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
     <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
     <GenerateAssemblyCopyrightAttribute>false</GenerateAssemblyCopyrightAttribute>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <Version>5.1.2</Version>
+    <AssemblyVersion>5.1.2</AssemblyVersion>
+    <FileVersion>5.1.2</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -27,12 +31,19 @@
     <PackageReference Include="Serilog.Sinks.PeriodicBatching" Version="2.1.1" />
   </ItemGroup>
 
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0'">
-    <DefineConstants>NETCORE;NETSTANDARD;NETSTANDARD2_0</DefineConstants>
-  </PropertyGroup>
+  <ItemGroup>
+    <!-- Ensure MSBuild ignores all build-target-specific files by default -->
+    <Compile Remove="BuildTargets\**\*.*" />
+    <!-- Show in VStudio, but MSBuild ignores these (indicates files are not code, non-published-content, etc.) -->
+    <None Include="BuildTargets\**\*.*" />
+    <!-- ItemGroups below with TFM conditions will re-include the compile targets -->
+  </ItemGroup>
+ 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0'">
     <PackageReference Include="System.Data.SqlClient" Version="4.4.0" />
-    <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.4.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="2.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="2.0.0" />
+    <Compile Include="BuildTargets\netstandard2_0\**\*.cs" />
   </ItemGroup>
   
   <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
@@ -42,15 +53,7 @@
     <Reference Include="System.Configuration" />
     <Reference Include="System" />
     <Reference Include="Microsoft.CSharp" />
+    <Compile Include="BuildTargets\net452\**\*.cs" />
   </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net452' ">
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Configuration" />
-    <Reference Include="System" />
-    <Reference Include="Microsoft.CSharp" />
-  </ItemGroup>
-
+  
 </Project>
