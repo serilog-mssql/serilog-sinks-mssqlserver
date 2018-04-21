@@ -208,5 +208,75 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 logEvents.Should().Contain(e => e.Message.Contains(loggingInformationMessage));
             }
         }
+
+        [Fact]
+        public void AuditEventToCustomStandardColumns()
+        {
+            // arrange
+            var options = new ColumnOptions();
+
+            options.Message.ColumnName = "CustomMessage";
+            options.MessageTemplate.ColumnName = "CustomMessageTemplate";
+            options.Level.ColumnName = "CustomLevel";
+            options.TimeStamp.ColumnName = "CustomTimeStamp";
+            options.Exception.ColumnName = "CustomException";
+            options.Properties.ColumnName = "CustomProperties";
+            options.Id.ColumnName = "CustomId";
+
+            var logTableName = $"{DatabaseFixture.LogTableName}AuditCustomEvent";
+            var loggerConfiguration = new LoggerConfiguration();
+            Log.Logger = loggerConfiguration.AuditTo.MSSqlServer(
+                connectionString: DatabaseFixture.LogEventsConnectionString,
+                tableName: logTableName,
+                autoCreateSqlTable: true,
+                columnOptions: options)
+                .CreateLogger();
+
+            var file = File.CreateText("CustomColumnsAuditEvent.Self.log");
+            Serilog.Debugging.SelfLog.Enable(TextWriter.Synchronized(file));
+
+            // act
+            const string loggingInformationMessage = "Logging Information message";
+            Log.Information(loggingInformationMessage);
+            Log.CloseAndFlush();
+
+            // assert
+            using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
+            {
+                var logEvents = conn.Query<CustomStandardLogColumns>($"SELECT * FROM {logTableName}");
+
+                logEvents.Should().Contain(e => e.CustomMessage.Contains(loggingInformationMessage));
+            }
+        }
+
+        [Fact]
+        public void AuditEventToDefaultStandardColumns()
+        {
+            // arrange
+            var loggerConfiguration = new LoggerConfiguration();
+            Log.Logger = loggerConfiguration.AuditTo.MSSqlServer(
+                connectionString: DatabaseFixture.LogEventsConnectionString,
+                tableName: DatabaseFixture.LogTableName,
+                autoCreateSqlTable: true,
+                columnOptions: new ColumnOptions())
+                .CreateLogger();
+
+            var file = File.CreateText("StandardColumns.Audit.Self.log");
+            Serilog.Debugging.SelfLog.Enable(TextWriter.Synchronized(file));
+
+            // act
+            const string loggingInformationMessage = "Logging Information message";
+            Log.Information(loggingInformationMessage);
+
+            Log.CloseAndFlush();
+
+            // assert
+            using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
+            {
+                var logEvents = conn.Query<DefaultStandardLogColumns>($"SELECT Message, Level FROM {DatabaseFixture.LogTableName}");
+
+                logEvents.Should().Contain(e => e.Message.Contains(loggingInformationMessage));
+            }
+        }
     }
 }
