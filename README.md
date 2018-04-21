@@ -5,7 +5,7 @@ A Serilog sink that writes events to Microsoft SQL Server. While a NoSql store a
 **Package** - [Serilog.Sinks.MSSqlServer](http://nuget.org/packages/serilog.sinks.mssqlserver)
 | **Platforms** - .NET 4.5 and .NET Standard 2.0
 
-From version 5.2 and up, this sink also support the Audit capabilities.
+From version 5.1 and up, this sink also support the Audit capabilities.
 
 ## Configuration
 
