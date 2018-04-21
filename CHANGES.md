@@ -1,3 +1,6 @@
+5.2
+ * Support for Audit sink added (#118/#110).
+
 4.0.0
  * Serilog 2.0
  * [Documentation fix](https://github.com/serilog/serilog-sinks-mssqlserver/pull/32)
