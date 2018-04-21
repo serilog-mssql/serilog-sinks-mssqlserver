@@ -64,11 +64,8 @@ namespace Serilog
 
             var defaultedPeriod = period ?? MSSqlServerSink.DefaultPeriod;
 
-            MSSqlServerConfigurationSection serviceConfigSection =
-               ConfigurationManager.GetSection("MSSqlServerSettingsSection") as MSSqlServerConfigurationSection;
-
             // If we have additional columns from config, load them as well
-            if (serviceConfigSection != null && serviceConfigSection.Columns.Count > 0)
+            if (ConfigurationManager.GetSection("MSSqlServerSettingsSection") is MSSqlServerConfigurationSection serviceConfigSection && serviceConfigSection.Columns.Count > 0)
             {
                 if (columnOptions == null)
                 {
@@ -120,11 +117,8 @@ namespace Serilog
         {
             if (loggerAuditSinkConfiguration == null) throw new ArgumentNullException("loggerAuditSinkConfiguration");
 
-            MSSqlServerConfigurationSection serviceConfigSection =
-               ConfigurationManager.GetSection("MSSqlServerSettingsSection") as MSSqlServerConfigurationSection;
-
             // If we have additional columns from config, load them as well
-            if (serviceConfigSection != null && serviceConfigSection.Columns.Count > 0)
+            if (ConfigurationManager.GetSection("MSSqlServerSettingsSection") is MSSqlServerConfigurationSection serviceConfigSection && serviceConfigSection.Columns.Count > 0)
             {
                 if (columnOptions == null)
                 {

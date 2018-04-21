@@ -54,9 +54,9 @@ namespace Serilog.Sinks.MSSqlServer
                 if (columnOptions.DisableTriggers)
                     throw new NotSupportedException($"The {nameof(ColumnOptions.DisableTriggers)} option is not supported for auditing.");
             }
+
             _traits = new MSSqlServerSinkTraits(connectionString, tableName, schemaName, columnOptions, formatProvider, autoCreateSqlTable);
-
-
+            
         }
 
         /// <summary>Emit the provided log event to the sink.</summary>

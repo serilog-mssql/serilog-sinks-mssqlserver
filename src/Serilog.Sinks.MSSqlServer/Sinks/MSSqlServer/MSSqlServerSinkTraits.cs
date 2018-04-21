@@ -194,10 +194,8 @@ namespace Serilog.Sinks.MSSqlServer
 
                 var columnName = property.Key;
                 var columnType = EventTable.Columns[columnName].DataType;
-                object conversion;
 
-                var scalarValue = property.Value as ScalarValue;
-                if (scalarValue == null)
+                if (!(property.Value is ScalarValue scalarValue))
                 {
                     yield return new KeyValuePair<string, object>(columnName, property.Value.ToString());
                     continue;
@@ -209,7 +207,7 @@ namespace Serilog.Sinks.MSSqlServer
                     continue;
                 }
 
-                if (TryChangeType(scalarValue.Value, columnType, out conversion))
+                if (TryChangeType(scalarValue.Value, columnType, out var conversion))
                 {
                     yield return new KeyValuePair<string, object>(columnName, conversion);
                 }
