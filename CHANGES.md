@@ -1,4 +1,4 @@
-5.2
+5.1
  * Support for Audit sink added (#118/#110).
 
 4.0.0
