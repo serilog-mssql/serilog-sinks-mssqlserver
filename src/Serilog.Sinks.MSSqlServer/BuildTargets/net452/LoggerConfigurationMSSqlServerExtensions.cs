@@ -64,7 +64,7 @@ namespace Serilog
             var defaultedPeriod = period ?? MSSqlServerSink.DefaultPeriod;
 
             MSSqlServerConfigurationSection serviceConfigSection =
-               ConfigurationManager.GetSection(MSSqlServerSink.ConfigurationSectionName) as MSSqlServerConfigurationSection;
+               ConfigurationManager.GetSection("MSSqlServerSettingsSection") as MSSqlServerConfigurationSection;
 
             // If we have additional columns from config, load them as well
             if (serviceConfigSection != null && serviceConfigSection.Columns.Count > 0)
@@ -84,6 +84,58 @@ namespace Serilog
                     tableName,
                     batchPostingLimit,
                     defaultedPeriod,
+                    formatProvider,
+                    autoCreateSqlTable,
+                    columnOptions,
+                    schemaName
+                    ),
+                restrictedToMinimumLevel);
+        }
+
+        /// <summary>
+        /// Adds a sink that writes log events to a table in a MSSqlServer database.
+        /// Create a database and execute the table creation script found here
+        /// https://gist.github.com/mivano/10429656
+        /// or use the autoCreateSqlTable option.
+        /// </summary>
+        /// <param name="loggerAuditSinkConfiguration">The logger configuration.</param>
+        /// <param name="connectionString">The connection string to the database where to store the events.</param>
+        /// <param name="tableName">Name of the table to store the events in.</param>
+        /// <param name="schemaName">Name of the schema for the table to store the data in. The default is 'dbo'.</param>
+        /// <param name="restrictedToMinimumLevel">The minimum log event level required in order to write an event to the sink.</param>
+        /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
+        /// <param name="autoCreateSqlTable">Create log table with the provided name on destination sql server.</param>
+        /// <param name="columnOptions"></param>
+        /// <returns>Logger configuration, allowing configuration to continue.</returns>
+        /// <exception cref="ArgumentNullException">A required parameter is null.</exception>
+        public static LoggerConfiguration MSSqlServer(this LoggerAuditSinkConfiguration loggerAuditSinkConfiguration,
+                                                      string connectionString,
+                                                      string tableName,
+                                                      LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
+                                                      IFormatProvider formatProvider = null,
+                                                      bool autoCreateSqlTable = false,
+                                                      ColumnOptions columnOptions = null,
+                                                      string schemaName = "dbo")
+        {
+            if(loggerAuditSinkConfiguration == null)
+                throw new ArgumentNullException("loggerAuditSinkConfiguration");
+
+            // If we have additional columns from config, load them as well
+            if(ConfigurationManager.GetSection("MSSqlServerSettingsSection") is MSSqlServerConfigurationSection serviceConfigSection && serviceConfigSection.Columns.Count > 0)
+            {
+                if(columnOptions == null)
+                {
+                    columnOptions = new ColumnOptions();
+                }
+                GenerateDataColumnsFromConfig(serviceConfigSection, columnOptions);
+            }
+
+            connectionString = GetConnectionString(connectionString);
+
+            return loggerAuditSinkConfiguration.Sink(
+                new MSSqlServerAuditSink(
+                    connectionString,
+                    tableName,
                     formatProvider,
                     autoCreateSqlTable,
                     columnOptions,

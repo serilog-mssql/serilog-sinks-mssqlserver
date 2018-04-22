@@ -86,6 +86,54 @@ namespace Serilog
         }
 
         /// <summary>
+        /// Adds a sink that writes log events to a table in a MSSqlServer database.
+        /// Create a database and execute the table creation script found here
+        /// https://gist.github.com/mivano/10429656
+        /// or use the autoCreateSqlTable option.
+        /// </summary>
+        /// <param name="loggerAuditSinkConfiguration">The logger configuration.</param>
+        /// <param name="connectionString">The connection string to the database where to store the events.</param>
+        /// <param name="tableName">Name of the table to store the events in.</param>
+        /// <param name="appConfiguration">Additional application-level configuration. Required if connectionString is a name.</param>
+        /// <param name="restrictedToMinimumLevel">The minimum log event level required in order to write an event to the sink.</param>
+        /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
+        /// <param name="autoCreateSqlTable">Create log table with the provided name on destination sql server.</param>
+        /// <param name="columnOptions">An externally-modified group of column settings</param>
+        /// <param name="columnOptionsSection">A config section defining various column settings</param>
+        /// <param name="schemaName">Name of the schema for the table to store the data in. The default is 'dbo'.</param>
+        /// <returns>Logger configuration, allowing configuration to continue.</returns>
+        /// <exception cref="ArgumentNullException">A required parameter is null.</exception>
+        public static LoggerConfiguration MSSqlServer(
+            this LoggerAuditSinkConfiguration loggerAuditSinkConfiguration,
+            string connectionString,
+            string tableName,
+            IConfiguration appConfiguration = null,
+            LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
+            IFormatProvider formatProvider = null,
+            bool autoCreateSqlTable = false,
+            ColumnOptions columnOptions = null,
+            IConfigurationSection columnOptionsSection = null,
+            string schemaName = "dbo"
+            )
+        {
+            if(loggerAuditSinkConfiguration == null) throw new ArgumentNullException("loggerAuditSinkConfiguration");
+
+            var connectionStr = GetConnectionString(connectionString, appConfiguration);
+            var colOpts = ConfigureColumnOptions(columnOptions, columnOptionsSection);
+
+            return loggerAuditSinkConfiguration.Sink(
+                new MSSqlServerAuditSink(
+                    connectionString,
+                    tableName,
+                    formatProvider,
+                    autoCreateSqlTable,
+                    columnOptions,
+                    schemaName
+                    ),
+                restrictedToMinimumLevel);
+        }
+
+        /// <summary>
         /// Examine if supplied connection string is a reference to an item in the "ConnectionStrings" section of web.config
         /// If it is, return the ConnectionStrings item, if not, return string as supplied.
         /// </summary>

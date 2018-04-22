@@ -23,7 +23,7 @@ namespace Serilog.Configuration
     public class MSSqlServerConfigurationSection : ConfigurationSection
     {
         private static MSSqlServerConfigurationSection settings =
-            ConfigurationManager.GetSection(MSSqlServerSink.ConfigurationSectionName) as MSSqlServerConfigurationSection;
+            ConfigurationManager.GetSection("MSSqlServerSettingsSection") as MSSqlServerConfigurationSection;
 
         /// <summary>
         /// Access to the settings stored in the config file
