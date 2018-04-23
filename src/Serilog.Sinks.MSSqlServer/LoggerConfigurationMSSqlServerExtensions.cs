@@ -142,6 +142,7 @@ namespace Serilog
                     case "bigint":
                         dataType = Type.GetType("System.Int64");
                         break;
+                    case "varbinary":
                     case "binary":
                         dataType = Type.GetType("System.Byte[]");
                         column.ExtendedProperties["DataLength"] = c.DataLength;

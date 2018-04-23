@@ -52,7 +52,7 @@ namespace Serilog.Configuration
         /// Type of column as it exists in SQL Server
         /// </summary>
         [ConfigurationProperty("DataType", IsRequired = true, IsKey = false, DefaultValue ="varchar")]
-        [RegexStringValidator("(bigint)|(bit)|(binary)|(char)|(date)|(datetime)|(datetime2)|(decimal)|(float)|(int)|(money)|(nchar)|(ntext)|(numeric)|(nvarchar)|(real)|(smalldatetime)|(smallint)|(smallmoney)|(text)|(time)|(uniqueidentifier)|(varchar)")]
+        [RegexStringValidator("(bigint)|(bit)|(binary)|(varbinary)|(char)|(date)|(datetime)|(datetime2)|(decimal)|(float)|(int)|(money)|(nchar)|(ntext)|(numeric)|(nvarchar)|(real)|(smalldatetime)|(smallint)|(smallmoney)|(text)|(time)|(uniqueidentifier)|(varchar)")]
         public string DataType
         {
             get { return (string)this["DataType"]; }

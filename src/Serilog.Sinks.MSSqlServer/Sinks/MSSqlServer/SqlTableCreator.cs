@@ -102,7 +102,7 @@ namespace Serilog.Sinks.MSSqlServer
                     break;
 
                 case "System.Byte[]":
-                    sqlType = columnSize == -1 ? "VARBINARY" : "BINARY(" + columnSize.ToString() + ")";
+                    sqlType = columnSize == -1 ? "VARBINARY(MAX)" : "VARBINARY(" + columnSize.ToString() + ")";
                     break;
 
                 case "System.String":
