@@ -45,12 +45,10 @@ namespace Serilog.Sinks.MSSqlServer
         /// <returns>A simplified representation.</returns>
         public static string Simplify(LogEventPropertyValue value, ColumnOptions.PropertiesColumnOptions options)
         {
-            var scalar = value as ScalarValue;
-            if (scalar != null)
+            if (value is ScalarValue scalar)
                 return SimplifyScalar(scalar.Value);
 
-            var dict = value as DictionaryValue;
-            if (dict != null)
+            if (value is DictionaryValue dict)
             {
                 var sb = new StringBuilder();
 
@@ -92,8 +90,7 @@ namespace Serilog.Sinks.MSSqlServer
                 return sb.ToString();
             }
 
-            var seq = value as SequenceValue;
-            if (seq != null)
+            if (value is SequenceValue seq)
             {
                 var sb = new StringBuilder();
 
@@ -127,8 +124,7 @@ namespace Serilog.Sinks.MSSqlServer
                 return sb.ToString();
             }
 
-            var str = value as StructureValue;
-            if (str != null)
+            if (value is StructureValue str)
             {
                 var props = str.Properties.ToDictionary(p => p.Name, p => Simplify(p.Value, options));
 
