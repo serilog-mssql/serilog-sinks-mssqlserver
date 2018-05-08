@@ -52,11 +52,31 @@ namespace Serilog.Configuration
         /// Type of column as it exists in SQL Server
         /// </summary>
         [ConfigurationProperty("DataType", IsRequired = true, IsKey = false, DefaultValue ="varchar")]
-        [RegexStringValidator("(bigint)|(bit)|(char)|(date)|(datetime)|(datetime2)|(decimal)|(float)|(int)|(money)|(nchar)|(ntext)|(numeric)|(nvarchar)|(real)|(smalldatetime)|(smallint)|(smallmoney)|(text)|(time)|(uniqueidentifier)|(varchar)")]
+        [RegexStringValidator("(bigint)|(bit)|(binary)|(varbinary)|(char)|(date)|(datetime)|(datetime2)|(decimal)|(float)|(int)|(money)|(nchar)|(ntext)|(numeric)|(nvarchar)|(real)|(smalldatetime)|(smallint)|(smallmoney)|(text)|(time)|(uniqueidentifier)|(varchar)")]
         public string DataType
         {
             get { return (string)this["DataType"]; }
             set { this["DataType"] = value; }
+        }
+
+        /// <summary>
+        /// Length of column as it exists in SQL Server for string or binary data type.
+        /// </summary>
+        [ConfigurationProperty("DataLength", IsRequired = false, IsKey = false, DefaultValue = 128)]
+        public int DataLength
+        {
+            get { return (int)this["DataLength"]; }
+            set { this["DataLength"] = value; }
+        }
+
+        /// <summary>
+        /// Allow nullable column as it exists in SQL Server.
+        /// </summary>
+        [ConfigurationProperty("AllowNull", IsRequired = false, IsKey = false, DefaultValue = true)]
+        public bool AllowNull
+        {
+            get { return (bool)this["AllowNull"]; }
+            set { this["AllowNull"] = value; }
         }
     }
 }

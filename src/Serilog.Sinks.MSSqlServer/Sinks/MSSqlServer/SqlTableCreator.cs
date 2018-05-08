@@ -101,9 +101,13 @@ namespace Serilog.Sinks.MSSqlServer
                     sqlType = "TINYINT";
                     break;
 
-                case "System.String":
-                    sqlType = "NVARCHAR(" + ((columnSize == -1) ? "MAX" : columnSize.ToString()) + ")";
+                case "System.Byte[]":
+                    sqlType = columnSize == -1 ? "VARBINARY(MAX)" : "VARBINARY(" + columnSize.ToString() + ")";
                     break;
+
+                case "System.String":
+	                sqlType = "NVARCHAR(" + ((columnSize == -1) ? "MAX" : columnSize.ToString()) + ")";
+	                break;
 
                 case "System.Decimal":
                     if (numericScale > 0)
@@ -153,4 +157,5 @@ namespace Serilog.Sinks.MSSqlServer
 
         #endregion
     }
+
 }
