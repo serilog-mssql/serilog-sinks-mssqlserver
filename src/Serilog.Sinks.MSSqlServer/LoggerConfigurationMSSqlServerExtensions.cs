@@ -6,6 +6,7 @@ using Serilog.Configuration;
 using Serilog.Events;
 using Serilog.Sinks.MSSqlServer;
 using System.Configuration;
+using System.Linq;
 using Serilog.Debugging;
 
 // Copyright 2014 Serilog Contributors
@@ -239,8 +240,40 @@ namespace Serilog
                         break;
                 }
 
+                if (c.RemovePredefinedColumn && Enum.TryParse(c.ColumnName, out StandardColumn standardColumn))
+                {
+                    columnOptions.Store.Remove(standardColumn);
+                    return;
+                }
+
+                if (c.OverridePredefinedColumn && Enum.TryParse(c.ColumnName, out standardColumn))
+                {
+                    switch (standardColumn)
+                    {
+                        case StandardColumn.Exception:
+                            break;
+                        case StandardColumn.Properties:
+                            break;
+                        case StandardColumn.Level:
+                            break;
+                        case StandardColumn.MessageTemplate:
+                            break;
+                        case StandardColumn.Message:
+                            break;
+                        case StandardColumn.LogEvent:
+                            break;
+                        case StandardColumn.TimeStamp:
+                            columnOptions.TimeStamp.ConvertToUtc = c.ConvertToUtc;
+                            break;
+                    }
+
+                    return;
+                }
+
                 column.DataType = dataType;
                 column.AllowDBNull = c.AllowNull;
+
+
                 if (columnOptions.AdditionalDataColumns == null)
                 {
                     columnOptions.AdditionalDataColumns = new Collection<DataColumn>();

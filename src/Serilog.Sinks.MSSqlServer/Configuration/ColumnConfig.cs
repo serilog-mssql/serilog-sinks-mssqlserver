@@ -78,5 +78,35 @@ namespace Serilog.Configuration
             get { return (bool)this["AllowNull"]; }
             set { this["AllowNull"] = value; }
         }
+
+        /// <summary>
+        /// Remove predefined column.
+        /// </summary>
+        [ConfigurationProperty("RemovePredefinedColumn", IsRequired = false, IsKey = false, DefaultValue = false)]
+        public bool RemovePredefinedColumn
+        {
+            get { return (bool)this["RemovePredefinedColumn"]; }
+            set { this["RemovePredefinedColumn"] = value; }
+        }
+
+        /// <summary>
+        /// Override predefined column.
+        /// </summary>
+        [ConfigurationProperty("OverridePredefinedColumn", IsRequired = false, IsKey = false, DefaultValue = false)]
+        public bool OverridePredefinedColumn
+        {
+            get { return (bool)this["OverridePredefinedColumn"]; }
+            set { this["OverridePredefinedColumn"] = value; }
+        }
+
+        /// <summary>
+        /// Define ConvertToUtc format for datetime column.
+        /// </summary>
+        [ConfigurationProperty("ConvertToUtc", IsRequired = false, IsKey = false, DefaultValue = false)]
+        public bool ConvertToUtc
+        {
+            get { return (bool)this["ConvertToUtc"]; }
+            set { this["ConvertToUtc"] = value; }
+        }
     }
 }
