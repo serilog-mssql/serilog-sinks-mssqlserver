@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
 using Serilog.Configuration;
@@ -180,66 +179,8 @@ namespace Serilog
         {
             foreach (ColumnConfig c in serviceConfigSection.Columns)
             {
-                // Set the type based on the defined SQL type from config
-                DataColumn column = new DataColumn(c.ColumnName);
-
-                Type dataType = null;
-
-                switch (c.DataType)
-                {
-                    case "bigint":
-                        dataType = typeof(long);
-                        break;
-                    case "varbinary":
-                    case "binary":
-                        dataType = Type.GetType("System.Byte[]");
-                        column.ExtendedProperties["DataLength"] = c.DataLength;
-                        break;
-                    case "bit":
-                        dataType = typeof(bool);
-                        break;
-                    case "char":
-                    case "nchar":
-                    case "ntext":
-                    case "nvarchar":
-                    case "text":
-                    case "varchar":
-                        dataType = Type.GetType("System.String");
-                        column.MaxLength = c.DataLength;
-                        break;
-                    case "date":
-                    case "datetime":
-                    case "datetime2":
-                    case "smalldatetime":
-                        dataType = typeof(DateTime);
-                        break;
-                    case "decimal":
-                    case "money":
-                    case "numeric":
-                    case "smallmoney":
-                        dataType = typeof(Decimal);
-                        break;
-                    case "float":
-                        dataType = typeof(double);
-                        break;
-                    case "int":
-                        dataType = typeof(int);
-                        break;
-                    case "real":
-                        dataType = typeof(float);
-                        break;
-                    case "smallint":
-                        dataType = typeof(short);
-                        break;
-                    case "time":
-                        dataType = typeof(TimeSpan);
-                        break;
-                    case "uniqueidentifier":
-                        dataType = typeof(Guid);
-                        break;
-                }
-
-                column.DataType = dataType;
+                var column = ConvertSqlDataType.GetEquivalentType(c.DataType, c.DataLength);
+                column.ColumnName = c.ColumnName;
                 column.AllowDBNull = c.AllowNull;
                 if (columnOptions.AdditionalDataColumns == null)
                 {
