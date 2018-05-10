@@ -223,6 +223,16 @@ namespace Serilog.Sinks.MSSqlServer
             /// The name of the column in the database.
             /// </summary>
             public string ColumnName { get; set; }
+
+            /// <summary>
+            /// The data column of the column in the database.
+            /// </summary>
+            public DataColumn DataColumn { get; set; }
+
+            /// <summary>
+            /// The value indicates whether this column is overrided by configuration or not.
+            /// </summary>
+            public bool Overrided { get; set; }
         }
 
         /// <summary>

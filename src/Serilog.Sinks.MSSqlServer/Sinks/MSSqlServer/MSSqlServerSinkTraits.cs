@@ -255,7 +255,7 @@ namespace Serilog.Sinks.MSSqlServer
                 switch (standardColumn)
                 {
                     case StandardColumn.Level:
-                        eventsTable.Columns.Add(new DataColumn
+                        eventsTable.Columns.Add(ColumnOptions.Level.Overrided ? ColumnOptions.Level.DataColumn : new DataColumn
                         {
                             DataType = ColumnOptions.Level.StoreAsEnum ? typeof(byte) : typeof(string),
                             MaxLength = ColumnOptions.Level.StoreAsEnum ? -1 : 128,
@@ -263,7 +263,7 @@ namespace Serilog.Sinks.MSSqlServer
                         });
                         break;
                     case StandardColumn.TimeStamp:
-                        eventsTable.Columns.Add(new DataColumn
+                        eventsTable.Columns.Add(ColumnOptions.TimeStamp.Overrided ? ColumnOptions.TimeStamp.DataColumn : new DataColumn
                         {
                             DataType = typeof(DateTime),
                             ColumnName = ColumnOptions.TimeStamp.ColumnName ?? StandardColumn.TimeStamp.ToString(),
@@ -271,14 +271,14 @@ namespace Serilog.Sinks.MSSqlServer
                         });
                         break;
                     case StandardColumn.LogEvent:
-                        eventsTable.Columns.Add(new DataColumn
+                        eventsTable.Columns.Add(ColumnOptions.LogEvent.Overrided ? ColumnOptions.LogEvent.DataColumn : new DataColumn
                         {
                             DataType = typeof(string),
                             ColumnName = ColumnOptions.LogEvent.ColumnName ?? StandardColumn.LogEvent.ToString()
                         });
                         break;
                     case StandardColumn.Message:
-                        eventsTable.Columns.Add(new DataColumn
+                        eventsTable.Columns.Add(ColumnOptions.Message.Overrided ? ColumnOptions.Message.DataColumn : new DataColumn
                         {
                             DataType = typeof(string),
                             MaxLength = -1,
@@ -286,7 +286,7 @@ namespace Serilog.Sinks.MSSqlServer
                         });
                         break;
                     case StandardColumn.MessageTemplate:
-                        eventsTable.Columns.Add(new DataColumn
+                        eventsTable.Columns.Add(ColumnOptions.MessageTemplate.Overrided ? ColumnOptions.MessageTemplate.DataColumn : new DataColumn
                         {
                             DataType = typeof(string),
                             MaxLength = -1,
@@ -294,7 +294,7 @@ namespace Serilog.Sinks.MSSqlServer
                         });
                         break;
                     case StandardColumn.Exception:
-                        eventsTable.Columns.Add(new DataColumn
+                        eventsTable.Columns.Add(ColumnOptions.Exception.Overrided ? ColumnOptions.Exception.DataColumn : new DataColumn
                         {
                             DataType = typeof(string),
                             MaxLength = -1,
@@ -302,7 +302,7 @@ namespace Serilog.Sinks.MSSqlServer
                         });
                         break;
                     case StandardColumn.Properties:
-                        eventsTable.Columns.Add(new DataColumn
+                        eventsTable.Columns.Add(ColumnOptions.Properties.Overrided ? ColumnOptions.Properties.DataColumn : new DataColumn
                         {
                             DataType = typeof(string),
                             MaxLength = -1,
