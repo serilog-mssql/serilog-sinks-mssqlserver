@@ -182,105 +182,126 @@ namespace Serilog
             foreach (ColumnConfig c in serviceConfigSection.Columns)
             {
                 // Set the type based on the defined SQL type from config
-                DataColumn column = new DataColumn(c.ColumnName);
-
-                Type dataType = null;
-
-                switch (c.DataType)
-                {
-                    case "bigint":
-                        dataType = typeof(long);
-                        break;
-                    case "varbinary":
-                    case "binary":
-                        dataType = Type.GetType("System.Byte[]");
-                        column.ExtendedProperties["DataLength"] = c.DataLength;
-                        break;
-                    case "bit":
-                        dataType = typeof(bool);
-                        break;
-                    case "char":
-                    case "nchar":
-                    case "ntext":
-                    case "nvarchar":
-                    case "text":
-                    case "varchar":
-                        dataType = Type.GetType("System.String");
-                        column.MaxLength = c.DataLength;
-                        break;
-                    case "date":
-                    case "datetime":
-                    case "datetime2":
-                    case "smalldatetime":
-                        dataType = typeof(DateTime);
-                        break;
-                    case "decimal":
-                    case "money":
-                    case "numeric":
-                    case "smallmoney":
-                        dataType = typeof(Decimal);
-                        break;
-                    case "float":
-                        dataType = typeof(double);
-                        break;
-                    case "int":
-                        dataType = typeof(int);
-                        break;
-                    case "real":
-                        dataType = typeof(float);
-                        break;
-                    case "smallint":
-                        dataType = typeof(short);
-                        break;
-                    case "time":
-                        dataType = typeof(TimeSpan);
-                        break;
-                    case "uniqueidentifier":
-                        dataType = typeof(Guid);
-                        break;
-                }
+                DataColumn column = CreateDataColumn(c);
 
                 if (c.RemovePredefinedColumn && Enum.TryParse(c.ColumnName, out StandardColumn standardColumn))
                 {
                     columnOptions.Store.Remove(standardColumn);
-                    return;
+                    continue;
                 }
-
-                if (c.OverridePredefinedColumn && Enum.TryParse(c.ColumnName, out standardColumn))
+                else if (c.OverridePredefinedColumn && Enum.TryParse(c.ColumnName, out standardColumn))
                 {
                     switch (standardColumn)
                     {
-                        case StandardColumn.Exception:
-                            break;
-                        case StandardColumn.Properties:
-                            break;
-                        case StandardColumn.Level:
-                            break;
-                        case StandardColumn.MessageTemplate:
-                            break;
-                        case StandardColumn.Message:
-                            break;
                         case StandardColumn.LogEvent:
+                            columnOptions.LogEvent.ExcludeAdditionalProperties = c.ExcludeAdditionalProperties;
+                            columnOptions.LogEvent.DataColumn = column;
+                            columnOptions.LogEvent.Overrided = true;
                             break;
                         case StandardColumn.TimeStamp:
                             columnOptions.TimeStamp.ConvertToUtc = c.ConvertToUtc;
+                            columnOptions.TimeStamp.DataColumn = column;
+                            columnOptions.TimeStamp.Overrided = true;
+                            break;
+                        case StandardColumn.Exception:
+                            columnOptions.Exception.DataColumn = column;
+                            columnOptions.Exception.Overrided = true;
+                            break;
+                        case StandardColumn.Properties:
+                            columnOptions.Properties.DataColumn = column;
+                            columnOptions.Properties.Overrided = true;
+                            break;
+                        case StandardColumn.Level:
+                            columnOptions.Level.DataColumn = column;
+                            columnOptions.Level.Overrided = true;
+                            break;
+                        case StandardColumn.MessageTemplate:
+                            columnOptions.MessageTemplate.DataColumn = column;
+                            columnOptions.MessageTemplate.Overrided = true;
+                            break;
+                        case StandardColumn.Message:
+                            columnOptions.Message.DataColumn = column;
+                            columnOptions.Message.Overrided = true;
                             break;
                     }
 
-                    return;
+                    continue;
                 }
-
-                column.DataType = dataType;
-                column.AllowDBNull = c.AllowNull;
-
-
-                if (columnOptions.AdditionalDataColumns == null)
+                else
                 {
-                    columnOptions.AdditionalDataColumns = new Collection<DataColumn>();
-                }
+                    if (columnOptions.AdditionalDataColumns == null)
+                    {
+                        columnOptions.AdditionalDataColumns = new Collection<DataColumn>();
+                    }
 
-                columnOptions.AdditionalDataColumns.Add(column);
+                    columnOptions.AdditionalDataColumns.Add(column);
+                }
             }
+        }
+
+        private static DataColumn CreateDataColumn(ColumnConfig c)
+        {
+            DataColumn column = new DataColumn(c.ColumnName);
+            Type dataType = typeof(string);
+
+            switch (c.DataType)
+            {
+                case "bigint":
+                    dataType = typeof(long);
+                    break;
+                case "varbinary":
+                case "binary":
+                    dataType = Type.GetType("System.Byte[]");
+                    column.ExtendedProperties["DataLength"] = c.DataLength;
+                    break;
+                case "bit":
+                    dataType = typeof(bool);
+                    break;
+                case "char":
+                case "nchar":
+                case "ntext":
+                case "nvarchar":
+                case "text":
+                case "varchar":
+                    dataType = Type.GetType("System.String");
+                    column.MaxLength = c.DataLength;
+                    break;
+                case "date":
+                case "datetime":
+                case "datetime2":
+                case "smalldatetime":
+                    dataType = typeof(DateTime);
+                    break;
+                case "decimal":
+                case "money":
+                case "numeric":
+                case "smallmoney":
+                    dataType = typeof(Decimal);
+                    break;
+                case "float":
+                    dataType = typeof(double);
+                    break;
+                case "int":
+                    dataType = typeof(int);
+                    break;
+                case "real":
+                    dataType = typeof(float);
+                    break;
+                case "smallint":
+                    dataType = typeof(short);
+                    break;
+                case "time":
+                    dataType = typeof(TimeSpan);
+                    break;
+                case "uniqueidentifier":
+                    dataType = typeof(Guid);
+                    break;
+            }
+
+            column.DataType = dataType;
+            column.AllowDBNull = c.AllowNull;
+
+            return column;
         }
     }
 }

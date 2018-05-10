@@ -100,6 +100,16 @@ namespace Serilog.Configuration
         }
 
         /// <summary>
+        /// Define ExcludeAdditionalProperties format for LogEvent column.
+        /// </summary>
+        [ConfigurationProperty("ExcludeAdditionalProperties", IsRequired = false, IsKey = false, DefaultValue = false)]
+        public bool ExcludeAdditionalProperties
+        {
+            get { return (bool)this["ExcludeAdditionalProperties"]; }
+            set { this["ExcludeAdditionalProperties"] = value; }
+        }
+
+        /// <summary>
         /// Define ConvertToUtc format for datetime column.
         /// </summary>
         [ConfigurationProperty("ConvertToUtc", IsRequired = false, IsKey = false, DefaultValue = false)]
