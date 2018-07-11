@@ -248,10 +248,10 @@ As the name suggests, `columnOptionSection` is an entire configuration section i
         "usePropertyKeyAsElementName": false
     },
     "timeStamp": { "columnName": "Timestamp", "convertToUtc": true },
-    "logEvent": { "columnName": "LogEvent", "excludeAdditionalProperties": true }
+    "logEvent": { "columnName": "LogEvent", "excludeAdditionalProperties": true },
     "message": { "columnName": "Message" },
     "exception": { "columnName": "Exception" },
-    "messageTemplate": { "columnName": "MessageTemplate" },
+    "messageTemplate": { "columnName": "MessageTemplate" }
 }
 ```
 
