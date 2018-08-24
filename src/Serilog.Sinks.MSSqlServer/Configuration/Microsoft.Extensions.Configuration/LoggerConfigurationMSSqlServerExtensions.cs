@@ -221,7 +221,7 @@ namespace Serilog
             var section = config.GetSection("level");
             if(section.GetChildren().Any())
             {
-                SetIfProvided<string>((val) => { opts.Id.ColumnName = val; }, section["columnName"]);
+                SetIfProvided<string>((val) => { opts.Level.ColumnName = val; }, section["columnName"]);
                 SetIfProvided<bool>((val) => { opts.Level.StoreAsEnum = val; }, section["storeAsEnum"]);
             }
 
@@ -266,10 +266,11 @@ namespace Serilog
 
             return opts;
 
-            // this avoids changing the property if it isn't provided by config
+            // This is used to only set a column property when it is actually specified in the config.
+            // When a value is requested from config, it returns null if that value hasn't been specified.
+            // This also means you can't use config to set a property to null.
             void SetIfProvided<T>(PropertySetter<T> setter, string value)
             {
-                // note this means you can't use config to set a property to null
                 if(value == null)
                     return;
                 try
@@ -277,10 +278,9 @@ namespace Serilog
                     var setting = (T)Convert.ChangeType(value, typeof(T));
                     setter(setting);
                 }
-                catch
-                {
-                    // don't change the property if the conversion failed 
-                }
+                // don't change the property if the conversion failed 
+                catch (InvalidCastException) { }
+                catch (OverflowException) { }
             }
         }
     }
