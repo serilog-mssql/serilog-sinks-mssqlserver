@@ -52,9 +52,14 @@ namespace Serilog.Sinks.MSSqlServer
             FormatProvider = formatProvider;
 
             ExcludedColumnNames = new List<string>(ColumnOptions.Store.Count + 1);
-            ExcludedColumnNames.Add("id");
-            foreach (var column in ColumnOptions.Store)
-                ExcludedColumnNames.Add(column.ToString());
+            ExcludedColumnNames.Add(ColumnOptions.Id.ColumnName ?? "Id");
+            if (ColumnOptions.Store.Contains(StandardColumn.Message)) ExcludedColumnNames.Add(ColumnOptions.Message.ColumnName ?? "Message");
+            if (ColumnOptions.Store.Contains(StandardColumn.MessageTemplate)) ExcludedColumnNames.Add(ColumnOptions.MessageTemplate.ColumnName ?? "MessageTemplate");
+            if (ColumnOptions.Store.Contains(StandardColumn.Level)) ExcludedColumnNames.Add(ColumnOptions.Level.ColumnName ?? "Level");
+            if (ColumnOptions.Store.Contains(StandardColumn.TimeStamp)) ExcludedColumnNames.Add(ColumnOptions.TimeStamp.ColumnName ?? "TimeStamp");
+            if (ColumnOptions.Store.Contains(StandardColumn.Exception)) ExcludedColumnNames.Add(ColumnOptions.Exception.ColumnName ?? "Exception");
+            if (ColumnOptions.Store.Contains(StandardColumn.Properties)) ExcludedColumnNames.Add(ColumnOptions.Properties.ColumnName ?? "Properties");
+            if (ColumnOptions.Store.Contains(StandardColumn.LogEvent)) ExcludedColumnNames.Add(ColumnOptions.LogEvent.ColumnName ?? "LogEvent");
 
             if (ColumnOptions.AdditionalDataColumns != null)
                 AdditionalDataColumnNames = new HashSet<string>(ColumnOptions.AdditionalDataColumns.Select(c => c.ColumnName), StringComparer.OrdinalIgnoreCase);
@@ -114,7 +119,7 @@ namespace Serilog.Sinks.MSSqlServer
                 case StandardColumn.Level:
                     return new KeyValuePair<string, object>(ColumnOptions.Level.ColumnName ?? "Level", ColumnOptions.Level.StoreAsEnum ? (object)logEvent.Level : logEvent.Level.ToString());
                 case StandardColumn.TimeStamp:
-                    return new KeyValuePair<string, object>(ColumnOptions.TimeStamp.ColumnName ?? "TimeStamp", ColumnOptions.TimeStamp.ConvertToUtc ? logEvent.Timestamp.ToUniversalTime() : logEvent.Timestamp.DateTime);
+                    return new KeyValuePair<string, object>(ColumnOptions.TimeStamp.ColumnName ?? "TimeStamp", ColumnOptions.TimeStamp.ConvertToUtc ? logEvent.Timestamp.ToUniversalTime().DateTime : logEvent.Timestamp.DateTime);
                 case StandardColumn.Exception:
                     return new KeyValuePair<string, object>(ColumnOptions.Exception.ColumnName ?? "Exception", logEvent.Exception != null ? logEvent.Exception.ToString() : null);
                 case StandardColumn.Properties:

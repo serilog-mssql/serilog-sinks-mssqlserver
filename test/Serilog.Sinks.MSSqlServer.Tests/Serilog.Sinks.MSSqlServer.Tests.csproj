@@ -56,7 +56,10 @@
     <PackageReference Include="System.Text.Encoding.Extensions" Version="4.3.0" />
     <PackageReference Include="xunit" Version="2.3.0" />
     <PackageReference Include="xunit.core" Version="2.3.0" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.3.0" NoWarn="NU1701" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.3.0" NoWarn="NU1701">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
     <Compile Include="Configuration\Microsoft.Extensions.Configuration\**\*.cs" />
   </ItemGroup>
 
