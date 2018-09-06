@@ -114,7 +114,7 @@ namespace Serilog.Sinks.MSSqlServer
                 case StandardColumn.Level:
                     return new KeyValuePair<string, object>(ColumnOptions.Level.ColumnName ?? "Level", ColumnOptions.Level.StoreAsEnum ? (object)logEvent.Level : logEvent.Level.ToString());
                 case StandardColumn.TimeStamp:
-                    return new KeyValuePair<string, object>(ColumnOptions.TimeStamp.ColumnName ?? "TimeStamp", ColumnOptions.TimeStamp.ConvertToUtc ? logEvent.Timestamp.DateTime.ToUniversalTime() : logEvent.Timestamp.DateTime);
+                    return new KeyValuePair<string, object>(ColumnOptions.TimeStamp.ColumnName ?? "TimeStamp", ColumnOptions.TimeStamp.ConvertToUtc ? logEvent.Timestamp.ToUniversalTime() : logEvent.Timestamp.DateTime);
                 case StandardColumn.Exception:
                     return new KeyValuePair<string, object>(ColumnOptions.Exception.ColumnName ?? "Exception", logEvent.Exception != null ? logEvent.Exception.ToString() : null);
                 case StandardColumn.Properties:
