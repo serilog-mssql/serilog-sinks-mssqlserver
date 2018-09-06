@@ -35,6 +35,7 @@ namespace Serilog.Sinks.MSSqlServer
         public JsonFormatter JsonFormatter { get; }
         public ISet<string> AdditionalDataColumnNames { get; }
         public DataTable EventTable { get; }
+        public List<string> ExcludedColumnNames { get; }
 
         public MSSqlServerSinkTraits(string connectionString, string tableName, string schemaName, ColumnOptions columnOptions, IFormatProvider formatProvider, bool autoCreateSqlTable)
         {
@@ -49,6 +50,11 @@ namespace Serilog.Sinks.MSSqlServer
             SchemaName = schemaName;
             ColumnOptions = columnOptions ?? new ColumnOptions();
             FormatProvider = formatProvider;
+
+            ExcludedColumnNames = new List<string>(ColumnOptions.Store.Count + 1);
+            ExcludedColumnNames.Add("id");
+            foreach (var column in ColumnOptions.Store)
+                ExcludedColumnNames.Add(column.ToString());
 
             if (ColumnOptions.AdditionalDataColumns != null)
                 AdditionalDataColumnNames = new HashSet<string>(ColumnOptions.AdditionalDataColumns.Select(c => c.ColumnName), StringComparer.OrdinalIgnoreCase);
@@ -183,13 +189,14 @@ namespace Serilog.Sinks.MSSqlServer
         /// <summary>
         ///     Mapping values from properties which have a corresponding data row.
         ///     Matching is done based on Column name and property key
+        ///     Standard columns are not mapped
         /// </summary>        
         /// <param name="properties"></param>
         private IEnumerable<KeyValuePair<string, object>> ConvertPropertiesToColumn(IReadOnlyDictionary<string, LogEventPropertyValue> properties)
         {
             foreach (var property in properties)
             {
-                if (!EventTable.Columns.Contains(property.Key))
+                if (!EventTable.Columns.Contains(property.Key) || ExcludedColumnNames.Contains(property.Key))
                     continue;
 
                 var columnName = property.Key;
