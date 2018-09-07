@@ -2,8 +2,9 @@
 
   <!-- 
   Because this is a multi-targeted project/solution, run tests from the command line
-  with the current working directory set to the location of this csproj. Tests will not
-  execute within the VS IDE as of version 15.6.5 (April 2018).
+  with the current working directory set to the location of this csproj. As of Sept 2018
+  the VS2017 IDE (v15.8.3) will only run a .NET Core test, there is no way to run
+  the .NET Framework test from the IDE.
   
   dotnet test [dash dash]framework net452
   dotnet test [dash dash]framework netcoreapp2.0
@@ -25,10 +26,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Serilog.Sinks.MSSqlServer\Serilog.Sinks.MSSqlServer.csproj" />
-    <PackageReference Include="FluentAssertions" Version="4.19.4" />
-    <PackageReference Include="Dapper.StrongName" Version="1.50.2" />
+    <PackageReference Include="FluentAssertions" Version="5.4.1" />
+    <PackageReference Include="Dapper.StrongName" Version="1.50.5" />
     <DotNetCliToolReference Include="dotnet-xunit" Version="2.3.0" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.5.0-preview-20171012-09" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.8.0" />
+    <PackageReference Include="System.Diagnostics.Debug" Version="4.3.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -42,8 +44,8 @@
   <ItemGroup Condition=" '$(TargetFramework)' == 'net452' ">
     <Reference Include="System" />
     <Reference Include="Microsoft.CSharp" />
-    <PackageReference Include="xunit" Version="2.3.0" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.3.0" NoWarn="NU1701" />
+    <PackageReference Include="xunit" Version="2.4.0" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.0" />
     <Compile Include="Configuration\NetFramework.ConfigurationManager\**\*.cs" />
   </ItemGroup>
 
@@ -54,9 +56,9 @@
     <PackageReference Include="System.IO.FileSystem.Primitives" Version="4.3.0" />
     <PackageReference Include="System.Resources.ResourceManager" Version="4.3.0" />
     <PackageReference Include="System.Text.Encoding.Extensions" Version="4.3.0" />
-    <PackageReference Include="xunit" Version="2.3.0" />
-    <PackageReference Include="xunit.core" Version="2.3.0" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.3.0" NoWarn="NU1701">
+    <PackageReference Include="xunit" Version="2.4.0" />
+    <PackageReference Include="xunit.core" Version="2.4.0" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
