@@ -84,7 +84,7 @@ var log = new LoggerConfiguration()
 
 ## Table definition
 
-You'll need to create a table like this in your database:
+You'll need to create a table like this in your database. Many other variations are possible. In particular, give careful consideration to whether you need the Id column (discussed in the next section). The table definition shown here is the default configuration.
 
 ```
 CREATE TABLE [Logs] (
@@ -95,8 +95,7 @@ CREATE TABLE [Logs] (
    [Level] nvarchar(128) NULL,
    [TimeStamp] datetimeoffset(7) NOT NULL,  -- use datetime for SQL Server pre-2008
    [Exception] nvarchar(max) NULL,
-   [Properties] xml NULL,
-   [LogEvent] nvarchar(max) NULL
+   [Properties] xml NULL
 
    CONSTRAINT [PK_Logs] 
      PRIMARY KEY CLUSTERED ([Id] ASC) 
@@ -107,23 +106,76 @@ CREATE TABLE [Logs] (
 ) ON [PRIMARY];
 ```
 
-**Remember to grant the necessary permissions for the sink to be able to write to the log table.**
+If you don't plan to use a column, you can specify which columns to exclude in the `columnOptions.Store` parameter (see below). 
 
-If you don't plan on using one or more columns, you can specify which columns to include in the *columnOptions.Store* parameter (see below). 
-
-The Level column should be defined as a TinyInt if the *columnOptions.Level.StoreAsEnum* is set to true.
+The Level column should be defined as a `tinyint` when `columnOptions.Level.StoreAsEnum` is set to `true`.
 
 
 ### Automatic table creation
 
-If you set the `autoCreateSqlTable` option to `true`, the sink will create a table for you in the database specified in the connection string.  Make sure that the user associated with this connection string has enough rights to make schema changes.
+If you set the `autoCreateSqlTable` option to `true`, the sink will create a table for you in the database specified in the connection string.  Make sure that the user associated with this connection string has enough rights to make schema changes; see below.
+
+
+### Permissions
+
+SQL permissions are a very complex subject. Here is an example of one possible solution (valid for SQL 2012 or later):
+
+```
+CREATE ROLE [SerilogAutoCreate];
+GRANT SELECT ON sys.tables TO [SerilogAutoCreate];
+GRANT SELECT ON sys.schemas TO [SerilogAutoCreate];
+GRANT ALTER ON SCHEMA::[dbo] TO [SerilogAutoCreate]
+GRANT CREATE TABLE ON DATABASE::[SerilogTest] TO [SerilogAutoCreate];
+
+CREATE ROLE [SerilogWriter];
+GRANT SELECT TO [SerilogWriter];
+GRANT INSERT TO [SerilogWriter];
+
+CREATE LOGIN [Serilog] WITH PASSWORD = 'password';
+
+CREATE USER [Serilog] FOR LOGIN [Serilog] WITH DEFAULT_SCHEMA = dbo;
+GRANT CONNECT TO [Serilog];
+
+ALTER ROLE [SerilogAutoCreate] ADD MEMBER [Serilog];
+ALTER ROLE [SerilogWriter] ADD MEMBER [Serilog];
+```
+
+This creates a SQL login named `Serilog`, a database user named `Serilog`, and assigned to that user are the roles `SerilogAutoCreate` and `SerilogWriter`. As the name suggests, the SerilogAutoCreate role is not needed if you create the database ahead of time, which is the recommended course of action if you're concerned about security at this level.
+
+Also, ideally the SerilogWriter role would be restricted to the log table only, and that table has to already exist for table-specific GRANT statements to execute, so that's another reason that you probably don't want to use auto-create. Table-level restrictions would look like this (assuming you name your log table SecuredLog, of course):
+
+```
+GRANT SELECT ON [dbo].[SecuredLog] TO [SerilogWriter];
+GRANT SELECT ON [dbo].[SecuredLog] TO [SerilogWriter];
+```
+
+There are many possible variations. For example, you could also create a new schema that was specific to the log(s) and restrict access that way.
+
+
+## Id Column Options
+
+Previous versions of this sink assumed the Id column is always present as an `int` `IDENTITY` primary key with a clustered index. Other configurations are available, however this is still the default strictly for backwards-compatibility reasons.
+
+You should consider your anticipated logging volume and query requirements carefully. The default setting is not especially useful in real-world query scenarios since a clustered index is primarily of use when the key is used for sorting or range searches, which will rarely be the case for the Id column.
+
+### No Id Column
+
+If you eliminate the Id column completely, the log table is stored as an unindexed heap. This is the ideal write-speed scenario for logging, however any non-clustered indexes you add will degrade write performance. One way to mitigate this is to keep the non-clustered indexes offline and use batch reindexing on a scheduled basis. If you create your table ahead of time, simply omit the Id column and the constraint shown in the previous section.
+
+### Unclustered Id Column
+
+You can also retain the Id column as an `IDENTITY` primary key, but without a clustered index. The log is still stored as an unindexed heap, but writes with non-clustered indexes are slightly faster. The non-clustered indexes will reference the Id primary key. However, read performance will be slightly degraded since it requires two reads (the covering non-clustered index, then dereferencing the heap row from the Id). To create this type of table ahead of time, change the constraint in the previous section to `NONCLUSTERED` and leave out the `WITH` clause.
+
+### Bigint Data Type
+
+For very large log tables, you may wish to create the Id column with the `bigint` datatype. This 8-byte integer will permit a maximum identity value of 9,223,372,036,854,775,807. The only change to the table syntax in the previous section is the datatype where `[Id]` is defined. 
 
 
 ## Standard columns
 
-The "standard columns" used by this sink (apart from obvious required columns like Id) are described by the StandardColumn enumeration and controlled through code by the `columnOptions.Store` collection.
+The "standard columns" used by this sink are described by the `StandardColumn` enumeration and controlled through code by the `columnOptions.Store` collection. By default (and consistent with the SQL command to create a table, above) these columns are included:
 
-By default (and consistent with the SQL command to create a table, above) these columns are included:
+ - `StandardColumn.Id`
  - `StandardColumn.Message`
  - `StandardColumn.MessageTemplate`
  - `StandardColumn.Level`
@@ -141,10 +193,9 @@ columnOptions.Store.Remove(StandardColumn.Properties);
 columnOptions.Store.Add(StandardColumn.LogEvent);
 ```
 
-You can also store your own log event properties as additional columns; see below.
+You can also store your own log event properties in additional custom columns; see below.
 
-
-### Saving properties in additional columns
+### Saving properties in custom columns
 
 By default any log event properties you include in your log statements will be saved to the Properties column (and/or LogEvent column, per columnOption.Store).  But they can also be stored in their own columns via the AdditionalDataColumns setting.
 
@@ -153,25 +204,30 @@ var columnOptions = new ColumnOptions
 {
     AdditionalDataColumns = new Collection<DataColumn>
     {
-        new DataColumn {DataType = typeof (string), ColumnName = "User"},
-        new DataColumn {DataType = typeof (string), ColumnName = "Other"},
+        new DataColumn {DataType = "nvarchar", ColumnName = "UserName", DataLength = 64},
+        new DataColumn {DataType = "varchar", ColumnName = "RequestUri", DataLength = -1, AllowNull = false},
     }
 };
 
 var log = new LoggerConfiguration()
-    .WriteTo.MSSqlServer(@"Server=.\SQLEXPRESS;Database=LogEvents;Trusted_Connection=True;", "Logs", columnOptions: columnOptions)
+    .WriteTo.MSSqlServer(@"Server=...", "Logs", columnOptions: columnOptions)
     .CreateLogger();
 ```
 
-The log event properties `User` and `Other` will now be placed in the corresponding column upon logging. The property name must match a column name in your table. Be sure to include them in the table definition.
+The log event properties `UserName` and `RequestUri` will be written to the corresponding columns whenever those values (with the exact same property name) occur in a log entry. Be sure to include them in the table definition if you create your table ahead of time.
+
+Variable-length data types like `varchar` require a `DataLength` property. Use -1 to specify SQL's `MAX` length.
+
+**Standard column names are reserved. Even if you exclude a standard column, never create a custom column by the same name.**
 
 
-#### Excluding redundant items from the Properties column
+#### Excluding redundant Properties or LogEvent data
 
 By default, additional properties will still be included in the data saved to the XML Properties or JSON LogEvent column (assuming one or both are enabled via the `columnOptions.Store` parameter). This is consistent with the idea behind structured logging, and makes it easier to convert the log data to another (e.g. NoSQL) storage platform later if desired. 
 
-However, if necessary, then the properties being saved in their own columns can be excluded from the data.  Use the `columnOptions.Properties.ExcludeAdditionalProperties` parameter in the sink configuration to exclude the redundant properties from the XML. 
+However, if necessary, the properties being saved in their own columns can be excluded from the data.  Use the `columnOptions.Properties.ExcludeAdditionalProperties` parameter in the sink configuration to exclude the redundant properties from the XML, or `columnOptions.LogEvent.ExcludeAdditionalProperties` if you've added the JSON LogEvent column. 
 
+The standard columns are always excluded from the Properties and LogEvent columns.
 
 ### Columns defined by AppSettings (.NET Framework)
 
@@ -219,7 +275,7 @@ The equivalent of adding custom columns as shown in the .NET Framework example a
 }
 ```
 
-As the name suggests, `columnOptionSection` is an entire configuration section in its own right. All possible entries and some sample values are shown below. All properties and subsections are optional.
+As the name suggests, `columnOptionSection` is an entire configuration section in its own right. All possible entries and some sample values are shown below. All properties and subsections are optional. It is not currently possible to specify a `PropertiesFilter` predicate in configuration.
 
 ```json
 "columnOptionsSection": {
@@ -230,7 +286,7 @@ As the name suggests, `columnOptionSection` is an entire configuration section i
         { "ColumnName": "Release", "DataType": "varchar", "DataLength": 32 }
     ],
     "disableTriggers": true,
-    "id": { "columnName": "Id" },
+    "id": { "columnName": "Id", "bigint": true, "clusteredIndex": true },
     "level": { "columnName": "Level", "storeAsEnum": false },
     "properties": { 
         "columnName": "Properties",
@@ -256,11 +312,13 @@ As the name suggests, `columnOptionSection` is an entire configuration section i
 ```
 
 
-### Options for serialization of the log event data
+### Options for serialization of event data
+
+Typically you will choose either XML or JSON serialization, but not both.
 
 #### JSON (LogEvent column)
 
-The log event JSON can be stored to the LogEvent column. This can be enabled by adding the LogEvent column to the `columnOptions.Store` collection. Use the `columnOptions.LogEvent.ExcludeAdditionalProperties` parameter to exclude redundant properties from the JSON. This is analogue to excluding redundant items from XML in the Properties column.
+Event data items can be stored to the LogEvent column. This can be enabled by adding the LogEvent column to the `columnOptions.Store` collection. Use the `columnOptions.LogEvent.ExcludeAdditionalProperties` parameter to exclude redundant properties from the JSON. This is analogue to excluding redundant items from XML in the Properties column.
 
 #### XML (Properties column)
 
@@ -276,7 +334,7 @@ If `OmitDictionaryContainerElement`, `OmitSequenceContainerElement` or `OmitStru
 
 If `OmitElementIfEmpty` is set then if a property is empty, it will not be serialized.
 
-##### Querying the properties XML
+##### Querying the Properties XML data
 
 Extracting and querying the properties data directly can be helpful when looking for specific log sequences.
 

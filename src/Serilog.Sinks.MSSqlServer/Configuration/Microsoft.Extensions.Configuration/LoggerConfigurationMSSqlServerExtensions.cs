@@ -216,9 +216,15 @@ namespace Serilog
 
             SetIfProvided<bool>((val) => { opts.DisableTriggers = val; }, config["disableTriggers"]);
 
-            SetIfProvided<string>((val) => { opts.Id.ColumnName = val; }, config.GetSection("id")["columnName"]);
+            var section = config.GetSection("id");
+            if (section.GetChildren().Any())
+            {
+                SetIfProvided<string>((val) => { opts.Id.ColumnName = val; }, section["columnName"]);
+                SetIfProvided<bool>((val) => { opts.Id.BigInt = val; }, section["bigInt"]);
+                SetIfProvided<bool>((val) => { opts.Id.ClusteredIndex = val; }, section["clusteredIndex"]);
+            }
 
-            var section = config.GetSection("level");
+            section = config.GetSection("level");
             if(section.GetChildren().Any())
             {
                 SetIfProvided<string>((val) => { opts.Level.ColumnName = val; }, section["columnName"]);
