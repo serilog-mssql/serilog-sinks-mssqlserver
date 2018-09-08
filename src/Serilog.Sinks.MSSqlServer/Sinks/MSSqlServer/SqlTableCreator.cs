@@ -45,16 +45,14 @@ namespace Serilog.Sinks.MSSqlServer
 
             // columns
             bool hasPrimaryKey = false;
-            bool clusteredIndex = true;
             int numOfColumns = table.Columns.Count;
             int i = 1;
             foreach (DataColumn column in table.Columns)
             {
                 sql.AppendFormat("[{0}] {1}", column.ColumnName, SqlGetType(column));
-                if (column.ColumnName.ToUpper().Equals("ID") || column.AutoIncrement)
+                if (column.AutoIncrement) // the PK is always auto-increment (IDENTITY)
                 {
                     hasPrimaryKey = true;
-                    clusteredIndex = (bool)column.ExtendedProperties["clusteredIndex"];
                     sql.Append(" IDENTITY(1,1) ");
                 }
                 if (numOfColumns > i)
@@ -65,6 +63,7 @@ namespace Serilog.Sinks.MSSqlServer
             // primary keys
             if (hasPrimaryKey)
             {
+                var clusteredIndex = (bool)table.PrimaryKey[0].ExtendedProperties["clusteredIndex"];
                 sql.AppendFormat(" CONSTRAINT [PK_{0}] PRIMARY KEY {1}CLUSTERED (", tableName, clusteredIndex ? string.Empty : "NON" );
 
                 int numOfKeys = table.PrimaryKey.Length;
