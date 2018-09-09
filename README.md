@@ -160,7 +160,7 @@ You should consider your anticipated logging volume and query requirements caref
 
 ### No Id Column
 
-If you eliminate the Id column completely, the log table is stored as an unindexed heap. This is the ideal write-speed scenario for logging, however any non-clustered indexes you add will degrade write performance. One way to mitigate this is to keep the non-clustered indexes offline and use batch reindexing on a scheduled basis. If you create your table ahead of time, simply omit the Id column and the constraint shown in the previous section.
+If you eliminate the Id column completely, the log table is stored as an unindexed heap. This is the ideal write-speed scenario for logging, however any non-clustered indexes you add will slightly degrade write performance. One way to mitigate this is to keep the non-clustered indexes offline and use batch reindexing on a scheduled basis. If you create your table ahead of time, simply omit the Id column and the constraint shown in the previous section.
 
 ### Unclustered Id Column
 
@@ -168,8 +168,13 @@ You can also retain the Id column as an `IDENTITY` primary key, but without a cl
 
 ### Bigint Data Type
 
-For very large log tables, you may wish to create the Id column with the `bigint` datatype. This 8-byte integer will permit a maximum identity value of 9,223,372,036,854,775,807. The only change to the table syntax in the previous section is the datatype where `[Id]` is defined. 
+For very large log tables, you may wish to create the Id column with the `bigint` datatype. This 8-byte integer will permit a maximum identity value of 9,223,372,036,854,775,807. The only change to the table syntax in the previous section is the datatype where `[Id]` is defined. This will slightly degrade both read and write performance.
 
+## Batch Size and Performance
+
+This is a "periodic batching sink." This means the sink will queue a certain number of log events before they're actually written to SQL Server as a bulk insert operation. There is also a timeout so that the batch is always written even if it has not been filled. By default, the batch size is 50 and the timeout is 5 seconds. You can change these through configuration.
+
+Consider increasing the batch size in high-volume logging environments. In one test of a loop writing a single log entry to a local server instance (no network traffic), the default batch achieved around 14,000 rows per second. Increasing the batch size to 1000 rows increased write speed to nearly 43,000 rows per second. However, you should also consider the risk-factor. If the server crashes or the connection goes down, you may lose an entire batch of log entries. You can mitigate this by reducing the timeout. Run performance tests to find the optimal batch size for your production log content, network setup, and server configuration.
 
 ## Standard columns
 
@@ -204,8 +209,8 @@ var columnOptions = new ColumnOptions
 {
     AdditionalDataColumns = new Collection<DataColumn>
     {
-        new DataColumn {DataType = "nvarchar", ColumnName = "UserName", DataLength = 64},
-        new DataColumn {DataType = "varchar", ColumnName = "RequestUri", DataLength = -1, AllowNull = false},
+        new DataColumn {DataType = typeof(string), ColumnName = "UserName", DataLength = 64},
+        new DataColumn {DataType = typeof(string), ColumnName = "RequestUri", DataLength = -1, AllowNull = false},
     }
 };
 
@@ -216,7 +221,7 @@ var log = new LoggerConfiguration()
 
 The log event properties `UserName` and `RequestUri` will be written to the corresponding columns whenever those values (with the exact same property name) occur in a log entry. Be sure to include them in the table definition if you create your table ahead of time.
 
-Variable-length data types like `varchar` require a `DataLength` property. Use -1 to specify SQL's `MAX` length.
+When configuring through code, set the `DataType` property to a .NET type. When configuring through XML, JSON or other settings packages, specify a SQL data type. It will be internally converted to an equivalent .NET type. Variable-length data types like `string` and `varchar` require a `DataLength` property. Use -1 to specify SQL's `MAX` length.
 
 **Standard column names are reserved. Even if you exclude a standard column, never create a custom column by the same name.**
 
