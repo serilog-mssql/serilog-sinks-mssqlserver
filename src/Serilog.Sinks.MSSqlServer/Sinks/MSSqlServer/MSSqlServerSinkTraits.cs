@@ -265,15 +265,12 @@ namespace Serilog.Sinks.MSSqlServer
                         {
                             DataType = ColumnOptions.Id.BigInt ? typeof(long) : typeof(int),
                             ColumnName = ColumnOptions.Id.ColumnName ?? StandardColumn.Id.ToString(),
-                            AutoIncrement = true
+                            AutoIncrement = true,
+                            AllowDBNull = false
                         };
+                        id.ExtendedProperties.Add("NonClusteredIndex", ColumnOptions.Id.NonClusteredIndex);
                         eventsTable.Columns.Add(id);
-                        id.ExtendedProperties.Add("clusteredIndex", false);
-                        if(ColumnOptions.Id.ClusteredIndex)
-                        {
-                            id.ExtendedProperties["clusteredIndex"] = true;
-                            eventsTable.PrimaryKey = new DataColumn[] { id };
-                        }
+                        eventsTable.PrimaryKey = new DataColumn[] { id };
                         break;
 
                     case StandardColumn.Level:

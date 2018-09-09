@@ -63,8 +63,8 @@ namespace Serilog.Sinks.MSSqlServer
             // primary keys
             if (hasPrimaryKey)
             {
-                var clusteredIndex = (bool)table.PrimaryKey[0].ExtendedProperties["clusteredIndex"];
-                sql.AppendFormat(" CONSTRAINT [PK_{0}] PRIMARY KEY {1}CLUSTERED (", tableName, clusteredIndex ? string.Empty : "NON" );
+                var NonClusteredIndex = (bool)table.PrimaryKey[0].ExtendedProperties["NonClusteredIndex"];
+                sql.AppendFormat(" CONSTRAINT [PK_{0}] PRIMARY KEY {1}CLUSTERED (", tableName, NonClusteredIndex ? "NON" : string.Empty);
 
                 int numOfKeys = table.PrimaryKey.Length;
                 i = 1;

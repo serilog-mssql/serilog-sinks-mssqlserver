@@ -164,7 +164,7 @@ If you eliminate the Id column completely, the log table is stored as an unindex
 
 ### Unclustered Id Column
 
-You can also retain the Id column as an `IDENTITY` primary key, but without a clustered index. The log is still stored as an unindexed heap, but writes with non-clustered indexes are slightly faster. The non-clustered indexes will reference the Id primary key. However, read performance will be slightly degraded since it requires two reads (the covering non-clustered index, then dereferencing the heap row from the Id). To create this type of table ahead of time, change the constraint in the previous section to `NONCLUSTERED` and leave out the `WITH` clause.
+You can also retain the Id column as an `IDENTITY` primary key, but using a non-clustered index. The log is still stored as an unindexed heap, but writes with non-clustered indexes are slightly faster. Non-clustered indexes on other columns will reference the Id primary key. However, read performance will be slightly degraded since it requires two reads (the covering non-clustered index, then dereferencing the heap row from the Id). To create this type of table ahead of time, change the constraint in the previous section to `NONCLUSTERED` and leave out the `WITH` clause.
 
 ### Bigint Data Type
 
@@ -291,7 +291,7 @@ As the name suggests, `columnOptionSection` is an entire configuration section i
         { "ColumnName": "Release", "DataType": "varchar", "DataLength": 32 }
     ],
     "disableTriggers": true,
-    "id": { "columnName": "Id", "bigint": true, "clusteredIndex": true },
+    "id": { "columnName": "Id", "bigint": true, "nonClusteredIndex": true },
     "level": { "columnName": "Level", "storeAsEnum": false },
     "properties": { 
         "columnName": "Properties",

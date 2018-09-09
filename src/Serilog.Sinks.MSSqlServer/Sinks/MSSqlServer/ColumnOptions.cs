@@ -19,9 +19,9 @@ namespace Serilog.Sinks.MSSqlServer
         {
             Id = new IdColumnOptions
             {
-                // Defaults for backwards compatibility only; not recommended, see docs
+                // Defaults for backwards compatibility, see docs
                 BigInt = false,
-                ClusteredIndex = true
+                NonClusteredIndex = false
             };
 
             Level = new LevelColumnOptions();
@@ -128,12 +128,6 @@ namespace Serilog.Sinks.MSSqlServer
             /// If true, stores as bigint (max value 2^64-1) instead of the default int.
             /// </summary>
             public bool BigInt { get; set; }
-
-            /// <summary>
-            /// If false, the log table will be stored as a heap structure. This will improve
-            /// write performance at the cost of query performance. See documentation for details.
-            /// </summary>
-            public bool ClusteredIndex { get; set; }
         }
 
         /// <summary>
@@ -241,6 +235,14 @@ namespace Serilog.Sinks.MSSqlServer
             /// The name of the column in the database.
             /// </summary>
             public string ColumnName { get; set; }
+
+            /// <summary>
+            /// Currently only implemented for the optional Id IDENTITY PK column. Defaults to false.
+            /// If true, the log table will be stored as a heap structure. This can improve
+            /// write performance at the cost of query performance. See documentation for details.
+            /// </summary>
+            public bool NonClusteredIndex { get; set; }
+
         }
 
         /// <summary>

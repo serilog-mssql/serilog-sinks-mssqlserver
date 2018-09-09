@@ -221,7 +221,7 @@ namespace Serilog
             {
                 SetIfProvided<string>((val) => { opts.Id.ColumnName = val; }, section["columnName"]);
                 SetIfProvided<bool>((val) => { opts.Id.BigInt = val; }, section["bigInt"]);
-                SetIfProvided<bool>((val) => { opts.Id.ClusteredIndex = val; }, section["clusteredIndex"]);
+                SetIfProvided<bool>((val) => { opts.Id.NonClusteredIndex = val; }, section["nonClusteredIndex"]);
             }
 
             section = config.GetSection("level");
@@ -264,11 +264,11 @@ namespace Serilog
                 SetIfProvided<bool>((val) => { opts.LogEvent.ExcludeAdditionalProperties = val; }, section["excludeAdditionalProperties"]);
             }
 
-            SetIfProvided<string>((val) => { opts.Id.ColumnName = val; }, config.GetSection("message")["columnName"]);
+            SetIfProvided<string>((val) => { opts.Message.ColumnName = val; }, config.GetSection("message")["columnName"]);
 
-            SetIfProvided<string>((val) => { opts.Id.ColumnName = val; }, config.GetSection("exception")["columnName"]);
+            SetIfProvided<string>((val) => { opts.Exception.ColumnName = val; }, config.GetSection("exception")["columnName"]);
 
-            SetIfProvided<string>((val) => { opts.Id.ColumnName = val; }, config.GetSection("messageTemplate")["columnName"]);
+            SetIfProvided<string>((val) => { opts.MessageTemplate.ColumnName = val; }, config.GetSection("messageTemplate")["columnName"]);
 
             return opts;
 
