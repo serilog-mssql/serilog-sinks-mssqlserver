@@ -118,6 +118,8 @@ If you set the `autoCreateSqlTable` option to `true`, the sink will create a tab
 
 ### Permissions
 
+At a minimum, writing log entries requires SELECT and INSERT permissions for the log table. (SELECT is required because the sink's batching behavior uses bulk inserts which reads the schema before the write operations begin).
+
 SQL permissions are a very complex subject. Here is an example of one possible solution (valid for SQL 2012 or later):
 
 ```
@@ -154,7 +156,7 @@ There are many possible variations. For example, you could also create a new sch
 
 ## Id Column Options
 
-Previous versions of this sink assumed the Id column is always present as an `int` `IDENTITY` primary key with a clustered index. Other configurations are available, however this is still the default strictly for backwards-compatibility reasons.
+Previous versions of this sink assumed the Id column is always present as an `int` `IDENTITY` primary key with a clustered index. Other configurations are available, however this is still the default for backwards-compatibility reasons.
 
 You should consider your anticipated logging volume and query requirements carefully. The default setting is not especially useful in real-world query scenarios since a clustered index is primarily of use when the key is used for sorting or range searches, which will rarely be the case for the Id column.
 
