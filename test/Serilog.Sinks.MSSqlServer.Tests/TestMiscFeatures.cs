@@ -20,7 +20,6 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         public void LogEventExcludeAdditionalProperties()
         {
             // arrange
-            const string tableName = "LogEventExcludeProps";
             var columnOptions = new ColumnOptions()
             {
                 AdditionalDataColumns = new List<DataColumn>
@@ -36,7 +35,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 .WriteTo.MSSqlServer
                 (
                     connectionString: DatabaseFixture.LogEventsConnectionString,
-                    tableName: tableName,
+                    tableName: DatabaseFixture.LogTableName,
                     columnOptions: columnOptions,
                     autoCreateSqlTable: true,
                     batchPostingLimit: 1,
@@ -55,12 +54,13 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             // assert
             using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
             {
-                var logEvents = conn.Query<LogEventColumns>($"SELECT LogEvent from {tableName}");
+                var logEvents = conn.Query<LogEventColumns>($"SELECT LogEvent from {DatabaseFixture.LogTableName}");
 
                 logEvents.Should().Contain(e => e.LogEvent.Contains("AValue"));
                 logEvents.Should().NotContain(e => e.LogEvent.Contains("BValue"));
             }
 
+            DatabaseFixture.DropTable();
         }
     }
 }
