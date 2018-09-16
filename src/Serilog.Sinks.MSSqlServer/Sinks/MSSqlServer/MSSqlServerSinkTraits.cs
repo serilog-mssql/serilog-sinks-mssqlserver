@@ -51,8 +51,8 @@ namespace Serilog.Sinks.MSSqlServer
             ColumnOptions = columnOptions ?? new ColumnOptions();
             FormatProvider = formatProvider;
 
-            ExcludedColumnNames = new List<string>(ColumnOptions.Store.Count + 1);
-            ExcludedColumnNames.Add(ColumnOptions.Id.ColumnName ?? "Id");
+            ExcludedColumnNames = new List<string>(ColumnOptions.Store.Count);
+            if (ColumnOptions.Store.Contains(StandardColumn.Id)) ExcludedColumnNames.Add(ColumnOptions.Id.ColumnName ?? "Id");
             if (ColumnOptions.Store.Contains(StandardColumn.Message)) ExcludedColumnNames.Add(ColumnOptions.Message.ColumnName ?? "Message");
             if (ColumnOptions.Store.Contains(StandardColumn.MessageTemplate)) ExcludedColumnNames.Add(ColumnOptions.MessageTemplate.ColumnName ?? "MessageTemplate");
             if (ColumnOptions.Store.Contains(StandardColumn.Level)) ExcludedColumnNames.Add(ColumnOptions.Level.ColumnName ?? "Level");
@@ -93,7 +93,9 @@ namespace Serilog.Sinks.MSSqlServer
         {
             foreach (var column in ColumnOptions.Store)
             {
-                yield return GetStandardColumnNameAndValue(column, logEvent);
+                // never write to Id since it will be auto-incrementing (IDENTITY)
+                if(column != StandardColumn.Id)
+                    yield return GetStandardColumnNameAndValue(column, logEvent);
             }
 
             if (ColumnOptions.AdditionalDataColumns != null)
@@ -254,18 +256,23 @@ namespace Serilog.Sinks.MSSqlServer
         {
             var eventsTable = new DataTable(TableName);
 
-            var id = new DataColumn
-            {
-                DataType = typeof(Int32),
-                ColumnName = !string.IsNullOrWhiteSpace(ColumnOptions.Id.ColumnName) ? ColumnOptions.Id.ColumnName : "Id",
-                AutoIncrement = true
-            };
-            eventsTable.Columns.Add(id);
-
             foreach (var standardColumn in ColumnOptions.Store)
             {
                 switch (standardColumn)
                 {
+                    case StandardColumn.Id:
+                        var id = new DataColumn
+                        {
+                            DataType = ColumnOptions.Id.BigInt ? typeof(long) : typeof(int),
+                            ColumnName = ColumnOptions.Id.ColumnName ?? StandardColumn.Id.ToString(),
+                            AutoIncrement = true,
+                            AllowDBNull = false
+                        };
+                        id.ExtendedProperties.Add("NonClusteredIndex", ColumnOptions.Id.NonClusteredIndex);
+                        eventsTable.Columns.Add(id);
+                        eventsTable.PrimaryKey = new DataColumn[] { id };
+                        break;
+
                     case StandardColumn.Level:
                         eventsTable.Columns.Add(new DataColumn
                         {
@@ -328,11 +335,6 @@ namespace Serilog.Sinks.MSSqlServer
             {
                 eventsTable.Columns.AddRange(ColumnOptions.AdditionalDataColumns.ToArray());
             }
-
-            // Create an array for DataColumn objects.
-            var keys = new DataColumn[1];
-            keys[0] = id;
-            eventsTable.PrimaryKey = keys;
 
             return eventsTable;
         }

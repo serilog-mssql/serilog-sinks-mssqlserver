@@ -11,17 +11,12 @@ namespace Serilog.Sinks.MSSqlServer
         private string _tableName;
         private string _schemaName;
 
-        #region Constructor
-
         public SqlTableCreator(string connectionString, string schemaName)
         {
             _schemaName = schemaName;
             _connectionString = connectionString;
         }
 
-        #endregion
-
-        #region Instance Methods				
         public int CreateTable(DataTable table)
         {
             if (table == null) return 0;
@@ -40,9 +35,6 @@ namespace Serilog.Sinks.MSSqlServer
 
             }
         }
-        #endregion
-
-        #region Static Methods
 
         private static string GetSqlFromDataTable(string tableName, DataTable table, string schema)
         {
@@ -52,22 +44,27 @@ namespace Serilog.Sinks.MSSqlServer
             sql.AppendFormat(" CREATE TABLE [{0}].[{1}] ( ", schema, tableName);
 
             // columns
+            bool hasPrimaryKey = false;
             int numOfColumns = table.Columns.Count;
             int i = 1;
             foreach (DataColumn column in table.Columns)
             {
                 sql.AppendFormat("[{0}] {1}", column.ColumnName, SqlGetType(column));
-                if (column.ColumnName.ToUpper().Equals("ID") || column.AutoIncrement)
+                if (column.AutoIncrement) // the PK is always auto-increment (IDENTITY)
+                {
+                    hasPrimaryKey = true;
                     sql.Append(" IDENTITY(1,1) ");
+                }
                 if (numOfColumns > i)
                     sql.AppendFormat(", ");
                 i++;
             }
 
             // primary keys
-            if (table.PrimaryKey.Length > 0)
+            if (hasPrimaryKey)
             {
-                sql.AppendFormat(" CONSTRAINT [PK_{0}] PRIMARY KEY CLUSTERED (", tableName);
+                var NonClusteredIndex = (bool)table.PrimaryKey[0].ExtendedProperties["NonClusteredIndex"];
+                sql.AppendFormat(" CONSTRAINT [PK_{0}] PRIMARY KEY {1}CLUSTERED (", tableName, NonClusteredIndex ? "NON" : string.Empty);
 
                 int numOfKeys = table.PrimaryKey.Length;
                 i = 1;
@@ -155,7 +152,6 @@ namespace Serilog.Sinks.MSSqlServer
             return SqlGetType(column.DataType, column.MaxLength, 10, 2, column.AllowDBNull);
         }
 
-        #endregion
     }
 
 }
