@@ -46,6 +46,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 logEvents.Should().Contain(e => e.Properties.Contains("AValue"));
                 logEvents.Should().NotContain(e => e.Properties.Contains("BValue"));
             }
+
+            DatabaseFixture.DropTable();
         }
 
         [Fact]
@@ -81,6 +83,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 logEvents.Should().Contain(e => e.Properties.Contains("AValue"));
                 logEvents.Should().NotContain(e => e.Properties.Contains("BValue"));
             }
+
+            DatabaseFixture.DropTable();
         }
     }
 }

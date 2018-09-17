@@ -16,11 +16,10 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         public void CanStoreLevelAsEnum()
         {
             // arrange
-            const string tableName = "LogEventsLevelAsEnum";
             var loggerConfiguration = new LoggerConfiguration();
             Log.Logger = loggerConfiguration.WriteTo.MSSqlServer(
                 connectionString: DatabaseFixture.LogEventsConnectionString,
-                tableName: tableName,
+                tableName: DatabaseFixture.LogTableName,
                 autoCreateSqlTable: true,
                 batchPostingLimit: 1,
                 period: TimeSpan.FromSeconds(10),
@@ -38,21 +37,22 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             // assert
             using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
             {
-                var logEvents = conn.Query<EnumLevelStandardLogColumns>($"SELECT Message, Level FROM {tableName}");
+                var logEvents = conn.Query<EnumLevelStandardLogColumns>($"SELECT Message, Level FROM {DatabaseFixture.LogTableName}");
 
                 logEvents.Should().Contain(e => e.Message.Contains(loggingInformationMessage) && e.Level == 2);
             }
+
+            DatabaseFixture.DropTable();
         }
 
         [Fact]
         public void CanStoreLevelAsString()
         {
             // arrange
-            const string tableName = "LogEventsLevelAsString";
             var loggerConfiguration = new LoggerConfiguration();
             Log.Logger = loggerConfiguration.WriteTo.MSSqlServer(
                 connectionString: DatabaseFixture.LogEventsConnectionString,
-                tableName: tableName,
+                tableName: DatabaseFixture.LogTableName,
                 autoCreateSqlTable: true,
                 batchPostingLimit: 1,
                 period: TimeSpan.FromSeconds(10),
@@ -70,21 +70,22 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             // assert
             using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
             {
-                var logEvents = conn.Query<StringLevelStandardLogColumns>($"SELECT Message, Level FROM {tableName}");
+                var logEvents = conn.Query<StringLevelStandardLogColumns>($"SELECT Message, Level FROM {DatabaseFixture.LogTableName}");
 
                 logEvents.Should().Contain(e => e.Message.Contains(loggingInformationMessage) && e.Level == LogEventLevel.Information.ToString());
             }
+
+            DatabaseFixture.DropTable();
         }
 
         [Fact]
         public void AuditCanStoreLevelAsEnum()
         {
             // arrange
-            const string tableName = "AuditLogEventsLevelAsEnum";
             var loggerConfiguration = new LoggerConfiguration();
             Log.Logger = loggerConfiguration.AuditTo.MSSqlServer(
                 connectionString: DatabaseFixture.LogEventsConnectionString,
-                tableName: tableName,
+                tableName: DatabaseFixture.LogTableName,
                 autoCreateSqlTable: true,
                 columnOptions: new ColumnOptions { Level = { StoreAsEnum = true } })
                 .CreateLogger();
@@ -100,21 +101,22 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             // assert
             using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
             {
-                var logEvents = conn.Query<EnumLevelStandardLogColumns>($"SELECT Message, Level FROM {tableName}");
+                var logEvents = conn.Query<EnumLevelStandardLogColumns>($"SELECT Message, Level FROM {DatabaseFixture.LogTableName}");
 
                 logEvents.Should().Contain(e => e.Message.Contains(loggingInformationMessage) && e.Level == 2);
             }
+
+            DatabaseFixture.DropTable();
         }
 
         [Fact]
         public void AuditCanStoreLevelAsString()
         {
             // arrange
-            const string tableName = "LogEventsLevelAsString";
             var loggerConfiguration = new LoggerConfiguration();
             Log.Logger = loggerConfiguration.AuditTo.MSSqlServer(
                 connectionString: DatabaseFixture.LogEventsConnectionString,
-                tableName: tableName,
+                tableName: DatabaseFixture.LogTableName,
                 autoCreateSqlTable: true,
                 columnOptions: new ColumnOptions { Level = { StoreAsEnum = false } })
                 .CreateLogger();
@@ -130,10 +132,12 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             // assert
             using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
             {
-                var logEvents = conn.Query<StringLevelStandardLogColumns>($"SELECT Message, Level FROM {tableName}");
+                var logEvents = conn.Query<StringLevelStandardLogColumns>($"SELECT Message, Level FROM {DatabaseFixture.LogTableName}");
 
                 logEvents.Should().Contain(e => e.Message.Contains(loggingInformationMessage) && e.Level == LogEventLevel.Information.ToString());
             }
+
+            DatabaseFixture.DropTable();
         }
     }
 

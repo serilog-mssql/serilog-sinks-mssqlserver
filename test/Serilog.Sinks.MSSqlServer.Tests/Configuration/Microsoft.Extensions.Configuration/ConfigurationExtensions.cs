@@ -43,6 +43,9 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 .CreateLogger();
 
             // should not throw
+
+            Log.CloseAndFlush();
+            DatabaseFixture.DropTable();
         }
 
         [Fact]
@@ -51,21 +54,21 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             var standardNames = new List<string> { "CustomMessage", "CustomMessageTemplate", "CustomLevel", "CustomTimeStamp", "CustomException", "CustomProperties" };
 
             var configSection = TestConfiguration().GetSection(ColumnOptionsSection);
-            var logTableName = $"{DatabaseFixture.LogTableName}Custom";
 
             var loggerConfiguration = new LoggerConfiguration();
             Log.Logger = loggerConfiguration.WriteTo.MSSqlServer(
                 connectionString: DatabaseFixture.LogEventsConnectionString,
-                tableName: logTableName,
+                tableName: DatabaseFixture.LogTableName,
                 autoCreateSqlTable: true,
                 columnOptionsSection: configSection)
                 .CreateLogger();
+            Log.CloseAndFlush();
 
             // from test TableCreatedWithCustomNames in CustomStandardColumnNames class
             using(var conn = new SqlConnection(DatabaseFixture.MasterConnectionString))
             {
                 conn.Execute($"use {DatabaseFixture.Database}");
-                var logEvents = conn.Query<InfoSchema>($@"SELECT COLUMN_NAME AS ColumnName FROM {DatabaseFixture.Database}.INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{logTableName}'");
+                var logEvents = conn.Query<InfoSchema>($@"SELECT COLUMN_NAME AS ColumnName FROM {DatabaseFixture.Database}.INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{DatabaseFixture.LogTableName}'");
                 var infoSchema = logEvents as InfoSchema[] ?? logEvents.ToArray();
 
                 foreach(var column in standardNames)
@@ -75,6 +78,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests
 
                 infoSchema.Should().Contain(columns => columns.ColumnName == "Id");
             }
+
+            DatabaseFixture.DropTable();
         }
     }
 }
