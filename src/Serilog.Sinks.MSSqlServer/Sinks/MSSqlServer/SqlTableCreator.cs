@@ -76,9 +76,9 @@ namespace Serilog.Sinks.MSSqlServer
 
                     i++;
                 }
-                sql.Append("))");
+                sql.Append(")");
             }
-            sql.AppendLine(" END");
+            sql.AppendLine(") END");
             return sql.ToString();
         }
 

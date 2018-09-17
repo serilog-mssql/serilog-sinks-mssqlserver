@@ -5,11 +5,12 @@ using Dapper;
 using Xunit;
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;
+using System;
 
 namespace Serilog.Sinks.MSSqlServer.Tests
 {
     [Collection("LogTest")]
-    public class ConfigurationExtensions
+    public class ConfigurationExtensions : IDisposable
     {
         static string ConnectionStringName = "NamedConnection";
         static string ColumnOptionsSection = "CustomColumnNames";
@@ -45,7 +46,6 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             // should not throw
 
             Log.CloseAndFlush();
-            DatabaseFixture.DropTable();
         }
 
         [Fact]
@@ -78,7 +78,10 @@ namespace Serilog.Sinks.MSSqlServer.Tests
 
                 infoSchema.Should().Contain(columns => columns.ColumnName == "Id");
             }
+        }
 
+        public void Dispose()
+        {
             DatabaseFixture.DropTable();
         }
     }

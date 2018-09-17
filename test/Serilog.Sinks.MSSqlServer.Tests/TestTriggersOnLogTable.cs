@@ -7,7 +7,7 @@ using Xunit;
 namespace Serilog.Sinks.MSSqlServer.Tests
 {
     [Collection("LogTest")]
-    public class TestTriggersOnLogTable
+    public class TestTriggersOnLogTable : IDisposable
     {
         [Fact]
         public void TestTriggerOnLogTableFire()
@@ -38,8 +38,6 @@ namespace Serilog.Sinks.MSSqlServer.Tests
 
                 logTriggerEvents.Should().NotBeNullOrEmpty();
             }
-
-            DropTables();
         }
 
         [Fact]
@@ -72,8 +70,6 @@ namespace Serilog.Sinks.MSSqlServer.Tests
 
                 logTriggerEvents.Should().BeEmpty();
             }
-
-            DropTables();
         }
 
         [Fact]
@@ -103,8 +99,6 @@ namespace Serilog.Sinks.MSSqlServer.Tests
 
                 logTriggerEvents.Should().NotBeNullOrEmpty();
             }
-
-            DropTables();
         }
 
         [Fact]        
@@ -148,7 +142,7 @@ END");
             }
         }
 
-        private void DropTables()
+        public void Dispose()
         {
             DatabaseFixture.DropTable();
             DatabaseFixture.DropTable(logTriggerTableName);
