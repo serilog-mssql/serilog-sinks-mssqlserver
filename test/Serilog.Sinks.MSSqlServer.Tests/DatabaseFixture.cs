@@ -84,6 +84,6 @@ DROP DATABASE [{Database}]
         }
     }
 
-    [CollectionDefinition("LogTest")]
+    [CollectionDefinition("LogTest", DisableParallelization = true)]
     public class PatientSecureFixtureCollection : ICollectionFixture<DatabaseFixture> { }
 }

@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
-using System.Data.SqlTypes;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Dapper;
@@ -12,7 +10,7 @@ using FluentAssertions;
 namespace Serilog.Sinks.MSSqlServer.Tests
 {
     [Collection("LogTest")]
-    public class CustomStandardColumnNames
+    public class CustomStandardColumnNames : IDisposable
     {
         [Fact]
         public void CustomIdColumn()
@@ -41,8 +39,6 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 var isIdentity = conn.Query<IdentityQuery>($"SELECT COLUMNPROPERTY(object_id('{DatabaseFixture.LogTableName}'), '{customIdName}', 'IsIdentity') AS IsIdentity");
                 isIdentity.Should().Contain(i => i.IsIdentity == 1);
             }
-
-            DatabaseFixture.DropTable();
         }
 
         internal class IdentityQuery
@@ -76,8 +72,6 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 var isIdentity = conn.Query<IdentityQuery>($"SELECT COLUMNPROPERTY(object_id('{DatabaseFixture.LogTableName}'), '{idColumnName}', 'IsIdentity') AS IsIdentity");
                 isIdentity.Should().Contain(i => i.IsIdentity == 1);
             }
-
-            DatabaseFixture.DropTable();
         }
 
         [Fact]
@@ -111,8 +105,6 @@ namespace Serilog.Sinks.MSSqlServer.Tests
 
                 infoSchema.Should().Contain(columns => columns.ColumnName == "Id");
             }
-
-            DatabaseFixture.DropTable();
         }
 
         [Fact]
@@ -137,8 +129,6 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                     infoSchema.Should().Contain(columns => columns.ColumnName == column);
                 }
             }
-
-            DatabaseFixture.DropTable();
         }
 
         [Fact]
@@ -178,8 +168,6 @@ namespace Serilog.Sinks.MSSqlServer.Tests
 
                 logEvents.Should().Contain(e => e.CustomMessage.Contains(loggingInformationMessage));
             }
-
-            DatabaseFixture.DropTable();
         }
 
         [Fact]
@@ -212,8 +200,6 @@ namespace Serilog.Sinks.MSSqlServer.Tests
 
                 logEvents.Should().Contain(e => e.Message.Contains(loggingInformationMessage));
             }
-
-            DatabaseFixture.DropTable();
         }
 
         [Fact]
@@ -253,8 +239,6 @@ namespace Serilog.Sinks.MSSqlServer.Tests
 
                 logEvents.Should().Contain(e => e.CustomMessage.Contains(loggingInformationMessage));
             }
-
-            DatabaseFixture.DropTable();
         }
 
         [Fact]
@@ -285,7 +269,10 @@ namespace Serilog.Sinks.MSSqlServer.Tests
 
                 logEvents.Should().Contain(e => e.Message.Contains(loggingInformationMessage));
             }
+        }
 
+        public void Dispose()
+        {
             DatabaseFixture.DropTable();
         }
     }
