@@ -16,6 +16,8 @@
     <PackageIconUrl>http://serilog.net/images/serilog-sink-nuget.png</PackageIconUrl>
     <PackageProjectUrl>https://github.com/serilog/serilog-sinks-mssqlserver</PackageProjectUrl>
     <PackageLicenseUrl>http://www.apache.org/licenses/LICENSE-2.0</PackageLicenseUrl>
+    <RepositoryUrl>https://github.com/serilog/serilog-sinks-mssqlserver</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
     <RuntimeIdentifiers>win</RuntimeIdentifiers>
     <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
     <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
