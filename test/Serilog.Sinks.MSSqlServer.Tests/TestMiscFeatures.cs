@@ -12,14 +12,14 @@ namespace Serilog.Sinks.MSSqlServer.Tests
     [Collection("LogTest")]
     public class TestMiscFeatures : IDisposable
     {
-        internal class LogEventColumns
-        {
-            public string LogEvent { get; set; }
-        }
 
         [Fact]
         public void LogEventExcludeAdditionalProperties()
         {
+            // This test literally checks for the exclusion of *additional* properties,
+            // meaning custom properties which have their own column. This was the original
+            // meaning of the flag. Contrast with LogEventExcludeStandardProperties below.
+
             // arrange
             var columnOptions = new ColumnOptions()
             {
@@ -55,10 +55,49 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             // assert
             using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
             {
-                var logEvents = conn.Query<LogEventColumns>($"SELECT LogEvent from {DatabaseFixture.LogTableName}");
+                var logEvents = conn.Query<LogEventColumn>($"SELECT LogEvent from {DatabaseFixture.LogTableName}");
 
                 logEvents.Should().Contain(e => e.LogEvent.Contains("AValue"));
                 logEvents.Should().NotContain(e => e.LogEvent.Contains("BValue"));
+            }
+        }
+
+        [Trait("Bugfix", "#90")]
+        [Fact]
+        public void LogEventExcludeStandardColumns()
+        {
+            // arrange
+            var columnOptions = new ColumnOptions();
+            columnOptions.Store.Remove(StandardColumn.Properties);
+            columnOptions.Store.Add(StandardColumn.LogEvent);
+            columnOptions.LogEvent.ExcludeStandardColumns = true;
+
+            Log.Logger = new LoggerConfiguration()
+                .WriteTo.MSSqlServer
+                (
+                    connectionString: DatabaseFixture.LogEventsConnectionString,
+                    tableName: DatabaseFixture.LogTableName,
+                    columnOptions: columnOptions,
+                    autoCreateSqlTable: true,
+                    batchPostingLimit: 1,
+                    period: TimeSpan.FromSeconds(10)
+                )
+                .CreateLogger();
+
+            // act
+            Log.Logger
+                .ForContext("A", "AValue")
+                .Information("Logging message");
+
+            Log.CloseAndFlush();
+
+            // assert
+            using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
+            {
+                var logEvents = conn.Query<LogEventColumn>($"SELECT LogEvent from {DatabaseFixture.LogTableName}");
+
+                logEvents.Should().Contain(e => e.LogEvent.Contains("AValue"));
+                logEvents.Should().NotContain(e => e.LogEvent.Contains("TimeStamp"));
             }
         }
 
@@ -123,11 +162,6 @@ namespace Serilog.Sinks.MSSqlServer.Tests
 
                 results.Should().Contain(x => x.DataType == "bigint");
             }
-        }
-
-        internal class SysObjectQuery
-        {
-            public int IndexType { get; set; }
         }
 
         [Fact]

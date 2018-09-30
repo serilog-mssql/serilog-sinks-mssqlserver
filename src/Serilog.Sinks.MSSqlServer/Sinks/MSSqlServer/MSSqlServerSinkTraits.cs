@@ -14,7 +14,6 @@
 
 using Serilog.Debugging;
 using Serilog.Events;
-using Serilog.Formatting.Json;
 
 using System;
 using System.Collections.Generic;
@@ -32,10 +31,10 @@ namespace Serilog.Sinks.MSSqlServer
         public string SchemaName { get; }
         public ColumnOptions ColumnOptions { get; }
         public IFormatProvider FormatProvider { get; }
-        public JsonFormatter JsonFormatter { get; }
+        public JsonLogEventFormatter jsonLogEventFormatter { get; }
         public ISet<string> AdditionalDataColumnNames { get; }
         public DataTable EventTable { get; }
-        public List<string> ExcludedColumnNames { get; }
+        public ISet<string> StandardDataColumnNames { get; }
 
         public MSSqlServerSinkTraits(string connectionString, string tableName, string schemaName, ColumnOptions columnOptions, IFormatProvider formatProvider, bool autoCreateSqlTable)
         {
@@ -51,21 +50,23 @@ namespace Serilog.Sinks.MSSqlServer
             ColumnOptions = columnOptions ?? new ColumnOptions();
             FormatProvider = formatProvider;
 
-            ExcludedColumnNames = new List<string>(ColumnOptions.Store.Count);
-            if (ColumnOptions.Store.Contains(StandardColumn.Id)) ExcludedColumnNames.Add(ColumnOptions.Id.ColumnName ?? "Id");
-            if (ColumnOptions.Store.Contains(StandardColumn.Message)) ExcludedColumnNames.Add(ColumnOptions.Message.ColumnName ?? "Message");
-            if (ColumnOptions.Store.Contains(StandardColumn.MessageTemplate)) ExcludedColumnNames.Add(ColumnOptions.MessageTemplate.ColumnName ?? "MessageTemplate");
-            if (ColumnOptions.Store.Contains(StandardColumn.Level)) ExcludedColumnNames.Add(ColumnOptions.Level.ColumnName ?? "Level");
-            if (ColumnOptions.Store.Contains(StandardColumn.TimeStamp)) ExcludedColumnNames.Add(ColumnOptions.TimeStamp.ColumnName ?? "TimeStamp");
-            if (ColumnOptions.Store.Contains(StandardColumn.Exception)) ExcludedColumnNames.Add(ColumnOptions.Exception.ColumnName ?? "Exception");
-            if (ColumnOptions.Store.Contains(StandardColumn.Properties)) ExcludedColumnNames.Add(ColumnOptions.Properties.ColumnName ?? "Properties");
-            if (ColumnOptions.Store.Contains(StandardColumn.LogEvent)) ExcludedColumnNames.Add(ColumnOptions.LogEvent.ColumnName ?? "LogEvent");
+            StandardDataColumnNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            if (ColumnOptions.Store.Contains(StandardColumn.Id)) StandardDataColumnNames.Add(ColumnOptions.Id.ColumnName ?? "Id");
+            if (ColumnOptions.Store.Contains(StandardColumn.Message)) StandardDataColumnNames.Add(ColumnOptions.Message.ColumnName ?? "Message");
+            if (ColumnOptions.Store.Contains(StandardColumn.MessageTemplate)) StandardDataColumnNames.Add(ColumnOptions.MessageTemplate.ColumnName ?? "MessageTemplate");
+            if (ColumnOptions.Store.Contains(StandardColumn.Level)) StandardDataColumnNames.Add(ColumnOptions.Level.ColumnName ?? "Level");
+            if (ColumnOptions.Store.Contains(StandardColumn.TimeStamp)) StandardDataColumnNames.Add(ColumnOptions.TimeStamp.ColumnName ?? "TimeStamp");
+            if (ColumnOptions.Store.Contains(StandardColumn.Exception)) StandardDataColumnNames.Add(ColumnOptions.Exception.ColumnName ?? "Exception");
+            if (ColumnOptions.Store.Contains(StandardColumn.Properties)) StandardDataColumnNames.Add(ColumnOptions.Properties.ColumnName ?? "Properties");
+            if (ColumnOptions.Store.Contains(StandardColumn.LogEvent)) StandardDataColumnNames.Add(ColumnOptions.LogEvent.ColumnName ?? "LogEvent");
 
+            AdditionalDataColumnNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             if (ColumnOptions.AdditionalDataColumns != null)
-                AdditionalDataColumnNames = new HashSet<string>(ColumnOptions.AdditionalDataColumns.Select(c => c.ColumnName), StringComparer.OrdinalIgnoreCase);
+                foreach (var col in ColumnOptions.AdditionalDataColumns)
+                    AdditionalDataColumnNames.Add(col.ColumnName);
 
             if (ColumnOptions.Store.Contains(StandardColumn.LogEvent))
-                JsonFormatter = new JsonFormatter(formatProvider: formatProvider);
+                jsonLogEventFormatter = new JsonLogEventFormatter(this);
 
             EventTable = CreateDataTable();
 
@@ -110,7 +111,7 @@ namespace Serilog.Sinks.MSSqlServer
             EventTable.Dispose();
         }
 
-        private KeyValuePair<string, object> GetStandardColumnNameAndValue(StandardColumn column, LogEvent logEvent)
+        internal KeyValuePair<string, object> GetStandardColumnNameAndValue(StandardColumn column, LogEvent logEvent)
         {
             switch (column)
             {
@@ -143,7 +144,7 @@ namespace Serilog.Sinks.MSSqlServer
 
             var sb = new StringBuilder();
             using (var writer = new System.IO.StringWriter(sb))
-                JsonFormatter.Format(logEvent, writer);
+                jsonLogEventFormatter.Format(logEvent, writer);
             return sb.ToString();
         }
 
@@ -203,7 +204,7 @@ namespace Serilog.Sinks.MSSqlServer
         {
             foreach (var property in properties)
             {
-                if (!EventTable.Columns.Contains(property.Key) || ExcludedColumnNames.Contains(property.Key))
+                if (!EventTable.Columns.Contains(property.Key) || StandardDataColumnNames.Contains(property.Key))
                     continue;
 
                 var columnName = property.Key;
