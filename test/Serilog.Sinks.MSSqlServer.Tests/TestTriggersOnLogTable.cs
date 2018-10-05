@@ -118,12 +118,6 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             DatabaseFixture.DropTable();
         }
 
-        internal class TestTriggerEntry
-        {
-            public Guid Id { get; set; }
-            public string Data { get; set; }
-        }
-
         private string logTriggerTableName => $"{DatabaseFixture.LogTableName}Trigger";
         private string logTriggerName => $"{logTriggerTableName}Trigger";
 

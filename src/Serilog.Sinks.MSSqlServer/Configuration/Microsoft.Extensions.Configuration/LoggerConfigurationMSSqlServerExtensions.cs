@@ -262,6 +262,7 @@ namespace Serilog
             {
                 SetIfProvided<string>((val) => { opts.LogEvent.ColumnName = val; }, section["columnName"]);
                 SetIfProvided<bool>((val) => { opts.LogEvent.ExcludeAdditionalProperties = val; }, section["excludeAdditionalProperties"]);
+                SetIfProvided<bool>((val) => { opts.LogEvent.ExcludeStandardColumns = val; }, section["ExcludeStandardColumns"]);
             }
 
             SetIfProvided<string>((val) => { opts.Message.ColumnName = val; }, config.GetSection("message")["columnName"]);

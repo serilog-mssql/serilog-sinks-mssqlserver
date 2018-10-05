@@ -41,11 +41,6 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             }
         }
 
-        internal class IdentityQuery
-        {
-            public int IsIdentity { get; set; }
-        }
-
         [Fact]
         public void DefaultIdColumn()
         {

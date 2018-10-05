@@ -204,7 +204,7 @@ You can also store your own log event properties in additional custom columns; s
 
 ### Saving properties in custom columns
 
-By default any log event properties you include in your log statements will be saved to the Properties column (and/or LogEvent column, per columnOption.Store).  But they can also be stored in their own columns via the AdditionalDataColumns setting.
+By default any log event properties you include in your log statements will be saved to the XML Properties column and/or the JSON LogEvent column (per columnOption.Store configuration). But they can also be stored in their own columns via the AdditionalDataColumns setting.
 
 ```csharp
 var columnOptions = new ColumnOptions
@@ -234,7 +234,7 @@ By default, additional properties will still be included in the data saved to th
 
 However, if necessary, the properties being saved in their own columns can be excluded from the data.  Use the `columnOptions.Properties.ExcludeAdditionalProperties` parameter in the sink configuration to exclude the redundant properties from the XML, or `columnOptions.LogEvent.ExcludeAdditionalProperties` if you've added the JSON LogEvent column. 
 
-The standard columns are always excluded from the Properties and LogEvent columns.
+The standard columns are always excluded from the XML Properties column and can be excluded from the JSON LogEvent column with `columnOptions.LogEvent.ExludeStandardColumns` (this defaults to `false` for backwards-compatibility reasons).
 
 ### Columns defined by AppSettings (.NET Framework)
 
@@ -311,7 +311,11 @@ As the name suggests, `columnOptionSection` is an entire configuration section i
         "usePropertyKeyAsElementName": false
     },
     "timeStamp": { "columnName": "Timestamp", "convertToUtc": true },
-    "logEvent": { "columnName": "LogEvent", "excludeAdditionalProperties": true },
+    "logEvent": {
+        "columnName": "LogEvent",
+        "excludeAdditionalProperties": true,
+        "excludeStandardColumns": true
+    },
     "message": { "columnName": "Message" },
     "exception": { "columnName": "Exception" },
     "messageTemplate": { "columnName": "MessageTemplate" }
@@ -325,7 +329,7 @@ Typically you will choose either XML or JSON serialization, but not both.
 
 #### JSON (LogEvent column)
 
-Event data items can be stored to the LogEvent column. This can be enabled by adding the LogEvent column to the `columnOptions.Store` collection. Use the `columnOptions.LogEvent.ExcludeAdditionalProperties` parameter to exclude redundant properties from the JSON. This is analogue to excluding redundant items from XML in the Properties column.
+Event data items can be stored as JSON in the LogEvent column. This can be enabled by adding the LogEvent column to the `columnOptions.Store` collection. Use the `columnOptions.LogEvent` parameters `ExcludeAdditionalProperties` and `ExcludeStandardColumns` to exclude redundant properties from the JSON. This is analogous to excluding redundant items from XML in the Properties column.
 
 #### XML (Properties column)
 

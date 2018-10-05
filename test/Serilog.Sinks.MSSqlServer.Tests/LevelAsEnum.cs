@@ -138,18 +138,4 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             DatabaseFixture.DropTable();
         }
     }
-
-    public class EnumLevelStandardLogColumns
-    {
-        public string Message { get; set; }
-
-        public byte Level { get; set; }
-    }
-
-    public class StringLevelStandardLogColumns
-    {
-        public string Message { get; set; }
-
-        public string Level { get; set; }
-    }
 }

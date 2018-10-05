@@ -43,7 +43,13 @@ namespace Serilog.Sinks.MSSqlServer
             MessageTemplate = new MessageTemplateColumnOptions();
             TimeStamp = new TimeStampColumnOptions();
             Exception = new ExceptionColumnOptions();
-            LogEvent = new LogEventColumnOptions();
+
+            LogEvent = new LogEventColumnOptions
+            {
+                // these defaults maintain backwards compatibility
+                ExcludeAdditionalProperties = false,
+                ExcludeStandardColumns = false
+            };
         }
 
         /// <summary>
@@ -265,6 +271,11 @@ namespace Serilog.Sinks.MSSqlServer
             ///     Exclude properties from the LogEvent column if they are being saved to additional columns.
             /// </summary>
             public bool ExcludeAdditionalProperties { get; set; }
+
+            /// <summary>
+            ///     Whether to include Standard Columns in the LogEvent column (for backwards compatibility).
+            /// </summary>
+            public bool ExcludeStandardColumns { get; set; }
         }
 
         /// <summary>

@@ -9,11 +9,6 @@ namespace Serilog.Sinks.MSSqlServer.Tests
     [Collection("LogTest")]
     public class TestPropertiesColumnFiltering : IDisposable
     {
-        internal class PropertiesColumns
-        {
-            public string Properties { get; set; }
-        }
-
         [Fact]
         public void FilteredProperties()
         {
