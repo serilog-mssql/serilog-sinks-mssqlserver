@@ -1,28 +1,27 @@
-## Bug Report / Support Request Template
-If you are opening a feature request, you can ignore this template. Bug reports and requests for assistance usually require the same basic information described below. This will help us more quickly reproduce and investigate the problem you're reporting.
+Bug Report / Support Request Template
+--------------------------------------
+If you are opening a feature request, you can ignore this template. Bug reports and requests for assistance usually require the same basic information described below. This will help us more quickly reproduce and investigate the problem you're reporting. (If you are using Serilog.Sinks.MSSqlServerCore, that package is deprecated, please switch to Serilog.Sinks.MSSqlServer before reporting an issue.)
 
-**Please clearly describe of what the SQL Sink is doing incorrectly:**
+>> Please clearly describe what the SQL Sink is doing incorrectly:
 
-**Please clearly describe the expected behavior:**
+>> Please clearly describe the expected behavior:
 
-**Name and version of all Serilog packages used in the project:**
+>> List the names and versions of all Serilog packages used in the project:
 
 - Serilog: 
 - Serilog.Sinks.MSSqlServer: 
 - (configuration, etc.)
 
-**Target framework and operating system:**
+>> Target framework and operating system:
 
-- [ ] .NET Core 2.0
-- [ ] .NET Framework 4.7
-- [ ] .NET Framework 4.6.x
-- [ ] .NET Framework 4.5.x
-- OS: 
+[ ] .NET Core 2.0
+[ ] .NET Framework 4.7
+[ ] .NET Framework 4.6.x
+[ ] .NET Framework 4.5.x
+OS: 
 
-**Please provide the following as a _simple_ reproduction of the reported issue:**
+>> Provide a *simple* reproduction of your Serilog configuration code:
 
-Serilog configuration code:
+>> Provide a *simple* reproduction of your Serilog configuration file, if any:
 
-Serilog configuration file, if any:
-
-Application code to reproduce the issue:
+>> Provide a *simple* reproduction of your application code:
