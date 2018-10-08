@@ -15,6 +15,7 @@ only_commits:
     - src/Serilog.Sinks.MSSqlServer/
     - Build.ps1
     - assets/
+    - test/Serilog.Sinks.MSSqlServer.Tests/
 deploy:
 - provider: NuGet
   api_key:
