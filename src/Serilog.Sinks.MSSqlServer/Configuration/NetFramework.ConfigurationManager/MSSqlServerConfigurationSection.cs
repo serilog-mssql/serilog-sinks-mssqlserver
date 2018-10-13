@@ -12,38 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Serilog.Sinks.MSSqlServer;
+using System.Configuration;
+
+// Disable XML comment warnings for internal config classes which are required to have public members
+#pragma warning disable 1591
+
 namespace Serilog.Configuration
 {
-    using System;
-    using System.Configuration;
+    // Should be in the sink namespace but changing it would break existing app.config files
 
-    /// <summary>
-    /// Settings configuration for defining DataColumns collection
-    /// </summary>
     public class MSSqlServerConfigurationSection : ConfigurationSection
     {
-        private static MSSqlServerConfigurationSection settings =
-            ConfigurationManager.GetSection("MSSqlServerSettings") as MSSqlServerConfigurationSection;
+        public static MSSqlServerConfigurationSection Settings { get; } = ConfigurationManager.GetSection("MSSqlServerSettings") as MSSqlServerConfigurationSection;
 
-        /// <summary>
-        /// Access to the settings stored in the config file
-        /// </summary>
-        public static MSSqlServerConfigurationSection Settings
-        {
-            get
-            {
-                return settings;
-            }
-        }
-
-        /// <summary>
-        /// Columns in the database to write data into
-        /// </summary>
         [ConfigurationProperty("Columns", IsDefaultCollection = false)]
-        [ConfigurationCollection(typeof(ColumnCollection),
-            AddItemName = "add",
-            ClearItemsName = "clear",
-            RemoveItemName = "remove")]
+        [ConfigurationCollection(typeof(ColumnCollection), AddItemName = "add", ClearItemsName = "clear", RemoveItemName = "remove")]
         public ColumnCollection Columns
         {
             get
@@ -53,3 +37,6 @@ namespace Serilog.Configuration
         }
     }
 }
+
+#pragma warning restore 1591
+

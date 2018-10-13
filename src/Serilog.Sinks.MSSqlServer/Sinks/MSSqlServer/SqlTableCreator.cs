@@ -7,26 +7,26 @@ namespace Serilog.Sinks.MSSqlServer
 {
     internal class SqlTableCreator
     {
-        private readonly string _connectionString;
-        private string _tableName;
-        private string _schemaName;
+        private readonly string connectionString;
+        private string tableName;
+        private string schemaName;
+        private DataTable dataTable;
+        private ColumnOptions columnOptions;
 
-        public SqlTableCreator(string connectionString, string schemaName)
+        public SqlTableCreator(string connectionString, string schemaName, string tableName, DataTable dataTable, ColumnOptions columnOptions)
         {
-            _schemaName = schemaName;
-            _connectionString = connectionString;
+            this.connectionString = connectionString;
+            this.schemaName = schemaName;
+            this.tableName = tableName;
+            this.dataTable = dataTable;
+            this.columnOptions = columnOptions;
         }
 
-        public int CreateTable(DataTable table)
+        public int CreateTable()
         {
-            if (table == null) return 0;
-
-            if (string.IsNullOrWhiteSpace(table.TableName) || string.IsNullOrWhiteSpace(_connectionString)) return 0;
-
-            _tableName = table.TableName;
-            using (var conn = new SqlConnection(_connectionString))
+            using (var conn = new SqlConnection(connectionString))
             {
-                string sql = GetSqlFromDataTable(_tableName, table, _schemaName);
+                string sql = GetSqlFromDataTable();
                 using (SqlCommand cmd = new SqlCommand(sql, conn))
                 {
                     conn.Open();
@@ -36,120 +36,81 @@ namespace Serilog.Sinks.MSSqlServer
             }
         }
 
-        private static string GetSqlFromDataTable(string tableName, DataTable table, string schema)
+        private string GetSqlFromDataTable()
         {
-            StringBuilder sql = new StringBuilder();
-            sql.AppendFormat("IF NOT EXISTS (SELECT s.name, t.name FROM sys.tables t JOIN sys.schemas s ON t.schema_id = s.schema_id WHERE s.name = '{0}' AND t.name = '{1}')", schema, tableName);
-            sql.AppendLine(" BEGIN");
-            sql.AppendFormat(" CREATE TABLE [{0}].[{1}] ( ", schema, tableName);
+            var sql = new StringBuilder();
+            var ix = new StringBuilder();
+            int indexCount = 1;
 
-            // columns
-            bool hasPrimaryKey = false;
-            int numOfColumns = table.Columns.Count;
+            // start schema check and DDL (wrap in EXEC to make a separate batch)
+            sql.AppendLine($"IF(NOT EXISTS(SELECT * FROM sys.schemas WHERE name = '{schemaName}'))");
+            sql.AppendLine("BEGIN");
+            sql.AppendLine($"EXEC('CREATE SCHEMA [{schemaName}] AUTHORIZATION [dbo]')");
+            sql.AppendLine("END");
+
+            // start table-creatin batch and DDL
+            sql.AppendLine($"IF NOT EXISTS (SELECT s.name, t.name FROM sys.tables t JOIN sys.schemas s ON t.schema_id = s.schema_id WHERE s.name = '{schemaName}' AND t.name = '{tableName}')");
+            sql.AppendLine("BEGIN");
+            sql.AppendLine($"CREATE TABLE [{schemaName}].[{tableName}] ( ");
+
+            // build column list
             int i = 1;
-            foreach (DataColumn column in table.Columns)
+            foreach (DataColumn column in dataTable.Columns)
             {
-                sql.AppendFormat("[{0}] {1}", column.ColumnName, SqlGetType(column));
-                if (column.AutoIncrement) // the PK is always auto-increment (IDENTITY)
-                {
-                    hasPrimaryKey = true;
-                    sql.Append(" IDENTITY(1,1) ");
-                }
-                if (numOfColumns > i)
-                    sql.AppendFormat(", ");
-                i++;
+                var common = (SqlColumn)column.ExtendedProperties["SqlColumn"];
+
+                sql.Append(GetColumnDDL(common));
+                if (dataTable.Columns.Count > i++) sql.Append(",");
+                sql.AppendLine();
+
+                // collect non-PK indexes for separate output after the table DDL
+                if(common != null && common.NonClusteredIndex && common != columnOptions.PrimaryKey)
+                    ix.AppendLine($"CREATE NONCLUSTERED INDEX [IX{indexCount++}_{tableName}] ON [{schemaName}].[{tableName}] ([{common.ColumnName}]);");
             }
 
-            // primary keys
-            if (hasPrimaryKey)
+            // primary key constraint at the end of the table DDL
+            if (columnOptions.PrimaryKey != null)
             {
-                var NonClusteredIndex = (bool)table.PrimaryKey[0].ExtendedProperties["NonClusteredIndex"];
-                sql.AppendFormat(" CONSTRAINT [PK_{0}] PRIMARY KEY {1}CLUSTERED (", tableName, NonClusteredIndex ? "NON" : string.Empty);
-
-                int numOfKeys = table.PrimaryKey.Length;
-                i = 1;
-                foreach (DataColumn column in table.PrimaryKey)
-                {
-                    sql.AppendFormat("[{0}]", column.ColumnName);
-                    if (numOfKeys > i)
-                        sql.AppendFormat(", ");
-
-                    i++;
-                }
-                sql.Append(")");
+                var clustering = (columnOptions.PrimaryKey.NonClusteredIndex ? "NON" : string.Empty);
+                sql.AppendLine($" CONSTRAINT [PK_{tableName}] PRIMARY KEY {clustering}CLUSTERED ([{columnOptions.PrimaryKey.ColumnName}])");
             }
-            sql.AppendLine(") END");
+
+            // end of CREATE TABLE
+            sql.AppendLine(");");
+
+            // CCI is output separately after table DDL
+            if (columnOptions.ClusteredColumnstoreIndex)
+                sql.AppendLine($"CREATE CLUSTERED COLUMNSTORE INDEX [CCI_{tableName}] ON [{schemaName}].[{tableName}]");
+
+            // output any extra non-clustered indexes
+            sql.Append(ix);
+
+            // end of batch
+            sql.AppendLine("END");
+
             return sql.ToString();
         }
 
-        // Return T-SQL data type definition, based on schema definition for a column
-        private static string SqlGetType(object type, int columnSize, int numericPrecision, int numericScale,
-            bool allowDbNull)
+        // Examples of possible output:
+        // [Id] BIGINT IDENTITY(1,1) NOT NULL
+        // [Message] VARCHAR(1024) NULL
+        private string GetColumnDDL(SqlColumn column)
         {
-            string sqlType;
+            var sb = new StringBuilder();
 
-            switch (type.ToString())
-            {
-                case "System.Boolean":
-                    sqlType = "BIT";
-                    break;
+            sb.Append($"[{column.ColumnName}] ");
 
-                case "System.Byte":
-                    sqlType = "TINYINT";
-                    break;
+            sb.Append(column.DataType.ToString().ToUpperInvariant());
 
-                case "System.Byte[]":
-                    sqlType = columnSize == -1 ? "VARBINARY(MAX)" : "VARBINARY(" + columnSize.ToString() + ")";
-                    break;
+            if (SqlDataTypes.DataLengthRequired.Contains(column.DataType))
+                sb.Append("(").Append(column.DataLength == -1 ? "MAX" : column.DataLength.ToString()).Append(")");
 
-                case "System.String":
-	                sqlType = "NVARCHAR(" + ((columnSize == -1) ? "MAX" : columnSize.ToString()) + ")";
-	                break;
+            if (column.StandardColumnIdentifier == StandardColumn.Id)
+                sb.Append(" IDENTITY(1,1)");
 
-                case "System.Decimal":
-                    if (numericScale > 0)
-                        sqlType = "REAL";
-                    else if (numericPrecision > 10)
-                        sqlType = "BIGINT";
-                    else
-                        sqlType = "INT";
-                    break;
+            sb.Append(column.AllowNull ? " NULL" : " NOT NULL");
 
-                case "System.Double":
-                case "System.Single":
-                    sqlType = "REAL";
-                    break;
-
-                case "System.Int64":
-                    sqlType = "BIGINT";
-                    break;
-
-                case "System.Int16":
-                case "System.Int32":
-                    sqlType = "INT";
-                    break;
-
-                case "System.DateTime":
-                    sqlType = "DATETIME";
-                    break;
-
-                case "System.Guid":
-                    sqlType = "UNIQUEIDENTIFIER";
-                    break;
-
-                default:
-                    throw new Exception(string.Format("{0} not implemented.", type));
-            }
-
-            sqlType += " " + (allowDbNull ? "NULL" : "NOT NULL");
-
-            return sqlType;
-        }
-
-        // Overload based on DataColumn from DataTable type
-        private static string SqlGetType(DataColumn column)
-        {
-            return SqlGetType(column.DataType, column.MaxLength, 10, 2, column.AllowDBNull);
+            return sb.ToString();
         }
 
     }

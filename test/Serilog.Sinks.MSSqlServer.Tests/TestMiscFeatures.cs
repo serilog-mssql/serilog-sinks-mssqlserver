@@ -12,7 +12,6 @@ namespace Serilog.Sinks.MSSqlServer.Tests
     [Collection("LogTest")]
     public class TestMiscFeatures : IDisposable
     {
-
         [Fact]
         public void LogEventExcludeAdditionalProperties()
         {
@@ -23,9 +22,9 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             // arrange
             var columnOptions = new ColumnOptions()
             {
-                AdditionalDataColumns = new List<DataColumn>
+                AdditionalColumns = new List<SqlColumn>
                 {
-                    new DataColumn { DataType = typeof(string), ColumnName = "B" }
+                    new SqlColumn { DataType = SqlDbType.NVarChar, DataLength = 20, ColumnName = "B" }
                 }
             };
             columnOptions.Store.Remove(StandardColumn.Properties);
@@ -122,14 +121,14 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             Log.CloseAndFlush();
 
             // assert
-            using (var conn = new SqlConnection(DatabaseFixture.MasterConnectionString))
+            using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
             {
                 conn.Execute($"use {DatabaseFixture.Database}");
                 var query = conn.Query<InfoSchema>($@"SELECT COLUMN_NAME AS ColumnName FROM {DatabaseFixture.Database}.INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{DatabaseFixture.LogTableName}'");
                 var results = query as InfoSchema[] ?? query.ToArray();
 
-                results.Should().Contain(x => x.ColumnName == StandardColumn.Properties.ToString());
-                results.Should().NotContain(x => x.ColumnName == StandardColumn.Id.ToString());
+                results.Should().Contain(x => x.ColumnName == columnOptions.Properties.ColumnName);
+                results.Should().NotContain(x => x.ColumnName == columnOptions.Id.ColumnName);
             }
         }
 
@@ -138,7 +137,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         {
             // arrange
             var columnOptions = new ColumnOptions();
-            columnOptions.Id.BigInt = true;
+            columnOptions.Id.DataType = SqlDbType.BigInt;
 
             Log.Logger = new LoggerConfiguration()
                 .WriteTo.MSSqlServer
@@ -157,25 +156,65 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             using (var conn = new SqlConnection(DatabaseFixture.MasterConnectionString))
             {
                 conn.Execute($"use {DatabaseFixture.Database}");
-                var query = conn.Query<InfoSchema>($@"SELECT DATA_TYPE AS DataType FROM {DatabaseFixture.Database}.INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{DatabaseFixture.LogTableName}' AND COLUMN_NAME = '{StandardColumn.Id.ToString()}'");
+                var query = conn.Query<InfoSchema>($@"SELECT DATA_TYPE AS DataType FROM {DatabaseFixture.Database}.INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{DatabaseFixture.LogTableName}' AND COLUMN_NAME = '{columnOptions.Id.ColumnName}'");
                 var results = query as InfoSchema[] ?? query.ToArray();
 
                 results.Should().Contain(x => x.DataType == "bigint");
             }
         }
 
+        [Trait("Bugfix", "#130")]
         [Fact]
-        public void NonClusteredPrimaryKey()
+        public void XmlPropertyColumn()
         {
             // arrange
             var columnOptions = new ColumnOptions();
-            columnOptions.Id.NonClusteredIndex = true;
+            columnOptions.Properties.DataType = SqlDbType.Xml;
 
             Log.Logger = new LoggerConfiguration()
                 .WriteTo.MSSqlServer
                 (
                     connectionString: DatabaseFixture.LogEventsConnectionString,
                     tableName: DatabaseFixture.LogTableName,
+                    columnOptions: columnOptions,
+                    autoCreateSqlTable: true,
+                    batchPostingLimit: 1,
+                    period: TimeSpan.FromSeconds(10)
+                )
+                .CreateLogger();
+            Log.CloseAndFlush();
+
+            // assert
+            using (var conn = new SqlConnection(DatabaseFixture.MasterConnectionString))
+            {
+                conn.Execute($"use {DatabaseFixture.Database}");
+                var query = conn.Query<InfoSchema>($@"SELECT DATA_TYPE AS DataType FROM {DatabaseFixture.Database}.INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{DatabaseFixture.LogTableName}' AND COLUMN_NAME = '{columnOptions.Properties.ColumnName}'");
+                var results = query as InfoSchema[] ?? query.ToArray();
+
+                results.Should().Contain(x => x.DataType == "xml");
+            }
+        }
+
+        [Trait("Bugfix", "#107")]
+        [Fact]
+        public void AutoCreateSchema()
+        {
+            // Use a custom table name because DROP SCHEMA can
+            // require permissions higher than the test-runner
+            // needs, and we don't want this left-over table
+            // to create misleading results in other tests.
+
+            // arrange
+            string schemaName = "CustomTestSchema";
+            string tableName = "CustomSchemaLogTable";
+            var columnOptions = new ColumnOptions();
+
+            Log.Logger = new LoggerConfiguration()
+                .WriteTo.MSSqlServer
+                (
+                    connectionString: DatabaseFixture.LogEventsConnectionString,
+                    schemaName: schemaName,
+                    tableName: tableName,
                     columnOptions: columnOptions,
                     autoCreateSqlTable: true,
                     batchPostingLimit: 1,
@@ -187,12 +226,10 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             // assert
             using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
             {
-                conn.Execute($"use {DatabaseFixture.Database}");
-                var query = conn.Query<SysObjectQuery>($@"SELECT P.OBJECT_ID AS IndexType FROM SYS.OBJECTS O INNER JOIN SYS.PARTITIONS P ON P.OBJECT_ID = O.OBJECT_ID WHERE NAME = '{DatabaseFixture.LogTableName}'");
-                var results = query as SysObjectQuery[] ?? query.ToArray();
+                var query = conn.Query<InfoSchema>("SELECT SCHEMA_NAME AS SchemaName FROM INFORMATION_SCHEMA.SCHEMATA");
+                var results = query as InfoSchema[] ?? query.ToArray();
 
-                // https://stackoverflow.com/a/25503189/152997
-                results.Should().Contain(x => x.IndexType > 1);
+                results.Should().Contain(x => x.SchemaName == schemaName);
             }
         }
 

@@ -12,35 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Serilog.Configuration
-{
-    using System;
-    using System.Configuration;
+using Serilog.Sinks.MSSqlServer;
+using System;
+using System.Configuration;
+using System.Data;
 
-    /// <summary>
-    /// 
-    /// </summary>
+// Disable XML comment warnings for internal config classes which are required to have public members
+#pragma warning disable 1591
+
+namespace Serilog.Sinks.MSSqlServer
+{
     public class ColumnConfig : ConfigurationElement
     {
-        /// <summary>
-        /// Constructor
-        /// </summary>
         public ColumnConfig() { }
 
-        /// <summary>
-        /// Create a new instance from key/value pair
-        /// </summary>
-        /// <param name="columnName">Column name in SQL Server</param>
-        /// <param name="dataType">Data type in SQL Server</param>
         public ColumnConfig(string columnName, string dataType)
         {
             ColumnName = columnName;
             DataType = dataType;
         }
 
-        /// <summary>
-        /// Name of the Column as it exists in SQL Server
-        /// </summary>
         [ConfigurationProperty("ColumnName", IsRequired = true, IsKey = true)]
         public string ColumnName
         {
@@ -48,20 +39,13 @@ namespace Serilog.Configuration
             set { this["ColumnName"] = value; }
         }
 
-        /// <summary>
-        /// Type of column as it exists in SQL Server
-        /// </summary>
         [ConfigurationProperty("DataType", IsRequired = true, IsKey = false, DefaultValue ="varchar")]
-        [RegexStringValidator("(bigint)|(bit)|(binary)|(varbinary)|(char)|(date)|(datetime)|(datetime2)|(decimal)|(float)|(int)|(money)|(nchar)|(ntext)|(numeric)|(nvarchar)|(real)|(smalldatetime)|(smallint)|(smallmoney)|(text)|(time)|(uniqueidentifier)|(varchar)")]
         public string DataType
         {
             get { return (string)this["DataType"]; }
-            set { this["DataType"] = value; }
+            set { this["DataType"] = value;  }
         }
 
-        /// <summary>
-        /// Length of column as it exists in SQL Server for string or binary data type.
-        /// </summary>
         [ConfigurationProperty("DataLength", IsRequired = false, IsKey = false, DefaultValue = 128)]
         public int DataLength
         {
@@ -69,14 +53,42 @@ namespace Serilog.Configuration
             set { this["DataLength"] = value; }
         }
 
-        /// <summary>
-        /// Allow nullable column as it exists in SQL Server.
-        /// </summary>
         [ConfigurationProperty("AllowNull", IsRequired = false, IsKey = false, DefaultValue = true)]
         public bool AllowNull
         {
             get { return (bool)this["AllowNull"]; }
             set { this["AllowNull"] = value; }
         }
+
+        [ConfigurationProperty("NonClusteredIndex", IsRequired = false, IsKey = false, DefaultValue = false)]
+        public bool NonClusteredIndex
+        {
+            get { return (bool)this["NonClusteredIndex"]; }
+            set { this["NonClusteredIndex"] = value; }
+        }
+
+        internal SqlColumn AsSqlColumn()
+        {
+            var commonColumn = new SqlColumn
+            {
+                ColumnName = ColumnName,
+                AllowNull = AllowNull,
+                DataLength = DataLength,
+                NonClusteredIndex = NonClusteredIndex
+            };
+
+            if (!SqlDataTypes.TryParseIfSupported(DataType, out SqlDbType sqlType))
+                throw new ArgumentException($"SQL column data type {DataType} is not recognized or supported by this sink.");
+
+            commonColumn.DataType = sqlType;
+
+            if (commonColumn.DataLength == 0 && SqlDataTypes.DataLengthRequired.Contains(commonColumn.DataType))
+                throw new ArgumentException($"SQL column data type {commonColumn.DataType.ToString()} requires a non-zero DataLength property.");
+
+            return commonColumn;
+        }
     }
 }
+
+#pragma warning restore 1591
+

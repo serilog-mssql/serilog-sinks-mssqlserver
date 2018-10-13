@@ -1,15 +1,4 @@
-﻿using System;
-using System.Collections.ObjectModel;
-using System.Data;
-using Serilog.Configuration;
-using Serilog.Events;
-using Serilog.Sinks.MSSqlServer;
-using Serilog.Debugging;
-using Microsoft.Extensions.Configuration;
-using System.Collections.Generic;
-using System.Linq;
-
-// Copyright 2014 Serilog Contributors
+﻿// Copyright 2014 Serilog Contributors
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,6 +11,16 @@ using System.Linq;
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
+using System;
+using System.Collections.ObjectModel;
+using Serilog.Configuration;
+using Serilog.Events;
+using Serilog.Sinks.MSSqlServer;
+using Serilog.Debugging;
+using Microsoft.Extensions.Configuration;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Serilog
 {
@@ -88,9 +87,6 @@ namespace Serilog
 
         /// <summary>
         /// Adds a sink that writes log events to a table in a MSSqlServer database.
-        /// Create a database and execute the table creation script found here
-        /// https://gist.github.com/mivano/10429656
-        /// or use the autoCreateSqlTable option.
         /// </summary>
         /// <param name="loggerAuditSinkConfiguration">The logger configuration.</param>
         /// <param name="connectionString">The connection string to the database where to store the events.</param>
@@ -155,14 +151,14 @@ namespace Serilog
             return cs;
         }
 
-        // dreaming of the day C# allows us to use property setters as out parameters...
+        // simulate using a property setter as an out parameter
         delegate void PropertySetter<T>(T value);
 
         /// <summary>
-        /// Create the ColumnOptions object and apply any configuration changes to it.
+        /// Create or add to the ColumnOptions object and apply any configuration changes to it.
         /// </summary>
-        /// <param name="columnOptions"></param>
-        /// <param name="config"></param>
+        /// <param name="columnOptions">An optional externally-created ColumnOptions object to be updated with additional configuration values.</param>
+        /// <param name="config">A configuration section typically named "columnOptionsSection" (see docs).</param>
         /// <returns></returns>
         private static ColumnOptions ConfigureColumnOptions(ColumnOptions columnOptions, IConfigurationSection config)
         {
@@ -173,105 +169,171 @@ namespace Serilog
             var opts = columnOptions ?? new ColumnOptions();
             if(config == null || !config.GetChildren().Any()) return opts;
 
-            // add standard columns
-            var addStd = config.GetSection("addStandardColumns");
-            if(addStd.GetChildren().Any())
-            {
-                foreach(var col in addStd.GetChildren().ToList())
-                {
-                    if(Enum.TryParse(col.Value, out StandardColumn stdcol))
-                        opts.Store.Add(stdcol);
-                }
-            }
+            AddRemoveStandardColumns();
+            AddAdditionalColumns();
+            ReadStandardColumns();
+            ReadMiscColumnOptions();
 
-            // remove standard columns
-            var removeStd = config.GetSection("removeStandardColumns");
-            if(removeStd.GetChildren().Any())
-            {
-                foreach(var col in removeStd.GetChildren().ToList())
-                {
-                    if(Enum.TryParse(col.Value, out StandardColumn stdcol))
-                        opts.Store.Remove(stdcol);
-                }
-            }
+            return opts;
 
-            // add custom columns
-            var custom = config.GetSection("customColumns").Get<List<Column>>();
-            if(custom != null)
+            void AddRemoveStandardColumns()
             {
-                foreach(Column c in custom)
+                // add standard columns
+                var addStd = config.GetSection("addStandardColumns");
+                if (addStd.GetChildren().Any())
                 {
-                    if(!string.IsNullOrEmpty(c.ColumnName) && !string.IsNullOrEmpty(c.DataType))
+                    foreach (var col in addStd.GetChildren().ToList())
                     {
-                        if(opts.AdditionalDataColumns == null)
-                            opts.AdditionalDataColumns = new Collection<DataColumn>();
+                        if (Enum.TryParse(col.Value, ignoreCase: true, result: out StandardColumn stdcol))
+                            opts.Store.Add(stdcol);
+                    }
+                }
 
-                        var column = ConvertSqlDataType.GetEquivalentType(c.DataType, c.DataLength);
-                        column.ColumnName = c.ColumnName;
-                        column.AllowDBNull = c.AllowNull;
-                        opts.AdditionalDataColumns.Add(column);
+                // remove standard columns
+                var removeStd = config.GetSection("removeStandardColumns");
+                if (removeStd.GetChildren().Any())
+                {
+                    foreach (var col in removeStd.GetChildren().ToList())
+                    {
+                        if (Enum.TryParse(col.Value, ignoreCase: true, result: out StandardColumn stdcol))
+                            opts.Store.Remove(stdcol);
                     }
                 }
             }
 
-            SetIfProvided<bool>((val) => { opts.DisableTriggers = val; }, config["disableTriggers"]);
-
-            var section = config.GetSection("id");
-            if (section.GetChildren().Any())
+            void AddAdditionalColumns()
             {
-                SetIfProvided<string>((val) => { opts.Id.ColumnName = val; }, section["columnName"]);
-                SetIfProvided<bool>((val) => { opts.Id.BigInt = val; }, section["bigInt"]);
-                SetIfProvided<bool>((val) => { opts.Id.NonClusteredIndex = val; }, section["nonClusteredIndex"]);
+                var newcols =
+                    config.GetSection("additionalColumns").Get<List<SqlColumn>>()
+                    ?? config.GetSection("customColumns").Get<List<SqlColumn>>(); // backwards-compatibility
+
+                if (newcols != null)
+                {
+                    foreach (var c in newcols)
+                    {
+                        if (!string.IsNullOrWhiteSpace(c.ColumnName))// && !string.IsNullOrWhiteSpace(c.DataType))
+                        {
+                            if (opts.AdditionalColumns == null)
+                                opts.AdditionalColumns = new Collection<SqlColumn>();
+
+                            opts.AdditionalColumns.Add(c);//.AsSqlColumn());
+                        }
+                    }
+                }
             }
 
-            section = config.GetSection("level");
-            if(section.GetChildren().Any())
+            void ReadStandardColumns()
             {
-                SetIfProvided<string>((val) => { opts.Level.ColumnName = val; }, section["columnName"]);
-                SetIfProvided<bool>((val) => { opts.Level.StoreAsEnum = val; }, section["storeAsEnum"]);
+                var section = config.GetSection("id");
+                if (section != null)
+                {
+                    SetCommonColumnOptions(opts.Id);
+                    #pragma warning disable 618 // deprecated: BigInt property
+                    SetIfProvided<bool>((val) => { opts.Id.BigInt = val; }, section["bigInt"]);
+                    #pragma warning restore 618
+                }
+
+                section = config.GetSection("level");
+                if (section != null)
+                {
+                    SetCommonColumnOptions(opts.Level);
+                    SetIfProvided<bool>((val) => { opts.Level.StoreAsEnum = val; }, section["storeAsEnum"]);
+                }
+
+                section = config.GetSection("properties");
+                if (section != null)
+                {
+                    SetCommonColumnOptions(opts.Properties);
+                    SetIfProvided<bool>((val) => { opts.Properties.ExcludeAdditionalProperties = val; }, section["excludeAdditionalProperties"]);
+                    SetIfProvided<string>((val) => { opts.Properties.DictionaryElementName = val; }, section["dictionaryElementName"]);
+                    SetIfProvided<string>((val) => { opts.Properties.ItemElementName = val; }, section["itemElementName"]);
+                    SetIfProvided<bool>((val) => { opts.Properties.OmitDictionaryContainerElement = val; }, section["omitDictionaryContainerElement"]);
+                    SetIfProvided<bool>((val) => { opts.Properties.OmitSequenceContainerElement = val; }, section["omitSequenceContainerElement"]);
+                    SetIfProvided<bool>((val) => { opts.Properties.OmitStructureContainerElement = val; }, section["omitStructureContainerElement"]);
+                    SetIfProvided<bool>((val) => { opts.Properties.OmitElementIfEmpty = val; }, section["omitElementIfEmpty"]);
+                    SetIfProvided<string>((val) => { opts.Properties.PropertyElementName = val; }, section["propertyElementName"]);
+                    SetIfProvided<string>((val) => { opts.Properties.RootElementName = val; }, section["rootElementName"]);
+                    SetIfProvided<string>((val) => { opts.Properties.SequenceElementName = val; }, section["sequenceElementName"]);
+                    SetIfProvided<string>((val) => { opts.Properties.StructureElementName = val; }, section["structureElementName"]);
+                    SetIfProvided<bool>((val) => { opts.Properties.UsePropertyKeyAsElementName = val; }, section["usePropertyKeyAsElementName"]);
+                    // TODO PropertiesFilter would need a compiled Predicate<string> (high Roslyn overhead, see Serilog Config repo #106)
+                }
+
+                section = config.GetSection("timeStamp");
+                if (section != null)
+                {
+                    SetCommonColumnOptions(opts.TimeStamp);
+                    SetIfProvided<bool>((val) => { opts.TimeStamp.ConvertToUtc = val; }, section["convertToUtc"]);
+                }
+
+                section = config.GetSection("logEvent");
+                if (section != null)
+                {
+                    SetCommonColumnOptions(opts.LogEvent);
+                    SetIfProvided<bool>((val) => { opts.LogEvent.ExcludeAdditionalProperties = val; }, section["excludeAdditionalProperties"]);
+                    SetIfProvided<bool>((val) => { opts.LogEvent.ExcludeStandardColumns = val; }, section["ExcludeStandardColumns"]);
+                }
+
+                section = config.GetSection("message");
+                if (section != null)
+                    SetCommonColumnOptions(opts.Message);
+
+                section = config.GetSection("exception");
+                if (section != null)
+                    SetCommonColumnOptions(opts.Exception);
+
+                section = config.GetSection("messageTemplate");
+                if (section != null)
+                    SetCommonColumnOptions(opts.MessageTemplate);
+
+                // Standard Columns are subclasses of the SqlColumn class
+                void SetCommonColumnOptions(SqlColumn target)
+                {
+                    SetIfProvided<string>((val) => { target.ColumnName = val; }, section["columnName"]);
+                    SetIfProvided<string>((val) => { target.SetDataTypeFromConfigString(val); }, section["dataType"]);
+                    SetIfProvided<bool>((val) => { target.AllowNull = val; }, section["allowNull"]);
+                    SetIfProvided<int>((val) => { target.DataLength = val; }, section["dataLength"]);
+                    SetIfProvided<bool>((val) => { target.NonClusteredIndex = val; }, section["nonClusteredIndex"]);
+                }
             }
 
-            section = config.GetSection("properties");
-            if(section.GetChildren().Any())
+            void ReadMiscColumnOptions()
             {
-                SetIfProvided<string>((val) => { opts.Properties.ColumnName = val; }, section["columnName"]);
-                SetIfProvided<bool>((val) => { opts.Properties.ExcludeAdditionalProperties = val; }, section["excludeAdditionalProperties"]);
-                SetIfProvided<string>((val) => { opts.Properties.DictionaryElementName = val; }, section["dictionaryElementName"]);
-                SetIfProvided<string>((val) => { opts.Properties.ItemElementName = val; }, section["itemElementName"]);
-                SetIfProvided<bool>((val) => { opts.Properties.OmitDictionaryContainerElement = val; }, section["omitDictionaryContainerElement"]);
-                SetIfProvided<bool>((val) => { opts.Properties.OmitSequenceContainerElement = val; }, section["omitSequenceContainerElement"]);
-                SetIfProvided<bool>((val) => { opts.Properties.OmitStructureContainerElement = val; }, section["omitStructureContainerElement"]);
-                SetIfProvided<bool>((val) => { opts.Properties.OmitElementIfEmpty = val; }, section["omitElementIfEmpty"]);
-                SetIfProvided<string>((val) => { opts.Properties.PropertyElementName = val; }, section["propertyElementName"]);
-                SetIfProvided<string>((val) => { opts.Properties.RootElementName = val; }, section["rootElementName"]);
-                SetIfProvided<string>((val) => { opts.Properties.SequenceElementName = val; }, section["sequenceElementName"]);
-                SetIfProvided<string>((val) => { opts.Properties.StructureElementName = val; }, section["structureElementName"]);
-                SetIfProvided<bool>((val) => { opts.Properties.UsePropertyKeyAsElementName = val; }, section["usePropertyKeyAsElementName"]);
-                // TODO PropertiesFilter would need a compiled Predicate<string> (high Roslyn overhead, see Serilog Config repo #106)
+                SetIfProvided<bool>((val) => { opts.DisableTriggers = val; }, config["disableTriggers"]);
+                SetIfProvided<bool>((val) => { opts.ClusteredColumnstoreIndex = val; }, config["clusteredColumnstoreIndex"]);
+
+                string pkName = config["primaryKeyColumnName"];
+                if (!string.IsNullOrEmpty(pkName))
+                {
+                    if (opts.ClusteredColumnstoreIndex)
+                        throw new ArgumentException("SQL Clustered Columnstore Indexes and primary key constraints are mutually exclusive.");
+
+                    foreach (var standardCol in opts.Store)
+                    {
+                        var stdColOpts = opts.GetStandardColumnOptions(standardCol);
+                        if (pkName.Equals(stdColOpts.ColumnName, StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            opts.PrimaryKey = stdColOpts;
+                            break;
+                        }
+                    }
+
+                    if (opts.PrimaryKey == null && opts.AdditionalColumns != null)
+                    {
+                        foreach (var col in opts.AdditionalColumns)
+                        {
+                            if (pkName.Equals(col.ColumnName, StringComparison.InvariantCultureIgnoreCase))
+                            {
+                                opts.PrimaryKey = col;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (opts.PrimaryKey == null)
+                        throw new ArgumentException($"Could not match the configured primary key column name \"{pkName}\" with a data column in the table.");
+                }
             }
-
-            section = config.GetSection("timeStamp");
-            if(section.GetChildren().Any())
-            {
-                SetIfProvided<string>((val) => { opts.TimeStamp.ColumnName = val; }, section["columnName"]);
-                SetIfProvided<bool>((val) => { opts.TimeStamp.ConvertToUtc = val; }, section["convertToUtc"]);
-            }
-
-            section = config.GetSection("logEvent");
-            if(section.GetChildren().Any())
-            {
-                SetIfProvided<string>((val) => { opts.LogEvent.ColumnName = val; }, section["columnName"]);
-                SetIfProvided<bool>((val) => { opts.LogEvent.ExcludeAdditionalProperties = val; }, section["excludeAdditionalProperties"]);
-                SetIfProvided<bool>((val) => { opts.LogEvent.ExcludeStandardColumns = val; }, section["ExcludeStandardColumns"]);
-            }
-
-            SetIfProvided<string>((val) => { opts.Message.ColumnName = val; }, config.GetSection("message")["columnName"]);
-
-            SetIfProvided<string>((val) => { opts.Exception.ColumnName = val; }, config.GetSection("exception")["columnName"]);
-
-            SetIfProvided<string>((val) => { opts.MessageTemplate.ColumnName = val; }, config.GetSection("messageTemplate")["columnName"]);
-
-            return opts;
 
             // This is used to only set a column property when it is actually specified in the config.
             // When a value is requested from config, it returns null if that value hasn't been specified.
