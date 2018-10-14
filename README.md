@@ -33,6 +33,8 @@ All sink configuration methods accept the following parameters, though not neces
 * `restrictedToMinimumLevel`
 * `batchPostingLimit`
 * `period`
+* `formatProvider`
+
 
 ### Basic Parameters
 
@@ -47,6 +49,8 @@ Like other sinks, `restrictedToMinimumLevel` controls the `LogEventLevel` messag
 This is a "periodic batching sink." The sink will queue a certain number of log events before they're actually written to SQL Server as a bulk insert operation. There is also a timeout period so that the batch is always written even if it has not been filled. By default, the batch size is 50 rows and the timeout is 5 seconds. You can change these through by setting the `batchPostingLimit` and `period` parameters.
 
 Consider increasing the batch size in high-volume logging environments. In one test of a loop writing a single log entry, the default batch size averaged about 14,000 rows per second. Increasing the batch size to 1000 rows increased average write speed to nearly 43,000 rows per second. However, you should also consider the risk-factor. If the client or server crashes, or if the connection goes down, you may lose an entire batch of log entries. You can mitigate this by reducing the timeout. Run performance tests to find the optimal batch size for your production log table definition and log event content, network setup, and server configuration.
+
+Refer to the Serilog Wiki's explanation of [Format Providers](https://github.com/serilog/serilog/wiki/Formatting-Output#format-providers) for details about the `formatProvider` parameter.
 
 ### Code-Only (any .NET target)
 
@@ -113,15 +117,16 @@ _NOTE:_ Although the configuration package can support many configuration source
 
 ## Audit Sink Configuration
 
-A Serilog audit sink is any sink which writes log events which are of such importance that they must succeed, and that verification of a successful write is more important than write performance. Unlike the regular sink, an audit sink _does not_ fail silently -- it can throw exceptions. You should wrap audit logging output in a `try/catch` block. The usual example is bank account withdrawal events -- a bank would certainly not want to allow a failure to record those transactions to fail silently.
+A Serilog audit sink writes log events which are of such importance that they must succeed, and that verification of a successful write is more important than write performance. Unlike the regular sink, an audit sink _does not_ fail silently -- it can throw exceptions. You should wrap audit logging output in a `try/catch` block. The usual example is bank account withdrawal events -- a bank would certainly not want to allow a failure to record those transactions to fail silently.
 
-The `MSSqlServerAuditSink` constructor accepts most of the same parameters:
+The constructor accepts most of the same parameters, and like other Serilog audit sinks, you configure one by using `AuditTo` instead of `WriteTo`.
 
 * `connectionString`
 * `schemaName`
 * `tableName`
 * `autoCreateSqlTable`
 * `columnOptions`
+* `formatProvider`
 
 The `restrictedToMinimumLevel` parameter is not available because all events written to an audit sink are required to succeed.
 
@@ -260,6 +265,8 @@ This property can be set to nearly any value in the `System.Data.SqlDbType` enum
 * `varbinary`
 * `varchar`
 * `xml`
+
+Numeric types use the default precision and scale. For numeric types, you are responsible for ensuring the values you write do not exceed the min/max values of the underlying SQL column data types. For example, the SQL `decimal` type defaults to 18-digit precision (and scale 0) meaning the maximum value is 10<sup>18</sup>-1, or 999,999,999,999,999,999, whereas the .NET `decimal` type has a much higher maximum value of 79,228,162,514,264,337,593,543,950,335.
 
 ### AllowNull
 

@@ -18,6 +18,17 @@ namespace Serilog.Sinks.MSSqlServer
         { }
 
         /// <summary>
+        /// Constructor with property initialization.
+        /// </summary>
+        public SqlColumn(string columnName, SqlDbType dataType, bool allowNull = true, int dataLength = -1)
+        {
+            ColumnName = columnName;
+            DataType = dataType;
+            AllowNull = allowNull;
+            DataLength = dataLength;
+        }
+
+        /// <summary>
         /// A constructor that initializes the object from a DataColumn object.
         /// </summary>
         public SqlColumn(DataColumn dataColumn)
