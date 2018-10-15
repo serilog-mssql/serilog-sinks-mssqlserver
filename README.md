@@ -410,13 +410,21 @@ Standard Columns are always excluded from the XML `Properties` column  but Stand
 
 ## External Configuration Syntax
 
-The _Serilog.Settings.AppSettings_ package supports XML-based configuration (either `app.config` or `web.config`), and the _Serilog.Settings.Configuration_ package supports the many _Microsoft.Extensions.Configuration_ sources. JSON is the most common, but other sources include environment variables, command lines, Azure Key Vault, XML, and more.  
+Projects targeting the .NET Framework automatically have support for XML-based configuration (either `app.config` or `web.config`) of `ColumnOptions` settings, and the _Serilog.Settings.AppSettings_ package adds XML-based configuration of sink arguments.
 
-### JSON syntax
+Projects targeting .NET Standard can apply configuration-driven sink setup and `ColumnOptions` settings using the _Serilog.Settings.Configuration_ (SSC) package. It supports any of the configuration sources supported by the underlying _Microsoft.Extensions.Configuration_ (MEC) packages. JSON is the most common, but other sources include environment variables, command lines, Azure Key Vault, XML, and more.  
 
 All properties of the `ColumnOptions` class are configurable except the `Properties.PropertyFilter` predicate expression. In most cases configuration keynames match the class property names, but there are some exceptions. For example, because `PrimaryKey` is a `SqlColumn` object reference when configured through code, external configuration uses a `primaryKeyColumnName` setting to identify the primary key by name.
 
-Keys and values are not case-sensitive.
+All `ColumnOptions` elements and lists are optional. Some settings or properties shown are mutually exclusive and are listed for documentation purposes -- these do not necessarily reflect real-world configurations that can be copy-pasted as-is.
+
+Custom columns and the stand-alone Standard Column entires all support the same general column properties (`ColumnName`, `DataType`, etc) listed in thec [SqlColumn Objects](#sqlcolumn-objects) topic. The samples omit many of these properties for brevity.
+
+If you combine external configuration with configuration through code, external configuration changes will be applied in addition to any `ColumnOptions` object you provide through code.
+
+### JSON: .NET Standard configuration
+
+Keys and values are not case-sensitive. This is an example of configuring the sink arguments.
 
 ```json
 {
@@ -441,15 +449,15 @@ Keys and values are not case-sensitive.
 }
 ```
 
-As the name suggests, `columnOptionSection` is an entire configuration section in its own right. All possible entries  are shown below, excluding properties like `ColumnName` and `AllowNull` that are available on every column definition. Some sample values are also shown below. All properties and subsections are optional. The `AdditionalColumns` collection can also be populated from a key named `customColumns` for backwards-compatibility reasons (not shown here). Some properties shown here are mutually exclusive (such as `clusteredColumnstoreIndex` and `primaryKeyColumnName`) -- the following does not represent a real-world configuration example, it is only a reference.
+As the name suggests, `columnOptionSection` is an entire configuration section in its own right. The `AdditionalColumns` collection can also be populated from a key named `customColumns` (not shown here) for backwards-compatibility reasons.
 
 ```json
 "columnOptionsSection": {
-    "addStandardColumns": [ "LogEvent" ],
-    "removeStandardColumns": [ "MessageTemplate", "Properties" ],
     "disableTriggers": true,
     "clusteredColumnstoreIndex": false,
     "primaryKeyColumnName": "Id",
+    "addStandardColumns": [ "LogEvent" ],
+    "removeStandardColumns": [ "MessageTemplate", "Properties" ],
     "additionalColumns": [
         { "ColumnName": "EventType", "DataType": "int", "AllowNull": false },
         { "ColumnName": "Release", "DataType": "varchar", "DataLength": 32 }
@@ -488,16 +496,24 @@ As the name suggests, `columnOptionSection` is an entire configuration section i
 }
 ```
 
-### ConfigurationManager XML syntax
+### XML: .NET Framework ColumnOptions configuration
 
-When targeting the .NET Framework, built-in support for `ConfigurationManager` allows you to define custom columns as it is represented in SQL Server. Columns specified must match the physical database exactly. This section will be processed automatically if it exists in the application's `web.config` or `app.config` file. The same properties listed in the topic [SqlColumn Objects](#sqlcolumn-objects) are available here.
+Keys and values are case-sensitive. Case must match **_exactly_** as shown below.
 
 ```xml
   <configSections>
     <section name="MSSqlServerSettingsSection"
              type="Serilog.Configuration.MSSqlServerConfigurationSection, Serilog.Sinks.MSSqlServer"/>
   </configSections>
-  <MSSqlServerSettingsSection>
+  <MSSqlServerSettingsSection DisableTriggers="false"
+                       ClusteredColumnstoreIndex="false"
+                       PrimaryKeyColumnName="Id">
+    <AddStandardColumns>
+        <add Name="LogEvent"/>
+    </AddStandardColumns>
+    <RemoveStandardColumns>
+        <remove Name="Properties"/>
+    </RemoveStandardColumns>
     <Columns>
       <add ColumnName="EventType" DataType="int"/>
       <add ColumnName="Release"
@@ -506,10 +522,31 @@ When targeting the .NET Framework, built-in support for `ConfigurationManager` a
            AllowNull="true"
            NonClusteredIndex="false"/>
     </Columns>
+    <Exception ColumnName="Ex" DataLength="512"/>
+    <Id NonClusteredIndex="true"/>
+    <Level ColumnName="Severity" StoreAsEnum="true"/>
+    <LogEvent ExcludeAdditionalProperties="true"
+              ExcludeStandardColumns="true"/>
+    <Message DataLength="1024"/>
+    <MessageTemplate DataLength="1536"/>
+    <Properties DataType="xml"
+                ExcludeAdditionalProperties="true"
+                DictionaryElementName="dict"
+                ItemElementName="item"
+                OmitDictionaryContainerElement="false"
+                OmitSequenceContainerElement="false"
+                OmitStructureContainerElement="false"
+                OmitElementIfEmpty="true"
+                PropertyElementName="prop"
+                RootElementName="root"
+                SequenceElementName="seq"
+                StructureElementName="struct"
+                UsePropertyKeyAsElementName="false"/>
+    <TimeStamp ConvertToUtc="true"/>
   </MSSqlServerSettingsSection>      
 ```
 
-### AppSettings XML syntax
+### XML: AppSettings sink configuration
 
 Refer to the _Serilog.Settings.AppSetings_ package documentation for complete details about sink configuration. This is an example of seting some of the configuration parameters for this sink.
 
