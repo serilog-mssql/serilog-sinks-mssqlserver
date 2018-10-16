@@ -71,8 +71,6 @@ namespace Serilog.Sinks.MSSqlServer.Tests
 
                 logEvents.Should().Contain(e => e.Message.Contains(loggingInformationMessage) && e.Level == LogEventLevel.Information.ToString());
             }
-
-            DatabaseFixture.DropTable();
         }
 
         [Fact]

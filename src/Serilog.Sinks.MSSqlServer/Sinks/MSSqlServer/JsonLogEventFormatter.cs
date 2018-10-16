@@ -52,7 +52,7 @@ namespace Serilog.Sinks.MSSqlServer
 
             output.Write("{");
 
-            if (traits.ColumnOptions.LogEvent.ExcludeStandardColumns == false)
+            if (traits.columnOptions.LogEvent.ExcludeStandardColumns == false)
             {
                 // The XML Properties column has never included the Standard Columns, but prior
                 // to adding this sink-specific JSON formatter, the LogEvent JSON column relied
@@ -64,7 +64,7 @@ namespace Serilog.Sinks.MSSqlServer
                 // columns that were output by the external JsonFormatter class).
 
                 string precedingDelimiter = "";
-                var store = traits.ColumnOptions.Store;
+                var store = traits.columnOptions.Store;
 
                 WriteIfPresent(StandardColumn.TimeStamp);
                 WriteIfPresent(StandardColumn.Level);

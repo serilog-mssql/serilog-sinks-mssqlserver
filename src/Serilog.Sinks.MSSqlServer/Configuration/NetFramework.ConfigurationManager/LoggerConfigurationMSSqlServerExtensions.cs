@@ -1,13 +1,4 @@
-﻿using System;
-using System.Collections.ObjectModel;
-using System.Data;
-using Serilog.Configuration;
-using Serilog.Events;
-using Serilog.Sinks.MSSqlServer;
-using System.Configuration;
-using Serilog.Debugging;
-
-// Copyright 2014 Serilog Contributors
+﻿// Copyright 2014 Serilog Contributors
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,6 +11,15 @@ using Serilog.Debugging;
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
+using System;
+using System.Collections.ObjectModel;
+using System.Data;
+using Serilog.Configuration;
+using Serilog.Events;
+using Serilog.Sinks.MSSqlServer;
+using System.Configuration;
+using Serilog.Debugging;
 
 namespace Serilog
 {
@@ -63,15 +63,8 @@ namespace Serilog
 
             var defaultedPeriod = period ?? MSSqlServerSink.DefaultPeriod;
 
-            // If we have additional columns from config, load them as well
-            if (ConfigurationManager.GetSection("MSSqlServerSettingsSection") is MSSqlServerConfigurationSection serviceConfigSection && serviceConfigSection.Columns.Count > 0)
-            {
-                if (columnOptions == null)
-                {
-                    columnOptions = new ColumnOptions();
-                }
-                GenerateDataColumnsFromConfig(serviceConfigSection, columnOptions);
-            }
+            if (ConfigurationManager.GetSection("MSSqlServerSettingsSection") is MSSqlServerConfigurationSection serviceConfigSection)
+                ConfigureColumnOptions(serviceConfigSection, columnOptions);
 
             connectionString = GetConnectionString(connectionString);
 
@@ -116,15 +109,8 @@ namespace Serilog
         {
             if (loggerAuditSinkConfiguration == null) throw new ArgumentNullException("loggerAuditSinkConfiguration");
 
-            // If we have additional columns from config, load them as well
-            if (ConfigurationManager.GetSection("MSSqlServerSettingsSection") is MSSqlServerConfigurationSection serviceConfigSection && serviceConfigSection.Columns.Count > 0)
-            {
-                if (columnOptions == null)
-                {
-                    columnOptions = new ColumnOptions();
-                }
-                GenerateDataColumnsFromConfig(serviceConfigSection, columnOptions);
-            }
+            if (ConfigurationManager.GetSection("MSSqlServerSettingsSection") is MSSqlServerConfigurationSection serviceConfigSection)
+                ConfigureColumnOptions(serviceConfigSection, columnOptions);
 
             connectionString = GetConnectionString(connectionString);
 
@@ -168,26 +154,31 @@ namespace Serilog
         }
 
         /// <summary>
-        /// Generate an array of DataColumns using the supplied MSSqlServerConfigurationSection,
-        ///     which is an array of keypairs defining the SQL column name and SQL data type
-        /// Entries are appended to a list of DataColumns in column options
+        /// Populate ColumnOptions properties and collections from app config
         /// </summary>
-        /// <param name="serviceConfigSection">A previously loaded configuration section</param>
-        /// <param name="columnOptions">column options with existing array of columns to append our config columns to</param>
-        private static void GenerateDataColumnsFromConfig(MSSqlServerConfigurationSection serviceConfigSection,
-            ColumnOptions columnOptions)
+        private static void ConfigureColumnOptions(MSSqlServerConfigurationSection serviceConfigSection, ColumnOptions columnOptions)
+        {
+            if (serviceConfigSection.Columns.Count > 0)
+            {
+                if (columnOptions == null)
+                    columnOptions = new ColumnOptions();
+
+                AddAdditionalColumns(serviceConfigSection, columnOptions);
+            }
+        }
+
+        /// <summary>
+        /// Converts XML Column nodes to SqlColumn objects and adds them to
+        /// the AdditionalColumns collection.
+        /// </summary>
+        private static void AddAdditionalColumns(MSSqlServerConfigurationSection serviceConfigSection, ColumnOptions columnOptions)
         {
             foreach (ColumnConfig c in serviceConfigSection.Columns)
             {
-                var column = ConvertSqlDataType.GetEquivalentType(c.DataType, c.DataLength);
-                column.ColumnName = c.ColumnName;
-                column.AllowDBNull = c.AllowNull;
-                if (columnOptions.AdditionalDataColumns == null)
-                {
-                    columnOptions.AdditionalDataColumns = new Collection<DataColumn>();
-                }
+                if (columnOptions.AdditionalColumns == null)
+                    columnOptions.AdditionalColumns = new Collection<SqlColumn>();
 
-                columnOptions.AdditionalDataColumns.Add(column);
+                columnOptions.AdditionalColumns.Add(c.AsSqlColumn());
             }
         }
     }

@@ -261,7 +261,6 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
             {
                 var logEvents = conn.Query<DefaultStandardLogColumns>($"SELECT Message, Level FROM {DatabaseFixture.LogTableName}");
-
                 logEvents.Should().Contain(e => e.Message.Contains(loggingInformationMessage));
             }
         }

@@ -14,27 +14,28 @@
 
 using Serilog.Debugging;
 using Serilog.Events;
-
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.IO;
 using System.Linq;
 using System.Text;
+
 
 namespace Serilog.Sinks.MSSqlServer
 {
     /// <summary>Contains common functionality and properties used by both MSSqlServerSinks.</summary>
     internal sealed class MSSqlServerSinkTraits : IDisposable
     {
-        public string ConnectionString { get; }
-        public string TableName { get; }
-        public string SchemaName { get; }
-        public ColumnOptions ColumnOptions { get; }
-        public IFormatProvider FormatProvider { get; }
+        public string connectionString { get; }
+        public string tableName { get; }
+        public string schemaName { get; }
+        public ColumnOptions columnOptions { get; }
+        public IFormatProvider formatProvider { get; }
         public JsonLogEventFormatter jsonLogEventFormatter { get; }
-        public ISet<string> AdditionalDataColumnNames { get; }
-        public DataTable EventTable { get; }
-        public ISet<string> StandardDataColumnNames { get; }
+        public ISet<string> additionalColumnNames { get; }
+        public DataTable eventTable { get; }
+        public ISet<string> standardColumnNames { get; }
 
         public MSSqlServerSinkTraits(string connectionString, string tableName, string schemaName, ColumnOptions columnOptions, IFormatProvider formatProvider, bool autoCreateSqlTable)
         {
@@ -44,42 +45,39 @@ namespace Serilog.Sinks.MSSqlServer
             if (string.IsNullOrWhiteSpace(tableName))
                 throw new ArgumentNullException(nameof(tableName));
 
-            ConnectionString = connectionString;
-            TableName = tableName;
-            SchemaName = schemaName;
-            ColumnOptions = columnOptions ?? new ColumnOptions();
-            FormatProvider = formatProvider;
+            this.connectionString = connectionString;
+            this.tableName = tableName;
+            this.schemaName = schemaName;
+            this.columnOptions = columnOptions ?? new ColumnOptions();
+            this.formatProvider = formatProvider;
 
-            StandardDataColumnNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            if (ColumnOptions.Store.Contains(StandardColumn.Id)) StandardDataColumnNames.Add(ColumnOptions.Id.ColumnName ?? "Id");
-            if (ColumnOptions.Store.Contains(StandardColumn.Message)) StandardDataColumnNames.Add(ColumnOptions.Message.ColumnName ?? "Message");
-            if (ColumnOptions.Store.Contains(StandardColumn.MessageTemplate)) StandardDataColumnNames.Add(ColumnOptions.MessageTemplate.ColumnName ?? "MessageTemplate");
-            if (ColumnOptions.Store.Contains(StandardColumn.Level)) StandardDataColumnNames.Add(ColumnOptions.Level.ColumnName ?? "Level");
-            if (ColumnOptions.Store.Contains(StandardColumn.TimeStamp)) StandardDataColumnNames.Add(ColumnOptions.TimeStamp.ColumnName ?? "TimeStamp");
-            if (ColumnOptions.Store.Contains(StandardColumn.Exception)) StandardDataColumnNames.Add(ColumnOptions.Exception.ColumnName ?? "Exception");
-            if (ColumnOptions.Store.Contains(StandardColumn.Properties)) StandardDataColumnNames.Add(ColumnOptions.Properties.ColumnName ?? "Properties");
-            if (ColumnOptions.Store.Contains(StandardColumn.LogEvent)) StandardDataColumnNames.Add(ColumnOptions.LogEvent.ColumnName ?? "LogEvent");
+            standardColumnNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var stdCol in this.columnOptions.Store)
+            {
+                var col = this.columnOptions.GetStandardColumnOptions(stdCol);
+                standardColumnNames.Add(col.ColumnName);
+            }
 
-            AdditionalDataColumnNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            if (ColumnOptions.AdditionalDataColumns != null)
-                foreach (var col in ColumnOptions.AdditionalDataColumns)
-                    AdditionalDataColumnNames.Add(col.ColumnName);
+            additionalColumnNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            if (this.columnOptions.AdditionalColumns != null)
+                foreach (var col in this.columnOptions.AdditionalColumns)
+                    additionalColumnNames.Add(col.ColumnName);
 
-            if (ColumnOptions.Store.Contains(StandardColumn.LogEvent))
+            if (this.columnOptions.Store.Contains(StandardColumn.LogEvent))
                 jsonLogEventFormatter = new JsonLogEventFormatter(this);
 
-            EventTable = CreateDataTable();
+            eventTable = CreateDataTable();
 
             if (autoCreateSqlTable)
             {
                 try
                 {
-                    SqlTableCreator tableCreator = new SqlTableCreator(connectionString, SchemaName);
-                    tableCreator.CreateTable(EventTable);
+                    SqlTableCreator tableCreator = new SqlTableCreator(this.connectionString, this.schemaName, this.tableName, eventTable, this.columnOptions);
+                    tableCreator.CreateTable(); // return code ignored, 0 = failure?
                 }
                 catch (Exception ex)
                 {
-                    SelfLog.WriteLine("Exception {0} caught while creating table {1} to the database specified in the Connection string.", ex, tableName);
+                    SelfLog.WriteLine($"Exception creating table {tableName}:\n{ex}");
                 }
 
             }
@@ -92,14 +90,14 @@ namespace Serilog.Sinks.MSSqlServer
         /// </returns>
         public IEnumerable<KeyValuePair<string, object>> GetColumnsAndValues(LogEvent logEvent)
         {
-            foreach (var column in ColumnOptions.Store)
+            foreach (var column in columnOptions.Store)
             {
-                // never write to Id since it will be auto-incrementing (IDENTITY)
+                // skip Id (auto-incrementing identity)
                 if(column != StandardColumn.Id)
                     yield return GetStandardColumnNameAndValue(column, logEvent);
             }
 
-            if (ColumnOptions.AdditionalDataColumns != null)
+            if (columnOptions.AdditionalColumns != null)
             {
                 foreach (var columnValuePair in ConvertPropertiesToColumn(logEvent.Properties))
                     yield return columnValuePair;
@@ -108,7 +106,7 @@ namespace Serilog.Sinks.MSSqlServer
 
         public void Dispose()
         {
-            EventTable.Dispose();
+            eventTable.Dispose();
         }
 
         internal KeyValuePair<string, object> GetStandardColumnNameAndValue(StandardColumn column, LogEvent logEvent)
@@ -116,19 +114,19 @@ namespace Serilog.Sinks.MSSqlServer
             switch (column)
             {
                 case StandardColumn.Message:
-                    return new KeyValuePair<string, object>(ColumnOptions.Message.ColumnName ?? "Message", logEvent.RenderMessage(FormatProvider));
+                    return new KeyValuePair<string, object>(columnOptions.Message.ColumnName, logEvent.RenderMessage(formatProvider));
                 case StandardColumn.MessageTemplate:
-                    return new KeyValuePair<string, object>(ColumnOptions.MessageTemplate.ColumnName ?? "MessageTemplate", logEvent.MessageTemplate.Text);
+                    return new KeyValuePair<string, object>(columnOptions.MessageTemplate.ColumnName, logEvent.MessageTemplate.Text);
                 case StandardColumn.Level:
-                    return new KeyValuePair<string, object>(ColumnOptions.Level.ColumnName ?? "Level", ColumnOptions.Level.StoreAsEnum ? (object)logEvent.Level : logEvent.Level.ToString());
+                    return new KeyValuePair<string, object>(columnOptions.Level.ColumnName, columnOptions.Level.StoreAsEnum ? (object)logEvent.Level : logEvent.Level.ToString());
                 case StandardColumn.TimeStamp:
-                    return new KeyValuePair<string, object>(ColumnOptions.TimeStamp.ColumnName ?? "TimeStamp", ColumnOptions.TimeStamp.ConvertToUtc ? logEvent.Timestamp.ToUniversalTime().DateTime : logEvent.Timestamp.DateTime);
+                    return new KeyValuePair<string, object>(columnOptions.TimeStamp.ColumnName, columnOptions.TimeStamp.ConvertToUtc ? logEvent.Timestamp.ToUniversalTime().DateTime : logEvent.Timestamp.DateTime);
                 case StandardColumn.Exception:
-                    return new KeyValuePair<string, object>(ColumnOptions.Exception.ColumnName ?? "Exception", logEvent.Exception != null ? logEvent.Exception.ToString() : null);
+                    return new KeyValuePair<string, object>(columnOptions.Exception.ColumnName, logEvent.Exception != null ? logEvent.Exception.ToString() : null);
                 case StandardColumn.Properties:
-                    return new KeyValuePair<string, object>(ColumnOptions.Properties.ColumnName ?? "Properties", ConvertPropertiesToXmlStructure(logEvent.Properties));
+                    return new KeyValuePair<string, object>(columnOptions.Properties.ColumnName, ConvertPropertiesToXmlStructure(logEvent.Properties));
                 case StandardColumn.LogEvent:
-                    return new KeyValuePair<string, object>(ColumnOptions.LogEvent.ColumnName ?? "LogEvent", LogEventToJson(logEvent));
+                    return new KeyValuePair<string, object>(columnOptions.LogEvent.ColumnName, LogEventToJson(logEvent));
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -136,9 +134,9 @@ namespace Serilog.Sinks.MSSqlServer
 
         private string LogEventToJson(LogEvent logEvent)
         {
-            if (ColumnOptions.LogEvent.ExcludeAdditionalProperties)
+            if (columnOptions.LogEvent.ExcludeAdditionalProperties)
             {
-                var filteredProperties = logEvent.Properties.Where(p => !AdditionalDataColumnNames.Contains(p.Key));
+                var filteredProperties = logEvent.Properties.Where(p => !additionalColumnNames.Contains(p.Key));
                 logEvent = new LogEvent(logEvent.Timestamp, logEvent.Level, logEvent.Exception, logEvent.MessageTemplate, filteredProperties.Select(x => new LogEventProperty(x.Key, x.Value)));
             }
 
@@ -150,10 +148,10 @@ namespace Serilog.Sinks.MSSqlServer
 
         private string ConvertPropertiesToXmlStructure(IEnumerable<KeyValuePair<string, LogEventPropertyValue>> properties)
         {
-            var options = ColumnOptions.Properties;
+            var options = columnOptions.Properties;
 
             if (options.ExcludeAdditionalProperties)
-                properties = properties.Where(p => !AdditionalDataColumnNames.Contains(p.Key));
+                properties = properties.Where(p => !additionalColumnNames.Contains(p.Key));
 
             if (options.PropertiesFilter != null)
             {
@@ -204,11 +202,11 @@ namespace Serilog.Sinks.MSSqlServer
         {
             foreach (var property in properties)
             {
-                if (!EventTable.Columns.Contains(property.Key) || StandardDataColumnNames.Contains(property.Key))
+                if (!eventTable.Columns.Contains(property.Key) || standardColumnNames.Contains(property.Key))
                     continue;
 
                 var columnName = property.Key;
-                var columnType = EventTable.Columns[columnName].DataType;
+                var columnType = eventTable.Columns[columnName].DataType;
 
                 if (!(property.Value is ScalarValue scalarValue))
                 {
@@ -216,7 +214,7 @@ namespace Serilog.Sinks.MSSqlServer
                     continue;
                 }
 
-                if (scalarValue.Value == null && EventTable.Columns[columnName].AllowDBNull)
+                if (scalarValue.Value == null && eventTable.Columns[columnName].AllowDBNull)
                 {
                     yield return new KeyValuePair<string, object>(columnName, DBNull.Value);
                     continue;
@@ -255,86 +253,26 @@ namespace Serilog.Sinks.MSSqlServer
 
         private DataTable CreateDataTable()
         {
-            var eventsTable = new DataTable(TableName);
+            var eventsTable = new DataTable(tableName);
 
-            foreach (var standardColumn in ColumnOptions.Store)
+            foreach (var standardColumn in columnOptions.Store)
             {
-                switch (standardColumn)
-                {
-                    case StandardColumn.Id:
-                        var id = new DataColumn
-                        {
-                            DataType = ColumnOptions.Id.BigInt ? typeof(long) : typeof(int),
-                            ColumnName = ColumnOptions.Id.ColumnName ?? StandardColumn.Id.ToString(),
-                            AutoIncrement = true,
-                            AllowDBNull = false
-                        };
-                        id.ExtendedProperties.Add("NonClusteredIndex", ColumnOptions.Id.NonClusteredIndex);
-                        eventsTable.Columns.Add(id);
-                        eventsTable.PrimaryKey = new DataColumn[] { id };
-                        break;
-
-                    case StandardColumn.Level:
-                        eventsTable.Columns.Add(new DataColumn
-                        {
-                            DataType = ColumnOptions.Level.StoreAsEnum ? typeof(byte) : typeof(string),
-                            MaxLength = ColumnOptions.Level.StoreAsEnum ? -1 : 128,
-                            ColumnName = ColumnOptions.Level.ColumnName ?? StandardColumn.Level.ToString()
-                        });
-                        break;
-                    case StandardColumn.TimeStamp:
-                        eventsTable.Columns.Add(new DataColumn
-                        {
-                            DataType = typeof(DateTime),
-                            ColumnName = ColumnOptions.TimeStamp.ColumnName ?? StandardColumn.TimeStamp.ToString(),
-                            AllowDBNull = false
-                        });
-                        break;
-                    case StandardColumn.LogEvent:
-                        eventsTable.Columns.Add(new DataColumn
-                        {
-                            DataType = typeof(string),
-                            ColumnName = ColumnOptions.LogEvent.ColumnName ?? StandardColumn.LogEvent.ToString()
-                        });
-                        break;
-                    case StandardColumn.Message:
-                        eventsTable.Columns.Add(new DataColumn
-                        {
-                            DataType = typeof(string),
-                            MaxLength = -1,
-                            ColumnName = ColumnOptions.Message.ColumnName ?? StandardColumn.Message.ToString()
-                        });
-                        break;
-                    case StandardColumn.MessageTemplate:
-                        eventsTable.Columns.Add(new DataColumn
-                        {
-                            DataType = typeof(string),
-                            MaxLength = -1,
-                            ColumnName = ColumnOptions.MessageTemplate.ColumnName ?? StandardColumn.MessageTemplate.ToString()
-                        });
-                        break;
-                    case StandardColumn.Exception:
-                        eventsTable.Columns.Add(new DataColumn
-                        {
-                            DataType = typeof(string),
-                            MaxLength = -1,
-                            ColumnName = ColumnOptions.Exception.ColumnName ?? StandardColumn.Exception.ToString()
-                        });
-                        break;
-                    case StandardColumn.Properties:
-                        eventsTable.Columns.Add(new DataColumn
-                        {
-                            DataType = typeof(string),
-                            MaxLength = -1,
-                            ColumnName = ColumnOptions.Properties.ColumnName ?? StandardColumn.Properties.ToString()
-                        });
-                        break;
-                }
+                var standardOpts = columnOptions.GetStandardColumnOptions(standardColumn);
+                var dataColumn = standardOpts.AsDataColumn();
+                eventsTable.Columns.Add(dataColumn);
+                if(standardOpts == columnOptions.PrimaryKey)
+                    eventsTable.PrimaryKey = new DataColumn[] { dataColumn };
             }
 
-            if (ColumnOptions.AdditionalDataColumns != null)
+            if (columnOptions.AdditionalColumns != null)
             {
-                eventsTable.Columns.AddRange(ColumnOptions.AdditionalDataColumns.ToArray());
+                foreach(var addCol in columnOptions.AdditionalColumns)
+                {
+                    var dataColumn = addCol.AsDataColumn();
+                    eventsTable.Columns.Add(dataColumn);
+                    if (addCol == columnOptions.PrimaryKey)
+                        eventsTable.PrimaryKey = new DataColumn[] { dataColumn };
+                }
             }
 
             return eventsTable;

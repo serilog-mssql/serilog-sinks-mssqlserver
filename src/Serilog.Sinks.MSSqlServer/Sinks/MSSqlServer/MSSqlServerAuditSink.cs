@@ -49,6 +49,8 @@ namespace Serilog.Sinks.MSSqlServer
             string schemaName = "dbo"
             )
         {
+            columnOptions.FinalizeConfigurationForSinkConstructor();
+
             if (columnOptions != null)
             {
                 if (columnOptions.DisableTriggers)
@@ -65,14 +67,14 @@ namespace Serilog.Sinks.MSSqlServer
         {
             try
             {
-                using (SqlConnection connection = new SqlConnection(_traits.ConnectionString))
+                using (SqlConnection connection = new SqlConnection(_traits.connectionString))
                 {
                     connection.Open();
                     using (SqlCommand command = connection.CreateCommand())
                     {
                         command.CommandType = CommandType.Text;
 
-                        StringBuilder fieldList = new StringBuilder($"INSERT INTO [{_traits.SchemaName}].[{_traits.TableName}] (");
+                        StringBuilder fieldList = new StringBuilder($"INSERT INTO [{_traits.schemaName}].[{_traits.tableName}] (");
                         StringBuilder parameterList = new StringBuilder(") VALUES (");
 
                         int index = 0;
