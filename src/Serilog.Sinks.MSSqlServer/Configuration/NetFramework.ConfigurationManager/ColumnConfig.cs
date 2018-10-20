@@ -12,10 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Serilog.Sinks.MSSqlServer;
 using System;
 using System.Configuration;
-using System.Data;
 
 // Disable XML comment warnings for internal config classes which are required to have public members
 #pragma warning disable 1591
@@ -24,7 +22,8 @@ namespace Serilog.Sinks.MSSqlServer
 {
     public class ColumnConfig : ConfigurationElement
     {
-        public ColumnConfig() { }
+        public ColumnConfig()
+        { }
 
         public ColumnConfig(string columnName, string dataType)
         {
@@ -32,58 +31,60 @@ namespace Serilog.Sinks.MSSqlServer
             DataType = dataType;
         }
 
+        // inheritors can override to set IsRequired = false
         [ConfigurationProperty("ColumnName", IsRequired = true, IsKey = true)]
-        public string ColumnName
+        public virtual string ColumnName
         {
             get { return (string)this["ColumnName"]; }
             set { this["ColumnName"] = value; }
         }
 
-        [ConfigurationProperty("DataType", IsRequired = true, IsKey = false, DefaultValue ="varchar")]
+        [ConfigurationProperty("DataType")]
         public string DataType
         {
             get { return (string)this["DataType"]; }
             set { this["DataType"] = value;  }
         }
 
-        [ConfigurationProperty("DataLength", IsRequired = false, IsKey = false, DefaultValue = 128)]
-        public int DataLength
+        [ConfigurationProperty("DataLength")]
+        public string DataLength
         {
-            get { return (int)this["DataLength"]; }
+            get { return (string)this["DataLength"]; }
             set { this["DataLength"] = value; }
         }
 
-        [ConfigurationProperty("AllowNull", IsRequired = false, IsKey = false, DefaultValue = true)]
-        public bool AllowNull
+        [ConfigurationProperty("AllowNull")]
+        public string AllowNull
         {
-            get { return (bool)this["AllowNull"]; }
+            get { return (string)this["AllowNull"]; }
             set { this["AllowNull"] = value; }
         }
 
-        [ConfigurationProperty("NonClusteredIndex", IsRequired = false, IsKey = false, DefaultValue = false)]
-        public bool NonClusteredIndex
+        [ConfigurationProperty("NonClusteredIndex")]
+        public string NonClusteredIndex
         {
-            get { return (bool)this["NonClusteredIndex"]; }
+            get { return (string)this["NonClusteredIndex"]; }
             set { this["NonClusteredIndex"] = value; }
         }
 
         internal SqlColumn AsSqlColumn()
         {
-            var commonColumn = new SqlColumn
-            {
-                ColumnName = ColumnName,
-                AllowNull = AllowNull,
-                DataLength = DataLength,
-                NonClusteredIndex = NonClusteredIndex
-            };
+            var commonColumn = new SqlColumn();
 
-            if (!SqlDataTypes.TryParseIfSupported(DataType, out SqlDbType sqlType))
-                throw new ArgumentException($"SQL column data type {DataType} is not recognized or supported by this sink.");
+            // inheritors can override IsRequired; config might not change the names of Standard Columns
+            SetProperty.IfProvidedNotEmpty<string>(this, "ColumnName", (val) => commonColumn.ColumnName = val);
 
-            commonColumn.DataType = sqlType;
+            if (DataType != null)
+                commonColumn.SetDataTypeFromConfigString(DataType);
+
+            SetProperty.IfProvided<int>(this, "DataLength", (val) => commonColumn.DataLength = val);
 
             if (commonColumn.DataLength == 0 && SqlDataTypes.DataLengthRequired.Contains(commonColumn.DataType))
                 throw new ArgumentException($"SQL column data type {commonColumn.DataType.ToString()} requires a non-zero DataLength property.");
+
+            SetProperty.IfProvided<bool>(this, "AllowNull", (val) => commonColumn.AllowNull = val);
+
+            SetProperty.IfProvided<bool>(this, "NonClusteredIndex", (val) => commonColumn.NonClusteredIndex = val);
 
             return commonColumn;
         }

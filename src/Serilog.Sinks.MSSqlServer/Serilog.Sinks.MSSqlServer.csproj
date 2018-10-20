@@ -56,4 +56,8 @@
     <Compile Include="Configuration\NetFramework.ConfigurationManager\**\*.cs" />
   </ItemGroup>
   
+  <ItemGroup>
+    <None Include="Configuration\SetProperty.cs" />
+  </ItemGroup>
+  
 </Project>

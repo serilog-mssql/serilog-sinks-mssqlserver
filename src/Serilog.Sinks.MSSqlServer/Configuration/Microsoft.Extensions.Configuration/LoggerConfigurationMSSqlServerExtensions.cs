@@ -151,9 +151,6 @@ namespace Serilog
             return cs;
         }
 
-        // simulate using a property setter as an out parameter
-        delegate void PropertySetter<T>(T value);
-
         /// <summary>
         /// Create or add to the ColumnOptions object and apply any configuration changes to it.
         /// </summary>
@@ -184,7 +181,8 @@ namespace Serilog
                 {
                     foreach (var col in addStd.GetChildren().ToList())
                     {
-                        if (Enum.TryParse(col.Value, ignoreCase: true, result: out StandardColumn stdcol))
+                        if (Enum.TryParse(col.Value, ignoreCase: true, result: out StandardColumn stdcol)
+                            && !opts.Store.Contains(stdcol))
                             opts.Store.Add(stdcol);
                     }
                 }
@@ -195,7 +193,8 @@ namespace Serilog
                 {
                     foreach (var col in removeStd.GetChildren().ToList())
                     {
-                        if (Enum.TryParse(col.Value, ignoreCase: true, result: out StandardColumn stdcol))
+                        if (Enum.TryParse(col.Value, ignoreCase: true, result: out StandardColumn stdcol)
+                            && opts.Store.Contains(stdcol))
                             opts.Store.Remove(stdcol);
                     }
                 }
@@ -211,12 +210,12 @@ namespace Serilog
                 {
                     foreach (var c in newcols)
                     {
-                        if (!string.IsNullOrWhiteSpace(c.ColumnName))// && !string.IsNullOrWhiteSpace(c.DataType))
+                        if (!string.IsNullOrWhiteSpace(c.ColumnName))
                         {
                             if (opts.AdditionalColumns == null)
                                 opts.AdditionalColumns = new Collection<SqlColumn>();
 
-                            opts.AdditionalColumns.Add(c);//.AsSqlColumn());
+                            opts.AdditionalColumns.Add(c);
                         }
                     }
                 }
@@ -229,7 +228,7 @@ namespace Serilog
                 {
                     SetCommonColumnOptions(opts.Id);
                     #pragma warning disable 618 // deprecated: BigInt property
-                    SetIfProvided<bool>((val) => { opts.Id.BigInt = val; }, section["bigInt"]);
+                    SetProperty.IfNotNull<bool>(section["bigInt"], (val) => opts.Id.BigInt = val);
                     #pragma warning restore 618
                 }
 
@@ -237,25 +236,25 @@ namespace Serilog
                 if (section != null)
                 {
                     SetCommonColumnOptions(opts.Level);
-                    SetIfProvided<bool>((val) => { opts.Level.StoreAsEnum = val; }, section["storeAsEnum"]);
+                    SetProperty.IfNotNull<bool>(section["storeAsEnum"], (val) => opts.Level.StoreAsEnum = val);
                 }
 
                 section = config.GetSection("properties");
                 if (section != null)
                 {
                     SetCommonColumnOptions(opts.Properties);
-                    SetIfProvided<bool>((val) => { opts.Properties.ExcludeAdditionalProperties = val; }, section["excludeAdditionalProperties"]);
-                    SetIfProvided<string>((val) => { opts.Properties.DictionaryElementName = val; }, section["dictionaryElementName"]);
-                    SetIfProvided<string>((val) => { opts.Properties.ItemElementName = val; }, section["itemElementName"]);
-                    SetIfProvided<bool>((val) => { opts.Properties.OmitDictionaryContainerElement = val; }, section["omitDictionaryContainerElement"]);
-                    SetIfProvided<bool>((val) => { opts.Properties.OmitSequenceContainerElement = val; }, section["omitSequenceContainerElement"]);
-                    SetIfProvided<bool>((val) => { opts.Properties.OmitStructureContainerElement = val; }, section["omitStructureContainerElement"]);
-                    SetIfProvided<bool>((val) => { opts.Properties.OmitElementIfEmpty = val; }, section["omitElementIfEmpty"]);
-                    SetIfProvided<string>((val) => { opts.Properties.PropertyElementName = val; }, section["propertyElementName"]);
-                    SetIfProvided<string>((val) => { opts.Properties.RootElementName = val; }, section["rootElementName"]);
-                    SetIfProvided<string>((val) => { opts.Properties.SequenceElementName = val; }, section["sequenceElementName"]);
-                    SetIfProvided<string>((val) => { opts.Properties.StructureElementName = val; }, section["structureElementName"]);
-                    SetIfProvided<bool>((val) => { opts.Properties.UsePropertyKeyAsElementName = val; }, section["usePropertyKeyAsElementName"]);
+                    SetProperty.IfNotNull<bool>(section["excludeAdditionalProperties"], (val) => opts.Properties.ExcludeAdditionalProperties = val);
+                    SetProperty.IfNotNull<string>(section["dictionaryElementName"], (val) => opts.Properties.DictionaryElementName = val);
+                    SetProperty.IfNotNull<string>(section["itemElementName"], (val) => opts.Properties.ItemElementName = val);
+                    SetProperty.IfNotNull<bool>(section["omitDictionaryContainerElement"], (val) => opts.Properties.OmitDictionaryContainerElement = val);
+                    SetProperty.IfNotNull<bool>(section["omitSequenceContainerElement"], (val) => opts.Properties.OmitSequenceContainerElement = val);
+                    SetProperty.IfNotNull<bool>(section["omitStructureContainerElement"], (val) => opts.Properties.OmitStructureContainerElement = val);
+                    SetProperty.IfNotNull<bool>(section["omitElementIfEmpty"], (val) => opts.Properties.OmitElementIfEmpty = val);
+                    SetProperty.IfNotNull<string>(section["propertyElementName"], (val) => opts.Properties.PropertyElementName = val);
+                    SetProperty.IfNotNull<string>(section["rootElementName"], (val) => opts.Properties.RootElementName = val);
+                    SetProperty.IfNotNull<string>(section["sequenceElementName"], (val) => opts.Properties.SequenceElementName = val);
+                    SetProperty.IfNotNull<string>(section["structureElementName"], (val) => opts.Properties.StructureElementName = val);
+                    SetProperty.IfNotNull<bool>(section["usePropertyKeyAsElementName"], (val) => opts.Properties.UsePropertyKeyAsElementName = val);
                     // TODO PropertiesFilter would need a compiled Predicate<string> (high Roslyn overhead, see Serilog Config repo #106)
                 }
 
@@ -263,15 +262,15 @@ namespace Serilog
                 if (section != null)
                 {
                     SetCommonColumnOptions(opts.TimeStamp);
-                    SetIfProvided<bool>((val) => { opts.TimeStamp.ConvertToUtc = val; }, section["convertToUtc"]);
+                    SetProperty.IfNotNull<bool>(section["convertToUtc"], (val) => opts.TimeStamp.ConvertToUtc = val);
                 }
 
                 section = config.GetSection("logEvent");
                 if (section != null)
                 {
                     SetCommonColumnOptions(opts.LogEvent);
-                    SetIfProvided<bool>((val) => { opts.LogEvent.ExcludeAdditionalProperties = val; }, section["excludeAdditionalProperties"]);
-                    SetIfProvided<bool>((val) => { opts.LogEvent.ExcludeStandardColumns = val; }, section["ExcludeStandardColumns"]);
+                    SetProperty.IfNotNull<bool>(section["excludeAdditionalProperties"], (val) => opts.LogEvent.ExcludeAdditionalProperties = val);
+                    SetProperty.IfNotNull<bool>(section["ExcludeStandardColumns"], (val) => opts.LogEvent.ExcludeStandardColumns = val);
                 }
 
                 section = config.GetSection("message");
@@ -289,18 +288,18 @@ namespace Serilog
                 // Standard Columns are subclasses of the SqlColumn class
                 void SetCommonColumnOptions(SqlColumn target)
                 {
-                    SetIfProvided<string>((val) => { target.ColumnName = val; }, section["columnName"]);
-                    SetIfProvided<string>((val) => { target.SetDataTypeFromConfigString(val); }, section["dataType"]);
-                    SetIfProvided<bool>((val) => { target.AllowNull = val; }, section["allowNull"]);
-                    SetIfProvided<int>((val) => { target.DataLength = val; }, section["dataLength"]);
-                    SetIfProvided<bool>((val) => { target.NonClusteredIndex = val; }, section["nonClusteredIndex"]);
+                    SetProperty.IfNotNullOrEmpty<string>(section["columnName"], (val) => target.ColumnName = val);
+                    SetProperty.IfNotNull<string>(section["dataType"], (val) => target.SetDataTypeFromConfigString(val));
+                    SetProperty.IfNotNull<bool>(section["allowNull"], (val) => target.AllowNull = val);
+                    SetProperty.IfNotNull<int>(section["dataLength"], (val) => target.DataLength = val);
+                    SetProperty.IfNotNull<bool>(section["nonClusteredIndex"], (val) => target.NonClusteredIndex = val);
                 }
             }
 
             void ReadMiscColumnOptions()
             {
-                SetIfProvided<bool>((val) => { opts.DisableTriggers = val; }, config["disableTriggers"]);
-                SetIfProvided<bool>((val) => { opts.ClusteredColumnstoreIndex = val; }, config["clusteredColumnstoreIndex"]);
+                SetProperty.IfNotNull<bool>(config["disableTriggers"], (val) => opts.DisableTriggers = val);
+                SetProperty.IfNotNull<bool>(config["clusteredColumnstoreIndex"], (val) => opts.ClusteredColumnstoreIndex = val);
 
                 string pkName = config["primaryKeyColumnName"];
                 if (!string.IsNullOrEmpty(pkName))
@@ -333,23 +332,6 @@ namespace Serilog
                     if (opts.PrimaryKey == null)
                         throw new ArgumentException($"Could not match the configured primary key column name \"{pkName}\" with a data column in the table.");
                 }
-            }
-
-            // This is used to only set a column property when it is actually specified in the config.
-            // When a value is requested from config, it returns null if that value hasn't been specified.
-            // This also means you can't use config to set a property to null.
-            void SetIfProvided<T>(PropertySetter<T> setter, string value)
-            {
-                if(value == null)
-                    return;
-                try
-                {
-                    var setting = (T)Convert.ChangeType(value, typeof(T));
-                    setter(setting);
-                }
-                // don't change the property if the conversion failed 
-                catch (InvalidCastException) { }
-                catch (OverflowException) { }
             }
         }
     }

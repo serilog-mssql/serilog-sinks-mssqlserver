@@ -21,7 +21,7 @@ A Serilog sink that writes events to Microsoft SQL Server. This sink will write 
 
 ## Sink Configuration Options
 
-The sink can be configured completely through code, by using configuration files (or other types of configuration providers), a combination of both, or by using the various Serilog configuration packages.
+The sink can be configured completely through code, by using configuration files (or other types of configuration providers), a combination of both, or by using the various Serilog configuration packages. There are two configuration considerations: configuring the sink itself, and configuring the table used by the sink. The sink is configured with a typical Serilog `WriteTo` configuration method (or `AuditTo`, or similar variations). The table is configured with an optional `ColumnOptions` object passed to the configuration method.
 
 All sink configuration methods accept the following parameters, though not necessarily in this order. Use of named parameters is strongly recommended.
 
@@ -35,7 +35,6 @@ All sink configuration methods accept the following parameters, though not neces
 * `period`
 * `formatProvider`
 
-
 ### Basic Parameters
 
 At minimum, `connectionString` and `tableName` are required. If you are using an external configuration source such as an XML file or JSON file, you can use a named connection string instead of providing the full "raw" connection string.
@@ -43,6 +42,8 @@ At minimum, `connectionString` and `tableName` are required. If you are using an
 If `schemaName` is omitted, the default is `dbo`.
 
 If `autoCreateSqlTable` is `true`, the sink will create the table if a table by that name doesn't exist. It will also create the schema if no schema by that name exists. The account connecting to SQL Server will need adequate permissions to create a table (see the Permissions section of the [Table Definition](#table-definition) topic).
+
+Table configuration with the optional `ColumnOptions` object is a lengthy subject discussed in the [ColumnOptions Object](#columnoptions-object) topic and other related topics.
 
 Like other sinks, `restrictedToMinimumLevel` controls the `LogEventLevel` messages that are processed by this sink.
 
@@ -54,7 +55,7 @@ Refer to the Serilog Wiki's explanation of [Format Providers](https://github.com
 
 ### Code-Only (any .NET target)
 
-All sink features are configurable from code. Here is a typical example that works the same way for any .NET target:
+All sink features are configurable from code. Here is a typical example that works the same way for any .NET target. This example configures the sink itself as well as table features.
 
 ```csharp
 var logDB = @"Server=...";
@@ -77,7 +78,7 @@ var log = new LoggerConfiguration()
 
 ### Code + External (.NET Standard)
 
-.NET Standard projects can build (or inject) a configuration object using _Microsoft.Extensions.Configuration_ and pass it to the sink's configuration method. If provided, the settings of a `ColumnOptions` object created in code are treated as a baseline which is then updated from the external configuration data. External configuration syntax is discussed later.
+.NET Standard projects can build (or inject) a configuration object using _Microsoft.Extensions.Configuration_ and pass it to the sink's configuration method. If provided, the settings of a `ColumnOptions` object created in code are treated as a baseline which is then updated from the external configuration data. See the [External Configuration Syntax](#external-configuration-syntax) topic for details.
 
 ```csharp
 var appSettings = new ConfigurationBuilder()
@@ -101,19 +102,21 @@ var log = new LoggerConfiguration()
 
 ### Code + External (.NET Framework)
 
-Newer .NET Framework projects (4.6.1+ compliant with .NET Standard) should use the _Microsoft.Extensions.Configuration_ approach as shown above, if possible. Older .NET Framework applications can load certain configuration options from an XML configuration file such as `app.config` or `web.config`. The sink configuration method automatically checks `ConfigurationManager`, so there is no code to show (it would look the same as the code-only approach shown earlier). External configuration syntax is discussed later.
+.NET Framework applications can load `ColumnOptions` table configuration from an XML configuration file such as `app.config` or `web.config`. The sink configuration method automatically checks `ConfigurationManager`, so there is no code to show, and no additional packages are required. See the [External Configuration Syntax](#external-configuration-syntax) topic for details. 
+
+(Settings via `ConfigurationManager` is currently not available to .NET Core applications. Even though Microsoft added these classes to .NET Core 2.0, it was not part of the .NET Standard 2.0 API specification which takes precedence when a .NET Core application references this NuGet package.)
 
 ### External using _Serilog.Settings.Configuration_
 
 _Requires configuration package version [**3.0.0**](https://www.nuget.org/packages/Serilog.Settings.Configuration/3.0.0) or newer._
 
-.NET Standard projects can call `ReadFrom.Configuration()` to configure Serilog using the [_Serilog.Settings.Configuration_](https://github.com/serilog/serilog-settings-configuration) package. This will apply configuration parameters from all application configuration sources (not only `appsettings.json` as shown here, but any other valid `IConfiguration` source). All features except the property filtering predicate are supported by this package. External configuration syntax is discussed later.
+.NET Standard projects can call `ReadFrom.Configuration()` to configure Serilog using the [_Serilog.Settings.Configuration_](https://github.com/serilog/serilog-settings-configuration) package. This will apply configuration parameters from all application configuration sources (not only `appsettings.json` as shown here, but any other valid `IConfiguration` source). This package can configure the sink itsef as well as `ColumnOptions` table features. See the [External Configuration Syntax](#external-configuration-syntax) topic for details.
 
 _NOTE:_ Although the configuration package can support many configuration sources (thanks to the extensions in the underlying Microsoft packages), for simplicity this documentation differentiates this from the .NET Framework-style XML configuration by collectively referring to this as JSON configuration, since that is the most popular usage by far. Support for the many other configuration sources is implicit.
 
 ### External using _Serilog.Settings.AppSettings_
 
-.NET Framework and .NET Standard projects can use XML configuration by calling `ReadFrom.AppSettings()` using the [_Serilog.Settings.AppSettings_](https://github.com/serilog/serilog-settings-appsettings) package. This will apply configuration parameters from the project's `app.config` or `web.config` file. When using XML configuration, this is much more flexible than relying on the internal `ConfigurationManager` support because the package is able to match parameters on the configuration method, as shown below. External configuration syntax is discussed later.
+.NET Framework and .NET Standard projects can configure the sink from XML configuration by calling `ReadFrom.AppSettings()` using the [_Serilog.Settings.AppSettings_](https://github.com/serilog/serilog-settings-appsettings) package. This will apply configuration parameters from the project's `app.config` or `web.config` file. This is independent of configuring `ColumnOptions` from external XML files. See the [External Configuration Syntax](#external-configuration-syntax) topic for details.
 
 ## Audit Sink Configuration
 
@@ -398,7 +401,9 @@ var log = new LoggerConfiguration()
 
 In this example, when a log event contains any of the properties `UserName`, `UserId`, and `RequestUri`, the property values would be written to the corresponding columns. The property names must match exactly (case-insensitive).
 
-Unlike previous versions of the sink, Standard Column names are not reserved. If you remove the `Id` Standard Column from the `ColumnOptions.Store` list, you are free to create a new custom column called `Id` which the sink will treat like any other custom column fully under your control. Also, .NET `System` data types and `DataColumn` objects are not used for configuration. 
+Unlike previous versions of the sink, Standard Column names are not reserved. If you remove the `Id` Standard Column from the `ColumnOptions.Store` list, you are free to create a new custom column called `Id` which the sink will treat like any other custom column fully under your control.
+
+Note the use of the `SqlDbType` enumerations for specifying `DataType`. Unlike previous versions of the sink, .NET `System` data types and `DataColumn` objects are no longer used for custom column definition. 
 
 ### Excluding redundant data
 
@@ -410,13 +415,21 @@ Standard Columns are always excluded from the XML `Properties` column  but Stand
 
 ## External Configuration Syntax
 
-The _Serilog.Settings.AppSettings_ package supports XML-based configuration (either `app.config` or `web.config`), and the _Serilog.Settings.Configuration_ package supports the many _Microsoft.Extensions.Configuration_ sources. JSON is the most common, but other sources include environment variables, command lines, Azure Key Vault, XML, and more.  
+Projects targeting the .NET Framework automatically have support for XML-based configuration (either `app.config` or `web.config`) of `ColumnOptions` table definition, and the _Serilog.Settings.AppSettings_ package adds XML-based configuration of sink arguments.
 
-### JSON syntax
+Projects targeting .NET Standard can apply configuration-driven sink setup and `ColumnOptions` settings using the _Serilog.Settings.Configuration_ package. It supports any of the configuration sources supported by the underlying _Microsoft.Extensions.Configuration_ packages. JSON is the most common, but other sources include environment variables, command lines, Azure Key Vault, XML, and more.  
 
-All properties of the `ColumnOptions` class are configurable except the `Properties.PropertyFilter` predicate expression. In most cases configuration keynames match the class property names, but there are some exceptions. For example, because `PrimaryKey` is a `SqlColumn` object reference when configured through code, external configuration uses a `primaryKeyColumnName` setting to identify the primary key by name.
+All properties of the `ColumnOptions` class are configurable except the `Properties.PropertyFilter` predicate expression, and all elements and lists shown are optional. In most cases configuration keynames match the class property names, but there are some exceptions. For example, because `PrimaryKey` is a `SqlColumn` object reference when configured through code, external configuration uses a `primaryKeyColumnName` setting to identify the primary key by name.
 
-Keys and values are not case-sensitive.
+Custom columns and the stand-alone Standard Column entries all support the same general column properties (`ColumnName`, `DataType`, etc) listed in the [SqlColumn Objects](#sqlcolumn-objects) topic. The following sections documenting configuration syntax omit many of these properties for brevity.
+
+If you combine external configuration with configuration through code, external configuration changes will be applied in addition to a `ColumnOptions` object you provide through code (external configuration "overwrites" properties defined in configuration, but properties only defined through code are preserved).
+
+Some settings or properties shown are mutually exclusive and are listed for documentation purposes -- these do not necessarily reflect real-world configurations that can be copy-pasted as-is.
+
+### JSON: .NET Standard configuration
+
+Keys and values are not case-sensitive. This is an example of configuring the sink arguments.
 
 ```json
 {
@@ -433,7 +446,7 @@ Keys and values are not case-sensitive.
             "restrictedToMinimumLevel": "Warning",
             "batchPostingLimit": 1000,
             "period": 30,
-            "columnOptionsSection": { ... }
+            "columnOptionsSection": { . . . }
         } 
       }
     ]
@@ -441,15 +454,15 @@ Keys and values are not case-sensitive.
 }
 ```
 
-As the name suggests, `columnOptionSection` is an entire configuration section in its own right. All possible entries  are shown below, excluding properties like `ColumnName` and `AllowNull` that are available on every column definition. Some sample values are also shown below. All properties and subsections are optional. The `AdditionalColumns` collection can also be populated from a key named `customColumns` for backwards-compatibility reasons (not shown here). Some properties shown here are mutually exclusive (such as `clusteredColumnstoreIndex` and `primaryKeyColumnName`) -- the following does not represent a real-world configuration example, it is only a reference.
+As the name suggests, `columnOptionSection` is an entire configuration section in its own right. The `AdditionalColumns` collection can also be populated from a key named `customColumns` (not shown here) for backwards-compatibility reasons.
 
 ```json
 "columnOptionsSection": {
-    "addStandardColumns": [ "LogEvent" ],
-    "removeStandardColumns": [ "MessageTemplate", "Properties" ],
     "disableTriggers": true,
     "clusteredColumnstoreIndex": false,
     "primaryKeyColumnName": "Id",
+    "addStandardColumns": [ "LogEvent" ],
+    "removeStandardColumns": [ "MessageTemplate", "Properties" ],
     "additionalColumns": [
         { "ColumnName": "EventType", "DataType": "int", "AllowNull": false },
         { "ColumnName": "Release", "DataType": "varchar", "DataLength": 32 }
@@ -488,16 +501,24 @@ As the name suggests, `columnOptionSection` is an entire configuration section i
 }
 ```
 
-### ConfigurationManager XML syntax
+### XML: .NET Framework ColumnOptions configuration
 
-When targeting the .NET Framework, built-in support for `ConfigurationManager` allows you to define custom columns as it is represented in SQL Server. Columns specified must match the physical database exactly. This section will be processed automatically if it exists in the application's `web.config` or `app.config` file. The same properties listed in the topic [SqlColumn Objects](#sqlcolumn-objects) are available here.
+Keys and values are case-sensitive. Case must match **_exactly_** as shown below.
 
 ```xml
   <configSections>
     <section name="MSSqlServerSettingsSection"
              type="Serilog.Configuration.MSSqlServerConfigurationSection, Serilog.Sinks.MSSqlServer"/>
   </configSections>
-  <MSSqlServerSettingsSection>
+  <MSSqlServerSettingsSection DisableTriggers="false"
+                       ClusteredColumnstoreIndex="false"
+                       PrimaryKeyColumnName="Id">
+    <AddStandardColumns>
+        <add Name="LogEvent"/>
+    </AddStandardColumns>
+    <RemoveStandardColumns>
+        <remove Name="Properties"/>
+    </RemoveStandardColumns>
     <Columns>
       <add ColumnName="EventType" DataType="int"/>
       <add ColumnName="Release"
@@ -506,10 +527,31 @@ When targeting the .NET Framework, built-in support for `ConfigurationManager` a
            AllowNull="true"
            NonClusteredIndex="false"/>
     </Columns>
+    <Exception ColumnName="Ex" DataLength="512"/>
+    <Id NonClusteredIndex="true"/>
+    <Level ColumnName="Severity" StoreAsEnum="true"/>
+    <LogEvent ExcludeAdditionalProperties="true"
+              ExcludeStandardColumns="true"/>
+    <Message DataLength="1024"/>
+    <MessageTemplate DataLength="1536"/>
+    <Properties DataType="xml"
+                ExcludeAdditionalProperties="true"
+                DictionaryElementName="dict"
+                ItemElementName="item"
+                OmitDictionaryContainerElement="false"
+                OmitSequenceContainerElement="false"
+                OmitStructureContainerElement="false"
+                OmitElementIfEmpty="true"
+                PropertyElementName="prop"
+                RootElementName="root"
+                SequenceElementName="seq"
+                StructureElementName="struct"
+                UsePropertyKeyAsElementName="false"/>
+    <TimeStamp ConvertToUtc="true"/>
   </MSSqlServerSettingsSection>      
 ```
 
-### AppSettings XML syntax
+### XML: AppSettings sink configuration
 
 Refer to the _Serilog.Settings.AppSetings_ package documentation for complete details about sink configuration. This is an example of seting some of the configuration parameters for this sink.
 
@@ -542,7 +584,7 @@ When you exit an application running in debug mode under Visual Studio, normal s
 
 ### Try a `dev` package
 
-If you're reading about a feature that doesn't seem to work, check whether you're reading the docs for the `mast` branch or the `dev` branch -- most Serilog repositories are configured to use the `dev` branch by default. If you see something interesting only described by the `dev` branch documentation, you'll have to reference a `dev`-versioned package. The repository automatically generates a new `dev` package whenever code-related changes are merged.
+If you're reading about a feature that doesn't seem to work, check whether you're reading the docs for the `master` branch or the `dev` branch -- most Serilog repositories are configured to use the `dev` branch by default. If you see something interesting only described by the `dev` branch documentation, you'll have to reference a `dev`-versioned package. The repository automatically generates a new `dev` package whenever code-related changes are merged.
 
 ### Are you really using this sink?
 
@@ -606,4 +648,4 @@ Feature | Notes
 `Id.BigInt` | Use `Id.DataType = SqlDb.BigInt` instead. (The `BigInt` property was only available in dev packages).
 `Binary` and `VarBinary` | Due to the way Serilog represents property data internally, it isn't possible for the sink to access property data as a byte array, so the sink can't write to these column types. 
 
-Deprecated features are still available, but they are marked with the `[Obsolete]` attribute (which results in a compiler warning in your project) and will be removed in a future release. You should switch to the replacement implementations as soon as possible. Where possible, internally these are converted to the replacement implementation so that they only exist at the configuration level.
+Most deprecated features are still available, but they are marked with the `[Obsolete]` attribute (which results in a compiler warning in your project) and will be removed in a future release. You should switch to the replacement implementations as soon as possible. Where possible, internally these are converted to the replacement implementation so that they only exist at the configuration level.
