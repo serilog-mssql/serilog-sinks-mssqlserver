@@ -1,9 +1,9 @@
-# Serilog.Sinks.MSSqlServer [![Build status](https://ci.appveyor.com/api/projects/status/3btbux1hbgyugind/branc#the-standard-columnsh/master?svg=true)](https://ci.appveyor.com/project/serilog/serilog-sinks-mssqlserver/branch/master) [![NuGet](https://img.shields.io/nuget/v/Serilog.Sinks.MSSqlServer.svg)](https://nuget.org/packages/Serilog.Sinks.MSSqlServer)
+# Serilog.Sinks.MSSqlServer [![Build status](https://ci.appveyor.com/api/projects/status/3btbux1hbgyugind/branch/master?svg=true)](https://ci.appveyor.com/project/serilog/serilog-sinks-mssqlserver/branch/master) [![NuGet](https://img.shields.io/nuget/v/Serilog.Sinks.MSSqlServer.svg)](https://nuget.org/packages/Serilog.Sinks.MSSqlServer)
 
 A Serilog sink that writes events to Microsoft SQL Server. This sink will write the log event data to a table and can optionally also store the properties inside an XML or JSON column so they can be queried. Important properties can also be written to their own separate columns.
 
 **Package** - [Serilog.Sinks.MSSqlServer](http://nuget.org/packages/serilog.sinks.mssqlserver)
-| **Minimum Platforms** - .NET Framework 4.5, .NET Core 2.0, .NET Standard 2.0
+| **Minimum Platforms** - .NET Framework 4.5.2, .NET Core 2.0, .NET Standard 2.0
 
 #### Topics
 
@@ -23,7 +23,7 @@ A Serilog sink that writes events to Microsoft SQL Server. This sink will write 
 
 The sink can be configured completely through code, by using configuration files (or other types of configuration providers), a combination of both, or by using the various Serilog configuration packages. There are two configuration considerations: configuring the sink itself, and configuring the table used by the sink. The sink is configured with a typical Serilog `WriteTo` configuration method (or `AuditTo`, or similar variations). The table is configured with an optional `ColumnOptions` object passed to the configuration method.
 
-All sink configuration methods accept the following parameters, though not necessarily in this order. Use of named parameters is strongly recommended.
+All sink configuration methods accept the following arguments, though not necessarily in this order. Use of named arguments is strongly recommended.  Some platform targets have additional arguments.
 
 * `connectionString`
 * `schemaName`
@@ -35,7 +35,7 @@ All sink configuration methods accept the following parameters, though not neces
 * `period`
 * `formatProvider`
 
-### Basic Parameters
+### Basic Arguments
 
 At minimum, `connectionString` and `tableName` are required. If you are using an external configuration source such as an XML file or JSON file, you can use a named connection string instead of providing the full "raw" connection string.
 
@@ -47,11 +47,39 @@ Table configuration with the optional `ColumnOptions` object is a lengthy subjec
 
 Like other sinks, `restrictedToMinimumLevel` controls the `LogEventLevel` messages that are processed by this sink.
 
-This is a "periodic batching sink." The sink will queue a certain number of log events before they're actually written to SQL Server as a bulk insert operation. There is also a timeout period so that the batch is always written even if it has not been filled. By default, the batch size is 50 rows and the timeout is 5 seconds. You can change these through by setting the `batchPostingLimit` and `period` parameters.
+This is a "periodic batching sink." The sink will queue a certain number of log events before they're actually written to SQL Server as a bulk insert operation. There is also a timeout period so that the batch is always written even if it has not been filled. By default, the batch size is 50 rows and the timeout is 5 seconds. You can change these through by setting the `batchPostingLimit` and `period` arguments.
 
 Consider increasing the batch size in high-volume logging environments. In one test of a loop writing a single log entry, the default batch size averaged about 14,000 rows per second. Increasing the batch size to 1000 rows increased average write speed to nearly 43,000 rows per second. However, you should also consider the risk-factor. If the client or server crashes, or if the connection goes down, you may lose an entire batch of log entries. You can mitigate this by reducing the timeout. Run performance tests to find the optimal batch size for your production log table definition and log event content, network setup, and server configuration.
 
-Refer to the Serilog Wiki's explanation of [Format Providers](https://github.com/serilog/serilog/wiki/Formatting-Output#format-providers) for details about the `formatProvider` parameter.
+Refer to the Serilog Wiki's explanation of [Format Providers](https://github.com/serilog/serilog/wiki/Formatting-Output#format-providers) for details about the `formatProvider` arguments.
+
+### Platform-Specific Arguments
+
+These additional arguments are accepted when the sink is configured from a library or application that supports the .NET Standard-style _Microsoft.Extensions.Configuration_ packages. They are optional.
+
+* `appConfiguration`
+* `columnOptionsSection`
+
+The full configuration root provided to the `appConfiguration` argument is only required if you are using a named connection string. The sink needs access to the entire configuration object so that it can locate and read the `ConnectionStrings` section.
+
+If you define the log event table through external configuration, you must provide a reference to the `columnOptionsSection` via the argument by the same name.
+
+### External Configuration and Framework Targets
+
+Because of the way external configuration has been implemented in various .NET frameworks, you should be aware of how your target framework impacts which external configuration options are available. _System.Configuration_ refers to the use of XML-based `app.config` or `web.config` files, and _Microsoft.Extensions.Configuration_ (_M.E.C_) collectively refers to all of the extensions packages that were created as part of .NET Standard and the various compliant frameworks. _M.E.C_ is commonly referred to as "JSON configuration" although the packages support many other configuration sources including environment variables, command lines, Azure Key Vault, XML, and more.
+
+| Your Framework | TFM | Project Types | External Configuration |
+| --- | --- | --- |  --- |
+| .NET Framework 4.5.2 | `net452` | app or library | _System.Configuration_ |
+| .NET Framework 4.6.1+ | `net461` | app or library | _System.Configuration_ |
+| .NET Framework 4.6.1+ | `net461` | app or library | _Microsoft.Extensions.Configuration_ |
+| .NET Standard 2.0 | `netstandard2.0` | library only | _Microsoft.Extensions.Configuration_ |
+| .NET Core 2.0+ | `netcoreapp2.0` | app or library | _System.Configuration_ |
+| .NET Core 2.0+ | `netcoreapp2.0` | app or library | _Microsoft.Extensions.Configuration_ |
+
+Support for .NET Framework 4.5.2 is tied to the Windows 8.1 lifecycle with support scheduled to end in January 2023.
+
+Although it's possible to use both XML and _M.E.C_ configuration with certain frameworks, this is not supported, unintended consequences are possible, and a warning will be emitted to `SelfLog`. If you actually require multiple configuration sources, the _M.E.C_ builder-pattern is designed to support this, and your syntax will be consistent across configuration sources.
 
 ### Code-Only (any .NET target)
 
@@ -76,9 +104,9 @@ var log = new LoggerConfiguration()
 
 ```
 
-### Code + External (.NET Standard)
+### Code + _Microsoft.Extensions.Configuration_
 
-.NET Standard projects can build (or inject) a configuration object using _Microsoft.Extensions.Configuration_ and pass it to the sink's configuration method. If provided, the settings of a `ColumnOptions` object created in code are treated as a baseline which is then updated from the external configuration data. See the [External Configuration Syntax](#external-configuration-syntax) topic for details.
+Projects can build (or inject) a configuration object using _Microsoft.Extensions.Configuration_ and pass it to the sink's configuration method. If provided, the settings of a `ColumnOptions` object created in code are treated as a baseline which is then updated from the external configuration data. See the [External Configuration Syntax](#external-configuration-syntax) topic for details.
 
 ```csharp
 var appSettings = new ConfigurationBuilder()
@@ -100,9 +128,9 @@ var log = new LoggerConfiguration()
     .CreateLogger();
 ```
 
-### Code + External (.NET Framework)
+### Code + _System.Configuration_
 
-.NET Framework applications can load `ColumnOptions` table configuration from an XML configuration file such as `app.config` or `web.config`. The sink configuration method automatically checks `ConfigurationManager`, so there is no code to show, and no additional packages are required. See the [External Configuration Syntax](#external-configuration-syntax) topic for details. 
+Projects can load `ColumnOptions` table configuration from an XML configuration file such as `app.config` or `web.config`. The sink configuration method automatically checks `ConfigurationManager`, so there is no code to show, and no additional packages are required. See the [External Configuration Syntax](#external-configuration-syntax) topic for details. 
 
 (Settings via `ConfigurationManager` is currently not available to .NET Core applications. Even though Microsoft added these classes to .NET Core 2.0, it was not part of the .NET Standard 2.0 API specification which takes precedence when a .NET Core application references this NuGet package.)
 
@@ -110,19 +138,17 @@ var log = new LoggerConfiguration()
 
 _Requires configuration package version [**3.0.0**](https://www.nuget.org/packages/Serilog.Settings.Configuration/3.0.0) or newer._
 
-.NET Standard projects can call `ReadFrom.Configuration()` to configure Serilog using the [_Serilog.Settings.Configuration_](https://github.com/serilog/serilog-settings-configuration) package. This will apply configuration parameters from all application configuration sources (not only `appsettings.json` as shown here, but any other valid `IConfiguration` source). This package can configure the sink itsef as well as `ColumnOptions` table features. See the [External Configuration Syntax](#external-configuration-syntax) topic for details.
-
-_NOTE:_ Although the configuration package can support many configuration sources (thanks to the extensions in the underlying Microsoft packages), for simplicity this documentation differentiates this from the .NET Framework-style XML configuration by collectively referring to this as JSON configuration, since that is the most popular usage by far. Support for the many other configuration sources is implicit.
+.NET Standard projects can call `ReadFrom.Configuration()` to configure Serilog using the [_Serilog.Settings.Configuration_](https://github.com/serilog/serilog-settings-configuration) package. This will apply configuration arguments from all application configuration sources (not only `appsettings.json` as shown here, but any other valid `IConfiguration` source). This package can configure the sink itsef as well as `ColumnOptions` table features. See the [External Configuration Syntax](#external-configuration-syntax) topic for details.
 
 ### External using _Serilog.Settings.AppSettings_
 
-.NET Framework and .NET Standard projects can configure the sink from XML configuration by calling `ReadFrom.AppSettings()` using the [_Serilog.Settings.AppSettings_](https://github.com/serilog/serilog-settings-appsettings) package. This will apply configuration parameters from the project's `app.config` or `web.config` file. This is independent of configuring `ColumnOptions` from external XML files. See the [External Configuration Syntax](#external-configuration-syntax) topic for details.
+Projects can configure the sink from XML configuration by calling `ReadFrom.AppSettings()` using the [_Serilog.Settings.AppSettings_](https://github.com/serilog/serilog-settings-appsettings) package. This will apply configuration arguments from the project's `app.config` or `web.config` file. This is independent of configuring `ColumnOptions` from external XML files. See the [External Configuration Syntax](#external-configuration-syntax) topic for details.
 
 ## Audit Sink Configuration
 
 A Serilog audit sink writes log events which are of such importance that they must succeed, and that verification of a successful write is more important than write performance. Unlike the regular sink, an audit sink _does not_ fail silently -- it can throw exceptions. You should wrap audit logging output in a `try/catch` block. The usual example is bank account withdrawal events -- a bank would certainly not want to allow a failure to record those transactions to fail silently.
 
-The constructor accepts most of the same parameters, and like other Serilog audit sinks, you configure one by using `AuditTo` instead of `WriteTo`.
+The constructor accepts most of the same arguments, and like other Serilog audit sinks, you configure one by using `AuditTo` instead of `WriteTo`.
 
 * `connectionString`
 * `schemaName`
@@ -134,6 +160,8 @@ The constructor accepts most of the same parameters, and like other Serilog audi
 The `restrictedToMinimumLevel` parameter is not available because all events written to an audit sink are required to succeed.
 
 The `batchPostingLimit` and `period` parameters are not available because the audit sink writes log events immediately.
+
+For _M.E.C_-compatible projects, `appConfiguration` and `columnOptionsSection` arguments are also provided, just as they are with the non-audit configuration extensions.
 
 ## Table Definition
 
@@ -415,9 +443,9 @@ Standard Columns are always excluded from the XML `Properties` column  but Stand
 
 ## External Configuration Syntax
 
-Projects targeting the .NET Framework automatically have support for XML-based configuration (either `app.config` or `web.config`) of `ColumnOptions` table definition, and the _Serilog.Settings.AppSettings_ package adds XML-based configuration of sink arguments.
+Projects targeting frameworks which are compatible with _System.Configuration_ automatically have support for XML-based configuration (either `app.config` or `web.config`) of a `ColumnOptions` table definition, and the _Serilog.Settings.AppSettings_ package adds XML-based configuration of sink arguments.
 
-Projects targeting .NET Standard can apply configuration-driven sink setup and `ColumnOptions` settings using the _Serilog.Settings.Configuration_ package. It supports any of the configuration sources supported by the underlying _Microsoft.Extensions.Configuration_ packages. JSON is the most common, but other sources include environment variables, command lines, Azure Key Vault, XML, and more.  
+Projects targeting frameworks which are compatible with _Microsoft.Extensions.Configuration_ can apply configuration-driven sink setup and `ColumnOptions` settings using the _Serilog.Settings.Configuration_ package or by supplying the appropriate arguments through code. 
 
 All properties of the `ColumnOptions` class are configurable except the `Properties.PropertyFilter` predicate expression, and all elements and lists shown are optional. In most cases configuration keynames match the class property names, but there are some exceptions. For example, because `PrimaryKey` is a `SqlColumn` object reference when configured through code, external configuration uses a `primaryKeyColumnName` setting to identify the primary key by name.
 
@@ -425,9 +453,9 @@ Custom columns and the stand-alone Standard Column entries all support the same 
 
 If you combine external configuration with configuration through code, external configuration changes will be applied in addition to a `ColumnOptions` object you provide through code (external configuration "overwrites" properties defined in configuration, but properties only defined through code are preserved).
 
-Some settings or properties shown are mutually exclusive and are listed for documentation purposes -- these do not necessarily reflect real-world configurations that can be copy-pasted as-is.
+**IMPORTANT:** Some of the following examples do not reflect real-world configurations that can be copy-pasted as-is. Some settings or properties shown are mutually exclusive and are listed below for documentation purposes only.
 
-### JSON: .NET Standard configuration
+### JSON (_Microsoft.Extensions.Configuration_)
 
 Keys and values are not case-sensitive. This is an example of configuring the sink arguments.
 
@@ -501,7 +529,7 @@ As the name suggests, `columnOptionSection` is an entire configuration section i
 }
 ```
 
-### XML: .NET Framework ColumnOptions configuration
+### XML ColumnOptions (_System.Configuration_)
 
 Keys and values are case-sensitive. Case must match **_exactly_** as shown below.
 
@@ -551,9 +579,9 @@ Keys and values are case-sensitive. Case must match **_exactly_** as shown below
   </MSSqlServerSettingsSection>      
 ```
 
-### XML: AppSettings sink configuration
+### XML Sink (_Serilog.Settings.AppSettings_)
 
-Refer to the _Serilog.Settings.AppSetings_ package documentation for complete details about sink configuration. This is an example of seting some of the configuration parameters for this sink.
+Refer to the _Serilog.Settings.AppSettings_ package documentation for complete details about sink configuration. This is an example of setting some of the configuration parameters for this sink.
 
 ```xml
 <add key="serilog:using:MSSqlServer" value="Serilog.Sinks.MSSqlServer" />
