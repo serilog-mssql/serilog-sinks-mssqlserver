@@ -404,7 +404,7 @@ The `ExcludeAddtionalProperties` and `ExcludeStandardColumns` properties are des
 
 ## Custom Property Columns
 
-By default, any log event properties you include in your log statements will be saved to the XML `Properties` column or the JSON `LogEvent` column. But they can also be stored in their own individual columns via the `AdditionalColumns` collection. This adds overhead to write operations but is very useful for frequently-queried properties.
+By default, any log event properties you include in your log statements will be saved to the XML `Properties` column or the JSON `LogEvent` column. But they can also be stored in their own individual columns via the `AdditionalColumns` collection. This adds overhead to write operations but is very useful for frequently-queried properties. Only `ColumnName` is required; the default configuration is `varchar(max)`.
 
 ```csharp
 var columnOptions = new ColumnOptions
@@ -412,13 +412,13 @@ var columnOptions = new ColumnOptions
     AdditionalColumns = new Collection<SqlColumn>
     {
         new SqlColumn
-            {DataType = SqlDbType.NVarChar, ColumnName = "UserName", DataLength = 64},
+            {ColumnName = "UserName", DataType = SqlDbType.NVarChar, DataLength = 64},
 
         new SqlColumn
-            {DataType = SqlDbType.BigInt, ColumnName = "UserId", NonClusteredIndex = true},
+            {ColumnName = "UserId", DataType = SqlDbType.BigInt, NonClusteredIndex = true},
 
         new SqlColumn
-            {DataType = SqlDbType.NVarChar, ColumnName = "RequestUri", DataLength = -1, AllowNull = false},
+            {ColumnName = "RequestUri", DataType = SqlDbType.NVarChar, DataLength = -1, AllowNull = false},
     }
 };
 

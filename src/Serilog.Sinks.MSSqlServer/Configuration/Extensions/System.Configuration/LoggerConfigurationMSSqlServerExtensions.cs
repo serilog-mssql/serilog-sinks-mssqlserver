@@ -66,9 +66,10 @@ namespace Serilog
             if (loggerConfiguration == null) throw new ArgumentNullException("loggerConfiguration");
 
             var defaultedPeriod = period ?? MSSqlServerSink.DefaultPeriod;
+            var colOpts = columnOptions ?? new ColumnOptions();
 
             if (ConfigurationManager.GetSection(AppConfigSectionName) is MSSqlServerConfigurationSection serviceConfigSection)
-                columnOptions = ApplySystemConfiguration.ConfigureColumnOptions(serviceConfigSection, columnOptions);
+                colOpts = ApplySystemConfiguration.ConfigureColumnOptions(serviceConfigSection, colOpts);
 
             connectionString = ApplySystemConfiguration.GetConnectionString(connectionString);
 
@@ -80,7 +81,7 @@ namespace Serilog
                     defaultedPeriod,
                     formatProvider,
                     autoCreateSqlTable,
-                    columnOptions,
+                    colOpts,
                     schemaName
                     ),
                 restrictedToMinimumLevel);
@@ -113,8 +114,10 @@ namespace Serilog
         {
             if (loggerAuditSinkConfiguration == null) throw new ArgumentNullException("loggerAuditSinkConfiguration");
 
+            var colOpts = columnOptions ?? new ColumnOptions();
+
             if (ConfigurationManager.GetSection(AppConfigSectionName) is MSSqlServerConfigurationSection serviceConfigSection)
-                columnOptions = ApplySystemConfiguration.ConfigureColumnOptions(serviceConfigSection, columnOptions);
+                colOpts = ApplySystemConfiguration.ConfigureColumnOptions(serviceConfigSection, colOpts);
 
             connectionString = ApplySystemConfiguration.GetConnectionString(connectionString);
 
@@ -124,7 +127,7 @@ namespace Serilog
                     tableName,
                     formatProvider,
                     autoCreateSqlTable,
-                    columnOptions,
+                    colOpts,
                     schemaName
                     ),
                 restrictedToMinimumLevel);

@@ -69,24 +69,23 @@ namespace Serilog.Sinks.MSSqlServer
 
         internal SqlColumn AsSqlColumn()
         {
-            var commonColumn = new SqlColumn();
+            var sqlColumn = new SqlColumn();
 
             // inheritors can override IsRequired; config might not change the names of Standard Columns
-            SetProperty.IfProvidedNotEmpty<string>(this, "ColumnName", (val) => commonColumn.ColumnName = val);
+            SetProperty.IfProvidedNotEmpty<string>(this, "ColumnName", (val) => sqlColumn.ColumnName = val);
 
-            if (DataType != null)
-                commonColumn.SetDataTypeFromConfigString(DataType);
+            SetProperty.IfProvidedNotEmpty<string>(this, "DataType", (val) => sqlColumn.SetDataTypeFromConfigString(val));
 
-            SetProperty.IfProvided<int>(this, "DataLength", (val) => commonColumn.DataLength = val);
+            SetProperty.IfProvided<int>(this, "DataLength", (val) => sqlColumn.DataLength = val);
 
-            if (commonColumn.DataLength == 0 && SqlDataTypes.DataLengthRequired.Contains(commonColumn.DataType))
-                throw new ArgumentException($"SQL column data type {commonColumn.DataType.ToString()} requires a non-zero DataLength property.");
+            if (sqlColumn.DataLength == 0 && SqlDataTypes.DataLengthRequired.Contains(sqlColumn.DataType))
+                throw new ArgumentException($"SQL column {sqlColumn.ColumnName} of data type {sqlColumn.DataType.ToString()} requires a non-zero DataLength property.");
 
-            SetProperty.IfProvided<bool>(this, "AllowNull", (val) => commonColumn.AllowNull = val);
+            SetProperty.IfProvided<bool>(this, "AllowNull", (val) => sqlColumn.AllowNull = val);
 
-            SetProperty.IfProvided<bool>(this, "NonClusteredIndex", (val) => commonColumn.NonClusteredIndex = val);
+            SetProperty.IfProvided<bool>(this, "NonClusteredIndex", (val) => sqlColumn.NonClusteredIndex = val);
 
-            return commonColumn;
+            return sqlColumn;
         }
     }
 }

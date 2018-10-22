@@ -75,7 +75,7 @@ namespace Serilog
                 throw new ArgumentNullException("loggerConfiguration");
 
             var defaultedPeriod = period ?? MSSqlServerSink.DefaultPeriod;
-            var colOpts = columnOptions;
+            var colOpts = columnOptions ?? new ColumnOptions();
             var connStr = connectionString;
 
             if (ConfigurationManager.GetSection(AppConfigSectionName) is MSSqlServerConfigurationSection serviceConfigSection)
@@ -138,7 +138,7 @@ namespace Serilog
             if(loggerAuditSinkConfiguration == null)
                 throw new ArgumentNullException("loggerAuditSinkConfiguration");
 
-            var colOpts = columnOptions;
+            var colOpts = columnOptions ?? new ColumnOptions();
             var connStr = connectionString;
 
             if (ConfigurationManager.GetSection(AppConfigSectionName) is MSSqlServerConfigurationSection serviceConfigSection)
