@@ -132,8 +132,6 @@ var log = new LoggerConfiguration()
 
 Projects can load `ColumnOptions` table configuration from an XML configuration file such as `app.config` or `web.config`. The sink configuration method automatically checks `ConfigurationManager`, so there is no code to show, and no additional packages are required. See the [External Configuration Syntax](#external-configuration-syntax) topic for details. 
 
-(Settings via `ConfigurationManager` is currently not available to .NET Core applications. Even though Microsoft added these classes to .NET Core 2.0, it was not part of the .NET Standard 2.0 API specification which takes precedence when a .NET Core application references this NuGet package.)
-
 ### External using _Serilog.Settings.Configuration_
 
 _Requires configuration package version [**3.0.0**](https://www.nuget.org/packages/Serilog.Settings.Configuration/3.0.0) or newer._
@@ -293,7 +291,6 @@ This property can be set to nearly any value in the `System.Data.SqlDbType` enum
 * `time`
 * `tinyint`
 * `uniqueidentifier`
-* `varbinary`
 * `varchar`
 * `xml`
 
