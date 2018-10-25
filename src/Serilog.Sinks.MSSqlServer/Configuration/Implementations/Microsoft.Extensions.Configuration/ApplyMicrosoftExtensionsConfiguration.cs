@@ -1,136 +1,17 @@
-﻿// Copyright 2014 Serilog Contributors
-// 
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0
-// 
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
-using System;
-using System.Collections.ObjectModel;
-using Serilog.Configuration;
-using Serilog.Events;
-using Serilog.Sinks.MSSqlServer;
+﻿using Microsoft.Extensions.Configuration;
 using Serilog.Debugging;
-using Microsoft.Extensions.Configuration;
+using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 
-namespace Serilog
+namespace Serilog.Sinks.MSSqlServer
 {
     /// <summary>
-    /// Adds the WriteTo.MSSqlServer() extension method to <see cref="LoggerConfiguration"/>.
+    /// Configures the sink's connection string and ColumnOtions object.
     /// </summary>
-    public static class LoggerConfigurationMSSqlServerExtensions
+    internal static class ApplyMicrosoftExtensionsConfiguration
     {
-        /// <summary>
-        /// Adds a sink that writes log events to a table in a MSSqlServer database.
-        /// Create a database and execute the table creation script found here
-        /// https://gist.github.com/mivano/10429656
-        /// or use the autoCreateSqlTable option.
-        /// </summary>
-        /// <param name="loggerConfiguration">The logger configuration.</param>
-        /// <param name="connectionString">The connection string to the database where to store the events.</param>
-        /// <param name="tableName">Name of the table to store the events in.</param>
-        /// <param name="appConfiguration">Additional application-level configuration. Required if connectionString is a name.</param>
-        /// <param name="restrictedToMinimumLevel">The minimum log event level required in order to write an event to the sink.</param>
-        /// <param name="batchPostingLimit">The maximum number of events to post in a single batch.</param>
-        /// <param name="period">The time to wait between checking for event batches.</param>
-        /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
-        /// <param name="autoCreateSqlTable">Create log table with the provided name on destination sql server.</param>
-        /// <param name="columnOptions">An externally-modified group of column settings</param>
-        /// <param name="columnOptionsSection">A config section defining various column settings</param>
-        /// <param name="schemaName">Name of the schema for the table to store the data in. The default is 'dbo'.</param>
-        /// <returns>Logger configuration, allowing configuration to continue.</returns>
-        /// <exception cref="ArgumentNullException">A required parameter is null.</exception>
-        public static LoggerConfiguration MSSqlServer(
-            this LoggerSinkConfiguration loggerConfiguration,
-            string connectionString,
-            string tableName,
-            IConfiguration appConfiguration = null,
-            LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
-            int batchPostingLimit = MSSqlServerSink.DefaultBatchPostingLimit,
-            TimeSpan? period = null,
-            IFormatProvider formatProvider = null,
-            bool autoCreateSqlTable = false,
-            ColumnOptions columnOptions = null,
-            IConfigurationSection columnOptionsSection = null,
-            string schemaName = "dbo"
-            )
-        {
-            if(loggerConfiguration == null)
-                throw new ArgumentNullException("loggerConfiguration");
-
-            var defaultedPeriod = period ?? MSSqlServerSink.DefaultPeriod;
-            var connectionStr = GetConnectionString(connectionString, appConfiguration);
-            var colOpts = ConfigureColumnOptions(columnOptions, columnOptionsSection);
-
-            return loggerConfiguration.Sink(
-                new MSSqlServerSink(
-                    connectionStr,
-                    tableName,
-                    batchPostingLimit,
-                    defaultedPeriod,
-                    formatProvider,
-                    autoCreateSqlTable,
-                    colOpts,
-                    schemaName
-                    ),
-                restrictedToMinimumLevel);
-        }
-
-        /// <summary>
-        /// Adds a sink that writes log events to a table in a MSSqlServer database.
-        /// </summary>
-        /// <param name="loggerAuditSinkConfiguration">The logger configuration.</param>
-        /// <param name="connectionString">The connection string to the database where to store the events.</param>
-        /// <param name="tableName">Name of the table to store the events in.</param>
-        /// <param name="appConfiguration">Additional application-level configuration. Required if connectionString is a name.</param>
-        /// <param name="restrictedToMinimumLevel">The minimum log event level required in order to write an event to the sink.</param>
-        /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
-        /// <param name="autoCreateSqlTable">Create log table with the provided name on destination sql server.</param>
-        /// <param name="columnOptions">An externally-modified group of column settings</param>
-        /// <param name="columnOptionsSection">A config section defining various column settings</param>
-        /// <param name="schemaName">Name of the schema for the table to store the data in. The default is 'dbo'.</param>
-        /// <returns>Logger configuration, allowing configuration to continue.</returns>
-        /// <exception cref="ArgumentNullException">A required parameter is null.</exception>
-        public static LoggerConfiguration MSSqlServer(
-            this LoggerAuditSinkConfiguration loggerAuditSinkConfiguration,
-            string connectionString,
-            string tableName,
-            IConfiguration appConfiguration = null,
-            LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
-            IFormatProvider formatProvider = null,
-            bool autoCreateSqlTable = false,
-            ColumnOptions columnOptions = null,
-            IConfigurationSection columnOptionsSection = null,
-            string schemaName = "dbo"
-            )
-        {
-            if(loggerAuditSinkConfiguration == null)
-                throw new ArgumentNullException("loggerAuditSinkConfiguration");
-
-            var connectionStr = GetConnectionString(connectionString, appConfiguration);
-            var colOpts = ConfigureColumnOptions(columnOptions, columnOptionsSection);
-
-            return loggerAuditSinkConfiguration.Sink(
-                new MSSqlServerAuditSink(
-                    connectionString,
-                    tableName,
-                    formatProvider,
-                    autoCreateSqlTable,
-                    columnOptions,
-                    schemaName
-                    ),
-                restrictedToMinimumLevel);
-        }
-
         /// <summary>
         /// Examine if supplied connection string is a reference to an item in the "ConnectionStrings" section of web.config
         /// If it is, return the ConnectionStrings item, if not, return string as supplied.
@@ -138,13 +19,13 @@ namespace Serilog
         /// <param name="nameOrConnectionString">The name of the ConnectionStrings key or raw connection string.</param>
         /// <param name="appConfiguration">Additional application-level configuration.</param>
         /// <remarks>Pulled from review of Entity Framework 6 methodology for doing the same</remarks>
-        private static string GetConnectionString(string nameOrConnectionString, IConfiguration appConfiguration)
+        internal static string GetConnectionString(string nameOrConnectionString, IConfiguration appConfiguration)
         {
             // If there is an `=`, we assume this is a raw connection string not a named value
             // If there are no `=`, attempt to pull the named value from config
-            if(nameOrConnectionString.IndexOf('=') > -1) return nameOrConnectionString;
+            if (nameOrConnectionString.IndexOf('=') > -1) return nameOrConnectionString;
             string cs = appConfiguration?.GetConnectionString(nameOrConnectionString);
-            if(string.IsNullOrEmpty(cs))
+            if (string.IsNullOrEmpty(cs))
             {
                 SelfLog.WriteLine("MSSqlServer sink configured value {0} is not found in ConnectionStrings settings and does not appear to be a raw connection string.", nameOrConnectionString);
             }
@@ -157,14 +38,14 @@ namespace Serilog
         /// <param name="columnOptions">An optional externally-created ColumnOptions object to be updated with additional configuration values.</param>
         /// <param name="config">A configuration section typically named "columnOptionsSection" (see docs).</param>
         /// <returns></returns>
-        private static ColumnOptions ConfigureColumnOptions(ColumnOptions columnOptions, IConfigurationSection config)
+        internal static ColumnOptions ConfigureColumnOptions(ColumnOptions columnOptions, IConfigurationSection config)
         {
             // Do not use configuration binding (ie GetSection.Get<ColumnOptions>). That will create a new
             // ColumnOptions object which would overwrite settings if the caller passed in a ColumnOptions
             // object via the extension method's columnOptions parameter.
 
             var opts = columnOptions ?? new ColumnOptions();
-            if(config == null || !config.GetChildren().Any()) return opts;
+            if (config == null || !config.GetChildren().Any()) return opts;
 
             AddRemoveStandardColumns();
             AddAdditionalColumns();
@@ -227,9 +108,9 @@ namespace Serilog
                 if (section != null)
                 {
                     SetCommonColumnOptions(opts.Id);
-                    #pragma warning disable 618 // deprecated: BigInt property
+#pragma warning disable 618 // deprecated: BigInt property
                     SetProperty.IfNotNull<bool>(section["bigInt"], (val) => opts.Id.BigInt = val);
-                    #pragma warning restore 618
+#pragma warning restore 618
                 }
 
                 section = config.GetSection("level");

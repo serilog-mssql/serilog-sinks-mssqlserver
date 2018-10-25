@@ -8,7 +8,7 @@ namespace Serilog.Sinks.MSSqlServer
         // to null doesn't work because internally the ConfigurationProperty attribute changes it back to empty string.
 
         /// <summary>
-        /// Test the underlying property collection's value-origin flag for a non-default value. Empty strings allowed.
+        /// Test the underlying property collection's value-origin flag for a non-default string value. Empty strings allowed.
         /// </summary>
         public static void IfProvided<T>(ConfigurationElement element, string propertyName, PropertySetter<T> setter)
         {
@@ -18,7 +18,7 @@ namespace Serilog.Sinks.MSSqlServer
         }
 
         /// <summary>
-        /// Test the underlying property collection's value-origin flag for a non-default value. Empty strings allowed.
+        /// Test the underlying property collection's value-origin flag for a non-default, non-null, non-empty string value.
         /// </summary>
         public static void IfProvidedNotEmpty<T>(ConfigurationElement element, string propertyName, PropertySetter<T> setter)
         {
