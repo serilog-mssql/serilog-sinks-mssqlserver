@@ -233,6 +233,40 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             }
         }
 
+        [Trait("Bugfix", "#171")]
+        [Fact]
+        public void LogEventStoreAsEnum()
+        {
+            // arrange
+            var columnOptions = new ColumnOptions();
+            columnOptions.Level.StoreAsEnum = true;
+            columnOptions.Store.Add(StandardColumn.LogEvent);
+
+            Log.Logger = new LoggerConfiguration()
+                .WriteTo.MSSqlServer
+                (
+                    connectionString: DatabaseFixture.LogEventsConnectionString,
+                    tableName: DatabaseFixture.LogTableName,
+                    columnOptions: columnOptions,
+                    autoCreateSqlTable: true
+                )
+                .CreateLogger();
+
+            // act
+            Log.Logger
+                .Information("Logging message");
+
+            Log.CloseAndFlush();
+
+            // assert
+            using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
+            {
+                var logEventCount = conn.Query<LogEventColumn>($"SELECT Id from {DatabaseFixture.LogTableName}");
+
+                logEventCount.Should().HaveCount(1);
+            }
+        }
+
         public void Dispose()
         {
             DatabaseFixture.DropTable();
