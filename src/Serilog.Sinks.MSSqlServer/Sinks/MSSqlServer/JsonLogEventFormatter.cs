@@ -1,4 +1,4 @@
-﻿// Copyright 2018 Serilog Contributors
+// Copyright 2018 Serilog Contributors
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ namespace Serilog.Sinks.MSSqlServer
     internal class JsonLogEventFormatter : ITextFormatter
     {
         static readonly JsonValueFormatter ValueFormatter = new JsonValueFormatter(typeTagName: null);
+        private const string COMMA_DELIMITER = ",";
 
         MSSqlServerSinkTraits traits;
  
@@ -52,6 +53,8 @@ namespace Serilog.Sinks.MSSqlServer
 
             output.Write("{");
 
+            string precedingDelimiter = "";
+
             if (traits.columnOptions.LogEvent.ExcludeStandardColumns == false)
             {
                 // The XML Properties column has never included the Standard Columns, but prior
@@ -63,7 +66,6 @@ namespace Serilog.Sinks.MSSqlServer
                 // whether Standard Columns are written (specifically, the subset of Standard
                 // columns that were output by the external JsonFormatter class).
 
-                string precedingDelimiter = "";
                 var store = traits.columnOptions.Store;
 
                 WriteIfPresent(StandardColumn.TimeStamp);
@@ -77,7 +79,7 @@ namespace Serilog.Sinks.MSSqlServer
                     if(store.Contains(col))
                     {
                         output.Write(precedingDelimiter);
-                        precedingDelimiter = ",";
+                        precedingDelimiter = COMMA_DELIMITER;
                         var colData = traits.GetStandardColumnNameAndValue(col, logEvent);
                         JsonValueFormatter.WriteQuotedJsonString(colData.Key, output);
                         output.Write(":");
@@ -88,7 +90,11 @@ namespace Serilog.Sinks.MSSqlServer
             }
 
             if (logEvent.Properties.Count != 0)
+            {
+                output.Write(precedingDelimiter);
                 WriteProperties(logEvent.Properties, output);
+                precedingDelimiter = COMMA_DELIMITER;
+            }
 
             var tokensWithFormat = logEvent.MessageTemplate.Tokens
                 .OfType<PropertyToken>()
@@ -98,6 +104,7 @@ namespace Serilog.Sinks.MSSqlServer
 
             if (tokensWithFormat.Length != 0)
             {
+                output.Write(precedingDelimiter);
                 WriteRenderings(tokensWithFormat, logEvent.Properties, output);
             }
 
@@ -106,13 +113,13 @@ namespace Serilog.Sinks.MSSqlServer
 
         static void WriteProperties(IReadOnlyDictionary<string, LogEventPropertyValue> properties, TextWriter output)
         {
-            output.Write(",\"Properties\":{");
+            output.Write("\"Properties\":{");
 
             string precedingDelimiter = "";
             foreach (var property in properties)
             {
                 output.Write(precedingDelimiter);
-                precedingDelimiter = ",";
+                precedingDelimiter = COMMA_DELIMITER;
                 JsonValueFormatter.WriteQuotedJsonString(property.Key, output);
                 output.Write(':');
                 ValueFormatter.Format(property.Value, output);
@@ -123,13 +130,13 @@ namespace Serilog.Sinks.MSSqlServer
 
         static void WriteRenderings(IEnumerable<IGrouping<string, PropertyToken>> tokensWithFormat, IReadOnlyDictionary<string, LogEventPropertyValue> properties, TextWriter output)
         {
-            output.Write(",\"Renderings\":{");
+            output.Write("\"Renderings\":{");
 
             string precedingDelimiter = "";
             foreach (var ptoken in tokensWithFormat)
             {
                 output.Write(precedingDelimiter);
-                precedingDelimiter = ",";
+                precedingDelimiter = COMMA_DELIMITER;
 
                 JsonValueFormatter.WriteQuotedJsonString(ptoken.Key, output);
                 output.Write(":[");
@@ -138,7 +145,7 @@ namespace Serilog.Sinks.MSSqlServer
                 foreach (var format in ptoken)
                 {
                     output.Write(fdelim);
-                    fdelim = ",";
+                    fdelim = COMMA_DELIMITER;
 
                     output.Write("{\"Format\":");
                     JsonValueFormatter.WriteQuotedJsonString(format.Format, output);
