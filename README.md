@@ -320,6 +320,7 @@ This is a `Collection<>` of `SqlColumn` objects that you create to define custom
 Each Standard Column in the `ColumnOptions.Store` list and any custom columns you add to the `AdditionalColumns` collection are `SqlColumn` objects with the following properties:
 
 * `ColumnName`
+* `PropertyName`
 * `DataType`
 * `AllowNull`
 * `DataLength`
@@ -328,6 +329,10 @@ Each Standard Column in the `ColumnOptions.Store` list and any custom columns yo
 ### ColumnName
 
 Any valid SQL column name can be used. Standard Columns have default names assigned but these can be changed without affecting their special handling.
+
+### PropertyName
+
+The optional name of a Serilog property to use as the value for the SqlColumn.  If not provided, the property used is the one that has the same name as the specified ColumnName.
 
 ### DataType
 
@@ -482,7 +487,7 @@ var columnOptions = new ColumnOptions
     AdditionalColumns = new Collection<SqlColumn>
     {
         new SqlColumn
-            {ColumnName = "UserName", DataType = SqlDbType.NVarChar, DataLength = 64},
+            {ColumnName = "EnvironmentUserName", PropertyName = "UserName", DataType = SqlDbType.NVarChar, DataLength = 64},
 
         new SqlColumn
             {ColumnName = "UserId", DataType = SqlDbType.BigInt, NonClusteredIndex = true},
@@ -499,7 +504,7 @@ var log = new LoggerConfiguration()
     .CreateLogger();
 ```
 
-In this example, when a log event contains any of the properties `UserName`, `UserId`, and `RequestUri`, the property values would be written to the corresponding columns. The property names must match exactly (case-insensitive).
+In this example, when a log event contains any of the properties `UserName`, `UserId`, and `RequestUri`, the property values would be written to the corresponding columns. The property names must match exactly (case-insensitive).  In the case of `UserName`, that value would be written to the column named `EnvironmentUserName`.
 
 Unlike previous versions of the sink, Standard Column names are not reserved. If you remove the `Id` Standard Column from the `ColumnOptions.Store` list, you are free to create a new custom column called `Id` which the sink will treat like any other custom column fully under your control.
 
@@ -568,6 +573,7 @@ As the name suggests, `columnOptionSection` is an entire configuration section i
     "additionalColumns": [
         { "ColumnName": "EventType", "DataType": "int", "AllowNull": false },
         { "ColumnName": "Release", "DataType": "varchar", "DataLength": 32 },
+        { "ColumnName": "EnvironmentUserName", "PropertyName": "UserName", "DataType": "varchar", "DataLength": 50 },
         { "ColumnName": "All_SqlColumn_Defaults",
             "DataType": "varchar",
             "AllowNull": true,
@@ -632,6 +638,10 @@ Keys and values are case-sensitive. Case must match **_exactly_** as shown below
     </RemoveStandardColumns>
     <Columns>
       <add ColumnName="EventType" DataType="int"/>
+      <add ColumnName="EnvironmentUserName" 
+           PropertyName="UserName" 
+           DataType="varchar" 
+           DataLength="50" />
       <add ColumnName="Release"
            DataType="varchar"
            DataLength="64"
