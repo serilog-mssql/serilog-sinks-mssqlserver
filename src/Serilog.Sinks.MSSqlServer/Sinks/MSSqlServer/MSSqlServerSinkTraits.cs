@@ -229,10 +229,14 @@ namespace Serilog.Sinks.MSSqlServer
         {
             foreach (var property in properties)
             {
-                if (!EventTable.Columns.Contains(property.Key) || StandardColumnNames.Contains(property.Key))
+                var additionalColumn = columnOptions
+                    .AdditionalColumns
+                    .FirstOrDefault(ac => ac.PropertyName == property.Key);
+
+                if (additionalColumn == null || standardColumnNames.Contains(property.Key))
                     continue;
 
-                var columnName = property.Key;
+                var columnName = additionalColumn.ColumnName;
                 var columnType = EventTable.Columns[columnName].DataType;
 
                 if (!(property.Value is ScalarValue scalarValue))
