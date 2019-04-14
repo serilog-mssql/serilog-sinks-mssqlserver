@@ -470,7 +470,7 @@ Keys and values are not case-sensitive. This is an example of configuring the si
             "autoCreateSqlTable": true,
             "restrictedToMinimumLevel": "Warning",
             "batchPostingLimit": 1000,
-            "period": 30,
+            "period": "0.00:00:30",
             "columnOptionsSection": { . . . }
         } 
       }
@@ -490,7 +490,7 @@ As the name suggests, `columnOptionSection` is an entire configuration section i
     "removeStandardColumns": [ "MessageTemplate", "Properties" ],
     "additionalColumns": [
         { "ColumnName": "EventType", "DataType": "int", "AllowNull": false },
-        { "ColumnName": "Release", "DataType": "varchar", "DataLength": 32 }
+        { "ColumnName": "Release", "DataType": "varchar", "DataLength": 32 },
         { "ColumnName": "All_SqlColumn_Defaults",
             "DataType": "varchar",
             "AllowNull": true,
