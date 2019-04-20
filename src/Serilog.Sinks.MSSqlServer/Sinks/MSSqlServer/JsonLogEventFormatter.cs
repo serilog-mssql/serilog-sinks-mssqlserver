@@ -83,7 +83,7 @@ namespace Serilog.Sinks.MSSqlServer
                         var colData = traits.GetStandardColumnNameAndValue(col, logEvent);
                         JsonValueFormatter.WriteQuotedJsonString(colData.Key, output);
                         output.Write(":");
-                        string value = (col != StandardColumn.TimeStamp) ? (string)(colData.Value ?? string.Empty) : ((DateTime)colData.Value).ToString("o");
+                        string value = (col != StandardColumn.TimeStamp) ? (colData.Value ?? string.Empty).ToString() : ((DateTime)colData.Value).ToString("o");
                         JsonValueFormatter.WriteQuotedJsonString(value, output);
                     }
                 }
