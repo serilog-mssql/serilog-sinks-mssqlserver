@@ -125,7 +125,6 @@ var log = new LoggerConfiguration()
         columnOptions: opts,
         appConfiguration: appSettings
     ).CreateLogger();
-    .CreateLogger();
 ```
 
 ### Code + _System.Configuration_
