@@ -214,7 +214,7 @@ Ideally the `SerilogWriter` role would be restricted to the log table only, and 
 
 ```
 GRANT SELECT ON [dbo].[SecuredLog] TO [SerilogWriter];
-GRANT SELECT ON [dbo].[SecuredLog] TO [SerilogWriter];
+GRANT INSERT ON [dbo].[SecuredLog] TO [SerilogWriter];
 ```
 
 There are many possible variations. For example, you could also create a logging-specific schema and restrict access that way.
