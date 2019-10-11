@@ -126,7 +126,6 @@ var log = new LoggerConfiguration()
         columnOptions: opts,
         appConfiguration: appSettings
     ).CreateLogger();
-    .CreateLogger();
 ```
 
 ### Code + _System.Configuration_
@@ -215,7 +214,7 @@ Ideally the `SerilogWriter` role would be restricted to the log table only, and 
 
 ```
 GRANT SELECT ON [dbo].[SecuredLog] TO [SerilogWriter];
-GRANT SELECT ON [dbo].[SecuredLog] TO [SerilogWriter];
+GRANT INSERT ON [dbo].[SecuredLog] TO [SerilogWriter];
 ```
 
 There are many possible variations. For example, you could also create a logging-specific schema and restrict access that way.
@@ -546,12 +545,12 @@ Keys and values are case-sensitive. Case must match **_exactly_** as shown below
         <remove Name="Properties"/>
     </RemoveStandardColumns>
     <Columns>
-      <add ColumnName="EventType" DataType="int"/>
-      <add ColumnName="Release"
-           DataType="varchar"
-           DataLength="64"
-           AllowNull="true"
-           NonClusteredIndex="false"/>
+      <add columnName="EventType" DataType="int"/>
+      <add columnName="Release"
+           dataType="varchar"
+           dataLength="64"
+           allowNull="true"
+           nonClusteredIndex="false"/>
     </Columns>
     <Exception ColumnName="Ex" DataLength="512"/>
     <Id NonClusteredIndex="true"/>
