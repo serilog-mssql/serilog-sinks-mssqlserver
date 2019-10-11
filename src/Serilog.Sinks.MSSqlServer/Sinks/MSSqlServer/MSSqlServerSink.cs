@@ -14,17 +14,13 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Data;
 using System.Data.SqlClient;
-using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
-using Serilog.Core;
 using Serilog.Debugging;
 using Serilog.Events;
-using Serilog.Formatting.Json;
 using Serilog.Sinks.PeriodicBatching;
 
 namespace Serilog.Sinks.MSSqlServer
@@ -70,6 +66,7 @@ namespace Serilog.Sinks.MSSqlServer
             )
             : base(batchPostingLimit, period)
         {
+            columnOptions.FinalizeConfigurationForSinkConstructor();
             _traits = new MSSqlServerSinkTraits(connectionString, tableName, schemaName, columnOptions, formatProvider, autoCreateSqlTable);
         }
 
@@ -89,23 +86,23 @@ namespace Serilog.Sinks.MSSqlServer
 
             try
             {
-                using (var cn = new SqlConnection(_traits.ConnectionString))
+                using (var cn = new SqlConnection(_traits.connectionString))
                 {
                     await cn.OpenAsync().ConfigureAwait(false);
-                    using (var copy = _traits.ColumnOptions.DisableTriggers
+                    using (var copy = _traits.columnOptions.DisableTriggers
                             ? new SqlBulkCopy(cn)
                             : new SqlBulkCopy(cn, SqlBulkCopyOptions.CheckConstraints | SqlBulkCopyOptions.FireTriggers, null)
                     )
                     {
-                        copy.DestinationTableName = string.Format("[{0}].[{1}]", _traits.SchemaName, _traits.TableName);
-                        foreach (var column in _traits.EventTable.Columns)
+                        copy.DestinationTableName = string.Format("[{0}].[{1}]", _traits.schemaName, _traits.tableName);
+                        foreach (var column in _traits.eventTable.Columns)
                         {
                             var columnName = ((DataColumn)column).ColumnName;
                             var mapping = new SqlBulkCopyColumnMapping(columnName, columnName);
                             copy.ColumnMappings.Add(mapping);
                         }
 
-                        await copy.WriteToServerAsync(_traits.EventTable).ConfigureAwait(false);
+                        await copy.WriteToServerAsync(_traits.eventTable).ConfigureAwait(false);
                     }
                 }
             }
@@ -116,7 +113,7 @@ namespace Serilog.Sinks.MSSqlServer
             finally
             {
                 // Processed the items, clear for the next run
-                _traits.EventTable.Clear();
+                _traits.eventTable.Clear();
             }
         }
 
@@ -125,17 +122,17 @@ namespace Serilog.Sinks.MSSqlServer
             // Add the new rows to the collection. 
             foreach (var logEvent in events)
             {
-                var row = _traits.EventTable.NewRow();
+                var row = _traits.eventTable.NewRow();
 
                 foreach (var field in _traits.GetColumnsAndValues(logEvent))
                 {
                     row[field.Key] = field.Value;
                 }
 
-                _traits.EventTable.Rows.Add(row);
+                _traits.eventTable.Rows.Add(row);
             }
 
-            _traits.EventTable.AcceptChanges();
+            _traits.eventTable.AcceptChanges();
         }
 
         /// <summary>

@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
-using System.Data.SqlTypes;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Dapper;
@@ -12,7 +10,7 @@ using FluentAssertions;
 namespace Serilog.Sinks.MSSqlServer.Tests
 {
     [Collection("LogTest")]
-    public class CustomStandardColumnNames
+    public class CustomStandardColumnNames : IDisposable
     {
         [Fact]
         public void CustomIdColumn()
@@ -23,14 +21,13 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             options.Id.ColumnName = customIdName;
 
             // act
-            var logTableName = $"{DatabaseFixture.LogTableName}CustomId";
-            var sink = new MSSqlServerSink(DatabaseFixture.LogEventsConnectionString, logTableName, 1, TimeSpan.FromSeconds(1), null, true, options);
+            var sink = new MSSqlServerSink(DatabaseFixture.LogEventsConnectionString, DatabaseFixture.LogTableName, 1, TimeSpan.FromSeconds(1), null, true, options);
 
             // assert
             using (var conn = new SqlConnection(DatabaseFixture.MasterConnectionString))
             {
                 conn.Execute($"use {DatabaseFixture.Database}");
-                var logEvents = conn.Query<InfoSchema>($@"SELECT COLUMN_NAME AS ColumnName FROM {DatabaseFixture.Database}.INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{logTableName}'");
+                var logEvents = conn.Query<InfoSchema>($@"SELECT COLUMN_NAME AS ColumnName FROM {DatabaseFixture.Database}.INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{DatabaseFixture.LogTableName}'");
                 var infoSchema = logEvents as InfoSchema[] ?? logEvents.ToArray();
 
                 infoSchema.Should().Contain(columns => columns.ColumnName == customIdName);
@@ -39,14 +36,9 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             // verify Id column has identity property
             using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
             {
-                var isIdentity = conn.Query<IdentityQuery>($"SELECT COLUMNPROPERTY(object_id('{logTableName}'), '{customIdName}', 'IsIdentity') AS IsIdentity");
+                var isIdentity = conn.Query<IdentityQuery>($"SELECT COLUMNPROPERTY(object_id('{DatabaseFixture.LogTableName}'), '{customIdName}', 'IsIdentity') AS IsIdentity");
                 isIdentity.Should().Contain(i => i.IsIdentity == 1);
             }
-        }
-
-        internal class IdentityQuery
-        {
-            public int IsIdentity { get; set; }
         }
 
         [Fact]
@@ -56,15 +48,14 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             var options = new ColumnOptions();
 
             // act
-            var logTableName = $"{DatabaseFixture.LogTableName}DefaultId";
-            var sink = new MSSqlServerSink(DatabaseFixture.LogEventsConnectionString, logTableName, 1, TimeSpan.FromSeconds(1), null, true, options);
+            var sink = new MSSqlServerSink(DatabaseFixture.LogEventsConnectionString, DatabaseFixture.LogTableName, 1, TimeSpan.FromSeconds(1), null, true, options);
 
             // assert
             var idColumnName = "Id";
             using (var conn = new SqlConnection(DatabaseFixture.MasterConnectionString))
             {
                 conn.Execute($"use {DatabaseFixture.Database}");
-                var logEvents = conn.Query<InfoSchema>($@"SELECT COLUMN_NAME AS ColumnName FROM {DatabaseFixture.Database}.INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{logTableName}'");
+                var logEvents = conn.Query<InfoSchema>($@"SELECT COLUMN_NAME AS ColumnName FROM {DatabaseFixture.Database}.INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{DatabaseFixture.LogTableName}'");
                 var infoSchema = logEvents as InfoSchema[] ?? logEvents.ToArray();
 
                 infoSchema.Should().Contain(columns => columns.ColumnName == idColumnName);
@@ -73,7 +64,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             // verify Id column has identity property
             using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
             {
-                var isIdentity = conn.Query<IdentityQuery>($"SELECT COLUMNPROPERTY(object_id('{logTableName}'), '{idColumnName}', 'IsIdentity') AS IsIdentity");
+                var isIdentity = conn.Query<IdentityQuery>($"SELECT COLUMNPROPERTY(object_id('{DatabaseFixture.LogTableName}'), '{idColumnName}', 'IsIdentity') AS IsIdentity");
                 isIdentity.Should().Contain(i => i.IsIdentity == 1);
             }
         }
@@ -93,14 +84,13 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             options.Properties.ColumnName = "CustomProperties";
 
             // act
-            var logTableName = $"{DatabaseFixture.LogTableName}Custom";
-            var sink = new MSSqlServerSink(DatabaseFixture.LogEventsConnectionString, logTableName, 1, TimeSpan.FromSeconds(1), null, true, options);
+            var sink = new MSSqlServerSink(DatabaseFixture.LogEventsConnectionString, DatabaseFixture.LogTableName, 1, TimeSpan.FromSeconds(1), null, true, options);
 
             // assert
             using (var conn = new SqlConnection(DatabaseFixture.MasterConnectionString))
             {
                 conn.Execute($"use {DatabaseFixture.Database}");
-                var logEvents = conn.Query<InfoSchema>($@"SELECT COLUMN_NAME AS ColumnName FROM {DatabaseFixture.Database}.INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{logTableName}'");
+                var logEvents = conn.Query<InfoSchema>($@"SELECT COLUMN_NAME AS ColumnName FROM {DatabaseFixture.Database}.INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{DatabaseFixture.LogTableName}'");
                 var infoSchema = logEvents as InfoSchema[] ?? logEvents.ToArray();
 
                 foreach (var column in standardNames)
@@ -120,14 +110,13 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             var standardNames = new List<string> { "Message", "MessageTemplate", "Level", "TimeStamp", "Exception", "Properties" };
 
             // act
-            var logTableName = $"{DatabaseFixture.LogTableName}DefaultStandard";
-            var sink = new MSSqlServerSink(DatabaseFixture.LogEventsConnectionString, logTableName, 1, TimeSpan.FromSeconds(1), null, true, options);
+            var sink = new MSSqlServerSink(DatabaseFixture.LogEventsConnectionString, DatabaseFixture.LogTableName, 1, TimeSpan.FromSeconds(1), null, true, options);
 
             // assert
             using (var conn = new SqlConnection(DatabaseFixture.MasterConnectionString))
             {
                 conn.Execute($"use {DatabaseFixture.Database}");
-                var logEvents = conn.Query<InfoSchema>($@"SELECT COLUMN_NAME AS ColumnName FROM {DatabaseFixture.Database}.INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{logTableName}'");
+                var logEvents = conn.Query<InfoSchema>($@"SELECT COLUMN_NAME AS ColumnName FROM {DatabaseFixture.Database}.INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{DatabaseFixture.LogTableName}'");
                 var infoSchema = logEvents as InfoSchema[] ?? logEvents.ToArray();
 
                 foreach (var column in standardNames)
@@ -151,11 +140,10 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             options.Properties.ColumnName = "CustomProperties";
             options.Id.ColumnName = "CustomId";
 
-            var logTableName = $"{DatabaseFixture.LogTableName}CustomEvent";
             var loggerConfiguration = new LoggerConfiguration();
             Log.Logger = loggerConfiguration.WriteTo.MSSqlServer(
                 connectionString: DatabaseFixture.LogEventsConnectionString,
-                tableName: logTableName,
+                tableName: DatabaseFixture.LogTableName,
                 autoCreateSqlTable: true,
                 columnOptions: options)
                 .CreateLogger();
@@ -171,7 +159,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             // assert
             using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
             {
-                var logEvents = conn.Query<CustomStandardLogColumns>($"SELECT * FROM {logTableName}");
+                var logEvents = conn.Query<CustomStandardLogColumns>($"SELECT * FROM {DatabaseFixture.LogTableName}");
 
                 logEvents.Should().Contain(e => e.CustomMessage.Contains(loggingInformationMessage));
             }
@@ -223,11 +211,10 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             options.Properties.ColumnName = "CustomProperties";
             options.Id.ColumnName = "CustomId";
 
-            var logTableName = $"{DatabaseFixture.LogTableName}AuditCustomEvent";
             var loggerConfiguration = new LoggerConfiguration();
             Log.Logger = loggerConfiguration.AuditTo.MSSqlServer(
                 connectionString: DatabaseFixture.LogEventsConnectionString,
-                tableName: logTableName,
+                tableName: DatabaseFixture.LogTableName,
                 autoCreateSqlTable: true,
                 columnOptions: options)
                 .CreateLogger();
@@ -243,7 +230,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             // assert
             using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
             {
-                var logEvents = conn.Query<CustomStandardLogColumns>($"SELECT * FROM {logTableName}");
+                var logEvents = conn.Query<CustomStandardLogColumns>($"SELECT * FROM {DatabaseFixture.LogTableName}");
 
                 logEvents.Should().Contain(e => e.CustomMessage.Contains(loggingInformationMessage));
             }
@@ -274,9 +261,13 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
             {
                 var logEvents = conn.Query<DefaultStandardLogColumns>($"SELECT Message, Level FROM {DatabaseFixture.LogTableName}");
-
                 logEvents.Should().Contain(e => e.Message.Contains(loggingInformationMessage));
             }
+        }
+
+        public void Dispose()
+        {
+            DatabaseFixture.DropTable();
         }
     }
 }

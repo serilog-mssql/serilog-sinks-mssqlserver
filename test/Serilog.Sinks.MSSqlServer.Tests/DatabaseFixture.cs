@@ -39,10 +39,22 @@ DROP DATABASE [{Database}]
         {
             CreateDatabase();
         }
-        
+
         public void Dispose()
         {
             DeleteDatabase();
+        }
+
+        public static void DropTable(string tableName = null)
+        {
+            try
+            {
+                using (var conn = new SqlConnection(LogEventsConnectionString))
+                {
+                    conn.Execute($"DROP TABLE {(string.IsNullOrEmpty(tableName) ? LogTableName : tableName)};");
+                }
+            }
+            catch { }
         }
 
         private static void DeleteDatabase()
@@ -72,6 +84,6 @@ DROP DATABASE [{Database}]
         }
     }
 
-    [CollectionDefinition("LogTest")]
+    [CollectionDefinition("LogTest", DisableParallelization = true)]
     public class PatientSecureFixtureCollection : ICollectionFixture<DatabaseFixture> { }
 }

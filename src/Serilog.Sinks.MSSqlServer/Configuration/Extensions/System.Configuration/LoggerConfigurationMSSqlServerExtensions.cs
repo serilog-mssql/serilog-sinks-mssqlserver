@@ -1,14 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Data;
-using Serilog.Configuration;
-using Serilog.Events;
-using Serilog.Sinks.MSSqlServer;
-using System.Configuration;
-using Serilog.Debugging;
-
-// Copyright 2014 Serilog Contributors
+﻿// Copyright 2014 Serilog Contributors
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,6 +12,14 @@ using Serilog.Debugging;
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
+using Serilog.Configuration;
+using Serilog.Events;
+using Serilog.Sinks.MSSqlServer;
+using System.Configuration;
+
+// System.Configuration support for .NET Framework 4.5.2 libraries and apps.
+
 namespace Serilog
 {
     /// <summary>
@@ -29,6 +27,11 @@ namespace Serilog
     /// </summary>
     public static class LoggerConfigurationMSSqlServerExtensions
     {
+        /// <summary>
+        /// The configuration section name for app.config or web.config configuration files.
+        /// </summary>
+        public static string AppConfigSectionName = "MSSqlServerSettingsSection";
+
         /// <summary>
         /// Adds a sink that writes log events to a table in a MSSqlServer database.
         /// Create a database and execute the table creation script found here
@@ -63,18 +66,12 @@ namespace Serilog
             if (loggerConfiguration == null) throw new ArgumentNullException("loggerConfiguration");
 
             var defaultedPeriod = period ?? MSSqlServerSink.DefaultPeriod;
+            var colOpts = columnOptions ?? new ColumnOptions();
 
-            // If we have additional columns from config, load them as well
-            if (ConfigurationManager.GetSection("MSSqlServerSettingsSection") is MSSqlServerConfigurationSection serviceConfigSection && serviceConfigSection.Columns.Count > 0)
-            {
-                if (columnOptions == null)
-                {
-                    columnOptions = new ColumnOptions();
-                }
-                GenerateDataColumnsFromConfig(serviceConfigSection, columnOptions);
-            }
+            if (ConfigurationManager.GetSection(AppConfigSectionName) is MSSqlServerConfigurationSection serviceConfigSection)
+                colOpts = ApplySystemConfiguration.ConfigureColumnOptions(serviceConfigSection, colOpts);
 
-            connectionString = GetConnectionString(connectionString);
+            connectionString = ApplySystemConfiguration.GetConnectionString(connectionString);
 
             return loggerConfiguration.Sink(
                 new MSSqlServerSink(
@@ -84,7 +81,7 @@ namespace Serilog
                     defaultedPeriod,
                     formatProvider,
                     autoCreateSqlTable,
-                    columnOptions,
+                    colOpts,
                     schemaName
                     ),
                 restrictedToMinimumLevel);
@@ -117,17 +114,12 @@ namespace Serilog
         {
             if (loggerAuditSinkConfiguration == null) throw new ArgumentNullException("loggerAuditSinkConfiguration");
 
-            // If we have additional columns from config, load them as well
-            if (ConfigurationManager.GetSection("MSSqlServerSettingsSection") is MSSqlServerConfigurationSection serviceConfigSection && serviceConfigSection.Columns.Count > 0)
-            {
-                if (columnOptions == null)
-                {
-                    columnOptions = new ColumnOptions();
-                }
-                GenerateDataColumnsFromConfig(serviceConfigSection, columnOptions);
-            }
+            var colOpts = columnOptions ?? new ColumnOptions();
 
-            connectionString = GetConnectionString(connectionString);
+            if (ConfigurationManager.GetSection(AppConfigSectionName) is MSSqlServerConfigurationSection serviceConfigSection)
+                colOpts = ApplySystemConfiguration.ConfigureColumnOptions(serviceConfigSection, colOpts);
+
+            connectionString = ApplySystemConfiguration.GetConnectionString(connectionString);
 
             return loggerAuditSinkConfiguration.Sink(
                 new MSSqlServerAuditSink(
@@ -135,110 +127,10 @@ namespace Serilog
                     tableName,
                     formatProvider,
                     autoCreateSqlTable,
-                    columnOptions,
+                    colOpts,
                     schemaName
                     ),
                 restrictedToMinimumLevel);
-        }
-
-        /// <summary>
-        /// Examine if supplied connection string is a reference to an item in the "ConnectionStrings" section of web.config
-        /// If it is, return the ConnectionStrings item, if not, return string as supplied.
-        /// </summary>
-        /// <param name="nameOrConnectionString">The name of the ConnectionStrings key or raw connection string.</param>
-        /// <remarks>Pulled from review of Entity Framework 6 methodology for doing the same</remarks>
-        private static string GetConnectionString(string nameOrConnectionString)
-        {
-
-            // If there is an `=`, we assume this is a raw connection string not a named value
-            // If there are no `=`, attempt to pull the named value from config
-            if (nameOrConnectionString.IndexOf('=') < 0)
-            {
-                var cs = ConfigurationManager.ConnectionStrings[nameOrConnectionString];
-                if (cs != null)
-                {
-                    return cs.ConnectionString;
-                }
-                else
-                {
-                    SelfLog.WriteLine("MSSqlServer sink configured value {0} is not found in ConnectionStrings settings and does not appear to be a raw connection string.", nameOrConnectionString);
-                }
-            }
-
-            return nameOrConnectionString;
-        }
-
-        /// <summary>
-        /// Generate an array of DataColumns using the supplied MSSqlServerConfigurationSection,
-        ///     which is an array of keypairs defining the SQL column name and SQL data type
-        /// Entries are appended to a list of DataColumns in column options
-        /// </summary>
-        /// <param name="serviceConfigSection">A previously loaded configuration section</param>
-        /// <param name="columnOptions">column options with existing array of columns to append our config columns to</param>
-        private static void GenerateDataColumnsFromConfig(MSSqlServerConfigurationSection serviceConfigSection,
-            ColumnOptions columnOptions)
-        {
-            foreach (ColumnConfig c in serviceConfigSection.Columns)
-            {
-                // Set the type based on the defined SQL type from config
-                DataColumn column = new DataColumn(c.ColumnName);
-
-                Type dataType = null;
-
-                switch (c.DataType)
-                {
-                    case "bigint":
-                        dataType = typeof(long);
-                        break;
-                    case "bit":
-                        dataType = typeof(bool);
-                        break;
-                    case "char":
-                    case "nchar":
-                    case "ntext":
-                    case "nvarchar":
-                    case "text":
-                    case "varchar":
-                        dataType = typeof(string);
-                        break;
-                    case "date":
-                    case "datetime":
-                    case "datetime2":
-                    case "smalldatetime":
-                        dataType = typeof(DateTime);
-                        break;
-                    case "decimal":
-                    case "money":
-                    case "numeric":
-                    case "smallmoney":
-                        dataType = typeof(Decimal);
-                        break;
-                    case "float":
-                        dataType = typeof(double);
-                        break;
-                    case "int":
-                        dataType = typeof(int);
-                        break;
-                    case "real":
-                        dataType = typeof(float);
-                        break;
-                    case "smallint":
-                        dataType = typeof(short);
-                        break;
-                    case "time":
-                        dataType = typeof(TimeSpan);
-                        break;
-                    case "uniqueidentifier":
-                        dataType = typeof(Guid);
-                        break;
-                }
-                column.DataType = dataType;
-                if (columnOptions.AdditionalDataColumns == null)
-                {
-                    columnOptions.AdditionalDataColumns = new Collection<DataColumn>();
-                }
-                columnOptions.AdditionalDataColumns.Add(column);
-            }
         }
     }
 }

@@ -1,18 +1,14 @@
 ﻿using Dapper;
 using FluentAssertions;
+using System;
 using System.Data.SqlClient;
 using Xunit;
 
 namespace Serilog.Sinks.MSSqlServer.Tests
 {
     [Collection("LogTest")]
-    public class TestPropertiesColumnFiltering
+    public class TestPropertiesColumnFiltering : IDisposable
     {
-        internal class PropertiesColumns
-        {
-            public string Properties { get; set; }
-        }
-
         [Fact]
         public void FilteredProperties()
         {
@@ -81,6 +77,11 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 logEvents.Should().Contain(e => e.Properties.Contains("AValue"));
                 logEvents.Should().NotContain(e => e.Properties.Contains("BValue"));
             }
+        }
+
+        public void Dispose()
+        {
+            DatabaseFixture.DropTable();
         }
     }
 }

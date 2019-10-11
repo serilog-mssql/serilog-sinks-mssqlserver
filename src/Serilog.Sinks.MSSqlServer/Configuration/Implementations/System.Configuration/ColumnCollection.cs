@@ -12,33 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Serilog.Configuration
-{
-    using System;
-    using System.Configuration;
+using System.Configuration;
 
-    /// <summary>
-    /// Collection of configuration items for use in generating DataColumn[]
-    /// </summary>
+// Disable XML comment warnings for internal config classes which are required to have public members
+#pragma warning disable 1591
+
+namespace Serilog.Sinks.MSSqlServer
+{
     public class ColumnCollection : ConfigurationElementCollection
     {
-        /// <summary>
-        /// Create new element
-        /// </summary>
-        /// <returns>new ColumnConfig instance</returns>
         protected override ConfigurationElement CreateNewElement()
         {
             return new ColumnConfig();
         }
 
-        /// <summary>
-        /// Fetch Key for the Element
-        /// </summary>
-        /// <param name="element"></param>
-        /// <returns>ColumnName</returns>
         protected override object GetElementKey(ConfigurationElement element)
         {
             return ((ColumnConfig)element).ColumnName;
         }
     }
 }
+
+#pragma warning restore 1591
+

@@ -6,6 +6,11 @@
     public enum StandardColumn
     {
         /// <summary>
+        /// The optional primary key
+        /// </summary>
+        Id,
+
+        /// <summary>
         /// The message rendered with the template given the properties associated with the event.
         /// </summary>
         Message,

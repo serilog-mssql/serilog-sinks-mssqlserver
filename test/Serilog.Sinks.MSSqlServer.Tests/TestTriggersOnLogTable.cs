@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Data.SqlClient;
-using System.Diagnostics;
 using Dapper;
 using FluentAssertions;
 using Xunit;
@@ -8,34 +7,23 @@ using Xunit;
 namespace Serilog.Sinks.MSSqlServer.Tests
 {
     [Collection("LogTest")]
-    public class TestTriggersOnLogTable
+    public class TestTriggersOnLogTable : IDisposable
     {
         [Fact]
         public void TestTriggerOnLogTableFire()
         {
             // arrange
-            var logTriggerTableName = $"Trigger{DatabaseFixture.LogTableName}Trigger";
-            var logTableName = $"{DatabaseFixture.LogTableName}WithTrigger";
             var loggerConfiguration = new LoggerConfiguration();
             Log.Logger = loggerConfiguration.WriteTo.MSSqlServer(
                 connectionString: DatabaseFixture.LogEventsConnectionString,
-                tableName: logTableName,
+                tableName: DatabaseFixture.LogTableName,
                 autoCreateSqlTable: true,
                 batchPostingLimit: 1,
                 period: TimeSpan.FromSeconds(10),
                 columnOptions: new ColumnOptions())
                 .CreateLogger();
 
-            using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
-            {
-                conn.Execute($"CREATE TABLE {logTriggerTableName} ([Id] [UNIQUEIDENTIFIER] NOT NULL, [Data] [NVARCHAR](50) NOT NULL)");
-                conn.Execute($@"CREATE TRIGGER {logTriggerTableName}NoTrigger ON {logTableName} 
-AFTER INSERT 
-AS
-BEGIN 
-INSERT INTO {logTriggerTableName} VALUES (NEWID(), 'Data') 
-END");
-            }
+            CreateTrigger();
 
             // act
             const string loggingInformationMessage = "Logging Information message";
@@ -57,28 +45,17 @@ END");
         {
             // arrange
             var options = new ColumnOptions { DisableTriggers = true };
-            var logTriggerTableName = $"{DatabaseFixture.LogTableName}NoTrigger";
-            var logTableName = $"{DatabaseFixture.LogTableName}WithTrigger";
             var loggerConfiguration = new LoggerConfiguration();
             Log.Logger = loggerConfiguration.WriteTo.MSSqlServer(
                 connectionString: DatabaseFixture.LogEventsConnectionString,
-                tableName: logTableName,
+                tableName: DatabaseFixture.LogTableName,
                 autoCreateSqlTable: true,
                 batchPostingLimit: 1,
                 period: TimeSpan.FromSeconds(10),
                 columnOptions: options)
                 .CreateLogger();
 
-            using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
-            {
-                conn.Execute($"CREATE TABLE {logTriggerTableName} ([Id] [UNIQUEIDENTIFIER] NOT NULL, [Data] [NVARCHAR](50) NOT NULL)");
-                conn.Execute($@"CREATE TRIGGER {logTableName}NoTrigger ON {logTableName} 
-AFTER INSERT 
-AS
-BEGIN
-INSERT INTO {logTriggerTableName} VALUES (NEWID(), 'Data')
-END");
-            }
+            CreateTrigger();
 
             // act
             const string loggingInformationMessage = "Logging Information message";
@@ -99,26 +76,15 @@ END");
         public void TestAuditTriggerOnLogTableFire()
         {
             // arrange
-            var logTriggerTableName = $"TriggerAudit{DatabaseFixture.LogTableName}Trigger";
-            var logTableName = $"{DatabaseFixture.LogTableName}WithTrigger";
             var loggerConfiguration = new LoggerConfiguration();
             Log.Logger = loggerConfiguration.AuditTo.MSSqlServer(
                 connectionString: DatabaseFixture.LogEventsConnectionString,
-                tableName: logTableName,
+                tableName: DatabaseFixture.LogTableName,
                 autoCreateSqlTable: true,
                 columnOptions: new ColumnOptions())
                 .CreateLogger();
 
-            using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
-            {
-                conn.Execute($"CREATE TABLE {logTriggerTableName} ([Id] [UNIQUEIDENTIFIER] NOT NULL, [Data] [NVARCHAR](50) NOT NULL)");
-                conn.Execute($@"CREATE TRIGGER {logTriggerTableName}NoTrigger ON {logTableName} 
-AFTER INSERT 
-AS
-BEGIN 
-INSERT INTO {logTriggerTableName} VALUES (NEWID(), 'Data') 
-END");
-            }
+            CreateTrigger();
 
             // act
             const string loggingInformationMessage = "Logging Information message";
@@ -140,21 +106,40 @@ END");
         {
             // arrange
             var options = new ColumnOptions { DisableTriggers = true };
-            var logTriggerTableName = $"{DatabaseFixture.LogTableName}NoTrigger";
-            var logTableName = $"{DatabaseFixture.LogTableName}WithTrigger";
             var loggerConfiguration = new LoggerConfiguration();
             Assert.Throws<NotSupportedException>(() => loggerConfiguration.AuditTo.MSSqlServer(
                 connectionString: DatabaseFixture.LogEventsConnectionString,
-                tableName: logTableName,
+                tableName: DatabaseFixture.LogTableName,
                 autoCreateSqlTable: true,
                 columnOptions: options)
                 .CreateLogger());
+
+            // throws, should be no table to delete unless the test fails
+            DatabaseFixture.DropTable();
         }
 
-        internal class TestTriggerEntry
+        private string logTriggerTableName => $"{DatabaseFixture.LogTableName}Trigger";
+        private string logTriggerName => $"{logTriggerTableName}Trigger";
+
+        private void CreateTrigger()
         {
-            public Guid Id { get; set; }
-            public string Data { get; set; }
+            using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
+            {
+                conn.Execute($"CREATE TABLE {logTriggerTableName} ([Id] [UNIQUEIDENTIFIER] NOT NULL, [Data] [NVARCHAR](50) NOT NULL)");
+                conn.Execute($@"
+CREATE TRIGGER {logTriggerName} ON {DatabaseFixture.LogTableName} 
+AFTER INSERT 
+AS
+BEGIN 
+INSERT INTO {logTriggerTableName} VALUES (NEWID(), 'Data') 
+END");
+            }
+        }
+
+        public void Dispose()
+        {
+            DatabaseFixture.DropTable();
+            DatabaseFixture.DropTable(logTriggerTableName);
         }
     }
 }
