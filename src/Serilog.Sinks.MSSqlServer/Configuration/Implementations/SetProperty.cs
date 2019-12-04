@@ -8,12 +8,14 @@ namespace Serilog.Sinks.MSSqlServer
     public static partial class SetProperty
     {
         // Usage:
-        // SetProperty.IfValueNotNull<bool>(stringFromConfig, (boolOutputValue) => opts.BoolProperty = boolOutputValue);
+#pragma warning disable S125 // Sections of code should not be commented out
+                            // SetProperty.IfValueNotNull<bool>(stringFromConfig, (boolOutputValue) => opts.BoolProperty = boolOutputValue);
 
         /// <summary>
         /// Simulates passing a property-setter to an "out" argument.
         /// </summary>
-        public delegate void PropertySetter<T>(T value);
+        public delegate void PropertySetter<in T>(T value);
+#pragma warning restore S125 // Sections of code should not be commented out
 
         /// <summary>
         /// This will only set a value (execute the PropertySetter delegate) if the value is non-null.

@@ -18,8 +18,8 @@ using Serilog.Events;
 using System;
 using System.Data;
 using System.Data.SqlClient;
-using System.Linq;
 using System.Text;
+using Microsoft.Azure.Services.AppAuthentication;
 
 namespace Serilog.Sinks.MSSqlServer
 {
@@ -40,25 +40,32 @@ namespace Serilog.Sinks.MSSqlServer
         /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
         /// <param name="autoCreateSqlTable">Create log table with the provided name on destination sql server.</param>
         /// <param name="columnOptions">Options that pertain to columns</param>
+        /// <param name="useMsi">Option to use MSI</param>
+        /// <param name="azureServiceTokenProviderResource">Resource required in AzureServiceTokenProvider.GetAccessTokenAsync(azureServiceTokenProviderResource). This will error if null, and useMsi is st to true</param>
         public MSSqlServerAuditSink(
             string connectionString,
             string tableName,
             IFormatProvider formatProvider,
             bool autoCreateSqlTable = false,
             ColumnOptions columnOptions = null,
-            string schemaName = "dbo"
-            )
+            string schemaName = "dbo",
+            bool useMsi = false,
+            string azureServiceTokenProviderResource = null)
         {
             columnOptions.FinalizeConfigurationForSinkConstructor();
 
+#pragma warning disable S2589 // Boolean expressions should not be gratuitous
             if (columnOptions != null)
+#pragma warning restore S2589 // Boolean expressions should not be gratuitous
             {
+#pragma warning disable S1066 // Collapsible "if" statements should be merged
                 if (columnOptions.DisableTriggers)
+#pragma warning restore S1066 // Collapsible "if" statements should be merged
                     throw new NotSupportedException($"The {nameof(ColumnOptions.DisableTriggers)} option is not supported for auditing.");
             }
 
-            _traits = new MSSqlServerSinkTraits(connectionString, tableName, schemaName, columnOptions, formatProvider, autoCreateSqlTable);
-            
+            _traits = new MSSqlServerSinkTraits(connectionString, tableName, schemaName, columnOptions, formatProvider, autoCreateSqlTable, useMsi, azureServiceTokenProviderResource);
+
         }
 
         /// <summary>Emit the provided log event to the sink.</summary>
@@ -67,10 +74,16 @@ namespace Serilog.Sinks.MSSqlServer
         {
             try
             {
-                using (SqlConnection connection = new SqlConnection(_traits.connectionString))
+                using (var cn = new SqlConnection(_traits.connectionString))
                 {
-                    connection.Open();
-                    using (SqlCommand command = connection.CreateCommand())
+                    if (_traits.useMsi)
+                    {
+                        cn.AccessToken = new AzureServiceTokenProvider()
+                            .GetAccessTokenAsync(_traits.azureServiceTokenProviderResource).Result;
+                    }
+
+                    cn.Open();
+                    using (SqlCommand command = cn.CreateCommand())
                     {
                         command.CommandType = CommandType.Text;
 
@@ -90,7 +103,7 @@ namespace Serilog.Sinks.MSSqlServer
                             parameterList.Append("@P");
                             parameterList.Append(index);
 
-                            SqlParameter parameter = new SqlParameter($"@P{index}", field.Value ?? DBNull.Value);                            
+                            SqlParameter parameter = new SqlParameter($"@P{index}", field.Value ?? DBNull.Value);
 
                             // The default is SqlDbType.DateTime, which will truncate the DateTime value if the actual
                             // type in the database table is datetime2. So we explicitly set it to DateTime2, which will
@@ -117,7 +130,7 @@ namespace Serilog.Sinks.MSSqlServer
             {
                 SelfLog.WriteLine("Unable to write log event to the database due to following error: {1}", ex.Message);
                 throw;
-            }            
+            }
         }
 
         /// <summary>

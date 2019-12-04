@@ -45,6 +45,8 @@ namespace Serilog
         /// <param name="columnOptions">An externally-modified group of column settings</param>
         /// <param name="columnOptionsSection">A config section defining various column settings</param>
         /// <param name="schemaName">Name of the schema for the table to store the data in. The default is 'dbo'.</param>
+        /// <param name="useMsi">Option to use MSI</param>
+        /// <param name="azureServiceTokenProviderResource">Resource required in AzureServiceTokenProvider.GetAccessTokenAsync(azureServiceTokenProviderResource). This will error if null, and useMsi is st to true</param>
         /// <returns>Logger configuration, allowing configuration to continue.</returns>
         /// <exception cref="ArgumentNullException">A required parameter is null.</exception>
         public static LoggerConfiguration MSSqlServer(
@@ -59,15 +61,21 @@ namespace Serilog
             bool autoCreateSqlTable = false,
             ColumnOptions columnOptions = null,
             IConfigurationSection columnOptionsSection = null,
-            string schemaName = "dbo"
+            string schemaName = "dbo",
+            bool useMsi = false,
+            string azureServiceTokenProviderResource = null
             )
         {
-            if(loggerConfiguration == null)
+            if (useMsi && string.IsNullOrWhiteSpace(azureServiceTokenProviderResource))
+                throw new ArgumentNullException(nameof(azureServiceTokenProviderResource), "If useMsi is set to true, you must also provide an azureServiceTokenProviderResource");
+
+            if (loggerConfiguration == null)
                 throw new ArgumentNullException("loggerConfiguration");
 
             var defaultedPeriod = period ?? MSSqlServerSink.DefaultPeriod;
             var connectionStr = ApplyMicrosoftExtensionsConfiguration.GetConnectionString(connectionString, appConfiguration);
             var colOpts = ApplyMicrosoftExtensionsConfiguration.ConfigureColumnOptions(columnOptions, columnOptionsSection);
+            var tokenResource = useMsi ? ApplyMicrosoftExtensionsConfiguration.GetAzureServiceTokenProviderResource(azureServiceTokenProviderResource, appConfiguration) : null;
 
             return loggerConfiguration.Sink(
                 new MSSqlServerSink(
@@ -78,7 +86,9 @@ namespace Serilog
                     formatProvider,
                     autoCreateSqlTable,
                     colOpts,
-                    schemaName
+                    schemaName,
+                    useMsi,
+                    tokenResource
                     ),
                 restrictedToMinimumLevel);
         }
@@ -96,6 +106,8 @@ namespace Serilog
         /// <param name="columnOptions">An externally-modified group of column settings</param>
         /// <param name="columnOptionsSection">A config section defining various column settings</param>
         /// <param name="schemaName">Name of the schema for the table to store the data in. The default is 'dbo'.</param>
+        /// <param name="useMsi">Option to use MSI</param>
+        /// <param name="azureServiceTokenProviderResource">Resource required in AzureServiceTokenProvider.GetAccessTokenAsync(azureServiceTokenProviderResource). This will error if null, and useMsi is st to true</param>
         /// <returns>Logger configuration, allowing configuration to continue.</returns>
         /// <exception cref="ArgumentNullException">A required parameter is null.</exception>
         public static LoggerConfiguration MSSqlServer(
@@ -108,23 +120,31 @@ namespace Serilog
             bool autoCreateSqlTable = false,
             ColumnOptions columnOptions = null,
             IConfigurationSection columnOptionsSection = null,
-            string schemaName = "dbo"
+            string schemaName = "dbo",
+            bool useMsi = false,
+            string azureServiceTokenProviderResource = null
             )
         {
-            if(loggerAuditSinkConfiguration == null)
+            if (useMsi && string.IsNullOrWhiteSpace(azureServiceTokenProviderResource))
+                throw new ArgumentNullException(nameof(azureServiceTokenProviderResource), "If useMsi is set to true, you must also provide an azureServiceTokenProviderResource");
+
+            if (loggerAuditSinkConfiguration == null)
                 throw new ArgumentNullException("loggerAuditSinkConfiguration");
 
             var connectionStr = ApplyMicrosoftExtensionsConfiguration.GetConnectionString(connectionString, appConfiguration);
             var colOpts = ApplyMicrosoftExtensionsConfiguration.ConfigureColumnOptions(columnOptions, columnOptionsSection);
+            var tokenResource = useMsi ? ApplyMicrosoftExtensionsConfiguration.GetAzureServiceTokenProviderResource(azureServiceTokenProviderResource, appConfiguration) : null;
 
             return loggerAuditSinkConfiguration.Sink(
                 new MSSqlServerAuditSink(
-                    connectionString,
+                    connectionStr,
                     tableName,
                     formatProvider,
                     autoCreateSqlTable,
-                    columnOptions,
-                    schemaName
+                    colOpts,
+                    schemaName,
+                    useMsi,
+                    tokenResource
                     ),
                 restrictedToMinimumLevel);
         }

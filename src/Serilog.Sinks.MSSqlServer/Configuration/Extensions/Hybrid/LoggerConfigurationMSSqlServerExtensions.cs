@@ -34,7 +34,8 @@ namespace Serilog
         /// <summary>
         /// The configuration section name for app.config or web.config configuration files.
         /// </summary>
-        public static string AppConfigSectionName = "MSSqlServerSettingsSection";
+        public static string AppConfigSectionName { get; } = "MSSqlServerSettingsSection";
+
 
         /// <summary>
         /// Adds a sink that writes log events to a table in a MSSqlServer database.
@@ -54,6 +55,8 @@ namespace Serilog
         /// <param name="columnOptions">An externally-modified group of column settings</param>
         /// <param name="columnOptionsSection">A config section defining various column settings</param>
         /// <param name="schemaName">Name of the schema for the table to store the data in. The default is 'dbo'.</param>
+        /// <param name="useMsi">Option to use MSI</param>
+        /// <param name="azureServiceTokenProviderResource">Resource required in AzureServiceTokenProvider.GetAccessTokenAsync(azureServiceTokenProviderResource). This will error if null, and useMsi is st to true</param>
         /// <returns>Logger configuration, allowing configuration to continue.</returns>
         /// <exception cref="ArgumentNullException">A required parameter is null.</exception>
         public static LoggerConfiguration MSSqlServer(
@@ -68,20 +71,28 @@ namespace Serilog
             bool autoCreateSqlTable = false,
             ColumnOptions columnOptions = null,
             IConfigurationSection columnOptionsSection = null,
-            string schemaName = "dbo"
+            string schemaName = "dbo",
+            bool useMsi = false,
+            string azureServiceTokenProviderResource = null
             )
         {
-            if(loggerConfiguration == null)
+            if (useMsi && string.IsNullOrWhiteSpace(azureServiceTokenProviderResource))
+                throw new ArgumentNullException(nameof(azureServiceTokenProviderResource), "If useMsi is set to true, you must also provide an azureServiceTokenProviderResource");
+
+            if (loggerConfiguration == null)
                 throw new ArgumentNullException("loggerConfiguration");
 
             var defaultedPeriod = period ?? MSSqlServerSink.DefaultPeriod;
             var colOpts = columnOptions ?? new ColumnOptions();
             var connStr = connectionString;
+            var tokenResource = azureServiceTokenProviderResource;
 
             if (ConfigurationManager.GetSection(AppConfigSectionName) is MSSqlServerConfigurationSection serviceConfigSection)
             {
                 colOpts = ApplySystemConfiguration.ConfigureColumnOptions(serviceConfigSection, colOpts);
                 connStr = ApplySystemConfiguration.GetConnectionString(connStr);
+                if(useMsi)
+                    tokenResource = ApplySystemConfiguration.GetAzureServiceTokenProviderResource(tokenResource);
 
                 if (appConfiguration != null || columnOptionsSection != null)
                     SelfLog.WriteLine("Warning: Both System.Configuration (app.config or web.config) and Microsoft.Extensions.Configuration are being applied to the MSSQLServer sink.");
@@ -91,6 +102,8 @@ namespace Serilog
             {
                 connStr = ApplyMicrosoftExtensionsConfiguration.GetConnectionString(connStr, appConfiguration);
                 colOpts = ApplyMicrosoftExtensionsConfiguration.ConfigureColumnOptions(colOpts, columnOptionsSection);
+                if (useMsi)
+                    tokenResource = ApplyMicrosoftExtensionsConfiguration.GetAzureServiceTokenProviderResource(tokenResource, appConfiguration);
             }
 
             return loggerConfiguration.Sink(
@@ -102,7 +115,9 @@ namespace Serilog
                     formatProvider,
                     autoCreateSqlTable,
                     colOpts,
-                    schemaName
+                    schemaName,
+                    useMsi,
+                    tokenResource
                     ),
                 restrictedToMinimumLevel);
         }
@@ -120,6 +135,8 @@ namespace Serilog
         /// <param name="columnOptions">An externally-modified group of column settings</param>
         /// <param name="columnOptionsSection">A config section defining various column settings</param>
         /// <param name="schemaName">Name of the schema for the table to store the data in. The default is 'dbo'.</param>
+        /// <param name="useMsi">Option to use MSI</param>
+        /// <param name="azureServiceTokenProviderResource">Resource required in AzureServiceTokenProvider.GetAccessTokenAsync(azureServiceTokenProviderResource). This will error if null, and useMsi is st to true</param>
         /// <returns>Logger configuration, allowing configuration to continue.</returns>
         /// <exception cref="ArgumentNullException">A required parameter is null.</exception>
         public static LoggerConfiguration MSSqlServer(
@@ -132,19 +149,26 @@ namespace Serilog
             bool autoCreateSqlTable = false,
             ColumnOptions columnOptions = null,
             IConfigurationSection columnOptionsSection = null,
-            string schemaName = "dbo"
+            string schemaName = "dbo",
+            bool useMsi = false,
+            string azureServiceTokenProviderResource = null
             )
         {
-            if(loggerAuditSinkConfiguration == null)
+            if (useMsi && string.IsNullOrWhiteSpace(azureServiceTokenProviderResource))
+                throw new ArgumentNullException(nameof(azureServiceTokenProviderResource), "If useMsi is set to true, you must also provide an azureServiceTokenProviderResource");
+
+            if (loggerAuditSinkConfiguration == null)
                 throw new ArgumentNullException("loggerAuditSinkConfiguration");
 
             var colOpts = columnOptions ?? new ColumnOptions();
             var connStr = connectionString;
+            var tokenResource = azureServiceTokenProviderResource;
 
             if (ConfigurationManager.GetSection(AppConfigSectionName) is MSSqlServerConfigurationSection serviceConfigSection)
             {
                 colOpts = ApplySystemConfiguration.ConfigureColumnOptions(serviceConfigSection, colOpts);
                 connStr = ApplySystemConfiguration.GetConnectionString(connStr);
+                tokenResource = ApplySystemConfiguration.GetAzureServiceTokenProviderResource(tokenResource);
 
                 if (appConfiguration != null || columnOptionsSection != null)
                     SelfLog.WriteLine("Warning: Both System.Configuration (app.config or web.config) and Microsoft.Extensions.Configuration are being applied to the MSSQLServer sink.");
@@ -154,6 +178,7 @@ namespace Serilog
             {
                 connStr = ApplyMicrosoftExtensionsConfiguration.GetConnectionString(connStr, appConfiguration);
                 colOpts = ApplyMicrosoftExtensionsConfiguration.ConfigureColumnOptions(colOpts, columnOptionsSection);
+                tokenResource = ApplyMicrosoftExtensionsConfiguration.GetAzureServiceTokenProviderResource(tokenResource, appConfiguration);
             }
 
             return loggerAuditSinkConfiguration.Sink(
@@ -163,7 +188,9 @@ namespace Serilog
                     formatProvider,
                     autoCreateSqlTable,
                     colOpts,
-                    schemaName
+                    schemaName,
+                    useMsi,
+                    tokenResource
                     ),
                 restrictedToMinimumLevel);
         }

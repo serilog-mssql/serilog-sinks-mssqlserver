@@ -35,36 +35,36 @@ namespace Serilog.Sinks.MSSqlServer
         [ConfigurationProperty("ColumnName", IsRequired = true, IsKey = true)]
         public virtual string ColumnName
         {
-            get { return (string)this["ColumnName"]; }
-            set { this["ColumnName"] = value; }
+            get { return (string)this[nameof(ColumnName)]; }
+            set { this[nameof(ColumnName)] = value; }
         }
 
         [ConfigurationProperty("DataType")]
         public string DataType
         {
-            get { return (string)this["DataType"]; }
-            set { this["DataType"] = value;  }
+            get { return (string)this[nameof(DataType)]; }
+            set { this[nameof(DataType)] = value;  }
         }
 
         [ConfigurationProperty("DataLength")]
         public string DataLength
         {
-            get { return (string)this["DataLength"]; }
-            set { this["DataLength"] = value; }
+            get { return (string)this[nameof(DataLength)]; }
+            set { this[nameof(DataLength)] = value; }
         }
 
         [ConfigurationProperty("AllowNull")]
         public string AllowNull
         {
-            get { return (string)this["AllowNull"]; }
-            set { this["AllowNull"] = value; }
+            get { return (string)this[nameof(AllowNull)]; }
+            set { this[nameof(AllowNull)] = value; }
         }
 
         [ConfigurationProperty("NonClusteredIndex")]
         public string NonClusteredIndex
         {
-            get { return (string)this["NonClusteredIndex"]; }
-            set { this["NonClusteredIndex"] = value; }
+            get { return (string)this[nameof(NonClusteredIndex)]; }
+            set { this[nameof(NonClusteredIndex)] = value; }
         }
 
         internal SqlColumn AsSqlColumn()
@@ -72,18 +72,18 @@ namespace Serilog.Sinks.MSSqlServer
             var sqlColumn = new SqlColumn();
 
             // inheritors can override IsRequired; config might not change the names of Standard Columns
-            SetProperty.IfProvidedNotEmpty<string>(this, "ColumnName", (val) => sqlColumn.ColumnName = val);
+            SetProperty.IfProvidedNotEmpty<string>(this, nameof(ColumnName), (val) => sqlColumn.ColumnName = val);
 
-            SetProperty.IfProvidedNotEmpty<string>(this, "DataType", (val) => sqlColumn.SetDataTypeFromConfigString(val));
+            SetProperty.IfProvidedNotEmpty<string>(this, nameof(DataType), (val) => sqlColumn.SetDataTypeFromConfigString(val));
 
-            SetProperty.IfProvided<int>(this, "DataLength", (val) => sqlColumn.DataLength = val);
+            SetProperty.IfProvided<int>(this, nameof(DataLength), (val) => sqlColumn.DataLength = val);
 
             if (sqlColumn.DataLength == 0 && SqlDataTypes.DataLengthRequired.Contains(sqlColumn.DataType))
                 throw new ArgumentException($"SQL column {sqlColumn.ColumnName} of data type {sqlColumn.DataType.ToString()} requires a non-zero DataLength property.");
 
-            SetProperty.IfProvided<bool>(this, "AllowNull", (val) => sqlColumn.AllowNull = val);
+            SetProperty.IfProvided<bool>(this, nameof(AllowNull), (val) => sqlColumn.AllowNull = val);
 
-            SetProperty.IfProvided<bool>(this, "NonClusteredIndex", (val) => sqlColumn.NonClusteredIndex = val);
+            SetProperty.IfProvided<bool>(this, nameof(NonClusteredIndex), (val) => sqlColumn.NonClusteredIndex = val);
 
             return sqlColumn;
         }

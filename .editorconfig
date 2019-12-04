@@ -14,3 +14,14 @@ end_of_line = lf
 
 [*.{cmd, bat}]
 end_of_line = crlf
+
+[*.cs]
+
+# CA2227: Collection properties should be read only
+dotnet_diagnostic.CA2227.severity = none
+
+# CA1303: Do not pass literals as localized parameters
+dotnet_diagnostic.CA1303.severity = none
+
+# S108: Nested blocks of code should not be left empty
+dotnet_diagnostic.S108.severity = none

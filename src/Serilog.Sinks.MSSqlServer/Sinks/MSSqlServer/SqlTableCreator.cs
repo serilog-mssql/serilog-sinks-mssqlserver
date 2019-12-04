@@ -2,30 +2,40 @@
 using System.Data;
 using System.Data.SqlClient;
 using System.Text;
+using Microsoft.Azure.Services.AppAuthentication;
 
 namespace Serilog.Sinks.MSSqlServer
 {
     internal class SqlTableCreator
     {
         private readonly string connectionString;
-        private string tableName;
-        private string schemaName;
-        private DataTable dataTable;
-        private ColumnOptions columnOptions;
+        private readonly string tableName;
+        private readonly string schemaName;
+        private readonly DataTable dataTable;
+        private readonly ColumnOptions columnOptions;
+        private readonly bool useMsi;
+        private readonly string azureServiceTokenProviderResource;
 
-        public SqlTableCreator(string connectionString, string schemaName, string tableName, DataTable dataTable, ColumnOptions columnOptions)
+        public SqlTableCreator(string connectionString, string schemaName, string tableName, DataTable dataTable, ColumnOptions columnOptions, bool useMsi = false, string azureServiceTokenProviderResource = null)
         {
             this.connectionString = connectionString;
             this.schemaName = schemaName;
             this.tableName = tableName;
             this.dataTable = dataTable;
             this.columnOptions = columnOptions;
+            this.useMsi = useMsi;
+            this.azureServiceTokenProviderResource = azureServiceTokenProviderResource;
         }
 
         public int CreateTable()
         {
-            using (var conn = new SqlConnection(connectionString))
+            using (var conn = new SqlConnection(this.connectionString))
             {
+                if (useMsi)
+                {
+                    conn.AccessToken = new AzureServiceTokenProvider()
+                        .GetAccessTokenAsync(azureServiceTokenProviderResource).Result;
+                }
                 string sql = GetSqlFromDataTable();
                 using (SqlCommand cmd = new SqlCommand(sql, conn))
                 {
@@ -94,7 +104,7 @@ namespace Serilog.Sinks.MSSqlServer
         // Examples of possible output:
         // [Id] BIGINT IDENTITY(1,1) NOT NULL
         // [Message] VARCHAR(1024) NULL
-        private string GetColumnDDL(SqlColumn column)
+        private static string GetColumnDDL(SqlColumn column)
         {
             var sb = new StringBuilder();
 

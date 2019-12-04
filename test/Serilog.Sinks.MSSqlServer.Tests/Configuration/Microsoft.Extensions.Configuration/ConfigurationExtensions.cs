@@ -14,11 +14,15 @@ namespace Serilog.Sinks.MSSqlServer.Tests
     {
         static string ConnectionStringName = "NamedConnection";
         static string ColumnOptionsSection = "CustomColumnNames";
+        static string DatabaseTokenProviderSection = "DatabaseTokenProviderSettings";
 
         IConfiguration TestConfiguration() =>
             new ConfigurationBuilder()
                 .AddInMemoryCollection(new Dictionary<string, string>
                 {
+                    { $"{DatabaseTokenProviderSection}:UseMsi", "true" },
+                    { $"{DatabaseTokenProviderSection}:Resource", "https://database.windows.net/" },
+
                     { $"ConnectionStrings:{ConnectionStringName}", DatabaseFixture.LogEventsConnectionString },
 
                     { $"{ColumnOptionsSection}:message:columnName", "CustomMessage" },
@@ -29,6 +33,26 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                     { $"{ColumnOptionsSection}:properties:columnName", "CustomProperties" },
                 })
                 .Build();
+
+        [Fact]
+        public void AzureTokenProviderResourceByName()
+        {
+            var appConfig = TestConfiguration();
+
+            var loggerConfiguration = new LoggerConfiguration();
+            Log.Logger = loggerConfiguration.WriteTo.MSSqlServer(
+                    connectionString: ConnectionStringName,
+                    tableName: DatabaseFixture.LogTableName,
+                    autoCreateSqlTable: true,
+                    appConfiguration: appConfig,
+                    useMsi: true,
+                    azureServiceTokenProviderResource: "DatabaseTokenProviderSettings:Resource")
+                .CreateLogger();
+
+            // should not throw
+
+            Log.CloseAndFlush();
+        }
 
         [Fact]
         public void ConnectionStringByName()

@@ -8,7 +8,7 @@ using System.Linq;
 namespace Serilog.Sinks.MSSqlServer
 {
     /// <summary>
-    /// Configures the sink's connection string and ColumnOtions object.
+    /// Configures the sink's connection string and ColumnOtions object, and azure token provider resource.
     /// </summary>
     internal static class ApplyMicrosoftExtensionsConfiguration
     {
@@ -28,6 +28,26 @@ namespace Serilog.Sinks.MSSqlServer
             if (string.IsNullOrEmpty(cs))
             {
                 SelfLog.WriteLine("MSSqlServer sink configured value {0} is not found in ConnectionStrings settings and does not appear to be a raw connection string.", nameOrConnectionString);
+            }
+            return cs;
+        }
+
+        /// <summary>
+        /// Examine if supplied resource string is a reference to an item in web.config
+        /// If it is, return the named item, if not, return string as supplied.
+        /// </summary>
+        /// <param name="nameOrResource"></param>
+        /// <param name="appConfiguration"></param>
+        /// <returns></returns>
+        internal static string GetAzureServiceTokenProviderResource(string nameOrResource, IConfiguration appConfiguration)
+        {
+            // If there is an `/`, we assume this is a  raw resource string not a named value
+            // If there are no `/`, attempt to pull the named value from config
+            if (nameOrResource.IndexOf('/') > -1) return nameOrResource;
+            string cs = appConfiguration?.GetValue<string>(nameOrResource);
+            if (string.IsNullOrEmpty(cs))
+            {
+                SelfLog.WriteLine("MSSqlServer sink configured value {0} is not found in app settings and does not appear to be a raw resource string such as http://login.microsoftonline.com.", nameOrResource);
             }
             return cs;
         }

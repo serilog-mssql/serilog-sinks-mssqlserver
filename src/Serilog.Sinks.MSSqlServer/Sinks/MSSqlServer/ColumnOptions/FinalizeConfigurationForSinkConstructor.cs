@@ -75,7 +75,7 @@ namespace Serilog.Sinks.MSSqlServer
             configurationFinalized = true;
         }
 
-        private void ColumnstoreCompatibilityCheck(SqlColumn column)
+        private static void ColumnstoreCompatibilityCheck(SqlColumn column)
         {
             if (!SqlDataTypes.ColumnstoreCompatible.Contains(column.DataType))
                 throw new ArgumentException($"Columnstore indexes do not support data type \"{column.DataType.ToString()}\" declared for column \"{column.ColumnName}\".");

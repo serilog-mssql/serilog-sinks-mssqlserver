@@ -48,6 +48,8 @@ namespace Serilog
         /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
         /// <param name="autoCreateSqlTable">Create log table with the provided name on destination sql server.</param>
         /// <param name="columnOptions"></param>
+        /// <param name="useMsi">Option to use MSI</param>
+        /// <param name="azureServiceTokenProviderResource">Resource required in AzureServiceTokenProvider.GetAccessTokenAsync(azureServiceTokenProviderResource). This will error if null, and useMsi is st to true</param>
         /// <returns>Logger configuration, allowing configuration to continue.</returns>
         /// <exception cref="ArgumentNullException">A required parameter is null.</exception>
         public static LoggerConfiguration MSSqlServer(
@@ -60,9 +62,13 @@ namespace Serilog
             IFormatProvider formatProvider = null,
             bool autoCreateSqlTable = false,
             ColumnOptions columnOptions = null,
-            string schemaName = "dbo"
-            )
+            string schemaName = "dbo",
+            bool useMsi = false,
+            string azureServiceTokenProviderResource = null)
         {
+            if (useMsi && string.IsNullOrWhiteSpace(azureServiceTokenProviderResource))
+                throw new ArgumentNullException(nameof(azureServiceTokenProviderResource), "If useMsi is set to true, you must also provide an azureServiceTokenProviderResource");
+
             if (loggerConfiguration == null) throw new ArgumentNullException("loggerConfiguration");
 
             var defaultedPeriod = period ?? MSSqlServerSink.DefaultPeriod;
@@ -73,6 +79,8 @@ namespace Serilog
 
             connectionString = ApplySystemConfiguration.GetConnectionString(connectionString);
 
+            var tokenResource = useMsi ? ApplySystemConfiguration.GetAzureServiceTokenProviderResource(azureServiceTokenProviderResource) : null;
+
             return loggerConfiguration.Sink(
                 new MSSqlServerSink(
                     connectionString,
@@ -82,8 +90,9 @@ namespace Serilog
                     formatProvider,
                     autoCreateSqlTable,
                     colOpts,
-                    schemaName
-                    ),
+                    schemaName,
+                    useMsi,
+                    tokenResource),
                 restrictedToMinimumLevel);
         }
 
@@ -101,6 +110,8 @@ namespace Serilog
         /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
         /// <param name="autoCreateSqlTable">Create log table with the provided name on destination sql server.</param>
         /// <param name="columnOptions"></param>
+        /// <param name="useMsi">Option to use MSI</param>
+        /// <param name="azureServiceTokenProviderResource">Resource required in AzureServiceTokenProvider.GetAccessTokenAsync(azureServiceTokenProviderResource). This will error if null, and useMsi is st to true</param>
         /// <returns>Logger configuration, allowing configuration to continue.</returns>
         /// <exception cref="ArgumentNullException">A required parameter is null.</exception>
         public static LoggerConfiguration MSSqlServer(this LoggerAuditSinkConfiguration loggerAuditSinkConfiguration,
@@ -110,8 +121,13 @@ namespace Serilog
                                                       IFormatProvider formatProvider = null,
                                                       bool autoCreateSqlTable = false,
                                                       ColumnOptions columnOptions = null,
-                                                      string schemaName = "dbo")
+                                                      string schemaName = "dbo",
+                                                      bool useMsi = false,
+                                                      string azureServiceTokenProviderResource = null)
         {
+            if (useMsi && string.IsNullOrWhiteSpace(azureServiceTokenProviderResource))
+                throw new ArgumentNullException(nameof(azureServiceTokenProviderResource), "If useMsi is set to true, you must also provide an azureServiceTokenProviderResource");
+
             if (loggerAuditSinkConfiguration == null) throw new ArgumentNullException("loggerAuditSinkConfiguration");
 
             var colOpts = columnOptions ?? new ColumnOptions();
@@ -121,6 +137,8 @@ namespace Serilog
 
             connectionString = ApplySystemConfiguration.GetConnectionString(connectionString);
 
+            var tokenResource = useMsi ? ApplySystemConfiguration.GetAzureServiceTokenProviderResource(azureServiceTokenProviderResource) : null;
+
             return loggerAuditSinkConfiguration.Sink(
                 new MSSqlServerAuditSink(
                     connectionString,
@@ -128,8 +146,9 @@ namespace Serilog
                     formatProvider,
                     autoCreateSqlTable,
                     colOpts,
-                    schemaName
-                    ),
+                    schemaName,
+                    useMsi,
+                    tokenResource),
                 restrictedToMinimumLevel);
         }
     }

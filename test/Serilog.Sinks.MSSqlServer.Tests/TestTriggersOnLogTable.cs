@@ -99,6 +99,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
 
                 logTriggerEvents.Should().NotBeNullOrEmpty();
             }
+            Assert.True(true);
         }
 
         [Fact]        

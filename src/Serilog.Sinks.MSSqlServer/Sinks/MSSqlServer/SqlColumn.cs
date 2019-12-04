@@ -95,10 +95,13 @@ namespace Serilog.Sinks.MSSqlServer
         /// </summary>
         public bool NonClusteredIndex { get; set; } = false;
 
-        // Set by the constructors of the Standard Column classes that inherit from this;
-        // allows Standard Columns and user-defined columns to coexist but remain identifiable
-        // and allows casting back to the Standard Column without a lot of switch gymnastics.
+
+#pragma warning disable S125 // Sections of code should not be commented out
+                            // Set by the constructors of the Standard Column classes that inherit from this;
+                            // allows Standard Columns and user-defined columns to coexist but remain identifiable
+                            // and allows casting back to the Standard Column without a lot of switch gymnastics.
         internal StandardColumn? StandardColumnIdentifier { get; set; } = null;
+#pragma warning restore S125 // Sections of code should not be commented out
         internal Type StandardColumnType { get; set; } = null;
 
         /// <summary>

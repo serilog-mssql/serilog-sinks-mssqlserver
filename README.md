@@ -3,7 +3,7 @@
 A Serilog sink that writes events to Microsoft SQL Server. This sink will write the log event data to a table and can optionally also store the properties inside an XML or JSON column so they can be queried. Important properties can also be written to their own separate columns.
 
 **Package** - [Serilog.Sinks.MSSqlServer](http://nuget.org/packages/serilog.sinks.mssqlserver)
-| **Minimum Platforms** - .NET Framework 4.5.2, .NET Core 2.0, .NET Standard 2.0
+| **Minimum Platforms** - .NET Framework 4.6.1, .NET Core 2.0, .NET Standard 2.0
 
 #### Topics
 
@@ -34,8 +34,12 @@ All sink configuration methods accept the following arguments, though not necess
 * `batchPostingLimit`
 * `period`
 * `formatProvider`
+* `useMsi`
+* `azureServiceTokenProviderResource`
 
 ### Basic Arguments
+
+Adding support for MSI (Managed Service Identities), and AccessTokens in sqlConnections.  
 
 At minimum, `connectionString` and `tableName` are required. If you are using an external configuration source such as an XML file or JSON file, you can use a named connection string instead of providing the full "raw" connection string.
 
@@ -70,7 +74,6 @@ Because of the way external configuration has been implemented in various .NET f
 
 | Your Framework | TFM | Project Types | External Configuration |
 | --- | --- | --- |  --- |
-| .NET Framework 4.5.2 | `net452` | app or library | _System.Configuration_ |
 | .NET Framework 4.6.1+ | `net461` | app or library | _System.Configuration_ |
 | .NET Framework 4.6.1+ | `net461` | app or library | _Microsoft.Extensions.Configuration_ |
 | .NET Standard 2.0 | `netstandard2.0` | library only | _Microsoft.Extensions.Configuration_ |

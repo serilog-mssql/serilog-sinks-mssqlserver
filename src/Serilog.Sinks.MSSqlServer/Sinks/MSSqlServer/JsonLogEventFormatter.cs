@@ -31,7 +31,7 @@ namespace Serilog.Sinks.MSSqlServer
         static readonly JsonValueFormatter ValueFormatter = new JsonValueFormatter(typeTagName: null);
         private const string COMMA_DELIMITER = ",";
 
-        MSSqlServerSinkTraits traits;
+        readonly MSSqlServerSinkTraits traits;
  
         /// <summary>
         /// Constructor. A reference to the parent Traits object is used so that JSON
@@ -142,25 +142,28 @@ namespace Serilog.Sinks.MSSqlServer
                 output.Write(":[");
 
                 var fdelim = "";
-                foreach (var format in ptoken)
+                var sw = new StringWriter();
+                using (sw)
                 {
-                    output.Write(fdelim);
-                    fdelim = COMMA_DELIMITER;
+                    foreach (var format in ptoken)
+                    {
+                        output.Write(fdelim);
+                        fdelim = COMMA_DELIMITER;
 
-                    output.Write("{\"Format\":");
-                    JsonValueFormatter.WriteQuotedJsonString(format.Format, output);
+                        output.Write("{\"Format\":");
+                        JsonValueFormatter.WriteQuotedJsonString(format.Format, output);
 
-                    output.Write(",\"Rendering\":");
-                    var sw = new StringWriter();
-                    format.Render(properties, sw);
-                    JsonValueFormatter.WriteQuotedJsonString(sw.ToString(), output);
-                    output.Write('}');
+                        output.Write(",\"Rendering\":");
+                        format.Render(properties, sw);
+                        JsonValueFormatter.WriteQuotedJsonString(sw.ToString(), output);
+                        output.Write('}');
+                    }
+
+                    output.Write(']');
                 }
 
-                output.Write(']');
+                output.Write('}');
             }
-
-            output.Write('}');
         }
     }
 }

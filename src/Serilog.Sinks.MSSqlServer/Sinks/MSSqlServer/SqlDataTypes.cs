@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlTypes;
 
 namespace Serilog.Sinks.MSSqlServer
 {
@@ -10,11 +9,15 @@ namespace Serilog.Sinks.MSSqlServer
     /// </summary>
     public static class SqlDataTypes
     {
+#pragma warning disable S2223 // Non-constant static fields should not be visible
+#pragma warning disable CA2211 // Non-constant fields should not be visible
         /// <summary>
         /// SqlDbType doesn't have anything like "None" so we indicate an unsupported type by
         /// referencing a type we can guarantee the rest of the sink will never recognize.
         /// </summary>
         public static SqlDbType NotSupported = SqlDbType.Variant;
+#pragma warning restore CA2211 // Non-constant fields should not be visible
+#pragma warning restore S2223 // Non-constant static fields should not be visible
 
         /// <summary>
         /// A collection keyed on the SqlDbType enum with values representing the equivalent DataColumn .NET type.

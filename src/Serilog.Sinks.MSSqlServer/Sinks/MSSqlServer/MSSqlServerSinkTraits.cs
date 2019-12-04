@@ -17,7 +17,6 @@ using Serilog.Events;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -27,6 +26,8 @@ namespace Serilog.Sinks.MSSqlServer
     /// <summary>Contains common functionality and properties used by both MSSqlServerSinks.</summary>
     internal sealed class MSSqlServerSinkTraits : IDisposable
     {
+        public bool useMsi { get; } = false;
+        public string azureServiceTokenProviderResource { get; } = null;
         public string connectionString { get; }
         public string tableName { get; }
         public string schemaName { get; }
@@ -37,14 +38,19 @@ namespace Serilog.Sinks.MSSqlServer
         public DataTable eventTable { get; }
         public ISet<string> standardColumnNames { get; }
 
-        public MSSqlServerSinkTraits(string connectionString, string tableName, string schemaName, ColumnOptions columnOptions, IFormatProvider formatProvider, bool autoCreateSqlTable)
+        public MSSqlServerSinkTraits(string connectionString, string tableName, string schemaName, ColumnOptions columnOptions, IFormatProvider formatProvider, bool autoCreateSqlTable, bool useMsi = false, string azureServiceTokenProviderResource = null)
         {
+            if (useMsi && string.IsNullOrWhiteSpace(azureServiceTokenProviderResource))
+                throw new ArgumentNullException(nameof(azureServiceTokenProviderResource), "If useMsi is set to true, you must also provide an azureServiceTokenProviderResource");
+
             if (string.IsNullOrWhiteSpace(connectionString))
                 throw new ArgumentNullException(nameof(connectionString));
 
             if (string.IsNullOrWhiteSpace(tableName))
                 throw new ArgumentNullException(nameof(tableName));
 
+            this.useMsi = useMsi;
+            this.azureServiceTokenProviderResource = azureServiceTokenProviderResource;
             this.connectionString = connectionString;
             this.tableName = tableName;
             this.schemaName = schemaName;
@@ -93,7 +99,7 @@ namespace Serilog.Sinks.MSSqlServer
             foreach (var column in columnOptions.Store)
             {
                 // skip Id (auto-incrementing identity)
-                if(column != StandardColumn.Id)
+                if (column != StandardColumn.Id)
                     yield return GetStandardColumnNameAndValue(column, logEvent);
             }
 
@@ -128,7 +134,9 @@ namespace Serilog.Sinks.MSSqlServer
                 case StandardColumn.LogEvent:
                     return new KeyValuePair<string, object>(columnOptions.LogEvent.ColumnName, LogEventToJson(logEvent));
                 default:
-                    throw new ArgumentOutOfRangeException();
+#pragma warning disable S3928 // Parameter names used into ArgumentException constructors should match an existing one 
+                    throw new ArgumentOutOfRangeException($"{nameof(column)} is an invalid case.");
+#pragma warning restore S3928 // Parameter names used into ArgumentException constructors should match an existing one 
             }
         }
 
@@ -260,13 +268,13 @@ namespace Serilog.Sinks.MSSqlServer
                 var standardOpts = columnOptions.GetStandardColumnOptions(standardColumn);
                 var dataColumn = standardOpts.AsDataColumn();
                 eventsTable.Columns.Add(dataColumn);
-                if(standardOpts == columnOptions.PrimaryKey)
+                if (standardOpts == columnOptions.PrimaryKey)
                     eventsTable.PrimaryKey = new DataColumn[] { dataColumn };
             }
 
             if (columnOptions.AdditionalColumns != null)
             {
-                foreach(var addCol in columnOptions.AdditionalColumns)
+                foreach (var addCol in columnOptions.AdditionalColumns)
                 {
                     var dataColumn = addCol.AsDataColumn();
                     eventsTable.Columns.Add(dataColumn);

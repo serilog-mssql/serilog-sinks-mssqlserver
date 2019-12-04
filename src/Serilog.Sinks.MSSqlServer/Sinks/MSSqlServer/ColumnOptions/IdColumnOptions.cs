@@ -38,7 +38,7 @@ namespace Serilog.Sinks.MSSqlServer
             /// <summary>
             /// The Id column must never allow null values (it is an auto-incremnting identity value and normally the primary key).
             /// </summary>
-            public new bool AllowNull // shadow base class with "new" to prevent accidentally setting this to true
+            public new static bool AllowNull // shadow base class with "new" to prevent accidentally setting this to true
             {
                 get => false;
                 set

@@ -14,11 +14,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Azure.Services.AppAuthentication;
 using Serilog.Debugging;
 using Serilog.Events;
 using Serilog.Sinks.PeriodicBatching;
@@ -43,6 +43,8 @@ namespace Serilog.Sinks.MSSqlServer
 
         private readonly MSSqlServerSinkTraits _traits;
 
+
+
         /// <summary>
         ///     Construct a sink posting to the specified database.
         /// </summary>
@@ -54,6 +56,8 @@ namespace Serilog.Sinks.MSSqlServer
         /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
         /// <param name="autoCreateSqlTable">Create log table with the provided name on destination sql server.</param>
         /// <param name="columnOptions">Options that pertain to columns</param>
+        /// <param name="useMsi">Option to use MSI</param>
+        /// <param name="azureServiceTokenProviderResource">Resource required in AzureServiceTokenProvider.GetAccessTokenAsync(azureServiceTokenProviderResource). This will error if null, and useMsi is st to true</param>
         public MSSqlServerSink(
             string connectionString,
             string tableName,
@@ -62,12 +66,13 @@ namespace Serilog.Sinks.MSSqlServer
             IFormatProvider formatProvider,
             bool autoCreateSqlTable = false,
             ColumnOptions columnOptions = null,
-            string schemaName = "dbo"
-            )
+            string schemaName = "dbo",
+            bool useMsi = false,
+            string azureServiceTokenProviderResource = null)
             : base(batchPostingLimit, period)
         {
             columnOptions.FinalizeConfigurationForSinkConstructor();
-            _traits = new MSSqlServerSinkTraits(connectionString, tableName, schemaName, columnOptions, formatProvider, autoCreateSqlTable);
+            _traits = new MSSqlServerSinkTraits(connectionString, tableName, schemaName, columnOptions, formatProvider, autoCreateSqlTable, useMsi, azureServiceTokenProviderResource);
         }
 
         /// <summary>
@@ -88,6 +93,11 @@ namespace Serilog.Sinks.MSSqlServer
             {
                 using (var cn = new SqlConnection(_traits.connectionString))
                 {
+                    if (_traits.useMsi)
+                    {
+                        cn.AccessToken = new AzureServiceTokenProvider()
+                            .GetAccessTokenAsync(_traits.azureServiceTokenProviderResource).Result;
+                    }
                     await cn.OpenAsync().ConfigureAwait(false);
                     using (var copy = _traits.columnOptions.DisableTriggers
                             ? new SqlBulkCopy(cn)

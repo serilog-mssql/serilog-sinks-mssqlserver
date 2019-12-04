@@ -1,10 +1,12 @@
-﻿using System;
+﻿using System.Collections.Generic;
+using System.Data.SqlClient;
+using System.Linq;
 using Dapper;
 using Xunit;
 using FluentAssertions;
-using System.Collections.Generic;
-using System.Data.SqlClient;
-using System.Linq;
+using Microsoft.Extensions.Configuration;
+using System;
+
 
 // Because System.Configuration is static and config is loaded automatically,
 // the tests alter the static AppConfigSectionName string value exposed by the
@@ -18,6 +20,26 @@ namespace Serilog.Sinks.MSSqlServer.Tests
     [Collection("LogTest")]
     public class ConfigurationExtensions : IDisposable
     {
+        [Fact]
+        public void AzureTokenProviderResourceByName()
+        {
+            string ConnectionStringName = "NamedConnection";
+            string DatabaseTokenProviderResourceName = "DatabaseTokenProviderResource";
+
+            var loggerConfiguration = new LoggerConfiguration();
+            Log.Logger = loggerConfiguration.WriteTo.MSSqlServer(
+                    connectionString: ConnectionStringName,
+                    tableName: DatabaseFixture.LogTableName,
+                    autoCreateSqlTable: true,
+                    useMsi: true,
+                    azureServiceTokenProviderResource: DatabaseTokenProviderResourceName)
+                .CreateLogger();
+
+            // should not throw
+
+            Log.CloseAndFlush();
+        }
+
         [Fact]
         public void ConnectionStringByName()
         {

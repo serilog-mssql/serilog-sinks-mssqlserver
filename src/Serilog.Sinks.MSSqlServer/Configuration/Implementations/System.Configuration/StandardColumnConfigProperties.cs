@@ -21,120 +21,120 @@ namespace Serilog.Sinks.MSSqlServer
         [ConfigurationProperty("ExcludeAdditionalProperties")]
         public string ExcludeAdditionalProperties
         {
-            get => (string)base["ExcludeAdditionalProperties"];
+            get => (string)base[nameof(ExcludeAdditionalProperties)];
             set
             {
-                base["ExcludeAdditionalProperties"] = value;
+                base[nameof(ExcludeAdditionalProperties)] = value;
             }
         }
 
         [ConfigurationProperty("DictionaryElementName")]
         public string DictionaryElementName
         {
-            get => (string)base["DictionaryElementName"];
+            get => (string)base[nameof(DictionaryElementName)];
             set
             {
-                base["DictionaryElementName"] = value;
+                base[nameof(DictionaryElementName)] = value;
             }
         }
 
         [ConfigurationProperty("ItemElementName")]
         public string ItemElementName
         {
-            get => (string)base["ItemElementName"];
+            get => (string)base[nameof(ItemElementName)];
             set
             {
-                base["ItemElementName"] = value;
+                base[nameof(ItemElementName)] = value;
             }
         }
 
         [ConfigurationProperty("OmitDictionaryContainerElement")]
         public string OmitDictionaryContainerElement
         {
-            get => (string)base["OmitDictionaryContainerElement"];
+            get => (string)base[nameof(OmitDictionaryContainerElement)];
             set
             {
-                base["OmitDictionaryContainerElement"] = value;
+                base[nameof(OmitDictionaryContainerElement)] = value;
             }
         }
 
         [ConfigurationProperty("OmitSequenceContainerElement")]
         public string OmitSequenceContainerElement
         {
-            get => (string)base["OmitSequenceContainerElement"];
+            get => (string)base[nameof(OmitSequenceContainerElement)];
             set
             {
-                base["OmitSequenceContainerElement"] = value;
+                base[nameof(OmitSequenceContainerElement)] = value;
             }
         }
 
         [ConfigurationProperty("OmitStructureContainerElement")]
         public string OmitStructureContainerElement
         {
-            get => (string)base["OmitStructureContainerElement"];
+            get => (string)base[nameof(OmitStructureContainerElement)];
             set
             {
-                base["OmitStructureContainerElement"] = value;
+                base[nameof(OmitStructureContainerElement)] = value;
             }
         }
 
         [ConfigurationProperty("OmitElementIfEmpty")]
         public string OmitElementIfEmpty
         {
-            get => (string)base["OmitElementIfEmpty"];
+            get => (string)base[nameof(OmitElementIfEmpty)];
             set
             {
-                base["OmitElementIfEmpty"] = value;
+                base[nameof(OmitElementIfEmpty)] = value;
             }
         }
 
         [ConfigurationProperty("PropertyElementName")]
         public string PropertyElementName
         {
-            get => (string)base["PropertyElementName"];
+            get => (string)base[nameof(PropertyElementName)];
             set
             {
-                base["PropertyElementName"] = value;
+                base[nameof(PropertyElementName)] = value;
             }
         }
 
         [ConfigurationProperty("RootElementName")]
         public string RootElementName
         {
-            get => (string)base["RootElementName"];
+            get => (string)base[nameof(RootElementName)];
             set
             {
-                base["RootElementName"] = value;
+                base[nameof(RootElementName)] = value;
             }
         }
 
         [ConfigurationProperty("SequenceElementName")]
         public string SequenceElementName
         {
-            get => (string)base["SequenceElementName"];
+            get => (string)base[nameof(SequenceElementName)];
             set
             {
-                base["SequenceElementName"] = value;
+                base[nameof(SequenceElementName)] = value;
             }
         }
 
         [ConfigurationProperty("StructureElementName")]
         public string StructureElementName
         {
-            get => (string)base["StructureElementName"];
+            get => (string)base[nameof(StructureElementName)];
             set
             {
-                base["StructureElementName"] = value;
+                base[nameof(StructureElementName)] = value;
             }
         }
 
         [ConfigurationProperty("UsePropertyKeyAsElementName")]
         public string UsePropertyKeyAsElementName
         {
-            get => (string)base["UsePropertyKeyAsElementName"];
+            get => (string)base[nameof(UsePropertyKeyAsElementName)];
             set
             {
-                base["UsePropertyKeyAsElementName"] = value;
+                base[nameof(UsePropertyKeyAsElementName)] = value;
             }
         }
 
