@@ -70,6 +70,16 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         public string Level { get; set; }
     }
 
+    public class TestTimeStampDateTimeOffsetEntry
+    {
+        public DateTimeOffset TimeStamp { get; set; }
+    }
+
+    public class TestTimeStampDateTimeEntry
+    {
+        public DateTime TimeStamp { get; set; }
+    }
+
     public class TestTriggerEntry
     {
         public Guid Id { get; set; }
