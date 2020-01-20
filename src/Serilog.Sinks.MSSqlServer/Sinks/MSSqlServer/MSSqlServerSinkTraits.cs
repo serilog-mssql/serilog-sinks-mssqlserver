@@ -1,4 +1,4 @@
-﻿// Copyright 2018 Serilog Contributors 
+﻿// Copyright 2020 Serilog Contributors 
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@ using Serilog.Events;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -120,7 +119,7 @@ namespace Serilog.Sinks.MSSqlServer
                 case StandardColumn.Level:
                     return new KeyValuePair<string, object>(columnOptions.Level.ColumnName, columnOptions.Level.StoreAsEnum ? (object)logEvent.Level : logEvent.Level.ToString());
                 case StandardColumn.TimeStamp:
-                    return new KeyValuePair<string, object>(columnOptions.TimeStamp.ColumnName, columnOptions.TimeStamp.ConvertToUtc ? logEvent.Timestamp.ToUniversalTime().DateTime : logEvent.Timestamp.DateTime);
+                    return GetTimeStampStandardColumnNameAndValue(logEvent);
                 case StandardColumn.Exception:
                     return new KeyValuePair<string, object>(columnOptions.Exception.ColumnName, logEvent.Exception != null ? logEvent.Exception.ToString() : null);
                 case StandardColumn.Properties:
@@ -130,6 +129,16 @@ namespace Serilog.Sinks.MSSqlServer
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+        }
+
+        private KeyValuePair<string, object> GetTimeStampStandardColumnNameAndValue(LogEvent logEvent)
+        {
+            var dateTimeOffset = columnOptions.TimeStamp.ConvertToUtc ? logEvent.Timestamp.ToUniversalTime() : logEvent.Timestamp;
+
+            if (columnOptions.TimeStamp.DataType == SqlDbType.DateTimeOffset)
+                return new KeyValuePair<string, object>(columnOptions.TimeStamp.ColumnName, dateTimeOffset);
+
+            return new KeyValuePair<string, object>(columnOptions.TimeStamp.ColumnName, dateTimeOffset.DateTime);
         }
 
         private string LogEventToJson(LogEvent logEvent)
