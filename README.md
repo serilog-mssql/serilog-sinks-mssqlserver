@@ -99,7 +99,7 @@ var log = new LoggerConfiguration()
     .WriteTo.MSSqlServer(
         connectionString: logDB,
         tableName: logTable,
-        columnOptions: opts
+        columnOptions: options
     ).CreateLogger();
 
 ```
