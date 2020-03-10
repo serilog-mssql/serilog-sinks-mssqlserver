@@ -23,7 +23,8 @@ namespace Serilog.Sinks.MSSqlServer
     public class ColumnConfig : ConfigurationElement
     {
         public ColumnConfig()
-        { }
+        {
+        }
 
         public ColumnConfig(string columnName, string dataType)
         {
@@ -43,7 +44,7 @@ namespace Serilog.Sinks.MSSqlServer
         public string DataType
         {
             get { return (string)this["DataType"]; }
-            set { this["DataType"] = value;  }
+            set { this["DataType"] = value; }
         }
 
         [ConfigurationProperty("DataLength")]

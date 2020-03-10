@@ -2,16 +2,12 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
-using System.Data.SqlClient;
-using System.Linq;
-using Dapper;
-using FluentAssertions;
 using Xunit;
 
 namespace Serilog.Sinks.MSSqlServer.Tests
 {
     [Collection("LogTest")]
-    public class TestSqlTypes : IDisposable
+    public sealed class TestSqlTypes : IDisposable
     {
         // Since the point of these tests are to validate we can write to
         // specific underlying SQL Server column data types, we use audit

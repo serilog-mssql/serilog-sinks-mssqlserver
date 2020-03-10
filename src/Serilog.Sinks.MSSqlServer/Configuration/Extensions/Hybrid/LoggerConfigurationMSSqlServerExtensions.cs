@@ -1,4 +1,4 @@
-﻿// Copyright 2014 Serilog Contributors
+﻿// Copyright 2020 Serilog Contributors
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ using Serilog.Sinks.MSSqlServer;
 using Microsoft.Extensions.Configuration;
 using System.Configuration;
 using Serilog.Debugging;
+using Serilog.Formatting;
 
 // The "Hybrid" configuration system supports both Microsoft.Extensions.Configuration and System.Configuration.
 // This is necessary because .NET Framework 4.6.1+ and .NET Core 2.0+ apps support both approaches, whereas the
@@ -50,6 +51,7 @@ namespace Serilog
         /// <param name="batchPostingLimit">The maximum number of events to post in a single batch.</param>
         /// <param name="period">The time to wait between checking for event batches.</param>
         /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
+        /// <param name="logEventFormatter">Supplies custom formatter for the LogEvent column, or null</param>
         /// <param name="autoCreateSqlTable">Create log table with the provided name on destination sql server.</param>
         /// <param name="columnOptions">An externally-modified group of column settings</param>
         /// <param name="columnOptionsSection">A config section defining various column settings</param>
@@ -65,14 +67,14 @@ namespace Serilog
             int batchPostingLimit = MSSqlServerSink.DefaultBatchPostingLimit,
             TimeSpan? period = null,
             IFormatProvider formatProvider = null,
+            ITextFormatter logEventFormatter = null,
             bool autoCreateSqlTable = false,
             ColumnOptions columnOptions = null,
             IConfigurationSection columnOptionsSection = null,
-            string schemaName = "dbo"
-            )
+            string schemaName = "dbo")
         {
-            if(loggerConfiguration == null)
-                throw new ArgumentNullException("loggerConfiguration");
+            if (loggerConfiguration == null)
+                throw new ArgumentNullException(nameof(loggerConfiguration));
 
             var defaultedPeriod = period ?? MSSqlServerSink.DefaultPeriod;
             var colOpts = columnOptions ?? new ColumnOptions();
@@ -100,6 +102,7 @@ namespace Serilog
                     batchPostingLimit,
                     defaultedPeriod,
                     formatProvider,
+                    logEventFormatter,
                     autoCreateSqlTable,
                     colOpts,
                     schemaName
@@ -116,6 +119,7 @@ namespace Serilog
         /// <param name="appConfiguration">Additional application-level configuration. Required if connectionString is a name.</param>
         /// <param name="restrictedToMinimumLevel">The minimum log event level required in order to write an event to the sink.</param>
         /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
+        /// <param name="logEventFormatter">Supplies custom formatter for the LogEvent column, or null</param>
         /// <param name="autoCreateSqlTable">Create log table with the provided name on destination sql server.</param>
         /// <param name="columnOptions">An externally-modified group of column settings</param>
         /// <param name="columnOptionsSection">A config section defining various column settings</param>
@@ -129,14 +133,14 @@ namespace Serilog
             IConfiguration appConfiguration = null,
             LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
             IFormatProvider formatProvider = null,
+            ITextFormatter logEventFormatter = null,
             bool autoCreateSqlTable = false,
             ColumnOptions columnOptions = null,
             IConfigurationSection columnOptionsSection = null,
-            string schemaName = "dbo"
-            )
+            string schemaName = "dbo")
         {
-            if(loggerAuditSinkConfiguration == null)
-                throw new ArgumentNullException("loggerAuditSinkConfiguration");
+            if (loggerAuditSinkConfiguration == null)
+                throw new ArgumentNullException(nameof(loggerAuditSinkConfiguration));
 
             var colOpts = columnOptions ?? new ColumnOptions();
             var connStr = connectionString;
@@ -161,6 +165,7 @@ namespace Serilog
                     connStr,
                     tableName,
                     formatProvider,
+                    logEventFormatter,
                     autoCreateSqlTable,
                     colOpts,
                     schemaName

@@ -1,4 +1,4 @@
-﻿// Copyright 2018 Serilog Contributors 
+﻿// Copyright 2020 Serilog Contributors 
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,13 +14,13 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
 using Serilog.Debugging;
 using Serilog.Events;
+using Serilog.Formatting;
 using Serilog.Sinks.PeriodicBatching;
 
 namespace Serilog.Sinks.MSSqlServer
@@ -52,6 +52,7 @@ namespace Serilog.Sinks.MSSqlServer
         /// <param name="batchPostingLimit">The maximum number of events to post in a single batch.</param>
         /// <param name="period">The time to wait between checking for event batches.</param>
         /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
+        /// <param name="logEventFormatter">Supplies custom formatter for the LogEvent column, or null</param>
         /// <param name="autoCreateSqlTable">Create log table with the provided name on destination sql server.</param>
         /// <param name="columnOptions">Options that pertain to columns</param>
         public MSSqlServerSink(
@@ -60,6 +61,7 @@ namespace Serilog.Sinks.MSSqlServer
             int batchPostingLimit,
             TimeSpan period,
             IFormatProvider formatProvider,
+            ITextFormatter logEventFormatter = null,
             bool autoCreateSqlTable = false,
             ColumnOptions columnOptions = null,
             string schemaName = "dbo"
@@ -67,7 +69,7 @@ namespace Serilog.Sinks.MSSqlServer
             : base(batchPostingLimit, period)
         {
             columnOptions.FinalizeConfigurationForSinkConstructor();
-            _traits = new MSSqlServerSinkTraits(connectionString, tableName, schemaName, columnOptions, formatProvider, autoCreateSqlTable);
+            _traits = new MSSqlServerSinkTraits(connectionString, tableName, schemaName, columnOptions, formatProvider, logEventFormatter, autoCreateSqlTable);
         }
 
         /// <summary>

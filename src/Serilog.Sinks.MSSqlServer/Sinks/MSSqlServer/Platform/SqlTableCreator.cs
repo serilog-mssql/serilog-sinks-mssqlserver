@@ -1,9 +1,8 @@
-﻿using System;
-using System.Data;
+﻿using System.Data;
 using System.Data.SqlClient;
 using System.Text;
 
-namespace Serilog.Sinks.MSSqlServer
+namespace Serilog.Sinks.MSSqlServer.Platform
 {
     internal class SqlTableCreator
     {

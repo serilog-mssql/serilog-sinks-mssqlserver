@@ -1,4 +1,4 @@
-﻿// Copyright 2018 Serilog Contributors 
+﻿// Copyright 2020 Serilog Contributors 
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,10 +14,12 @@
 
 using Serilog.Debugging;
 using Serilog.Events;
+using Serilog.Formatting;
+using Serilog.Sinks.MSSqlServer.Output;
+using Serilog.Sinks.MSSqlServer.Platform;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -32,12 +34,19 @@ namespace Serilog.Sinks.MSSqlServer
         public string schemaName { get; }
         public ColumnOptions columnOptions { get; }
         public IFormatProvider formatProvider { get; }
-        public JsonLogEventFormatter jsonLogEventFormatter { get; }
+        public ITextFormatter logEventFormatter { get; }
         public ISet<string> additionalColumnNames { get; }
         public DataTable eventTable { get; }
         public ISet<string> standardColumnNames { get; }
 
-        public MSSqlServerSinkTraits(string connectionString, string tableName, string schemaName, ColumnOptions columnOptions, IFormatProvider formatProvider, bool autoCreateSqlTable)
+        public MSSqlServerSinkTraits(
+            string connectionString,
+            string tableName,
+            string schemaName,
+            ColumnOptions columnOptions,
+            IFormatProvider formatProvider,
+            ITextFormatter logEventFormatter,
+            bool autoCreateSqlTable)
         {
             if (string.IsNullOrWhiteSpace(connectionString))
                 throw new ArgumentNullException(nameof(connectionString));
@@ -64,7 +73,7 @@ namespace Serilog.Sinks.MSSqlServer
                     additionalColumnNames.Add(col.ColumnName);
 
             if (this.columnOptions.Store.Contains(StandardColumn.LogEvent))
-                jsonLogEventFormatter = new JsonLogEventFormatter(this);
+                this.logEventFormatter = logEventFormatter ?? new JsonLogEventFormatter(this);
 
             eventTable = CreateDataTable();
 
@@ -126,13 +135,13 @@ namespace Serilog.Sinks.MSSqlServer
                 case StandardColumn.Properties:
                     return new KeyValuePair<string, object>(columnOptions.Properties.ColumnName, ConvertPropertiesToXmlStructure(logEvent.Properties));
                 case StandardColumn.LogEvent:
-                    return new KeyValuePair<string, object>(columnOptions.LogEvent.ColumnName, LogEventToJson(logEvent));
+                    return new KeyValuePair<string, object>(columnOptions.LogEvent.ColumnName, RenderLogEventColumn(logEvent));
                 default:
                     throw new ArgumentOutOfRangeException();
             }
         }
 
-        private string LogEventToJson(LogEvent logEvent)
+        private string RenderLogEventColumn(LogEvent logEvent)
         {
             if (columnOptions.LogEvent.ExcludeAdditionalProperties)
             {
@@ -142,7 +151,7 @@ namespace Serilog.Sinks.MSSqlServer
 
             var sb = new StringBuilder();
             using (var writer = new System.IO.StringWriter(sb))
-                jsonLogEventFormatter.Format(logEvent, writer);
+                logEventFormatter.Format(logEvent, writer);
             return sb.ToString();
         }
 

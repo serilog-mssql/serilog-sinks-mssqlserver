@@ -1,4 +1,4 @@
-﻿// Copyright 2018 Serilog Contributors 
+﻿// Copyright 2020 Serilog Contributors 
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,10 +15,10 @@
 using Serilog.Core;
 using Serilog.Debugging;
 using Serilog.Events;
+using Serilog.Formatting;
 using System;
 using System.Data;
 using System.Data.SqlClient;
-using System.Linq;
 using System.Text;
 
 namespace Serilog.Sinks.MSSqlServer
@@ -38,12 +38,14 @@ namespace Serilog.Sinks.MSSqlServer
         /// <param name="tableName">Name of the table to store the data in.</param>
         /// <param name="schemaName">Name of the schema for the table to store the data in. The default is 'dbo'.</param>
         /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
+        /// <param name="logEventFormatter">Supplies custom formatter for the LogEvent column, or null</param>
         /// <param name="autoCreateSqlTable">Create log table with the provided name on destination sql server.</param>
         /// <param name="columnOptions">Options that pertain to columns</param>
         public MSSqlServerAuditSink(
             string connectionString,
             string tableName,
             IFormatProvider formatProvider,
+            ITextFormatter logEventFormatter = null,
             bool autoCreateSqlTable = false,
             ColumnOptions columnOptions = null,
             string schemaName = "dbo"
@@ -57,7 +59,7 @@ namespace Serilog.Sinks.MSSqlServer
                     throw new NotSupportedException($"The {nameof(ColumnOptions.DisableTriggers)} option is not supported for auditing.");
             }
 
-            _traits = new MSSqlServerSinkTraits(connectionString, tableName, schemaName, columnOptions, formatProvider, autoCreateSqlTable);
+            _traits = new MSSqlServerSinkTraits(connectionString, tableName, schemaName, columnOptions, formatProvider, logEventFormatter, autoCreateSqlTable);
             
         }
 
