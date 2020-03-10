@@ -20,15 +20,15 @@ namespace Serilog.Sinks.MSSqlServer
             }
 
             /// <summary>
-            /// The TimeStamp column only supports the DateTime data type.
+            /// The TimeStamp column only supports the DateTime and DateTimeOffset data types.
             /// </summary>
             public new SqlDbType DataType
             {
                 get => base.DataType;
                 set
                 {
-                    if (value != SqlDbType.DateTime)
-                        throw new ArgumentException("The Standard Column \"TimeStamp\" only supports the DateTime format.");
+                    if (value != SqlDbType.DateTime && value != SqlDbType.DateTimeOffset)
+                        throw new ArgumentException("The Standard Column \"TimeStamp\" only supports the DateTime and DateTimeOffset formats.");
                     base.DataType = value;
                 }
             }

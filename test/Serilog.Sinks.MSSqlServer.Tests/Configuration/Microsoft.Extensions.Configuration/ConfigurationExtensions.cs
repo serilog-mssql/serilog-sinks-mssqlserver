@@ -10,7 +10,7 @@ using System;
 namespace Serilog.Sinks.MSSqlServer.Tests
 {
     [Collection("LogTest")]
-    public class ConfigurationExtensions : IDisposable
+    public sealed class ConfigurationExtensions : IDisposable
     {
         static string ConnectionStringName = "NamedConnection";
         static string ColumnOptionsSection = "CustomColumnNames";
