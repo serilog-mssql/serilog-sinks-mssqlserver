@@ -31,7 +31,7 @@ namespace Serilog.Sinks.MSSqlServer.Output
         static readonly JsonValueFormatter ValueFormatter = new JsonValueFormatter(typeTagName: null);
         private const string COMMA_DELIMITER = ",";
 
-        MSSqlServerSinkTraits traits;
+        private readonly MSSqlServerSinkTraits _traits;
  
         /// <summary>
         /// Constructor. A reference to the parent Traits object is used so that JSON
@@ -40,7 +40,7 @@ namespace Serilog.Sinks.MSSqlServer.Output
         /// </summary>
         public JsonLogEventFormatter(MSSqlServerSinkTraits parent)
         {
-            traits = parent;
+            _traits = parent;
         }
 
         /// <summary>
@@ -55,7 +55,7 @@ namespace Serilog.Sinks.MSSqlServer.Output
 
             string precedingDelimiter = "";
 
-            if (traits.columnOptions.LogEvent.ExcludeStandardColumns == false)
+            if (_traits.ColumnOptions.LogEvent.ExcludeStandardColumns == false)
             {
                 // The XML Properties column has never included the Standard Columns, but prior
                 // to adding this sink-specific JSON formatter, the LogEvent JSON column relied
@@ -66,7 +66,7 @@ namespace Serilog.Sinks.MSSqlServer.Output
                 // whether Standard Columns are written (specifically, the subset of Standard
                 // columns that were output by the external JsonFormatter class).
 
-                var store = traits.columnOptions.Store;
+                var store = _traits.ColumnOptions.Store;
 
                 WriteIfPresent(StandardColumn.TimeStamp);
                 WriteIfPresent(StandardColumn.Level);
@@ -80,7 +80,7 @@ namespace Serilog.Sinks.MSSqlServer.Output
                     {
                         output.Write(precedingDelimiter);
                         precedingDelimiter = COMMA_DELIMITER;
-                        var colData = traits.GetStandardColumnNameAndValue(col, logEvent);
+                        var colData = _traits.GetStandardColumnNameAndValue(col, logEvent);
                         JsonValueFormatter.WriteQuotedJsonString(colData.Key, output);
                         output.Write(":");
                         string value = (col != StandardColumn.TimeStamp) ? (colData.Value ?? string.Empty).ToString() : ((DateTime)colData.Value).ToString("o");

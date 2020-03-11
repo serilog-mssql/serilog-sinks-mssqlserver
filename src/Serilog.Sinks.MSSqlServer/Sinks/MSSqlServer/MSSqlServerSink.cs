@@ -87,23 +87,23 @@ namespace Serilog.Sinks.MSSqlServer
 
             try
             {
-                using (var cn = new SqlConnection(_traits.connectionString))
+                using (var cn = new SqlConnection(_traits.ConnectionString))
                 {
                     await cn.OpenAsync().ConfigureAwait(false);
-                    using (var copy = _traits.columnOptions.DisableTriggers
+                    using (var copy = _traits.ColumnOptions.DisableTriggers
                             ? new SqlBulkCopy(cn)
                             : new SqlBulkCopy(cn, SqlBulkCopyOptions.CheckConstraints | SqlBulkCopyOptions.FireTriggers, null)
                     )
                     {
-                        copy.DestinationTableName = string.Format("[{0}].[{1}]", _traits.schemaName, _traits.tableName);
-                        foreach (var column in _traits.eventTable.Columns)
+                        copy.DestinationTableName = string.Format("[{0}].[{1}]", _traits.SchemaName, _traits.TableName);
+                        foreach (var column in _traits.EventTable.Columns)
                         {
                             var columnName = ((DataColumn)column).ColumnName;
                             var mapping = new SqlBulkCopyColumnMapping(columnName, columnName);
                             copy.ColumnMappings.Add(mapping);
                         }
 
-                        await copy.WriteToServerAsync(_traits.eventTable).ConfigureAwait(false);
+                        await copy.WriteToServerAsync(_traits.EventTable).ConfigureAwait(false);
                     }
                 }
             }
@@ -114,7 +114,7 @@ namespace Serilog.Sinks.MSSqlServer
             finally
             {
                 // Processed the items, clear for the next run
-                _traits.eventTable.Clear();
+                _traits.EventTable.Clear();
             }
         }
 
@@ -123,17 +123,17 @@ namespace Serilog.Sinks.MSSqlServer
             // Add the new rows to the collection. 
             foreach (var logEvent in events)
             {
-                var row = _traits.eventTable.NewRow();
+                var row = _traits.EventTable.NewRow();
 
                 foreach (var field in _traits.GetColumnsAndValues(logEvent))
                 {
                     row[field.Key] = field.Value;
                 }
 
-                _traits.eventTable.Rows.Add(row);
+                _traits.EventTable.Rows.Add(row);
             }
 
-            _traits.eventTable.AcceptChanges();
+            _traits.EventTable.AcceptChanges();
         }
 
         /// <summary>
