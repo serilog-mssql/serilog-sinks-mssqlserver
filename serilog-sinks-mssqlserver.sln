@@ -21,7 +21,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Serilog.Sinks.MSSqlServer.T
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sample", "sample", "{AA346332-5BAF-47F1-B8FB-7600ED61265D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CustomLogEventFormatterDemo", "sample\CustomLogEventFormatterDemo\CustomLogEventFormatterDemo.csproj", "{873320F1-8F6D-45E2-A853-D321C86793EC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CustomLogEventFormatterDemo", "sample\CustomLogEventFormatterDemo\CustomLogEventFormatterDemo.csproj", "{873320F1-8F6D-45E2-A853-D321C86793EC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppConfigDemo", "sample\AppConfigDemo\AppConfigDemo.csproj", "{7DC530B1-68FD-4F07-A2F9-910C338562C1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -41,6 +43,10 @@ Global
 		{873320F1-8F6D-45E2-A853-D321C86793EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{873320F1-8F6D-45E2-A853-D321C86793EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{873320F1-8F6D-45E2-A853-D321C86793EC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7DC530B1-68FD-4F07-A2F9-910C338562C1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7DC530B1-68FD-4F07-A2F9-910C338562C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7DC530B1-68FD-4F07-A2F9-910C338562C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7DC530B1-68FD-4F07-A2F9-910C338562C1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -49,6 +55,7 @@ Global
 		{803CD13A-D54B-4CEC-A55F-E22AE3D93B3C} = {04226074-C72F-42BC-AB02-4D70A7BAE7E1}
 		{3C2D8E01-5580-426A-BDD9-EC59CD98E618} = {F02D6513-6F45-452E-85A0-41A872A2C1F8}
 		{873320F1-8F6D-45E2-A853-D321C86793EC} = {AA346332-5BAF-47F1-B8FB-7600ED61265D}
+		{7DC530B1-68FD-4F07-A2F9-910C338562C1} = {AA346332-5BAF-47F1-B8FB-7600ED61265D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {AAA6BF8D-7B53-4A5F-A79A-D1B306383B45}

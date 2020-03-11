@@ -11,7 +11,7 @@ namespace CustomLogEventFormatterDemo
         const string _schemaName = "dbo";
         const string _tableName = "LogEvents";
 
-        static void Main()
+        public static void Main()
         {
             var options = new ColumnOptions();
             options.Store.Add(StandardColumn.LogEvent);
