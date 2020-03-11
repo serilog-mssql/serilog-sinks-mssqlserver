@@ -38,18 +38,17 @@ namespace Serilog.Sinks.MSSqlServer
         /// <param name="tableName">Name of the table to store the data in.</param>
         /// <param name="schemaName">Name of the schema for the table to store the data in. The default is 'dbo'.</param>
         /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
-        /// <param name="logEventFormatter">Supplies custom formatter for the LogEvent column, or null</param>
         /// <param name="autoCreateSqlTable">Create log table with the provided name on destination sql server.</param>
         /// <param name="columnOptions">Options that pertain to columns</param>
+        /// <param name="logEventFormatter">Supplies custom formatter for the LogEvent column, or null</param>
         public MSSqlServerAuditSink(
             string connectionString,
             string tableName,
             IFormatProvider formatProvider,
-            ITextFormatter logEventFormatter = null,
             bool autoCreateSqlTable = false,
             ColumnOptions columnOptions = null,
-            string schemaName = "dbo"
-            )
+            string schemaName = "dbo",
+            ITextFormatter logEventFormatter = null)
         {
             columnOptions.FinalizeConfigurationForSinkConstructor();
 
@@ -59,7 +58,7 @@ namespace Serilog.Sinks.MSSqlServer
                     throw new NotSupportedException($"The {nameof(ColumnOptions.DisableTriggers)} option is not supported for auditing.");
             }
 
-            _traits = new MSSqlServerSinkTraits(connectionString, tableName, schemaName, columnOptions, formatProvider, logEventFormatter, autoCreateSqlTable);
+            _traits = new MSSqlServerSinkTraits(connectionString, tableName, schemaName, columnOptions, formatProvider, autoCreateSqlTable, logEventFormatter);
             
         }
 

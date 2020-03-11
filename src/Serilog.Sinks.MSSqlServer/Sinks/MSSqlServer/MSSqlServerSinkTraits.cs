@@ -23,7 +23,6 @@ using System.Data;
 using System.Linq;
 using System.Text;
 
-
 namespace Serilog.Sinks.MSSqlServer
 {
     /// <summary>Contains common functionality and properties used by both MSSqlServerSinks.</summary>
@@ -45,8 +44,8 @@ namespace Serilog.Sinks.MSSqlServer
             string schemaName,
             ColumnOptions columnOptions,
             IFormatProvider formatProvider,
-            ITextFormatter logEventFormatter,
-            bool autoCreateSqlTable)
+            bool autoCreateSqlTable,
+            ITextFormatter logEventFormatter)
         {
             if (string.IsNullOrWhiteSpace(connectionString))
                 throw new ArgumentNullException(nameof(connectionString));
@@ -151,7 +150,7 @@ namespace Serilog.Sinks.MSSqlServer
             return new KeyValuePair<string, object>(columnOptions.TimeStamp.ColumnName, dateTimeOffset.DateTime);
         }
 
-        private string LogEventToJson(LogEvent logEvent)
+        private string RenderLogEventColumn(LogEvent logEvent)
         {
             if (columnOptions.LogEvent.ExcludeAdditionalProperties)
             {

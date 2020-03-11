@@ -52,24 +52,23 @@ namespace Serilog.Sinks.MSSqlServer
         /// <param name="batchPostingLimit">The maximum number of events to post in a single batch.</param>
         /// <param name="period">The time to wait between checking for event batches.</param>
         /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
-        /// <param name="logEventFormatter">Supplies custom formatter for the LogEvent column, or null</param>
         /// <param name="autoCreateSqlTable">Create log table with the provided name on destination sql server.</param>
         /// <param name="columnOptions">Options that pertain to columns</param>
+        /// <param name="logEventFormatter">Supplies custom formatter for the LogEvent column, or null</param>
         public MSSqlServerSink(
             string connectionString,
             string tableName,
             int batchPostingLimit,
             TimeSpan period,
             IFormatProvider formatProvider,
-            ITextFormatter logEventFormatter = null,
             bool autoCreateSqlTable = false,
             ColumnOptions columnOptions = null,
-            string schemaName = "dbo"
-            )
+            string schemaName = "dbo",
+            ITextFormatter logEventFormatter = null)
             : base(batchPostingLimit, period)
         {
             columnOptions.FinalizeConfigurationForSinkConstructor();
-            _traits = new MSSqlServerSinkTraits(connectionString, tableName, schemaName, columnOptions, formatProvider, logEventFormatter, autoCreateSqlTable);
+            _traits = new MSSqlServerSinkTraits(connectionString, tableName, schemaName, columnOptions, formatProvider, autoCreateSqlTable, logEventFormatter);
         }
 
         /// <summary>

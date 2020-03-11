@@ -21,7 +21,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             options.Id.ColumnName = customIdName;
 
             // act
-            var sink = new MSSqlServerSink(DatabaseFixture.LogEventsConnectionString, DatabaseFixture.LogTableName, 1, TimeSpan.FromSeconds(1), null, null, true, options);
+            var sink = new MSSqlServerSink(DatabaseFixture.LogEventsConnectionString, DatabaseFixture.LogTableName, 1, TimeSpan.FromSeconds(1), null, true, options, null);
 
             // assert
             using (var conn = new SqlConnection(DatabaseFixture.MasterConnectionString))
@@ -48,7 +48,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             var options = new ColumnOptions();
 
             // act
-            var sink = new MSSqlServerSink(DatabaseFixture.LogEventsConnectionString, DatabaseFixture.LogTableName, 1, TimeSpan.FromSeconds(1), null, null, true, options);
+            var sink = new MSSqlServerSink(DatabaseFixture.LogEventsConnectionString, DatabaseFixture.LogTableName, 1, TimeSpan.FromSeconds(1), null, true, options, null);
 
             // assert
             var idColumnName = "Id";
@@ -84,7 +84,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             options.Properties.ColumnName = "CustomProperties";
 
             // act
-            var sink = new MSSqlServerSink(DatabaseFixture.LogEventsConnectionString, DatabaseFixture.LogTableName, 1, TimeSpan.FromSeconds(1), null, null, true, options);
+            var sink = new MSSqlServerSink(DatabaseFixture.LogEventsConnectionString, DatabaseFixture.LogTableName, 1, TimeSpan.FromSeconds(1), null, true, options, null);
 
             // assert
             using (var conn = new SqlConnection(DatabaseFixture.MasterConnectionString))
@@ -110,7 +110,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             var standardNames = new List<string> { "Message", "MessageTemplate", "Level", "TimeStamp", "Exception", "Properties" };
 
             // act
-            var sink = new MSSqlServerSink(DatabaseFixture.LogEventsConnectionString, DatabaseFixture.LogTableName, 1, TimeSpan.FromSeconds(1), null, null, true, options);
+            var sink = new MSSqlServerSink(DatabaseFixture.LogEventsConnectionString, DatabaseFixture.LogTableName, 1, TimeSpan.FromSeconds(1), null, true, options, null);
 
             // assert
             using (var conn = new SqlConnection(DatabaseFixture.MasterConnectionString))

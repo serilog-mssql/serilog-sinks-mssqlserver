@@ -47,9 +47,9 @@ namespace Serilog
         /// <param name="batchPostingLimit">The maximum number of events to post in a single batch.</param>
         /// <param name="period">The time to wait between checking for event batches.</param>
         /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
-        /// <param name="logEventFormatter">Supplies custom formatter for the LogEvent column, or null</param>
         /// <param name="autoCreateSqlTable">Create log table with the provided name on destination sql server.</param>
         /// <param name="columnOptions"></param>
+        /// <param name="logEventFormatter">Supplies custom formatter for the LogEvent column, or null</param>
         /// <returns>Logger configuration, allowing configuration to continue.</returns>
         /// <exception cref="ArgumentNullException">A required parameter is null.</exception>
         public static LoggerConfiguration MSSqlServer(
@@ -60,10 +60,10 @@ namespace Serilog
             int batchPostingLimit = MSSqlServerSink.DefaultBatchPostingLimit,
             TimeSpan? period = null,
             IFormatProvider formatProvider = null,
-            ITextFormatter logEventFormatter = null,
             bool autoCreateSqlTable = false,
             ColumnOptions columnOptions = null,
-            string schemaName = "dbo")
+            string schemaName = "dbo",
+            ITextFormatter logEventFormatter = null)
         {
             if (loggerConfiguration == null)
                 throw new ArgumentNullException(nameof(loggerConfiguration));
@@ -83,10 +83,10 @@ namespace Serilog
                     batchPostingLimit,
                     defaultedPeriod,
                     formatProvider,
-                    logEventFormatter,
                     autoCreateSqlTable,
                     colOpts,
-                    schemaName),
+                    schemaName,
+                    logEventFormatter),
                 restrictedToMinimumLevel);
         }
 
@@ -102,9 +102,9 @@ namespace Serilog
         /// <param name="schemaName">Name of the schema for the table to store the data in. The default is 'dbo'.</param>
         /// <param name="restrictedToMinimumLevel">The minimum log event level required in order to write an event to the sink.</param>
         /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
-        /// <param name="logEventFormatter">Supplies custom formatter for the LogEvent column, or null</param>
         /// <param name="autoCreateSqlTable">Create log table with the provided name on destination sql server.</param>
         /// <param name="columnOptions"></param>
+        /// <param name="logEventFormatter">Supplies custom formatter for the LogEvent column, or null</param>
         /// <returns>Logger configuration, allowing configuration to continue.</returns>
         /// <exception cref="ArgumentNullException">A required parameter is null.</exception>
         public static LoggerConfiguration MSSqlServer(
@@ -113,10 +113,10 @@ namespace Serilog
             string tableName,
             LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
             IFormatProvider formatProvider = null,
-            ITextFormatter logEventFormatter = null,
             bool autoCreateSqlTable = false,
             ColumnOptions columnOptions = null,
-            string schemaName = "dbo")
+            string schemaName = "dbo",
+            ITextFormatter logEventFormatter = null)
         {
             if (loggerAuditSinkConfiguration == null)
                 throw new ArgumentNullException(nameof(loggerAuditSinkConfiguration));
@@ -133,10 +133,10 @@ namespace Serilog
                     connectionString,
                     tableName,
                     formatProvider,
-                    logEventFormatter,
                     autoCreateSqlTable,
                     colOpts,
-                    schemaName),
+                    schemaName,
+                    logEventFormatter),
                 restrictedToMinimumLevel);
         }
     }

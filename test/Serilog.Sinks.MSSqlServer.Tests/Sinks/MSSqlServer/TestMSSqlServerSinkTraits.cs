@@ -101,8 +101,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer
 
         private void SetupTest(Serilog.Sinks.MSSqlServer.ColumnOptions options, DateTimeOffset testDateTimeOffset)
         {
-            this.traits = new MSSqlServerSinkTraits("connectionString", "tableName", "schemaName",
-                options, CultureInfo.InvariantCulture, false);
+            this.traits = new MSSqlServerSinkTraits("connectionString", "tableName", "schemaName", 
+                options, CultureInfo.InvariantCulture, false, null);
             this.logEvent = new LogEvent(testDateTimeOffset, LogEventLevel.Information, null,
                 new MessageTemplate(new List<MessageTemplateToken>()), new List<LogEventProperty>());
         }
