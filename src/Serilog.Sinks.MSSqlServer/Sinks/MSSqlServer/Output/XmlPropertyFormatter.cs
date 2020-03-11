@@ -1,4 +1,4 @@
-// Copyright 2015 Serilog Contributors
+// Copyright 2020 Serilog Contributors
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -20,13 +19,13 @@ using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using Serilog.Events;
 
-namespace Serilog.Sinks.MSSqlServer
+namespace Serilog.Sinks.MSSqlServer.Output
 {
     /// <summary>
     ///     Converts <see cref="LogEventProperty" /> values into simple scalars,
     ///     dictionaries and lists so that they can be persisted in MSSqlServer.
     /// </summary>
-    public static class XmlPropertyFormatter
+    internal static class XmlPropertyFormatter
     {
 
         /// <summary>
@@ -185,7 +184,7 @@ namespace Serilog.Sinks.MSSqlServer
             return null;
         }
 
-        internal static string GetValidElementName(string name)
+        public static string GetValidElementName(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
             {
@@ -204,7 +203,7 @@ namespace Serilog.Sinks.MSSqlServer
             return validName;
         }
 
-        static string SimplifyScalar(object value)
+        private static string SimplifyScalar(object value)
         {
             if (value == null) return null;
 

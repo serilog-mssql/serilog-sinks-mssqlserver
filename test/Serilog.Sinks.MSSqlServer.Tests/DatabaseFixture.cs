@@ -6,7 +6,7 @@ using Xunit;
 
 namespace Serilog.Sinks.MSSqlServer.Tests
 {
-    public class DatabaseFixture : IDisposable
+    public sealed class DatabaseFixture : IDisposable
     {
         public static string Database => "LogTest";
         public static string LogTableName => "LogEvents";
