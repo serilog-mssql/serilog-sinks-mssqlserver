@@ -34,6 +34,7 @@ All sink configuration methods accept the following arguments, though not necess
 * `batchPostingLimit`
 * `period`
 * `formatProvider`
+* `logEventFormatter`
 
 ### Basic Arguments
 
@@ -52,6 +53,8 @@ This is a "periodic batching sink." The sink will queue a certain number of log 
 Consider increasing the batch size in high-volume logging environments. In one test of a loop writing a single log entry, the default batch size averaged about 14,000 rows per second. Increasing the batch size to 1000 rows increased average write speed to nearly 43,000 rows per second. However, you should also consider the risk-factor. If the client or server crashes, or if the connection goes down, you may lose an entire batch of log entries. You can mitigate this by reducing the timeout. Run performance tests to find the optimal batch size for your production log table definition and log event content, network setup, and server configuration.
 
 Refer to the Serilog Wiki's explanation of [Format Providers](https://github.com/serilog/serilog/wiki/Formatting-Output#format-providers) for details about the `formatProvider` arguments.
+
+The parameter `logEventFormatter` can be used to specify a custom renderer implementing `ITextFormatter` which will be used to generate the contents of the `LogEvent`column. If the parameter is omitted or set to null, the default internal JSON formatter will be used. For more information about custom text formatters refer to the Serilog documentation [Custom text formatters](https://github.com/serilog/serilog/wiki/Formatting-Output#custom-text-formatters).
 
 ### Platform-Specific Arguments
 
@@ -153,6 +156,7 @@ The constructor accepts most of the same arguments, and like other Serilog audit
 * `autoCreateSqlTable`
 * `columnOptions`
 * `formatProvider`
+* `logEventFormatter`
 
 The `restrictedToMinimumLevel` parameter is not available because all events written to an audit sink are required to succeed.
 
@@ -406,6 +410,8 @@ If `OmitElementIfEmpty` is set then if a property is empty, it will not be seria
 This column stores log event property values as JSON. Typically you will use either this column or the XML-based `Properties` column, but not both. This column's `DataType` must always be `nvarchar`.
 
 The `ExcludeAddtionalProperties` and `ExcludeStandardColumns` properties are described in the [Custom Property Columns](#custom-property-columns) topic.
+
+The content of this column is rendered as JSON by default or with a custom ITextFormatter passed by the caller as parameter `logEventFormatter`. Details can be found in [Sink Configuration Options](#sink-configuration-options).
 
 ## Custom Property Columns
 
