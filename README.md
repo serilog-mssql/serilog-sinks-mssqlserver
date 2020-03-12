@@ -559,12 +559,12 @@ Keys and values are case-sensitive. Case must match **_exactly_** as shown below
         <remove Name="Properties"/>
     </RemoveStandardColumns>
     <Columns>
-      <add columnName="EventType" DataType="int"/>
-      <add columnName="Release"
-           dataType="varchar"
-           dataLength="64"
-           allowNull="true"
-           nonClusteredIndex="false"/>
+      <add ColumnName="EventType" DataType="int"/>
+      <add ColumnName="Release"
+           DataType="varchar"
+           DataLength="64"
+           AllowNull="true"
+           NonClusteredIndex="false"/>
     </Columns>
     <Exception ColumnName="Ex" DataLength="512"/>
     <Id NonClusteredIndex="true"/>
