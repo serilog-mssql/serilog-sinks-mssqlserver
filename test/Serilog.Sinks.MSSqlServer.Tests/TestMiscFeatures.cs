@@ -10,7 +10,7 @@ using Xunit;
 namespace Serilog.Sinks.MSSqlServer.Tests
 {
     [Collection("LogTest")]
-    public class TestMiscFeatures : IDisposable
+    public sealed class TestMiscFeatures : IDisposable
     {
         [Fact]
         public void LogEventExcludeAdditionalProperties()

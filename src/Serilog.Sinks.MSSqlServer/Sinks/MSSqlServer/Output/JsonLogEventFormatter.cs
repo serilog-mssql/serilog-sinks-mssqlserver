@@ -1,4 +1,4 @@
-// Copyright 2018 Serilog Contributors
+// Copyright 2020 Serilog Contributors
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,10 +18,11 @@ using Serilog.Formatting.Json;
 using Serilog.Parsing;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Linq;
 
-namespace Serilog.Sinks.MSSqlServer
+namespace Serilog.Sinks.MSSqlServer.Output
 {
     /// <summary>
     /// Custom JSON formatter to generate content for the LogEvent Standard Column.
@@ -31,7 +32,7 @@ namespace Serilog.Sinks.MSSqlServer
         static readonly JsonValueFormatter ValueFormatter = new JsonValueFormatter(typeTagName: null);
         private const string COMMA_DELIMITER = ",";
 
-        MSSqlServerSinkTraits traits;
+        private readonly MSSqlServerSinkTraits _traits;
  
         /// <summary>
         /// Constructor. A reference to the parent Traits object is used so that JSON
@@ -40,7 +41,7 @@ namespace Serilog.Sinks.MSSqlServer
         /// </summary>
         public JsonLogEventFormatter(MSSqlServerSinkTraits parent)
         {
-            traits = parent;
+            _traits = parent;
         }
 
         /// <summary>
@@ -55,7 +56,7 @@ namespace Serilog.Sinks.MSSqlServer
 
             string precedingDelimiter = "";
 
-            if (traits.columnOptions.LogEvent.ExcludeStandardColumns == false)
+            if (_traits.ColumnOptions.LogEvent.ExcludeStandardColumns == false)
             {
                 // The XML Properties column has never included the Standard Columns, but prior
                 // to adding this sink-specific JSON formatter, the LogEvent JSON column relied
@@ -66,27 +67,7 @@ namespace Serilog.Sinks.MSSqlServer
                 // whether Standard Columns are written (specifically, the subset of Standard
                 // columns that were output by the external JsonFormatter class).
 
-                var store = traits.columnOptions.Store;
-
-                WriteIfPresent(StandardColumn.TimeStamp);
-                WriteIfPresent(StandardColumn.Level);
-                WriteIfPresent(StandardColumn.Message);
-                WriteIfPresent(StandardColumn.MessageTemplate);
-                if(logEvent.Exception != null) WriteIfPresent(StandardColumn.Exception);
-
-                void WriteIfPresent(StandardColumn col)
-                {
-                    if(store.Contains(col))
-                    {
-                        output.Write(precedingDelimiter);
-                        precedingDelimiter = COMMA_DELIMITER;
-                        var colData = traits.GetStandardColumnNameAndValue(col, logEvent);
-                        JsonValueFormatter.WriteQuotedJsonString(colData.Key, output);
-                        output.Write(":");
-                        string value = (col != StandardColumn.TimeStamp) ? (colData.Value ?? string.Empty).ToString() : ((DateTime)colData.Value).ToString("o");
-                        JsonValueFormatter.WriteQuotedJsonString(value, output);
-                    }
-                }
+                WriteStandardColumns(logEvent, output, ref precedingDelimiter);
             }
 
             if (logEvent.Properties.Count != 0)
@@ -109,6 +90,50 @@ namespace Serilog.Sinks.MSSqlServer
             }
 
             output.Write("}");
+        }
+
+        private void WriteStandardColumns(LogEvent logEvent, TextWriter output, ref string precedingDelimiter)
+        {
+            WriteTimeStampIfPresent(logEvent, output, ref precedingDelimiter);
+            WriteIfPresent(StandardColumn.Level, logEvent, output, ref precedingDelimiter);
+            WriteIfPresent(StandardColumn.Message, logEvent, output, ref precedingDelimiter);
+            WriteIfPresent(StandardColumn.MessageTemplate, logEvent, output, ref precedingDelimiter);
+            if (logEvent.Exception != null) WriteIfPresent(StandardColumn.Exception, logEvent, output, ref precedingDelimiter);
+        }
+
+        private void WriteIfPresent(StandardColumn col, LogEvent logEvent, TextWriter output, ref string precedingDelimiter)
+        {
+            if (!_traits.ColumnOptions.Store.Contains(col))
+                return;
+
+            output.Write(precedingDelimiter);
+            precedingDelimiter = COMMA_DELIMITER;
+            var colData = WritePropertyName(logEvent, output, col);
+            string value = (colData.Value ?? string.Empty).ToString();
+            JsonValueFormatter.WriteQuotedJsonString(value, output);
+        }
+
+        private void WriteTimeStampIfPresent(LogEvent logEvent, TextWriter output, ref string precedingDelimiter)
+        {
+            if (!_traits.ColumnOptions.Store.Contains(StandardColumn.TimeStamp))
+                return;
+
+            output.Write(precedingDelimiter);
+            precedingDelimiter = COMMA_DELIMITER;
+            var colData = WritePropertyName(logEvent, output, StandardColumn.TimeStamp);
+            string value = _traits.ColumnOptions.TimeStamp.DataType == SqlDbType.DateTime
+                ? ((DateTime)colData.Value).ToString("o")
+                : ((DateTimeOffset)colData.Value).ToString("o");
+            JsonValueFormatter.WriteQuotedJsonString(value, output);
+        }
+
+        private KeyValuePair<string, object> WritePropertyName(LogEvent le, TextWriter writer, StandardColumn col)
+        {
+            var colData = _traits.GetStandardColumnNameAndValue(col, le);
+            JsonValueFormatter.WriteQuotedJsonString(colData.Key, writer);
+            writer.Write(":");
+
+            return colData;
         }
 
         static void WriteProperties(IReadOnlyDictionary<string, LogEventPropertyValue> properties, TextWriter output)

@@ -1,4 +1,4 @@
-﻿// Copyright 2014 Serilog Contributors
+﻿// Copyright 2020 Serilog Contributors
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ using Serilog.Configuration;
 using Serilog.Events;
 using Serilog.Sinks.MSSqlServer;
 using Microsoft.Extensions.Configuration;
+using Serilog.Formatting;
 
 // M.E.C. support for .NET Standard 2.0 libraries.
 
@@ -45,6 +46,7 @@ namespace Serilog
         /// <param name="columnOptions">An externally-modified group of column settings</param>
         /// <param name="columnOptionsSection">A config section defining various column settings</param>
         /// <param name="schemaName">Name of the schema for the table to store the data in. The default is 'dbo'.</param>
+        /// <param name="logEventFormatter">Supplies custom formatter for the LogEvent column, or null</param>
         /// <returns>Logger configuration, allowing configuration to continue.</returns>
         /// <exception cref="ArgumentNullException">A required parameter is null.</exception>
         public static LoggerConfiguration MSSqlServer(
@@ -59,11 +61,11 @@ namespace Serilog
             bool autoCreateSqlTable = false,
             ColumnOptions columnOptions = null,
             IConfigurationSection columnOptionsSection = null,
-            string schemaName = "dbo"
-            )
+            string schemaName = "dbo",
+            ITextFormatter logEventFormatter = null)
         {
-            if(loggerConfiguration == null)
-                throw new ArgumentNullException("loggerConfiguration");
+            if (loggerConfiguration == null)
+                throw new ArgumentNullException(nameof(loggerConfiguration));
 
             var defaultedPeriod = period ?? MSSqlServerSink.DefaultPeriod;
             var connectionStr = ApplyMicrosoftExtensionsConfiguration.GetConnectionString(connectionString, appConfiguration);
@@ -78,8 +80,8 @@ namespace Serilog
                     formatProvider,
                     autoCreateSqlTable,
                     colOpts,
-                    schemaName
-                    ),
+                    schemaName,
+                    logEventFormatter),
                 restrictedToMinimumLevel);
         }
 
@@ -96,6 +98,7 @@ namespace Serilog
         /// <param name="columnOptions">An externally-modified group of column settings</param>
         /// <param name="columnOptionsSection">A config section defining various column settings</param>
         /// <param name="schemaName">Name of the schema for the table to store the data in. The default is 'dbo'.</param>
+        /// <param name="logEventFormatter">Supplies custom formatter for the LogEvent column, or null</param>
         /// <returns>Logger configuration, allowing configuration to continue.</returns>
         /// <exception cref="ArgumentNullException">A required parameter is null.</exception>
         public static LoggerConfiguration MSSqlServer(
@@ -108,11 +111,11 @@ namespace Serilog
             bool autoCreateSqlTable = false,
             ColumnOptions columnOptions = null,
             IConfigurationSection columnOptionsSection = null,
-            string schemaName = "dbo"
-            )
+            string schemaName = "dbo",
+            ITextFormatter logEventFormatter = null)
         {
-            if(loggerAuditSinkConfiguration == null)
-                throw new ArgumentNullException("loggerAuditSinkConfiguration");
+            if (loggerAuditSinkConfiguration == null)
+                throw new ArgumentNullException(nameof(loggerAuditSinkConfiguration));
 
             var connectionStr = ApplyMicrosoftExtensionsConfiguration.GetConnectionString(connectionString, appConfiguration);
             var colOpts = ApplyMicrosoftExtensionsConfiguration.ConfigureColumnOptions(columnOptions, columnOptionsSection);
@@ -124,8 +127,8 @@ namespace Serilog
                     formatProvider,
                     autoCreateSqlTable,
                     columnOptions,
-                    schemaName
-                    ),
+                    schemaName,
+                    logEventFormatter),
                 restrictedToMinimumLevel);
         }
     }
