@@ -7,7 +7,7 @@ using Xunit;
 namespace Serilog.Sinks.MSSqlServer.Tests
 {
     [Collection("LogTest")]
-    public sealed class TestSqlTypes : IDisposable
+    public sealed class SqlTypesTests : IDisposable
     {
         // Since the point of these tests are to validate we can write to
         // specific underlying SQL Server column data types, we use audit

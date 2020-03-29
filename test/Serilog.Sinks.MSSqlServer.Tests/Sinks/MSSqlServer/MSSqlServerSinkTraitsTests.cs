@@ -12,7 +12,7 @@ using Xunit;
 
 namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer
 {
-    public class TestMSSqlServerSinkTraits
+    public class MSSqlServerSinkTraitsTests
     {
         private MSSqlServerSinkTraits traits;
         private LogEvent logEvent;

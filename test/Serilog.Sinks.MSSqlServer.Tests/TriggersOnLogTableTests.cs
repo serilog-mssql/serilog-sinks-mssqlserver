@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Data;
 using System.Data.SqlClient;
-using System.IO;
 using Dapper;
 using FluentAssertions;
 using Xunit;
@@ -9,11 +7,10 @@ using Xunit;
 namespace Serilog.Sinks.MSSqlServer.Tests
 {
     [Collection("LogTest")]
-    public class TestTimeStamp : IDisposable
+    public class TriggersOnLogTableTests : IDisposable
     {
-        [Trait("Bugfix", "#187")]
         [Fact]
-        public void CanCreateDatabaseWithDateTimeByDefault()
+        public void TestTriggerOnLogTableFire()
         {
             // arrange
             var loggerConfiguration = new LoggerConfiguration();
@@ -26,24 +23,28 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 columnOptions: new ColumnOptions())
                 .CreateLogger();
 
+            CreateTrigger();
+
             // act
             const string loggingInformationMessage = "Logging Information message";
             Log.Information(loggingInformationMessage);
+
             Log.CloseAndFlush();
 
             // assert
             using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
             {
-                var logEvents = conn.Query<TestTimeStampDateTimeEntry>($"SELECT TimeStamp FROM {DatabaseFixture.LogTableName}");
-                logEvents.Should().NotBeEmpty();
+                var logTriggerEvents = conn.Query<TestTriggerEntry>($"SELECT * FROM {logTriggerTableName}");
+
+                logTriggerEvents.Should().NotBeNullOrEmpty();
             }
         }
 
-        [Trait("Bugfix", "#187")]
         [Fact]
-        public void CanStoreDateTimeOffsetWithCorrectLocalTimeZone()
+        public void TestOptionsDisableTriggersOnLogTable()
         {
             // arrange
+            var options = new ColumnOptions { DisableTriggers = true };
             var loggerConfiguration = new LoggerConfiguration();
             Log.Logger = loggerConfiguration.WriteTo.MSSqlServer(
                 connectionString: DatabaseFixture.LogEventsConnectionString,
@@ -51,54 +52,94 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 autoCreateSqlTable: true,
                 batchPostingLimit: 1,
                 period: TimeSpan.FromSeconds(10),
-                columnOptions: new ColumnOptions { TimeStamp = { DataType = SqlDbType.DateTimeOffset, ConvertToUtc = false }})
+                columnOptions: options)
                 .CreateLogger();
-            var dateTimeOffsetNow = DateTimeOffset.Now;
+
+            CreateTrigger();
 
             // act
             const string loggingInformationMessage = "Logging Information message";
             Log.Information(loggingInformationMessage);
+
             Log.CloseAndFlush();
 
             // assert
             using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
             {
-                var logEvents = conn.Query<TestTimeStampDateTimeOffsetEntry>($"SELECT TimeStamp FROM {DatabaseFixture.LogTableName}");
-                logEvents.Should().Contain(e => e.TimeStamp.Offset == dateTimeOffsetNow.Offset);
+                var logTriggerEvents = conn.Query<TestTriggerEntry>($"SELECT * FROM {logTriggerTableName}");
+
+                logTriggerEvents.Should().BeEmpty();
             }
         }
 
-        [Trait("Bugfix", "#187")]
         [Fact]
-        public void CanStoreDateTimeOffsetWithUtcTimeZone()
+        public void TestAuditTriggerOnLogTableFire()
         {
             // arrange
             var loggerConfiguration = new LoggerConfiguration();
-            Log.Logger = loggerConfiguration.WriteTo.MSSqlServer(
+            Log.Logger = loggerConfiguration.AuditTo.MSSqlServer(
                 connectionString: DatabaseFixture.LogEventsConnectionString,
                 tableName: DatabaseFixture.LogTableName,
                 autoCreateSqlTable: true,
-                batchPostingLimit: 1,
-                period: TimeSpan.FromSeconds(10),
-                columnOptions: new ColumnOptions { TimeStamp = { DataType = SqlDbType.DateTimeOffset, ConvertToUtc = true } })
+                columnOptions: new ColumnOptions())
                 .CreateLogger();
+
+            CreateTrigger();
 
             // act
             const string loggingInformationMessage = "Logging Information message";
             Log.Information(loggingInformationMessage);
+
             Log.CloseAndFlush();
 
             // assert
             using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
             {
-                var logEvents = conn.Query<TestTimeStampDateTimeOffsetEntry>($"SELECT TimeStamp FROM {DatabaseFixture.LogTableName}");
-                logEvents.Should().Contain(e => e.TimeStamp.Offset == new TimeSpan(0));
+                var logTriggerEvents = conn.Query<TestTriggerEntry>($"SELECT * FROM {logTriggerTableName}");
+
+                logTriggerEvents.Should().NotBeNullOrEmpty();
+            }
+        }
+
+        [Fact]        
+        public void TestAuditOptionsDisableTriggersOnLogTable_ThrowsNotSupportedException()
+        {
+            // arrange
+            var options = new ColumnOptions { DisableTriggers = true };
+            var loggerConfiguration = new LoggerConfiguration();
+            Assert.Throws<NotSupportedException>(() => loggerConfiguration.AuditTo.MSSqlServer(
+                connectionString: DatabaseFixture.LogEventsConnectionString,
+                tableName: DatabaseFixture.LogTableName,
+                autoCreateSqlTable: true,
+                columnOptions: options)
+                .CreateLogger());
+
+            // throws, should be no table to delete unless the test fails
+            DatabaseFixture.DropTable();
+        }
+
+        private string logTriggerTableName => $"{DatabaseFixture.LogTableName}Trigger";
+        private string logTriggerName => $"{logTriggerTableName}Trigger";
+
+        private void CreateTrigger()
+        {
+            using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
+            {
+                conn.Execute($"CREATE TABLE {logTriggerTableName} ([Id] [UNIQUEIDENTIFIER] NOT NULL, [Data] [NVARCHAR](50) NOT NULL)");
+                conn.Execute($@"
+CREATE TRIGGER {logTriggerName} ON {DatabaseFixture.LogTableName} 
+AFTER INSERT 
+AS
+BEGIN 
+INSERT INTO {logTriggerTableName} VALUES (NEWID(), 'Data') 
+END");
             }
         }
 
         public void Dispose()
         {
             DatabaseFixture.DropTable();
+            DatabaseFixture.DropTable(logTriggerTableName);
         }
     }
 }

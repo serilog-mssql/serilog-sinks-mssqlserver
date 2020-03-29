@@ -16,7 +16,7 @@ using System.Linq;
 namespace Serilog.Sinks.MSSqlServer.Tests
 {
     [Collection("LogTest")]
-    public class ConfigurationExtensions : IDisposable
+    public sealed class ConfigurationExtensionsTests : IDisposable
     {
         [Fact]
         public void ConnectionStringByName()
