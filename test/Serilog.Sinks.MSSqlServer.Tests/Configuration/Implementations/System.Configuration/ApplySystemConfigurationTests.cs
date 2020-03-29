@@ -27,7 +27,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.System.C
             // Arrange
             const string connectionStringName = "TestConnectionStringName";
             const string expectedResult = "TestConnectionString";
-            var connectionStringProviderMock = new Mock<IConnectionStringProvider>();
+            var connectionStringProviderMock = new Mock<ISystemConfigurationConnectionStringProvider>();
             connectionStringProviderMock.Setup(p => p.GetConnectionString(It.IsAny<string>())).Returns(expectedResult);
             ApplySystemConfiguration.ConnectionStringProvider = connectionStringProviderMock.Object;
 

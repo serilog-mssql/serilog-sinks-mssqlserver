@@ -3,7 +3,7 @@ using Serilog.Debugging;
 
 namespace Serilog.Sinks.MSSqlServer.Configuration
 {
-    internal class SystemConfigurationConnectionStringProvider : IConnectionStringProvider
+    internal class SystemConfigurationConnectionStringProvider : ISystemConfigurationConnectionStringProvider
     {
         public string GetConnectionString(string nameOrConnectionString)
         {

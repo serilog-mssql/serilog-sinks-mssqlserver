@@ -8,7 +8,7 @@ namespace Serilog.Sinks.MSSqlServer
     /// </summary>
     internal static class ApplySystemConfiguration
     {
-        internal static IConnectionStringProvider ConnectionStringProvider { get; set; } = new SystemConfigurationConnectionStringProvider();
+        internal static ISystemConfigurationConnectionStringProvider ConnectionStringProvider { get; set; } = new SystemConfigurationConnectionStringProvider();
 
         internal static ISystemConfigurationColumnOptionsProvider ColumnOptionsProvider { get; set; } = new SystemConfigurationColumnOptionsProvider();
 

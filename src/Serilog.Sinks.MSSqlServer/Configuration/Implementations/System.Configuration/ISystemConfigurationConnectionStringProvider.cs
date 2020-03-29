@@ -1,6 +1,6 @@
 ﻿namespace Serilog.Sinks.MSSqlServer.Configuration
 {
-    internal interface IConnectionStringProvider
+    internal interface ISystemConfigurationConnectionStringProvider
     {
         string GetConnectionString(string nameOrConnectionString);
     }
