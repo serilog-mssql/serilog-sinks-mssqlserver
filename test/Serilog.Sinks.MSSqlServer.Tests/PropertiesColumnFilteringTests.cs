@@ -7,7 +7,7 @@ using Xunit;
 namespace Serilog.Sinks.MSSqlServer.Tests
 {
     [Collection("LogTest")]
-    public class TestPropertiesColumnFiltering : IDisposable
+    public sealed class PropertiesColumnFilteringTests : IDisposable
     {
         [Fact]
         public void FilteredProperties()

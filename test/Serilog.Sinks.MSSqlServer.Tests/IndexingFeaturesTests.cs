@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using Dapper;
@@ -10,7 +8,7 @@ using Xunit;
 namespace Serilog.Sinks.MSSqlServer.Tests
 {
     [Collection("LogTest")]
-    public class TestIndexingFeatures : IDisposable
+    public sealed class IndexingFeaturesTests : IDisposable
     {
         [Fact]
         public void NonClusteredDefaultIdPrimaryKey()

@@ -48,6 +48,7 @@
     <PackageReference Include="xunit" Version="2.4.0" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.0" />
     <Compile Include="Configuration\System.Configuration\**\*.cs" />
+    <Compile Include="Configuration\Implementations\System.Configuration\**\*.cs" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.0' ">
@@ -64,6 +65,8 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
     <Compile Include="Configuration\Microsoft.Extensions.Configuration\**\*.cs" />
+    <Compile Include="Configuration\Implementations\Microsoft.Extensions.Configuration\**\*.cs" />
+    <Compile Include="Configuration\Implementations\System.Configuration\**\*.cs" />
   </ItemGroup>
 
   <ItemGroup>

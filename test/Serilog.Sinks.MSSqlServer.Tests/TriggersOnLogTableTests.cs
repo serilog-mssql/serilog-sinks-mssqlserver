@@ -7,7 +7,7 @@ using Xunit;
 namespace Serilog.Sinks.MSSqlServer.Tests
 {
     [Collection("LogTest")]
-    public class TestTriggersOnLogTable : IDisposable
+    public sealed class TriggersOnLogTableTests : IDisposable
     {
         [Fact]
         public void TestTriggerOnLogTableFire()

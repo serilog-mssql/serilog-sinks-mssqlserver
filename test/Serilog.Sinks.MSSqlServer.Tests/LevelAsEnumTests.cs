@@ -9,7 +9,7 @@ using Xunit;
 namespace Serilog.Sinks.MSSqlServer.Tests
 {
     [Collection("LogTest")]
-    public class LevelAsEnum : IDisposable
+    public sealed class LevelAsEnumTests : IDisposable
     {
         [Fact]
         public void CanStoreLevelAsEnum()
