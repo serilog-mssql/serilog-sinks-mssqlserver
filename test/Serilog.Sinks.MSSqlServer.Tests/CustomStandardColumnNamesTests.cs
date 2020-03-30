@@ -10,7 +10,7 @@ using FluentAssertions;
 namespace Serilog.Sinks.MSSqlServer.Tests
 {
     [Collection("LogTest")]
-    public sealed class CustomStandardColumnNames : IDisposable
+    public sealed class CustomStandardColumnNamesTests : IDisposable
     {
         [Fact]
         public void CustomIdColumn()
