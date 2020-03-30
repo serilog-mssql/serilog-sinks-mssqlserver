@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Data;
 using System.Data.SqlClient;
-using System.IO;
 using Dapper;
 using FluentAssertions;
 using Xunit;
@@ -9,7 +8,7 @@ using Xunit;
 namespace Serilog.Sinks.MSSqlServer.Tests
 {
     [Collection("LogTest")]
-    public class TimeStampTests : IDisposable
+    public sealed class TimeStampTests : IDisposable
     {
         [Trait("Bugfix", "#187")]
         [Fact]
