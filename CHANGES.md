@@ -1,4 +1,20 @@
-5.2
+5.2.0
+ * Enhancement #232: Allow to override formatter for rendering LogEvent column.
+ * Fixed #187 (again - still an exception when using logevent column with TimeStamp column type DateTimeOffset).
+ * Added sample programs
+
+5.1.4
+ * Fixed #187 Support datetimeoffset as a column type for default column TimeStamp.
+ * Fixed #229 Slight issue with documentation.
+
+5.1.3
+ * Support binary data type, support specify data length in column config, support specify allow null column
+ * Also build on unit-test commits
+ * Added issue templase
+ * Hybrid config implementation
+ * Bugfixes
+
+5.1.2
  * Support for Audit sink added (#118/#110).
 
 4.0.0
