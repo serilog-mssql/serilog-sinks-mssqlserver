@@ -5,6 +5,7 @@ using Xunit;
 
 namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsoft.Extensions.Configuration
 {
+    [Collection("LogTest")]
     public class ApplyMicrosoftExtensionsConfigurationTests
     {
         [Fact]
