@@ -4,12 +4,13 @@ using System.IO;
 using Dapper;
 using FluentAssertions;
 using Serilog.Events;
+using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
 
 namespace Serilog.Sinks.MSSqlServer.Tests
 {
     [Collection("LogTest")]
-    public sealed class LevelAsEnumTests : IDisposable
+    public class LevelAsEnumTests : DatabaseTestsBase
     {
         [Fact]
         public void CanStoreLevelAsEnum()
@@ -129,11 +130,6 @@ namespace Serilog.Sinks.MSSqlServer.Tests
 
                 logEvents.Should().Contain(e => e.Message.Contains(loggingInformationMessage) && e.Level == LogEventLevel.Information.ToString());
             }
-        }
-
-        public void Dispose()
-        {
-            DatabaseFixture.DropTable();
         }
     }
 }

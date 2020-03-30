@@ -2,13 +2,16 @@
 using System.Data.SqlClient;
 using Dapper;
 using FluentAssertions;
+using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
 
 namespace Serilog.Sinks.MSSqlServer.Tests
 {
     [Collection("LogTest")]
-    public sealed class TriggersOnLogTableTests : IDisposable
+    public class TriggersOnLogTableTests : DatabaseTestsBase
     {
+        private bool _disposedValue;
+
         [Fact]
         public void TestTriggerOnLogTableFire()
         {
@@ -136,10 +139,14 @@ END");
             }
         }
 
-        public void Dispose()
+        protected override void Dispose(bool disposing)
         {
-            DatabaseFixture.DropTable();
-            DatabaseFixture.DropTable(logTriggerTableName);
+            base.Dispose(disposing);
+            if (!_disposedValue)
+            {
+                DatabaseFixture.DropTable(logTriggerTableName);
+                _disposedValue = true;
+            }
         }
     }
 }

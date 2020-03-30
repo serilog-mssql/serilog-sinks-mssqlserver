@@ -3,12 +3,13 @@ using System.Data;
 using System.Data.SqlClient;
 using Dapper;
 using FluentAssertions;
+using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
 
 namespace Serilog.Sinks.MSSqlServer.Tests
 {
     [Collection("LogTest")]
-    public sealed class TimeStampTests : IDisposable
+    public class TimeStampTests : DatabaseTestsBase
     {
         [Trait("Bugfix", "#187")]
         [Fact]
@@ -93,11 +94,6 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 var logEvents = conn.Query<TestTimeStampDateTimeOffsetEntry>($"SELECT TimeStamp FROM {DatabaseFixture.LogTableName}");
                 logEvents.Should().Contain(e => e.TimeStamp.Offset == new TimeSpan(0));
             }
-        }
-
-        public void Dispose()
-        {
-            DatabaseFixture.DropTable();
         }
     }
 }

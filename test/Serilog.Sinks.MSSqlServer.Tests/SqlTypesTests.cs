@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
@@ -7,7 +8,7 @@ using Xunit;
 namespace Serilog.Sinks.MSSqlServer.Tests
 {
     [Collection("LogTest")]
-    public sealed class SqlTypesTests : IDisposable
+    public class SqlTypesTests : DatabaseTestsBase
     {
         // Since the point of these tests are to validate we can write to
         // specific underlying SQL Server column data types, we use audit
@@ -141,11 +142,6 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                     autoCreateSqlTable: true
                 )
                 .CreateLogger();
-        }
-
-        public void Dispose()
-        {
-            DatabaseFixture.DropTable();
         }
     }
 }

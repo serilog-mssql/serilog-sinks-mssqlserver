@@ -3,12 +3,13 @@ using System.Data.SqlClient;
 using System.Linq;
 using Dapper;
 using FluentAssertions;
+using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
 
 namespace Serilog.Sinks.MSSqlServer.Tests
 {
     [Collection("LogTest")]
-    public sealed class IndexingFeaturesTests : IDisposable
+    public class IndexingFeaturesTests : DatabaseTestsBase
     {
         [Fact]
         public void NonClusteredDefaultIdPrimaryKey()
@@ -109,11 +110,6 @@ namespace Serilog.Sinks.MSSqlServer.Tests
 
                 results.Should().Contain(x => x.name == $"CCI_{DatabaseFixture.LogTableName}");
             }
-        }
-
-        public void Dispose()
-        {
-            DatabaseFixture.DropTable();
         }
     }
 }
