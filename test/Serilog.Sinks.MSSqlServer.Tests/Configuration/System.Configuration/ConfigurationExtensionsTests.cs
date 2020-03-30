@@ -1,10 +1,10 @@
-﻿using System;
-using Dapper;
+﻿using Dapper;
 using Xunit;
 using FluentAssertions;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
+using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 
 // Because System.Configuration is static and config is loaded automatically,
 // the tests alter the static AppConfigSectionName string value exposed by the
@@ -16,7 +16,7 @@ using System.Linq;
 namespace Serilog.Sinks.MSSqlServer.Tests
 {
     [Collection("LogTest")]
-    public sealed class ConfigurationExtensionsTests : IDisposable
+    public class ConfigurationExtensionsTests : DatabaseTestsBase
     {
         [Fact]
         public void ConnectionStringByName()
@@ -88,11 +88,6 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 infoSchema.Should().Contain(columns => columns.ColumnName == "LogEvent");
                 infoSchema.Should().Contain(columns => columns.ColumnName == "CustomColumn");
             }
-        }
-
-        public void Dispose()
-        {
-            DatabaseFixture.DropTable();
         }
     }
 }

@@ -5,12 +5,13 @@ using System.Data.SqlClient;
 using System.Linq;
 using Dapper;
 using FluentAssertions;
+using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
 
 namespace Serilog.Sinks.MSSqlServer.Tests
 {
     [Collection("LogTest")]
-    public sealed class MiscFeaturesTests : IDisposable
+    public class MiscFeaturesTests : DatabaseTestsBase
     {
         [Fact]
         public void LogEventExcludeAdditionalProperties()
@@ -265,11 +266,6 @@ namespace Serilog.Sinks.MSSqlServer.Tests
 
                 logEventCount.Should().HaveCount(1);
             }
-        }
-
-        public void Dispose()
-        {
-            DatabaseFixture.DropTable();
         }
     }
 }

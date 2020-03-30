@@ -1,7 +1,7 @@
 ﻿using Serilog.Events;
 using System;
 
-namespace Serilog.Sinks.MSSqlServer.Tests
+namespace Serilog.Sinks.MSSqlServer.Tests.TestUtils
 {
     public class CustomStandardLogColumns
     {

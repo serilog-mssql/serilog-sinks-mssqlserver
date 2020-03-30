@@ -6,11 +6,12 @@ using System.Linq;
 using Dapper;
 using Xunit;
 using FluentAssertions;
+using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 
 namespace Serilog.Sinks.MSSqlServer.Tests
 {
     [Collection("LogTest")]
-    public sealed class CustomStandardColumnNamesTests : IDisposable
+    public class CustomStandardColumnNamesTests : DatabaseTestsBase
     {
         [Fact]
         public void CustomIdColumn()
@@ -263,11 +264,6 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 var logEvents = conn.Query<DefaultStandardLogColumns>($"SELECT Message, Level FROM {DatabaseFixture.LogTableName}");
                 logEvents.Should().Contain(e => e.Message.Contains(loggingInformationMessage));
             }
-        }
-
-        public void Dispose()
-        {
-            DatabaseFixture.DropTable();
         }
     }
 }
