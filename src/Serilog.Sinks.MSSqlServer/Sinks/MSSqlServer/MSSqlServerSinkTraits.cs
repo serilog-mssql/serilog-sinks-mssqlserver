@@ -308,6 +308,5 @@ namespace Serilog.Sinks.MSSqlServer
 
             return eventsTable;
         }
-
     }
 }
