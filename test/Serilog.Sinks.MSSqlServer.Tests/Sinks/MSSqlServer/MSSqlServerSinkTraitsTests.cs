@@ -16,9 +16,9 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer
     [Collection("LogTest")]
     public class MSSqlServerSinkTraitsTests
     {
-        private string _connectionString = "connectionString";
-        private string _tableName = "tableName";
-        private string _schemaName = "schemaName";
+        private readonly string _connectionString = "connectionString";
+        private readonly string _tableName = "tableName";
+        private readonly string _schemaName = "schemaName";
         private MSSqlServerSinkTraits _sut;
 
         [Trait("Bugfix", "#187")]

@@ -130,8 +130,10 @@ namespace Serilog.Sinks.MSSqlServer.Tests
 
         private void Arrange(ICollection<SqlColumn> customColumns)
         {
-            var columnOptions = new ColumnOptions();
-            columnOptions.AdditionalColumns = customColumns;
+            var columnOptions = new ColumnOptions
+            {
+                AdditionalColumns = customColumns
+            };
 
             Log.Logger = new LoggerConfiguration()
                 .AuditTo.MSSqlServer

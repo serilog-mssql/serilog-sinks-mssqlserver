@@ -117,8 +117,8 @@ namespace Serilog
             if (loggerAuditSinkConfiguration == null)
                 throw new ArgumentNullException(nameof(loggerAuditSinkConfiguration));
 
-            var connectionStr = ApplyMicrosoftExtensionsConfiguration.GetConnectionString(connectionString, appConfiguration);
-            var colOpts = ApplyMicrosoftExtensionsConfiguration.ConfigureColumnOptions(columnOptions, columnOptionsSection);
+            connectionString = ApplyMicrosoftExtensionsConfiguration.GetConnectionString(connectionString, appConfiguration);
+            columnOptions = ApplyMicrosoftExtensionsConfiguration.ConfigureColumnOptions(columnOptions, columnOptionsSection);
 
             return loggerAuditSinkConfiguration.Sink(
                 new MSSqlServerAuditSink(
