@@ -2,6 +2,7 @@
 using Serilog.Events;
 using Serilog.Formatting;
 using Serilog.Parsing;
+using Serilog.Sinks.MSSqlServer.Platform;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -15,22 +16,25 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer
     [Collection("LogTest")]
     public class MSSqlServerSinkTraitsTests
     {
-        private MSSqlServerSinkTraits traits;
-        private LogEvent logEvent;
+        private readonly string _connectionString = "connectionString";
+        private readonly string _tableName = "tableName";
+        private readonly string _schemaName = "schemaName";
+        private MSSqlServerSinkTraits _sut;
 
         [Trait("Bugfix", "#187")]
         [Fact]
         public void GetColumnsAndValuesCreatesTimeStampOfTypeDateTimeAccordingToColumnOptions()
         {
-            // arrange
+            // Arrange
             var options = new Serilog.Sinks.MSSqlServer.ColumnOptions();
             var testDateTimeOffset = new DateTimeOffset(2020, 1, 1, 9, 0, 0, new TimeSpan(1, 0, 0)); // Timezone +1:00
-            SetupTest(options, testDateTimeOffset);
+            var logEvent = CreateLogEvent(testDateTimeOffset);
+            SetupSut(options);
 
-            // act
-            var columns = traits.GetColumnsAndValues(logEvent);
+            // Act
+            var columns = _sut.GetColumnsAndValues(logEvent);
 
-            // assert
+            // Assert
             var timeStampColumn = columns.Single(c => c.Key == options.TimeStamp.ColumnName);
             Assert.IsType<DateTime>(timeStampColumn.Value);
             Assert.Equal(testDateTimeOffset.Hour, ((DateTime)timeStampColumn.Value).Hour);
@@ -40,18 +44,19 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer
         [Fact]
         public void GetColumnsAndValuesCreatesUtcConvertedTimeStampOfTypeDateTimeAccordingToColumnOptions()
         {
-            // arrange
+            // Arrange
             var options = new Serilog.Sinks.MSSqlServer.ColumnOptions
             {
                 TimeStamp = { ConvertToUtc = true }
             };
             var testDateTimeOffset = new DateTimeOffset(2020, 1, 1, 9, 0, 0, new TimeSpan(1, 0, 0)); // Timezone +1:00
-            SetupTest(options, testDateTimeOffset);
+            var logEvent = CreateLogEvent(testDateTimeOffset);
+            SetupSut(options);
 
-            // act
-            var columns = traits.GetColumnsAndValues(logEvent);
+            // Act
+            var columns = _sut.GetColumnsAndValues(logEvent);
 
-            // assert
+            // Assert
             var timeStampColumn = columns.Single(c => c.Key == options.TimeStamp.ColumnName);
             Assert.IsType<DateTime>(timeStampColumn.Value);
             Assert.Equal(testDateTimeOffset.Hour - 1, ((DateTime)timeStampColumn.Value).Hour);
@@ -61,18 +66,19 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer
         [Fact]
         public void GetColumnsAndValuesCreatesTimeStampOfTypeDateTimeOffsetAccordingToColumnOptions()
         {
-            // arrange
+            // Arrange
             var options = new Serilog.Sinks.MSSqlServer.ColumnOptions
             {
                 TimeStamp = { DataType = SqlDbType.DateTimeOffset }
             };
             var testDateTimeOffset = new DateTimeOffset(2020, 1, 1, 9, 0, 0, new TimeSpan(1, 0, 0)); // Timezone +1:00
-            SetupTest(options, testDateTimeOffset);
+            var logEvent = CreateLogEvent(testDateTimeOffset);
+            SetupSut(options);
 
-            // act
-            var columns = traits.GetColumnsAndValues(logEvent);
+            // Act
+            var columns = _sut.GetColumnsAndValues(logEvent);
 
-            // assert
+            // Assert
             var timeStampColumn = columns.Single(c => c.Key == options.TimeStamp.ColumnName);
             Assert.IsType<DateTimeOffset>(timeStampColumn.Value);
             var timeStampColumnOffset = (DateTimeOffset)timeStampColumn.Value;
@@ -84,18 +90,19 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer
         [Fact]
         public void GetColumnsAndValuesCreatesUtcConvertedTimeStampOfTypeDateTimeOffsetAccordingToColumnOptions()
         {
-            // arrange
+            // Arrange
             var options = new Serilog.Sinks.MSSqlServer.ColumnOptions
             {
                 TimeStamp = { DataType = SqlDbType.DateTimeOffset, ConvertToUtc = true }
             };
             var testDateTimeOffset = new DateTimeOffset(2020, 1, 1, 9, 0, 0, new TimeSpan(1, 0, 0)); // Timezone +1:00
-            SetupTest(options, testDateTimeOffset);
+            var logEvent = CreateLogEvent(testDateTimeOffset);
+            SetupSut(options);
 
-            // act
-            var columns = traits.GetColumnsAndValues(logEvent);
+            // Act
+            var columns = _sut.GetColumnsAndValues(logEvent);
 
-            // assert
+            // Assert
             var timeStampColumn = columns.Single(c => c.Key == options.TimeStamp.ColumnName);
             Assert.IsType<DateTimeOffset>(timeStampColumn.Value);
             var timeStampColumnOffset = (DateTimeOffset)timeStampColumn.Value;
@@ -106,19 +113,20 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer
         [Fact]
         public void GetColumnsAndValuesWhenCalledWithCustomFormatterRendersLogEventPropertyUsingCustomFormatter()
         {
-            // arrange
+            // Arrange
             const string testLogEventContent = "Content of LogEvent";
             var options = new Serilog.Sinks.MSSqlServer.ColumnOptions();
             options.Store.Add(StandardColumn.LogEvent);
             var logEventFormatterMock = new Mock<ITextFormatter>();
             logEventFormatterMock.Setup(f => f.Format(It.IsAny<LogEvent>(), It.IsAny<TextWriter>()))
                 .Callback<LogEvent, TextWriter>((e, w) => w.Write(testLogEventContent));
-            SetupTest(options, DateTimeOffset.UtcNow, logEventFormatterMock.Object);
+            var logEvent = CreateLogEvent(DateTimeOffset.UtcNow);
+            SetupSut(options, logEventFormatter: logEventFormatterMock.Object);
 
-            // act
-            var columns = traits.GetColumnsAndValues(logEvent);
+            // Act
+            var columns = _sut.GetColumnsAndValues(logEvent);
 
-            // assert
+            // Assert
             var logEventColumn = columns.Single(c => c.Key == options.LogEvent.ColumnName);
             Assert.Equal(testLogEventContent, logEventColumn.Value);
         }
@@ -126,31 +134,78 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer
         [Fact]
         public void GetColumnsAndValuesWhenCalledWithoutFormatterRendersLogEventPropertyUsingInternalJsonFormatter()
         {
-            // arrange
+            // Arrange
             const string expectedLogEventContent =
                 "{\"TimeStamp\":\"2020-01-01T09:00:00.0000000\",\"Level\":\"Information\",\"Message\":\"\",\"MessageTemplate\":\"\"}";
             var options = new Serilog.Sinks.MSSqlServer.ColumnOptions();
             options.Store.Add(StandardColumn.LogEvent);
             var testDateTimeOffset = new DateTimeOffset(2020, 1, 1, 9, 0, 0, TimeSpan.Zero);
-            SetupTest(options, testDateTimeOffset, null);
+            var logEvent = CreateLogEvent(testDateTimeOffset);
+            SetupSut(options);
 
-            // act
-            var columns = traits.GetColumnsAndValues(logEvent);
+            // Act
+            var columns = _sut.GetColumnsAndValues(logEvent);
 
-            // assert
+            // Assert
             var logEventColumn = columns.Single(c => c.Key == options.LogEvent.ColumnName);
             Assert.Equal(expectedLogEventContent, logEventColumn.Value);
         }
 
-        private void SetupTest(
-            Serilog.Sinks.MSSqlServer.ColumnOptions options,
-            DateTimeOffset testDateTimeOffset,
-            ITextFormatter logEventFormatter = null)
+        [Fact]
+        public void InitializeWithAutoCreateSqlTableCallsSqlTableCreator()
         {
-            this.traits = new MSSqlServerSinkTraits("connectionString", "tableName", "schemaName", 
-                options, CultureInfo.InvariantCulture, false, logEventFormatter);
-            this.logEvent = new LogEvent(testDateTimeOffset, LogEventLevel.Information, null,
+            // Arrange
+            var options = new Serilog.Sinks.MSSqlServer.ColumnOptions();
+            var sqlTableCreatorMock = new Mock<ISqlTableCreator>();
+
+            // Act
+            SetupSut(options, autoCreateSqlTable: true, sqlTableCreator: sqlTableCreatorMock.Object);
+
+            // Assert
+            sqlTableCreatorMock.Verify(c => c.CreateTable(_connectionString, _schemaName, _tableName,
+                It.IsAny<DataTable>(), options),
+                Times.Once);
+        }
+
+        [Fact]
+        public void InitializeWithoutAutoCreateSqlTableDoesNotCallsSqlTableCreator()
+        {
+            // Arrange
+            var options = new Serilog.Sinks.MSSqlServer.ColumnOptions();
+            var sqlTableCreatorMock = new Mock<ISqlTableCreator>();
+
+            // Act
+            SetupSut(options, autoCreateSqlTable: false, sqlTableCreator: sqlTableCreatorMock.Object);
+
+            // Assert
+            sqlTableCreatorMock.Verify(c => c.CreateTable(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(),
+                It.IsAny<DataTable>(), It.IsAny<Serilog.Sinks.MSSqlServer.ColumnOptions>()),
+                Times.Never);
+        }
+
+        private static LogEvent CreateLogEvent(DateTimeOffset testDateTimeOffset)
+        {
+            return new LogEvent(testDateTimeOffset, LogEventLevel.Information, null,
                 new MessageTemplate(new List<MessageTemplateToken>()), new List<LogEventProperty>());
+        }
+
+        private void SetupSut(
+            Serilog.Sinks.MSSqlServer.ColumnOptions options,
+            bool autoCreateSqlTable = false,
+            ITextFormatter logEventFormatter = null,
+            ISqlTableCreator sqlTableCreator = null)
+        {
+            if (sqlTableCreator == null)
+            {
+                _sut = new MSSqlServerSinkTraits(_connectionString, _tableName, _schemaName, 
+                    options, CultureInfo.InvariantCulture, autoCreateSqlTable, logEventFormatter);
+            }
+            else
+            {
+                // Internal constructor to use ISqlTableCreator mock
+                _sut = new MSSqlServerSinkTraits(_connectionString, _tableName, _schemaName,
+                    options, CultureInfo.InvariantCulture, autoCreateSqlTable, logEventFormatter, sqlTableCreator);
+            }
         }
     }
 }

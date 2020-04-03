@@ -7,13 +7,13 @@ using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 
-namespace Serilog.Sinks.MSSqlServer.Tests
+namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.Microsoft.Extensions.Configuration
 {
     [Collection("LogTest")]
     public class ConfigurationExtensionsTests : DatabaseTestsBase
     {
-        static string ConnectionStringName = "NamedConnection";
-        static string ColumnOptionsSection = "CustomColumnNames";
+        private const string ConnectionStringName = "NamedConnection";
+        private const string ColumnOptionsSection = "CustomColumnNames";
 
         IConfiguration TestConfiguration() =>
             new ConfigurationBuilder()

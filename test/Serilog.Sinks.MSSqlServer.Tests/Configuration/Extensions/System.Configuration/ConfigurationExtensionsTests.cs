@@ -13,7 +13,7 @@ using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 // not run the tests within a class in parallel and each run is a full restart
 // so there are not conflicts across tests.
 
-namespace Serilog.Sinks.MSSqlServer.Tests
+namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.System.Configuration
 {
     [Collection("LogTest")]
     public class ConfigurationExtensionsTests : DatabaseTestsBase

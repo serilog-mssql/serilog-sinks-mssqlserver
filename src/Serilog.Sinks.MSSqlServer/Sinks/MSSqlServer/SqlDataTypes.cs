@@ -68,7 +68,6 @@ namespace Serilog.Sinks.MSSqlServer
         /// </summary>
         public static bool TryParseIfSupported(string requestedType, out SqlDbType supportedSqlDbType)
         {
-            supportedSqlDbType = NotSupported;
             if(Enum.TryParse(requestedType, ignoreCase: true, result: out supportedSqlDbType))
             {
                 return SystemTypeMap.ContainsKey(supportedSqlDbType);

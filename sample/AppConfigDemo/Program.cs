@@ -6,7 +6,7 @@ using System.Threading;
 
 namespace AppConfigDemo
 {
-    public class Program
+    public static class Program
     {
         const string _connectionString = "Server=localhost;Database=LogTest;Integrated Security=SSPI;";
         const string _schemaName = "dbo";

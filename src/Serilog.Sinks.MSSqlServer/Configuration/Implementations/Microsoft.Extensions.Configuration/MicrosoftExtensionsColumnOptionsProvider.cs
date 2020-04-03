@@ -25,6 +25,16 @@ namespace Serilog.Sinks.MSSqlServer.Configuration
             return columnOptions;
         }
 
+        private static void SetCommonColumnOptions(IConfigurationSection section, SqlColumn target)
+        {
+            // Standard Columns are subclasses of the SqlColumn class
+            SetProperty.IfNotNullOrEmpty<string>(section["columnName"], (val) => target.ColumnName = val);
+            SetProperty.IfNotNull<string>(section["dataType"], (val) => target.SetDataTypeFromConfigString(val));
+            SetProperty.IfNotNull<bool>(section["allowNull"], (val) => target.AllowNull = val);
+            SetProperty.IfNotNull<int>(section["dataLength"], (val) => target.DataLength = val);
+            SetProperty.IfNotNull<bool>(section["nonClusteredIndex"], (val) => target.NonClusteredIndex = val);
+        }
+
         private void AddRemoveStandardColumns(IConfigurationSection config, ColumnOptions columnOptions)
         {
             // add standard columns
@@ -136,16 +146,6 @@ namespace Serilog.Sinks.MSSqlServer.Configuration
             section = config.GetSection("messageTemplate");
             if (section != null)
                 SetCommonColumnOptions(section, columnOptions.MessageTemplate);
-        }
-
-        private void SetCommonColumnOptions(IConfigurationSection section, SqlColumn target)
-        {
-            // Standard Columns are subclasses of the SqlColumn class
-            SetProperty.IfNotNullOrEmpty<string>(section["columnName"], (val) => target.ColumnName = val);
-            SetProperty.IfNotNull<string>(section["dataType"], (val) => target.SetDataTypeFromConfigString(val));
-            SetProperty.IfNotNull<bool>(section["allowNull"], (val) => target.AllowNull = val);
-            SetProperty.IfNotNull<int>(section["dataLength"], (val) => target.DataLength = val);
-            SetProperty.IfNotNull<bool>(section["nonClusteredIndex"], (val) => target.NonClusteredIndex = val);
         }
 
         private void ReadMiscColumnOptions(IConfigurationSection config, ColumnOptions columnOptions)

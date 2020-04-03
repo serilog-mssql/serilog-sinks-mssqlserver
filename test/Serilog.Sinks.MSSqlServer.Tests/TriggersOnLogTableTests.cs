@@ -37,7 +37,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             // assert
             using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
             {
-                var logTriggerEvents = conn.Query<TestTriggerEntry>($"SELECT * FROM {logTriggerTableName}");
+                var logTriggerEvents = conn.Query<TestTriggerEntry>($"SELECT * FROM {LogTriggerTableName}");
 
                 logTriggerEvents.Should().NotBeNullOrEmpty();
             }
@@ -69,7 +69,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             // assert
             using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
             {
-                var logTriggerEvents = conn.Query<TestTriggerEntry>($"SELECT * FROM {logTriggerTableName}");
+                var logTriggerEvents = conn.Query<TestTriggerEntry>($"SELECT * FROM {LogTriggerTableName}");
 
                 logTriggerEvents.Should().BeEmpty();
             }
@@ -98,7 +98,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             // assert
             using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
             {
-                var logTriggerEvents = conn.Query<TestTriggerEntry>($"SELECT * FROM {logTriggerTableName}");
+                var logTriggerEvents = conn.Query<TestTriggerEntry>($"SELECT * FROM {LogTriggerTableName}");
 
                 logTriggerEvents.Should().NotBeNullOrEmpty();
             }
@@ -121,20 +121,20 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             DatabaseFixture.DropTable();
         }
 
-        private string logTriggerTableName => $"{DatabaseFixture.LogTableName}Trigger";
-        private string logTriggerName => $"{logTriggerTableName}Trigger";
+        private static string LogTriggerTableName => $"{DatabaseFixture.LogTableName}Trigger";
+        private static string LogTriggerName => $"{LogTriggerTableName}Trigger";
 
         private void CreateTrigger()
         {
             using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
             {
-                conn.Execute($"CREATE TABLE {logTriggerTableName} ([Id] [UNIQUEIDENTIFIER] NOT NULL, [Data] [NVARCHAR](50) NOT NULL)");
+                conn.Execute($"CREATE TABLE {LogTriggerTableName} ([Id] [UNIQUEIDENTIFIER] NOT NULL, [Data] [NVARCHAR](50) NOT NULL)");
                 conn.Execute($@"
-CREATE TRIGGER {logTriggerName} ON {DatabaseFixture.LogTableName} 
+CREATE TRIGGER {LogTriggerName} ON {DatabaseFixture.LogTableName} 
 AFTER INSERT 
 AS
 BEGIN 
-INSERT INTO {logTriggerTableName} VALUES (NEWID(), 'Data') 
+INSERT INTO {LogTriggerTableName} VALUES (NEWID(), 'Data') 
 END");
             }
         }
@@ -144,7 +144,7 @@ END");
             base.Dispose(disposing);
             if (!_disposedValue)
             {
-                DatabaseFixture.DropTable(logTriggerTableName);
+                DatabaseFixture.DropTable(LogTriggerTableName);
                 _disposedValue = true;
             }
         }

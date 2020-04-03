@@ -13,8 +13,8 @@ namespace Serilog.Sinks.MSSqlServer
         [ConfigurationProperty("Name", IsRequired = true, IsKey = true)]
         public string Name
         {
-            get { return (string)this["Name"]; }
-            set { this["Name"] = value; }
+            get { return (string)this[nameof(Name)]; }
+            set { this[nameof(Name)] = value; }
         }
     }
 }

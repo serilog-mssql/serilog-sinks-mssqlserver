@@ -47,7 +47,7 @@
     <Reference Include="Microsoft.CSharp" />
     <PackageReference Include="xunit" Version="2.4.0" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.0" />
-    <Compile Include="Configuration\System.Configuration\**\*.cs" />
+    <Compile Include="Configuration\Extensions\System.Configuration\**\*.cs" />
     <Compile Include="Configuration\Implementations\System.Configuration\**\*.cs" />
   </ItemGroup>
 
@@ -64,7 +64,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
-    <Compile Include="Configuration\Microsoft.Extensions.Configuration\**\*.cs" />
+    <Compile Include="Configuration\Extensions\Microsoft.Extensions.Configuration\**\*.cs" />
     <Compile Include="Configuration\Implementations\Microsoft.Extensions.Configuration\**\*.cs" />
     <Compile Include="Configuration\Implementations\System.Configuration\**\*.cs" />
   </ItemGroup>

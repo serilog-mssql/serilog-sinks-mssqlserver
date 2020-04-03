@@ -46,6 +46,21 @@ namespace Serilog.Sinks.MSSqlServer
             IFormatProvider formatProvider,
             bool autoCreateSqlTable,
             ITextFormatter logEventFormatter)
+            : this(connectionString, tableName, schemaName, columnOptions, formatProvider, autoCreateSqlTable,
+                logEventFormatter, new SqlTableCreator(new SqlCreateTableWriter()))
+        {
+        }
+
+        // Internal constructor with injectable dependencies for better testability
+        internal MSSqlServerSinkTraits(
+            string connectionString,
+            string tableName,
+            string schemaName,
+            ColumnOptions columnOptions,
+            IFormatProvider formatProvider,
+            bool autoCreateSqlTable,
+            ITextFormatter logEventFormatter,
+            ISqlTableCreator sqlTableCreator)
         {
             if (string.IsNullOrWhiteSpace(connectionString))
                 throw new ArgumentNullException(nameof(connectionString));
@@ -80,8 +95,7 @@ namespace Serilog.Sinks.MSSqlServer
             {
                 try
                 {
-                    SqlTableCreator tableCreator = new SqlTableCreator(ConnectionString, SchemaName, TableName, EventTable, ColumnOptions);
-                    tableCreator.CreateTable(); // return code ignored, 0 = failure?
+                    sqlTableCreator.CreateTable(ConnectionString, SchemaName, TableName, EventTable, ColumnOptions); // return code ignored, 0 = failure?
                 }
                 catch (Exception ex)
                 {
@@ -294,6 +308,5 @@ namespace Serilog.Sinks.MSSqlServer
 
             return eventsTable;
         }
-
     }
 }

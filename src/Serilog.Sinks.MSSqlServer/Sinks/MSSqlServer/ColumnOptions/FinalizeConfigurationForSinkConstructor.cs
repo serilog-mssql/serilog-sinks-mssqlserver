@@ -75,10 +75,10 @@ namespace Serilog.Sinks.MSSqlServer
             configurationFinalized = true;
         }
 
-        private void ColumnstoreCompatibilityCheck(SqlColumn column)
+        private static void ColumnstoreCompatibilityCheck(SqlColumn column)
         {
             if (!SqlDataTypes.ColumnstoreCompatible.Contains(column.DataType))
-                throw new ArgumentException($"Columnstore indexes do not support data type \"{column.DataType.ToString()}\" declared for column \"{column.ColumnName}\".");
+                throw new ArgumentException($"Columnstore indexes do not support data type \"{column.DataType}\" declared for column \"{column.ColumnName}\".");
 
             if (column.DataLength == -1 && SqlDataTypes.DataLengthRequired.Contains(column.DataType))
                 SelfLog.WriteLine($"Warning: SQL2017 or newer required to use columnstore index with MAX length column \"{column.ColumnName}\".");

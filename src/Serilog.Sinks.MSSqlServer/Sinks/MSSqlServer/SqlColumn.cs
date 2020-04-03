@@ -37,13 +37,13 @@ namespace Serilog.Sinks.MSSqlServer
             AllowNull = dataColumn.AllowDBNull;
 
             if (!SqlDataTypes.ReverseTypeMap.ContainsKey(dataColumn.DataType))
-                throw new ArgumentException($".NET type {dataColumn.DataType.ToString()} does not map to a supported SQL column data type.");
+                throw new ArgumentException($".NET type {dataColumn.DataType} does not map to a supported SQL column data type.");
 
             DataType = SqlDataTypes.ReverseTypeMap[dataColumn.DataType];
             DataLength = dataColumn.MaxLength;
 
             if(DataLength == 0 && SqlDataTypes.DataLengthRequired.Contains(DataType))
-                throw new ArgumentException($".NET type {dataColumn.DataType.ToString()} maps to a SQL column data type requiring a non-zero DataLength property.");
+                throw new ArgumentException($".NET type {dataColumn.DataType} maps to a SQL column data type requiring a non-zero DataLength property.");
         }
 
         /// <summary>
@@ -73,7 +73,7 @@ namespace Serilog.Sinks.MSSqlServer
             set
             {
                 if (!SqlDataTypes.SystemTypeMap.ContainsKey(value))
-                    throw new ArgumentException($"SQL column data type {value.ToString()} is not supported by this sink.");
+                    throw new ArgumentException($"SQL column data type {value} is not supported by this sink.");
                 dataType = value;
             }
         }
