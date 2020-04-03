@@ -68,8 +68,10 @@ namespace Serilog
                 throw new ArgumentNullException(nameof(loggerConfiguration));
 
             var defaultedPeriod = period ?? MSSqlServerSink.DefaultPeriod;
-            var connectionStr = ApplyMicrosoftExtensionsConfiguration.GetConnectionString(connectionString, appConfiguration);
-            var colOpts = ApplyMicrosoftExtensionsConfiguration.ConfigureColumnOptions(columnOptions, columnOptionsSection);
+
+            var microsoftExtensionsConfiguration = new ApplyMicrosoftExtensionsConfiguration();
+            var connectionStr = microsoftExtensionsConfiguration.GetConnectionString(connectionString, appConfiguration);
+            var colOpts = microsoftExtensionsConfiguration.ConfigureColumnOptions(columnOptions, columnOptionsSection);
 
             return loggerConfiguration.Sink(
                 new MSSqlServerSink(
@@ -117,8 +119,9 @@ namespace Serilog
             if (loggerAuditSinkConfiguration == null)
                 throw new ArgumentNullException(nameof(loggerAuditSinkConfiguration));
 
-            connectionString = ApplyMicrosoftExtensionsConfiguration.GetConnectionString(connectionString, appConfiguration);
-            columnOptions = ApplyMicrosoftExtensionsConfiguration.ConfigureColumnOptions(columnOptions, columnOptionsSection);
+            var microsoftExtensionsConfiguration = new ApplyMicrosoftExtensionsConfiguration();
+            connectionString = microsoftExtensionsConfiguration.GetConnectionString(connectionString, appConfiguration);
+            columnOptions = microsoftExtensionsConfiguration.ConfigureColumnOptions(columnOptions, columnOptionsSection);
 
             return loggerAuditSinkConfiguration.Sink(
                 new MSSqlServerAuditSink(

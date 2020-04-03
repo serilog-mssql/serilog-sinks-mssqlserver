@@ -5,23 +5,8 @@ using Xunit;
 
 namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsoft.Extensions.Configuration
 {
-    [Collection("LogTest")]
     public class ApplyMicrosoftExtensionsConfigurationTests
     {
-        [Fact]
-        public void InitializesSystemConfigurationConnectionStringProvider()
-        {
-            Assert.NotNull(ApplyMicrosoftExtensionsConfiguration.ConnectionStringProvider);
-            Assert.IsType<MicrosoftExtensionsConnectionStringProvider>(ApplyMicrosoftExtensionsConfiguration.ConnectionStringProvider);
-        }
-
-        [Fact]
-        public void InitializesSystemConfigurationColumnOptionsProvider()
-        {
-            Assert.NotNull(ApplyMicrosoftExtensionsConfiguration.ColumnOptionsProvider);
-            Assert.IsType<MicrosoftExtensionsColumnOptionsProvider>(ApplyMicrosoftExtensionsConfiguration.ColumnOptionsProvider);
-        }
-
         [Fact]
         public void GetConfigurationStringCallsAttachedConfigurationStringProvider()
         {
@@ -31,10 +16,10 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
             var configurationMock = new Mock<IConfiguration>();
             var connectionStringProviderMock = new Mock<IMicrosoftExtensionsConnectionStringProvider>();
             connectionStringProviderMock.Setup(p => p.GetConnectionString(It.IsAny<string>(), It.IsAny<IConfiguration>())).Returns(expectedResult);
-            ApplyMicrosoftExtensionsConfiguration.ConnectionStringProvider = connectionStringProviderMock.Object;
+            var sut = new ApplyMicrosoftExtensionsConfiguration(connectionStringProviderMock.Object, null);
 
             // Act
-            var result = ApplyMicrosoftExtensionsConfiguration.GetConnectionString(connectionStringName, configurationMock.Object);
+            var result = sut.GetConnectionString(connectionStringName, configurationMock.Object);
 
             // Assert
             connectionStringProviderMock.Verify(p => p.GetConnectionString(connectionStringName, configurationMock.Object), Times.Once);
@@ -51,10 +36,10 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
             var columnOptionsProviderMock = new Mock<IMicrosoftExtensionsColumnOptionsProvider>();
             columnOptionsProviderMock.Setup(p => p.ConfigureColumnOptions(It.IsAny<ColumnOptions>(), It.IsAny<IConfigurationSection>()))
                 .Returns(expectedResult);
-            ApplyMicrosoftExtensionsConfiguration.ColumnOptionsProvider = columnOptionsProviderMock.Object;
+            var sut = new ApplyMicrosoftExtensionsConfiguration(null, columnOptionsProviderMock.Object);
 
             // Act
-            var result = ApplyMicrosoftExtensionsConfiguration.ConfigureColumnOptions(inputColumnOptions, configurationSectionMock.Object);
+            var result = sut.ConfigureColumnOptions(inputColumnOptions, configurationSectionMock.Object);
 
             // Assert
             columnOptionsProviderMock.Verify(p => p.ConfigureColumnOptions(inputColumnOptions, configurationSectionMock.Object), Times.Once);

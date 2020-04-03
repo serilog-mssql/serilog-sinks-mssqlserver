@@ -6,11 +6,25 @@ namespace Serilog.Sinks.MSSqlServer
     /// <summary>
     /// Configures the sink's connection string and ColumnOtions object.
     /// </summary>
-    internal static class ApplyMicrosoftExtensionsConfiguration
+    internal class ApplyMicrosoftExtensionsConfiguration
     {
-        internal static IMicrosoftExtensionsConnectionStringProvider ConnectionStringProvider { get; set; } = new MicrosoftExtensionsConnectionStringProvider();
+        private readonly IMicrosoftExtensionsConnectionStringProvider _connectionStringProvider;
+        private readonly IMicrosoftExtensionsColumnOptionsProvider _columnOptionsProvider;
 
-        internal static IMicrosoftExtensionsColumnOptionsProvider ColumnOptionsProvider { get; set; } = new MicrosoftExtensionsColumnOptionsProvider();
+        public ApplyMicrosoftExtensionsConfiguration()
+        {
+            _connectionStringProvider = new MicrosoftExtensionsConnectionStringProvider();
+            _columnOptionsProvider = new MicrosoftExtensionsColumnOptionsProvider();
+        }
+
+        // Constructor with injectable dependencies for tests
+        internal ApplyMicrosoftExtensionsConfiguration(
+            IMicrosoftExtensionsConnectionStringProvider connectionStringProvider,
+            IMicrosoftExtensionsColumnOptionsProvider columnOptionsProvider)
+        {
+            _connectionStringProvider = connectionStringProvider;
+            _columnOptionsProvider = columnOptionsProvider;
+        }
 
         /// <summary>
         /// Examine if supplied connection string is a reference to an item in the "ConnectionStrings" section of web.config
@@ -19,8 +33,8 @@ namespace Serilog.Sinks.MSSqlServer
         /// <param name="nameOrConnectionString">The name of the ConnectionStrings key or raw connection string.</param>
         /// <param name="appConfiguration">Additional application-level configuration.</param>
         /// <remarks>Pulled from review of Entity Framework 6 methodology for doing the same</remarks>
-        internal static string GetConnectionString(string nameOrConnectionString, IConfiguration appConfiguration) =>
-            ConnectionStringProvider.GetConnectionString(nameOrConnectionString, appConfiguration);
+        public string GetConnectionString(string nameOrConnectionString, IConfiguration appConfiguration) =>
+            _connectionStringProvider.GetConnectionString(nameOrConnectionString, appConfiguration);
 
         /// <summary>
         /// Create or add to the ColumnOptions object and apply any configuration changes to it.
@@ -28,7 +42,7 @@ namespace Serilog.Sinks.MSSqlServer
         /// <param name="columnOptions">An optional externally-created ColumnOptions object to be updated with additional configuration values.</param>
         /// <param name="config">A configuration section typically named "columnOptionsSection" (see docs).</param>
         /// <returns></returns>
-        internal static ColumnOptions ConfigureColumnOptions(ColumnOptions columnOptions, IConfigurationSection config) =>
-            ColumnOptionsProvider.ConfigureColumnOptions(columnOptions, config);
+        public ColumnOptions ConfigureColumnOptions(ColumnOptions columnOptions, IConfigurationSection config) =>
+            _columnOptionsProvider.ConfigureColumnOptions(columnOptions, config);
     }
 }

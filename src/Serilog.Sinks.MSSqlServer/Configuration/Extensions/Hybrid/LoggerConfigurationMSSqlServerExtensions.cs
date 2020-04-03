@@ -82,8 +82,9 @@ namespace Serilog
 
             if (ConfigurationManager.GetSection(AppConfigSectionName) is MSSqlServerConfigurationSection serviceConfigSection)
             {
-                colOpts = ApplySystemConfiguration.ConfigureColumnOptions(serviceConfigSection, colOpts);
-                connStr = ApplySystemConfiguration.GetConnectionString(connStr);
+                var systemConfiguration = new ApplySystemConfiguration();
+                colOpts = systemConfiguration.ConfigureColumnOptions(serviceConfigSection, colOpts);
+                connStr = systemConfiguration.GetConnectionString(connStr);
 
                 if (appConfiguration != null || columnOptionsSection != null)
                     SelfLog.WriteLine("Warning: Both System.Configuration (app.config or web.config) and Microsoft.Extensions.Configuration are being applied to the MSSQLServer sink.");
@@ -91,8 +92,9 @@ namespace Serilog
 
             if (appConfiguration != null || columnOptionsSection != null)
             {
-                connStr = ApplyMicrosoftExtensionsConfiguration.GetConnectionString(connStr, appConfiguration);
-                colOpts = ApplyMicrosoftExtensionsConfiguration.ConfigureColumnOptions(colOpts, columnOptionsSection);
+                var microsoftExtensionsConfiguration = new ApplyMicrosoftExtensionsConfiguration();
+                connStr = microsoftExtensionsConfiguration.GetConnectionString(connStr, appConfiguration);
+                colOpts = microsoftExtensionsConfiguration.ConfigureColumnOptions(colOpts, columnOptionsSection);
             }
 
             return loggerConfiguration.Sink(
@@ -146,8 +148,9 @@ namespace Serilog
 
             if (ConfigurationManager.GetSection(AppConfigSectionName) is MSSqlServerConfigurationSection serviceConfigSection)
             {
-                colOpts = ApplySystemConfiguration.ConfigureColumnOptions(serviceConfigSection, colOpts);
-                connStr = ApplySystemConfiguration.GetConnectionString(connStr);
+                var systemConfiguration = new ApplySystemConfiguration();
+                colOpts = systemConfiguration.ConfigureColumnOptions(serviceConfigSection, colOpts);
+                connStr = systemConfiguration.GetConnectionString(connStr);
 
                 if (appConfiguration != null || columnOptionsSection != null)
                     SelfLog.WriteLine("Warning: Both System.Configuration (app.config or web.config) and Microsoft.Extensions.Configuration are being applied to the MSSQLServer sink.");
@@ -155,8 +158,9 @@ namespace Serilog
 
             if (appConfiguration != null || columnOptionsSection != null)
             {
-                connStr = ApplyMicrosoftExtensionsConfiguration.GetConnectionString(connStr, appConfiguration);
-                colOpts = ApplyMicrosoftExtensionsConfiguration.ConfigureColumnOptions(colOpts, columnOptionsSection);
+                var microsoftExtensionsConfiguration = new ApplyMicrosoftExtensionsConfiguration();
+                connStr = microsoftExtensionsConfiguration.GetConnectionString(connStr, appConfiguration);
+                colOpts = microsoftExtensionsConfiguration.ConfigureColumnOptions(colOpts, columnOptionsSection);
             }
 
             return loggerAuditSinkConfiguration.Sink(

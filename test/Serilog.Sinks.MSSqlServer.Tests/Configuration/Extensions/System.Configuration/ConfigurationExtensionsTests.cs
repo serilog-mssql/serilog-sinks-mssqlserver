@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
+using Xunit.Abstractions;
 
 // Because System.Configuration is static and config is loaded automatically,
 // the tests alter the static AppConfigSectionName string value exposed by the
@@ -15,9 +16,12 @@ using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 
 namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.System.Configuration
 {
-    [Collection("LogTest")]
     public class ConfigurationExtensionsTests : DatabaseTestsBase
     {
+        public ConfigurationExtensionsTests(ITestOutputHelper output) : base(output)
+        {
+        }
+
         [Fact]
         public void ConnectionStringByName()
         {

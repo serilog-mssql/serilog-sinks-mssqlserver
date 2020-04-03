@@ -6,14 +6,18 @@ using Xunit;
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
+using Xunit.Abstractions;
 
 namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.Microsoft.Extensions.Configuration
 {
-    [Collection("LogTest")]
     public class ConfigurationExtensionsTests : DatabaseTestsBase
     {
         private const string ConnectionStringName = "NamedConnection";
         private const string ColumnOptionsSection = "CustomColumnNames";
+
+        public ConfigurationExtensionsTests(ITestOutputHelper output) : base(output)
+        {
+        }
 
         IConfiguration TestConfiguration() =>
             new ConfigurationBuilder()

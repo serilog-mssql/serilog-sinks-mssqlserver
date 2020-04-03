@@ -4,7 +4,6 @@ using Xunit;
 
 namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.ColumnOptions
 {
-    [Collection("LogTest")]
     public class TimeStampColumnOptionsTests
     {
         [Trait("Bugfix", "#187")]

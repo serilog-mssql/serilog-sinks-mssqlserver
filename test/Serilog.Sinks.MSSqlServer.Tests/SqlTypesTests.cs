@@ -4,12 +4,16 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Serilog.Sinks.MSSqlServer.Tests
 {
-    [Collection("LogTest")]
     public class SqlTypesTests : DatabaseTestsBase
     {
+        public SqlTypesTests(ITestOutputHelper output) : base(output)
+        {
+        }
+
         // Since the point of these tests are to validate we can write to
         // specific underlying SQL Server column data types, we use audit
         // logging so exceptions from logevent writes do not fail silently.
