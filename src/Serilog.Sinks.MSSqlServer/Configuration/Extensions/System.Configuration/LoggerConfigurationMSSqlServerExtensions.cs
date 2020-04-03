@@ -71,10 +71,11 @@ namespace Serilog
             var defaultedPeriod = period ?? MSSqlServerSink.DefaultPeriod;
             var colOpts = columnOptions ?? new ColumnOptions();
 
+            var systemConfiguration = new ApplySystemConfiguration();
             if (ConfigurationManager.GetSection(AppConfigSectionName) is MSSqlServerConfigurationSection serviceConfigSection)
-                colOpts = ApplySystemConfiguration.ConfigureColumnOptions(serviceConfigSection, colOpts);
+                colOpts = systemConfiguration.ConfigureColumnOptions(serviceConfigSection, colOpts);
 
-            connectionString = ApplySystemConfiguration.GetConnectionString(connectionString);
+            connectionString = systemConfiguration.GetConnectionString(connectionString);
 
             return loggerConfiguration.Sink(
                 new MSSqlServerSink(
@@ -123,10 +124,11 @@ namespace Serilog
 
             var colOpts = columnOptions ?? new ColumnOptions();
 
+            var systemConfiguration = new ApplySystemConfiguration();
             if (ConfigurationManager.GetSection(AppConfigSectionName) is MSSqlServerConfigurationSection serviceConfigSection)
-                colOpts = ApplySystemConfiguration.ConfigureColumnOptions(serviceConfigSection, colOpts);
+                colOpts = systemConfiguration.ConfigureColumnOptions(serviceConfigSection, colOpts);
 
-            connectionString = ApplySystemConfiguration.GetConnectionString(connectionString);
+            connectionString = systemConfiguration.GetConnectionString(connectionString);
 
             return loggerAuditSinkConfiguration.Sink(
                 new MSSqlServerAuditSink(

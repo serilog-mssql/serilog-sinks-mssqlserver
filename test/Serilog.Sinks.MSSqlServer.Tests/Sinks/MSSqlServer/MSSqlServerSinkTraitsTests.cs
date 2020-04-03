@@ -13,7 +13,6 @@ using Xunit;
 
 namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer
 {
-    [Collection("LogTest")]
     public class MSSqlServerSinkTraitsTests
     {
         private readonly string _connectionString = "connectionString";

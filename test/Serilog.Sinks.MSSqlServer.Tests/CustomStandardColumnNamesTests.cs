@@ -7,12 +7,16 @@ using Dapper;
 using Xunit;
 using FluentAssertions;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
+using Xunit.Abstractions;
 
 namespace Serilog.Sinks.MSSqlServer.Tests
 {
-    [Collection("LogTest")]
     public class CustomStandardColumnNamesTests : DatabaseTestsBase
     {
+        public CustomStandardColumnNamesTests(ITestOutputHelper output) : base(output)
+        {
+        }
+
         [Fact]
         public void CustomIdColumn()
         {

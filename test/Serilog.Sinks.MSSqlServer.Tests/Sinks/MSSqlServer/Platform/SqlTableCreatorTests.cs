@@ -6,16 +6,16 @@ using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using System.Data;
 using System.Data.SqlClient;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Platform
 {
-    [Collection("LogTest")]
     public class SqlTableCreatorTests : DatabaseTestsBase
     {
         private readonly Mock<ISqlCreateTableWriter> _sqlWriterMock;
         private readonly SqlTableCreator _sut;
 
-        public SqlTableCreatorTests()
+        public SqlTableCreatorTests(ITestOutputHelper output) : base(output)
         {
             _sqlWriterMock = new Mock<ISqlCreateTableWriter>();
             _sut = new SqlTableCreator(_sqlWriterMock.Object);

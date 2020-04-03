@@ -4,7 +4,6 @@ using Xunit;
 
 namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Platform
 {
-    [Collection("LogTest")]
     public class SqlCreateTableWriterTests
     {
         private readonly SqlCreateTableWriter _sut;

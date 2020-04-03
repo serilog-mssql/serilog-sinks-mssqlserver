@@ -7,12 +7,16 @@ using Dapper;
 using FluentAssertions;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Serilog.Sinks.MSSqlServer.Tests
 {
-    [Collection("LogTest")]
     public class MiscFeaturesTests : DatabaseTestsBase
     {
+        public MiscFeaturesTests(ITestOutputHelper output) : base(output)
+        {
+        }
+
         [Fact]
         public void LogEventExcludeAdditionalProperties()
         {

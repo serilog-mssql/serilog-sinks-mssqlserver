@@ -5,12 +5,16 @@ using Dapper;
 using FluentAssertions;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Serilog.Sinks.MSSqlServer.Tests
 {
-    [Collection("LogTest")]
     public class TimeStampTests : DatabaseTestsBase
     {
+        public TimeStampTests(ITestOutputHelper output) : base(output)
+        {
+        }
+
         [Trait("Bugfix", "#187")]
         [Fact]
         public void CanCreateDatabaseWithDateTimeByDefault()

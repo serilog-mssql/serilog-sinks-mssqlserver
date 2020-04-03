@@ -6,11 +6,25 @@ namespace Serilog.Sinks.MSSqlServer
     /// <summary>
     /// Configures the sink's connection string and ColumnOtions object.
     /// </summary>
-    internal static class ApplySystemConfiguration
+    internal class ApplySystemConfiguration
     {
-        internal static ISystemConfigurationConnectionStringProvider ConnectionStringProvider { get; set; } = new SystemConfigurationConnectionStringProvider();
+        private readonly ISystemConfigurationConnectionStringProvider _connectionStringProvider;
+        private readonly ISystemConfigurationColumnOptionsProvider _columnOptionsProvider;
 
-        internal static ISystemConfigurationColumnOptionsProvider ColumnOptionsProvider { get; set; } = new SystemConfigurationColumnOptionsProvider();
+        public ApplySystemConfiguration()
+        {
+            _connectionStringProvider = new SystemConfigurationConnectionStringProvider();
+            _columnOptionsProvider = new SystemConfigurationColumnOptionsProvider();
+        }
+
+        // Constructor with injectable dependencies for tests
+        internal ApplySystemConfiguration(
+            ISystemConfigurationConnectionStringProvider connectionStringProvider,
+            ISystemConfigurationColumnOptionsProvider columnOptionsProvider)
+        {
+            _connectionStringProvider = connectionStringProvider;
+            _columnOptionsProvider = columnOptionsProvider;
+        }
 
         /// <summary>
         /// Examine if supplied connection string is a reference to an item in the "ConnectionStrings" section of web.config
@@ -18,13 +32,13 @@ namespace Serilog.Sinks.MSSqlServer
         /// </summary>
         /// <param name="nameOrConnectionString">The name of the ConnectionStrings key or raw connection string.</param>
         /// <remarks>Pulled from review of Entity Framework 6 methodology for doing the same</remarks>
-        internal static string GetConnectionString(string nameOrConnectionString) =>
-            ConnectionStringProvider.GetConnectionString(nameOrConnectionString);
+        public string GetConnectionString(string nameOrConnectionString) =>
+            _connectionStringProvider.GetConnectionString(nameOrConnectionString);
 
         /// <summary>
         /// Populate ColumnOptions properties and collections from app config
         /// </summary>
-        internal static ColumnOptions ConfigureColumnOptions(MSSqlServerConfigurationSection config, ColumnOptions columnOptions) =>
-            ColumnOptionsProvider.ConfigureColumnOptions(config, columnOptions);
+        public ColumnOptions ConfigureColumnOptions(MSSqlServerConfigurationSection config, ColumnOptions columnOptions) =>
+            _columnOptionsProvider.ConfigureColumnOptions(config, columnOptions);
     }
 }

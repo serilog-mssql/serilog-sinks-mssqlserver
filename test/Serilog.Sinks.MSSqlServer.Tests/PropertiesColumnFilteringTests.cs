@@ -1,15 +1,18 @@
 ﻿using Dapper;
 using FluentAssertions;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
-using System;
 using System.Data.SqlClient;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Serilog.Sinks.MSSqlServer.Tests
 {
-    [Collection("LogTest")]
     public class PropertiesColumnFilteringTests : DatabaseTestsBase
     {
+        public PropertiesColumnFilteringTests(ITestOutputHelper output) : base(output)
+        {
+        }
+
         [Fact]
         public void FilteredProperties()
         {
