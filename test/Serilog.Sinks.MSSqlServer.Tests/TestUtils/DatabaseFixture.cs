@@ -46,14 +46,11 @@ DROP DATABASE [{Database}]
 
         public static void DropTable(string tableName = null)
         {
-            try
+            using (var conn = new SqlConnection(LogEventsConnectionString))
             {
-                using (var conn = new SqlConnection(LogEventsConnectionString))
-                {
-                    conn.Execute($"DROP TABLE {(string.IsNullOrEmpty(tableName) ? LogTableName : tableName)};");
-                }
+                var actualTableName = string.IsNullOrEmpty(tableName) ? LogTableName : tableName;
+                conn.Execute($"IF OBJECT_ID('{actualTableName}', 'U') IS NOT NULL DROP TABLE {actualTableName};");
             }
-            catch { }
         }
 
         private static void DeleteDatabase()
