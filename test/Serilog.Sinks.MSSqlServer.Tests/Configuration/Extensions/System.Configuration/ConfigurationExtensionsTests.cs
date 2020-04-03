@@ -50,10 +50,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.System.Config
                 .CreateLogger();
             Log.CloseAndFlush();
 
-            // from test TableCreatedWithCustomNames in CustomStandardColumnNames class
-            using (var conn = new SqlConnection(DatabaseFixture.MasterConnectionString))
+            using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
             {
-                conn.Execute($"use {DatabaseFixture.Database}");
                 var logEvents = conn.Query<InfoSchema>($@"SELECT COLUMN_NAME AS ColumnName FROM {DatabaseFixture.Database}.INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{DatabaseFixture.LogTableName}'");
                 var infoSchema = logEvents as InfoSchema[] ?? logEvents.ToArray();
 
@@ -79,9 +77,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.System.Config
                 .CreateLogger();
             Log.CloseAndFlush();
 
-            using (var conn = new SqlConnection(DatabaseFixture.MasterConnectionString))
+            using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
             {
-                conn.Execute($"use {DatabaseFixture.Database}");
                 var logEvents = conn.Query<InfoSchema>($@"SELECT COLUMN_NAME AS ColumnName FROM {DatabaseFixture.Database}.INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{DatabaseFixture.LogTableName}'");
                 var infoSchema = logEvents as InfoSchema[] ?? logEvents.ToArray();
 
