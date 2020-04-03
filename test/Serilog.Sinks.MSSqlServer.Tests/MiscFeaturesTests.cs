@@ -154,9 +154,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             Log.CloseAndFlush();
 
             // assert
-            using (var conn = new SqlConnection(DatabaseFixture.MasterConnectionString))
+            using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
             {
-                conn.Execute($"use {DatabaseFixture.Database}");
                 var query = conn.Query<InfoSchema>($@"SELECT DATA_TYPE AS DataType FROM {DatabaseFixture.Database}.INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{DatabaseFixture.LogTableName}' AND COLUMN_NAME = '{columnOptions.Id.ColumnName}'");
                 var results = query as InfoSchema[] ?? query.ToArray();
 
@@ -186,9 +185,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             Log.CloseAndFlush();
 
             // assert
-            using (var conn = new SqlConnection(DatabaseFixture.MasterConnectionString))
+            using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
             {
-                conn.Execute($"use {DatabaseFixture.Database}");
                 var query = conn.Query<InfoSchema>($@"SELECT DATA_TYPE AS DataType FROM {DatabaseFixture.Database}.INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{DatabaseFixture.LogTableName}' AND COLUMN_NAME = '{columnOptions.Properties.ColumnName}'");
                 var results = query as InfoSchema[] ?? query.ToArray();
 

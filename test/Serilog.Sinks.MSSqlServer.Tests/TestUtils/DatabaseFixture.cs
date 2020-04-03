@@ -10,6 +10,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests.TestUtils
         public static string Database => "LogTest";
         public static string LogTableName => "LogEvents";
 
+        private const string MasterConnectionString = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=Master;Integrated Security=True";
+
         private const string CreateLogEventsDatabase = @"
 EXEC ('CREATE DATABASE [{0}] ON PRIMARY 
 	(NAME = [{0}], 
@@ -26,7 +28,6 @@ WITH ROLLBACK IMMEDIATE
 DROP DATABASE [{Database}]
 ";
 
-        public static string MasterConnectionString => @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=Master;Integrated Security=True";
         public static string LogEventsConnectionString => $@"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog={Database};Integrated Security=True";
 
         public class FileName
@@ -46,14 +47,11 @@ DROP DATABASE [{Database}]
 
         public static void DropTable(string tableName = null)
         {
-            try
+            using (var conn = new SqlConnection(LogEventsConnectionString))
             {
-                using (var conn = new SqlConnection(LogEventsConnectionString))
-                {
-                    conn.Execute($"DROP TABLE {(string.IsNullOrEmpty(tableName) ? LogTableName : tableName)};");
-                }
+                var actualTableName = string.IsNullOrEmpty(tableName) ? LogTableName : tableName;
+                conn.Execute($"IF OBJECT_ID('{actualTableName}', 'U') IS NOT NULL DROP TABLE {actualTableName};");
             }
-            catch { }
         }
 
         private static void DeleteDatabase()
