@@ -9,13 +9,13 @@ using Xunit;
 
 namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Output
 {
-    public class TestJsonLogEventFormatter
+    public class JsonLogEventFormatterTests
     {
         private Serilog.Sinks.MSSqlServer.ColumnOptions _testColumnOptions;
         private MSSqlServerSinkTraits _testTraits;
         private JsonLogEventFormatter _sut;
 
-        public TestJsonLogEventFormatter()
+        public JsonLogEventFormatterTests()
         {
             SetupTest();
         }
