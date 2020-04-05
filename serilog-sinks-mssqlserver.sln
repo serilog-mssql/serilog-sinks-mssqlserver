@@ -25,7 +25,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CustomLogEventFormatterDemo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppConfigDemo", "sample\AppConfigDemo\AppConfigDemo.csproj", "{7DC530B1-68FD-4F07-A2F9-910C338562C1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkerServiceDemo", "sample\WorkerServiceDemo\WorkerServiceDemo.csproj", "{04F523D9-F00B-4C63-9287-31A244378E06}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkerServiceDemo", "sample\WorkerServiceDemo\WorkerServiceDemo.csproj", "{04F523D9-F00B-4C63-9287-31A244378E06}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CombinedConfigDemo", "sample\CombinedConfigDemo\CombinedConfigDemo.csproj", "{98F21125-AF7A-46E8-8C08-E3E4F5DBEDB9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -53,6 +55,10 @@ Global
 		{04F523D9-F00B-4C63-9287-31A244378E06}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{04F523D9-F00B-4C63-9287-31A244378E06}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{04F523D9-F00B-4C63-9287-31A244378E06}.Release|Any CPU.Build.0 = Release|Any CPU
+		{98F21125-AF7A-46E8-8C08-E3E4F5DBEDB9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{98F21125-AF7A-46E8-8C08-E3E4F5DBEDB9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{98F21125-AF7A-46E8-8C08-E3E4F5DBEDB9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{98F21125-AF7A-46E8-8C08-E3E4F5DBEDB9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -63,6 +69,7 @@ Global
 		{873320F1-8F6D-45E2-A853-D321C86793EC} = {AA346332-5BAF-47F1-B8FB-7600ED61265D}
 		{7DC530B1-68FD-4F07-A2F9-910C338562C1} = {AA346332-5BAF-47F1-B8FB-7600ED61265D}
 		{04F523D9-F00B-4C63-9287-31A244378E06} = {AA346332-5BAF-47F1-B8FB-7600ED61265D}
+		{98F21125-AF7A-46E8-8C08-E3E4F5DBEDB9} = {AA346332-5BAF-47F1-B8FB-7600ED61265D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {AAA6BF8D-7B53-4A5F-A79A-D1B306383B45}
