@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 
 namespace Serilog.Sinks.MSSqlServer
 {
@@ -22,10 +23,10 @@ namespace Serilog.Sinks.MSSqlServer
         /// </summary>
         public static void IfNotNull<T>(string value, PropertySetter<T> setter)
         {
-            if (value == null) return;
+            if (value == null || setter == null) return;
             try
             {
-                T setting = (T)Convert.ChangeType(value, typeof(T));
+                T setting = (T)Convert.ChangeType(value, typeof(T), CultureInfo.InvariantCulture);
                 setter(setting);
             }
             // don't change the property if the conversion fails 

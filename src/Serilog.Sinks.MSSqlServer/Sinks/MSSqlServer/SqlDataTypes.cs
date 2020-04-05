@@ -13,7 +13,7 @@ namespace Serilog.Sinks.MSSqlServer
         /// SqlDbType doesn't have anything like "None" so we indicate an unsupported type by
         /// referencing a type we can guarantee the rest of the sink will never recognize.
         /// </summary>
-        public static SqlDbType NotSupported = SqlDbType.Variant;
+        public const SqlDbType NotSupported = SqlDbType.Variant;
 
         /// <summary>
         /// A collection keyed on the SqlDbType enum with values representing the equivalent DataColumn .NET type.

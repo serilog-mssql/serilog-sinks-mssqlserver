@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data.SqlClient;
+using System.Globalization;
 using System.Linq;
 using Dapper;
 
@@ -29,11 +30,6 @@ DROP DATABASE [{Database}]
 ";
 
         public static string LogEventsConnectionString => $@"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog={Database};Integrated Security=True";
-
-        public class FileName
-        {
-            public string Name { get; set; }
-        }
 
         public DatabaseFixture()
         {
@@ -74,7 +70,7 @@ DROP DATABASE [{Database}]
                 conn.Open();
                 // ReSharper disable once PossibleNullReferenceException
                 var filename = conn.Query<FileName>(DatabaseFileNameQuery).FirstOrDefault().Name;
-                var createDatabase = string.Format(CreateLogEventsDatabase, Database, filename);
+                var createDatabase = string.Format(CultureInfo.InvariantCulture, CreateLogEventsDatabase, Database, filename);
 
                 conn.Execute(createDatabase);
             }

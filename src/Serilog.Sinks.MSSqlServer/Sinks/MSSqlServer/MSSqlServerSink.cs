@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Serilog.Debugging;
@@ -67,7 +68,7 @@ namespace Serilog.Sinks.MSSqlServer
             ITextFormatter logEventFormatter = null)
             : base(batchPostingLimit, period)
         {
-            columnOptions.FinalizeConfigurationForSinkConstructor();
+            columnOptions?.FinalizeConfigurationForSinkConstructor();
             _traits = new MSSqlServerSinkTraits(connectionString, tableName, schemaName, columnOptions, formatProvider, autoCreateSqlTable, logEventFormatter);
         }
 
@@ -95,7 +96,7 @@ namespace Serilog.Sinks.MSSqlServer
                             : new SqlBulkCopy(cn, SqlBulkCopyOptions.CheckConstraints | SqlBulkCopyOptions.FireTriggers, null)
                     )
                     {
-                        copy.DestinationTableName = string.Format("[{0}].[{1}]", _traits.SchemaName, _traits.TableName);
+                        copy.DestinationTableName = string.Format(CultureInfo.InvariantCulture, "[{0}].[{1}]", _traits.SchemaName, _traits.TableName);
                         foreach (var column in _traits.EventTable.Columns)
                         {
                             var columnName = ((DataColumn)column).ColumnName;

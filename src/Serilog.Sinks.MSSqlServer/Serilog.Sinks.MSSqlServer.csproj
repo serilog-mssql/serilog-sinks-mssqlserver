@@ -13,9 +13,9 @@
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
     <PackageId>Serilog.Sinks.MSSqlServer</PackageId>
     <PackageTags>serilog;sinks;mssqlserver</PackageTags>
-    <PackageIconUrl>http://serilog.net/images/serilog-sink-nuget.png</PackageIconUrl>
+    <PackageIcon>serilog-sink-nuget.png</PackageIcon>
     <PackageProjectUrl>https://github.com/serilog/serilog-sinks-mssqlserver</PackageProjectUrl>
-    <PackageLicenseUrl>http://www.apache.org/licenses/LICENSE-2.0</PackageLicenseUrl>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <RepositoryUrl>https://github.com/serilog/serilog-sinks-mssqlserver</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <RuntimeIdentifiers>win</RuntimeIdentifiers>
@@ -26,6 +26,10 @@
 
   <ItemGroup>
     <!-- Whenever these are updated, also update versions in packages.config for net452 -->
+    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.8">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Serilog" Version="2.5.0" />
     <PackageReference Include="Serilog.Sinks.PeriodicBatching" Version="2.1.1" />
   </ItemGroup>
@@ -45,7 +49,7 @@
     <None Include="Configuration\Implementations\System.Configuration\**\*.*" />
     <!-- ItemGroups below with TFM conditions will re-include the compile targets -->
   </ItemGroup>
- 
+
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
     <PackageReference Include="System.Data.SqlClient" Version="4.4.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="2.0.0" />
@@ -73,6 +77,10 @@
     <Reference Include="Microsoft.CSharp" />
     <Compile Include="Configuration\Extensions\System.Configuration\**\*.cs" />
     <Compile Include="Configuration\Implementations\System.Configuration\**\*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Images\serilog-sink-nuget.png" Pack="true" PackagePath="" />
   </ItemGroup>
 
 </Project>

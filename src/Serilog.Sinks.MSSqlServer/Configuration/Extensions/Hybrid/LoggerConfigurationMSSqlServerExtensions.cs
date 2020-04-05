@@ -35,7 +35,7 @@ namespace Serilog
         /// <summary>
         /// The configuration section name for app.config or web.config configuration files.
         /// </summary>
-        public static string AppConfigSectionName = "MSSqlServerSettingsSection";
+        public const string AppConfigSectionName = "MSSqlServerSettingsSection";
 
         /// <summary>
         /// Adds a sink that writes log events to a table in a MSSqlServer database.

@@ -18,6 +18,7 @@ using Serilog.Events;
 using Serilog.Sinks.MSSqlServer;
 using System.Configuration;
 using Serilog.Formatting;
+using System.Diagnostics.CodeAnalysis;
 
 // System.Configuration support for .NET Framework 4.5.2 libraries and apps.
 
@@ -31,6 +32,8 @@ namespace Serilog
         /// <summary>
         /// The configuration section name for app.config or web.config configuration files.
         /// </summary>
+        // TODO: Make this non-static. It could cause race condition in unit tests!
+        [SuppressMessage("Usage", "CA2211:Non-constant fields should not be visible", Justification = "Too hard to change. Accepted for now.")]
         public static string AppConfigSectionName = "MSSqlServerSettingsSection";
 
         /// <summary>

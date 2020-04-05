@@ -12,6 +12,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests.TestUtils
 
         public DatabaseTestsBase(ITestOutputHelper output)
         {
+            if (output == null) throw new ArgumentNullException(nameof(output));
+
             _output = output;
             Serilog.Debugging.SelfLog.Enable(_output.WriteLine);
         }

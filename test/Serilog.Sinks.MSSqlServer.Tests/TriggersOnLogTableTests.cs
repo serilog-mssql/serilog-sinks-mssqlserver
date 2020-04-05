@@ -109,7 +109,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         }
 
         [Fact]        
-        public void TestAuditOptionsDisableTriggersOnLogTable_ThrowsNotSupportedException()
+        public void TestAuditOptionsDisableTriggersOnLogTableThrowsNotSupportedException()
         {
             // arrange
             var options = new ColumnOptions { DisableTriggers = true };

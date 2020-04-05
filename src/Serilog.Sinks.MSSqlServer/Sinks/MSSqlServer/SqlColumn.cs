@@ -33,7 +33,7 @@ namespace Serilog.Sinks.MSSqlServer
         /// </summary>
         public SqlColumn(DataColumn dataColumn)
         {
-            ColumnName = dataColumn.ColumnName;
+            ColumnName = dataColumn?.ColumnName;
             AllowNull = dataColumn.AllowDBNull;
 
             if (!SqlDataTypes.ReverseTypeMap.ContainsKey(dataColumn.DataType))
@@ -118,7 +118,7 @@ namespace Serilog.Sinks.MSSqlServer
             if (SqlDataTypes.DataLengthRequired.Contains(DataType))
             {
                 if(DataLength == 0)
-                    throw new ArgumentException($"Column \"{ColumnName}\" is of type {DataType.ToString().ToLowerInvariant()} which requires a non-zero DataLength.");
+                    throw new ArgumentException($"Column \"{ColumnName}\" is of type {DataType.ToString().ToUpperInvariant()} which requires a non-zero DataLength.");
 
                 dataColumn.MaxLength = DataLength;
             }
