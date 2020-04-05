@@ -19,6 +19,7 @@ using Serilog.Parsing;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 
@@ -122,8 +123,8 @@ namespace Serilog.Sinks.MSSqlServer.Output
             precedingDelimiter = COMMA_DELIMITER;
             var colData = WritePropertyName(logEvent, output, StandardColumn.TimeStamp);
             string value = _traits.ColumnOptions.TimeStamp.DataType == SqlDbType.DateTime
-                ? ((DateTime)colData.Value).ToString("o")
-                : ((DateTimeOffset)colData.Value).ToString("o");
+                ? ((DateTime)colData.Value).ToString("o", CultureInfo.InvariantCulture)
+                : ((DateTimeOffset)colData.Value).ToString("o", CultureInfo.InvariantCulture);
             JsonValueFormatter.WriteQuotedJsonString(value, output);
         }
 
@@ -176,9 +177,11 @@ namespace Serilog.Sinks.MSSqlServer.Output
                     JsonValueFormatter.WriteQuotedJsonString(format.Format, output);
 
                     output.Write(",\"Rendering\":");
-                    var sw = new StringWriter();
-                    format.Render(properties, sw);
-                    JsonValueFormatter.WriteQuotedJsonString(sw.ToString(), output);
+                    using (var sw = new StringWriter())
+                    {
+                        format.Render(properties, sw);
+                        JsonValueFormatter.WriteQuotedJsonString(sw.ToString(), output);
+                    }
                     output.Write('}');
                 }
 

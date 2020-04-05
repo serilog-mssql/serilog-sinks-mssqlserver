@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using System.Globalization;
 using System.Text;
 
 namespace Serilog.Sinks.MSSqlServer.Platform
@@ -72,7 +73,7 @@ namespace Serilog.Sinks.MSSqlServer.Platform
             sb.Append(column.DataType.ToString().ToUpperInvariant());
 
             if (SqlDataTypes.DataLengthRequired.Contains(column.DataType))
-                sb.Append("(").Append(column.DataLength == -1 ? "MAX" : column.DataLength.ToString()).Append(")");
+                sb.Append("(").Append(column.DataLength == -1 ? "MAX" : column.DataLength.ToString(CultureInfo.InvariantCulture)).Append(")");
 
             if (column.StandardColumnIdentifier == StandardColumn.Id)
                 sb.Append(" IDENTITY(1,1)");

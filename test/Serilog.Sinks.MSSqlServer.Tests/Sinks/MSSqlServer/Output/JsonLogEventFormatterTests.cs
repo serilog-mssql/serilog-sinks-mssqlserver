@@ -9,11 +9,12 @@ using Xunit;
 
 namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Output
 {
-    public class JsonLogEventFormatterTests
+    public class JsonLogEventFormatterTests : IDisposable
     {
         private Serilog.Sinks.MSSqlServer.ColumnOptions _testColumnOptions;
         private MSSqlServerSinkTraits _testTraits;
         private JsonLogEventFormatter _sut;
+        private bool disposedValue;
 
         public JsonLogEventFormatterTests()
         {
@@ -134,6 +135,21 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Output
 
             var testMessageTemplate = new MessageTemplate("Test message template", new List<MessageTemplateToken>());
             return new LogEvent(testTimeStamp, LogEventLevel.Information, null, testMessageTemplate, properties);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                _testTraits.Dispose();
+                disposedValue = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
     }
 }

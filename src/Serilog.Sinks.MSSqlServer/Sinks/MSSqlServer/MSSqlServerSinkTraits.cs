@@ -20,6 +20,7 @@ using Serilog.Sinks.MSSqlServer.Platform;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 
@@ -149,7 +150,7 @@ namespace Serilog.Sinks.MSSqlServer
                 case StandardColumn.LogEvent:
                     return new KeyValuePair<string, object>(ColumnOptions.LogEvent.ColumnName, RenderLogEventColumn(logEvent));
                 default:
-                    throw new ArgumentOutOfRangeException();
+                    throw new ArgumentOutOfRangeException(nameof(column));
             }
         }
 
@@ -198,7 +199,7 @@ namespace Serilog.Sinks.MSSqlServer
 
             var sb = new StringBuilder();
 
-            sb.AppendFormat("<{0}>", options.RootElementName);
+            sb.AppendFormat(CultureInfo.InvariantCulture, "<{0}>", options.RootElementName);
 
             foreach (var property in properties)
             {
@@ -210,15 +211,15 @@ namespace Serilog.Sinks.MSSqlServer
 
                 if (options.UsePropertyKeyAsElementName)
                 {
-                    sb.AppendFormat("<{0}>{1}</{0}>", XmlPropertyFormatter.GetValidElementName(property.Key), value);
+                    sb.AppendFormat(CultureInfo.InvariantCulture, "<{0}>{1}</{0}>", XmlPropertyFormatter.GetValidElementName(property.Key), value);
                 }
                 else
                 {
-                    sb.AppendFormat("<{0} key='{1}'>{2}</{0}>", options.PropertyElementName, property.Key, value);
+                    sb.AppendFormat(CultureInfo.InvariantCulture, "<{0} key='{1}'>{2}</{0}>", options.PropertyElementName, property.Key, value);
                 }
             }
 
-            sb.AppendFormat("</{0}>", options.RootElementName);
+            sb.AppendFormat(CultureInfo.InvariantCulture, "</{0}>", options.RootElementName);
 
             return sb.ToString();
         }
@@ -273,7 +274,7 @@ namespace Serilog.Sinks.MSSqlServer
             conversion = null;
             try
             {
-                conversion = Convert.ChangeType(obj, type);
+                conversion = Convert.ChangeType(obj, type, CultureInfo.InvariantCulture);
                 return true;
             }
             catch

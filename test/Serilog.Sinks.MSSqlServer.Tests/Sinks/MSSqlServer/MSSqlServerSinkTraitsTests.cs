@@ -13,12 +13,13 @@ using Xunit;
 
 namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer
 {
-    public class MSSqlServerSinkTraitsTests
+    public class MSSqlServerSinkTraitsTests : IDisposable
     {
         private readonly string _connectionString = "connectionString";
         private readonly string _tableName = "tableName";
         private readonly string _schemaName = "schemaName";
         private MSSqlServerSinkTraits _sut;
+        private bool disposedValue;
 
         [Trait("Bugfix", "#187")]
         [Fact]
@@ -205,6 +206,21 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer
                 _sut = new MSSqlServerSinkTraits(_connectionString, _tableName, _schemaName,
                     options, CultureInfo.InvariantCulture, autoCreateSqlTable, logEventFormatter, sqlTableCreator);
             }
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                _sut.Dispose();
+                disposedValue = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
     }
 }

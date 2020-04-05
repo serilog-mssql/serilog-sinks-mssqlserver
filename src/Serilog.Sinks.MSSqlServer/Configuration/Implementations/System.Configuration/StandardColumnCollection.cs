@@ -14,7 +14,7 @@ namespace Serilog.Sinks.MSSqlServer
 
         protected override object GetElementKey(ConfigurationElement element)
         {
-            return ((StandardColumnConfig)element).Name;
+            return ((StandardColumnConfig)element)?.Name;
         }
     }
 }

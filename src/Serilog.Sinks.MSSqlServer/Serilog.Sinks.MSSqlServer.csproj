@@ -26,6 +26,10 @@
 
   <ItemGroup>
     <!-- Whenever these are updated, also update versions in packages.config for net452 -->
+    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.8">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Serilog" Version="2.5.0" />
     <PackageReference Include="Serilog.Sinks.PeriodicBatching" Version="2.1.1" />
   </ItemGroup>
@@ -76,7 +80,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="Images\serilog-sink-nuget.png" Pack="true" PackagePath=""/>
+    <None Include="Images\serilog-sink-nuget.png" Pack="true" PackagePath="" />
   </ItemGroup>
 
 </Project>

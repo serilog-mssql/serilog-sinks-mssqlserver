@@ -1,4 +1,5 @@
 ﻿using Serilog.Sinks.MSSqlServer.Platform;
+using System;
 using System.Data;
 using Xunit;
 
@@ -49,7 +50,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Platform
             var result = _sut.GetSqlFromDataTable("TestSchemaName", "TestTableName", dataTable, columnOptions);
 
             // Assert
-            Assert.Contains(expectedResult, result);
+            Assert.Contains(expectedResult, result, StringComparison.InvariantCulture);
         }
 
         [Fact]
@@ -75,7 +76,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Platform
             var result = _sut.GetSqlFromDataTable("TestSchemaName", "TestTableName", dataTable, columnOptions);
 
             // Assert
-            Assert.Contains(expectedResult, result);
+            Assert.Contains(expectedResult, result, StringComparison.InvariantCulture);
         }
 
         [Fact]
@@ -95,7 +96,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Platform
             var result = _sut.GetSqlFromDataTable("TestSchemaName", "TestTableName", dataTable, columnOptions);
 
             // Assert
-            Assert.Contains(expectedResult, result);
+            Assert.Contains(expectedResult, result, StringComparison.InvariantCulture);
         }
 
         [Fact]
@@ -121,7 +122,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Platform
             var result = _sut.GetSqlFromDataTable("TestSchemaName", "TestTableName", dataTable, columnOptions);
 
             // Assert
-            Assert.Contains(expectedResult, result);
+            Assert.Contains(expectedResult, result, StringComparison.InvariantCulture);
         }
 
         [Fact]
@@ -156,7 +157,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Platform
             var result = _sut.GetSqlFromDataTable("TestSchemaName", "TestTableName", dataTable, columnOptions);
 
             // Assert
-            Assert.Contains(expectedResult, result);
+            Assert.Contains(expectedResult, result, StringComparison.InvariantCulture);
         }
 
         [Fact]
@@ -185,7 +186,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Platform
             var result = _sut.GetSqlFromDataTable("TestSchemaName", "TestTableName", dataTable, columnOptions);
 
             // Assert
-            Assert.Contains(expectedResult, result);
+            Assert.Contains(expectedResult, result, StringComparison.InvariantCulture);
         }
     }
 }

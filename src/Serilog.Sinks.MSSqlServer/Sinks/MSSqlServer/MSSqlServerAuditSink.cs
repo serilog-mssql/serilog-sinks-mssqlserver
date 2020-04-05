@@ -50,7 +50,7 @@ namespace Serilog.Sinks.MSSqlServer
             string schemaName = "dbo",
             ITextFormatter logEventFormatter = null)
         {
-            columnOptions.FinalizeConfigurationForSinkConstructor();
+            columnOptions?.FinalizeConfigurationForSinkConstructor();
 
             if (columnOptions != null)
             {
