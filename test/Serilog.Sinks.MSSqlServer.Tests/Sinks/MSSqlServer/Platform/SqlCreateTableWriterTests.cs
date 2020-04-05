@@ -158,5 +158,34 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Platform
             // Assert
             Assert.Contains(expectedResult, result);
         }
+
+        [Fact]
+        public void GetSqlFromDataTableCreatesClusteredColumnStoreIndexCorrectly()
+        {
+            // Arrange
+            var dataTable = new DataTable();
+            var dataColumnId = new DataColumn();
+            var sqlColumnId = new SqlColumn { AllowNull = false, ColumnName = "Id", DataType = SqlDbType.Int, StandardColumnIdentifier =  StandardColumn.Id };
+            dataColumnId.ExtendedProperties["SqlColumn"] = sqlColumnId;
+            dataTable.Columns.Add(dataColumnId);
+            var dataColumnMessage = new DataColumn();
+            var sqlColumnMessage = new SqlColumn { AllowNull = false, ColumnName = "Message", DataType = SqlDbType.NVarChar, DataLength = 100 };
+            dataColumnMessage.ExtendedProperties["SqlColumn"] = sqlColumnMessage;
+            dataTable.Columns.Add(dataColumnMessage);
+            var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions { PrimaryKey = sqlColumnId, ClusteredColumnstoreIndex = true };
+            string expectedResult = "CREATE TABLE [TestSchemaName].[TestTableName] ( \r\n"
+                + "[Id] INT IDENTITY(1,1) NOT NULL,\r\n"
+                + "[Message] NVARCHAR(100) NOT NULL\r\n"
+                + " CONSTRAINT [PK_TestTableName] PRIMARY KEY CLUSTERED ([Id])\r\n"
+                + ");\r\n"
+                + "CREATE CLUSTERED COLUMNSTORE INDEX [CCI_TestTableName] ON [TestSchemaName].[TestTableName]\r\n"
+                + "END";
+
+            // Act
+            var result = _sut.GetSqlFromDataTable("TestSchemaName", "TestTableName", dataTable, columnOptions);
+
+            // Assert
+            Assert.Contains(expectedResult, result);
+        }
     }
 }
