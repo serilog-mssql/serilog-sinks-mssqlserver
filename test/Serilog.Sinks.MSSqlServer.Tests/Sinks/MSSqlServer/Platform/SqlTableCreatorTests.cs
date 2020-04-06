@@ -29,14 +29,16 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Platform
             const string tableName = "TestTableName";
             _sqlWriterMock.Setup(w => w.GetSqlFromDataTable(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<DataTable>(),
                 It.IsAny<Serilog.Sinks.MSSqlServer.ColumnOptions>())).Returns($"USE {DatabaseFixture.Database}");
-            var dataTable = new DataTable();
             var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions();
 
             // Act
-            _sut.CreateTable(DatabaseFixture.LogEventsConnectionString, schemaName, tableName, dataTable, columnOptions);
+            using (var dataTable = new DataTable())
+            {
+                _sut.CreateTable(DatabaseFixture.LogEventsConnectionString, schemaName, tableName, dataTable, columnOptions);
 
-            // Assert
-            _sqlWriterMock.Verify(w => w.GetSqlFromDataTable(schemaName, tableName, dataTable, columnOptions), Times.Once());
+                // Assert
+                _sqlWriterMock.Verify(w => w.GetSqlFromDataTable(schemaName, tableName, dataTable, columnOptions), Times.Once());
+            }
         }
 
         [Fact]
@@ -48,7 +50,10 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Platform
                 $"CREATE TABLE {DatabaseFixture.LogTableName} ( Id INT IDENTITY )");
 
             // Act
-            _sut.CreateTable(DatabaseFixture.LogEventsConnectionString, "TestSchemaName", "TestTableName", new DataTable(), new Serilog.Sinks.MSSqlServer.ColumnOptions());
+            using (var dataTable = new DataTable())
+            {
+                _sut.CreateTable(DatabaseFixture.LogEventsConnectionString, "TestSchemaName", "TestTableName", dataTable, new Serilog.Sinks.MSSqlServer.ColumnOptions());
+            }
 
             // Assert
             using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))

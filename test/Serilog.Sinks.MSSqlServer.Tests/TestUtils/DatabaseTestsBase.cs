@@ -10,11 +10,10 @@ namespace Serilog.Sinks.MSSqlServer.Tests.TestUtils
         private readonly ITestOutputHelper _output;
         private bool _disposedValue;
 
-        public DatabaseTestsBase(ITestOutputHelper output)
+        protected DatabaseTestsBase(ITestOutputHelper output)
         {
-            if (output == null) throw new ArgumentNullException(nameof(output));
+            _output = output ?? throw new ArgumentNullException(nameof(output));
 
-            _output = output;
             Serilog.Debugging.SelfLog.Enable(_output.WriteLine);
         }
 

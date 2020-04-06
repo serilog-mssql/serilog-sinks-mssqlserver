@@ -29,13 +29,16 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Output
             const string expectedResult = "{\"TimeStamp\":\"2020-03-27T14:17:00.0000000+00:00\",\"Level\":\"Information\",\"Message\":\"\",\"MessageTemplate\":\"Test message template\"}";
             _testTraits.ColumnOptions.TimeStamp.DataType = SqlDbType.DateTimeOffset;
             var testLogEvent = CreateTestLogEvent(new DateTimeOffset(2020, 3, 27, 14, 17, 0, TimeSpan.Zero));
-            var outputWriter = new StringWriter();
 
             // act
-            _sut.Format(testLogEvent, outputWriter);
+            string renderResult;
+            using (var outputWriter = new StringWriter())
+            {
+                _sut.Format(testLogEvent, outputWriter);
+                renderResult = outputWriter.ToString();
+            }
 
             // assert
-            var renderResult = outputWriter.ToString();
             Assert.Equal(expectedResult, renderResult);
         }
 
@@ -47,13 +50,16 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Output
             const string expectedResult = "{\"TimeStamp\":\"2020-03-27T13:17:00.0000000+01:00\",\"Level\":\"Information\",\"Message\":\"\",\"MessageTemplate\":\"Test message template\"}";
             _testTraits.ColumnOptions.TimeStamp.DataType = SqlDbType.DateTimeOffset;
             var testLogEvent = CreateTestLogEvent(new DateTimeOffset(2020, 3, 27, 13, 17, 0, new TimeSpan(1, 0, 0)));
-            var outputWriter = new StringWriter();
 
             // act
-            _sut.Format(testLogEvent, outputWriter);
+            string renderResult;
+            using (var outputWriter = new StringWriter())
+            {
+                _sut.Format(testLogEvent, outputWriter);
+                renderResult = outputWriter.ToString();
+            }
 
             // assert
-            var renderResult = outputWriter.ToString();
             Assert.Equal(expectedResult, renderResult);
         }
 
@@ -64,13 +70,16 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Output
             // arrange
             const string expectedResult = "{\"TimeStamp\":\"2020-03-27T14:17:00.0000000\",\"Level\":\"Information\",\"Message\":\"\",\"MessageTemplate\":\"Test message template\"}";
             var testLogEvent = CreateTestLogEvent(new DateTimeOffset(2020, 3, 27, 14, 17, 0, TimeSpan.Zero));
-            var outputWriter = new StringWriter();
 
             // act
-            _sut.Format(testLogEvent, outputWriter);
+            string renderResult;
+            using (var outputWriter = new StringWriter())
+            {
+                _sut.Format(testLogEvent, outputWriter);
+                renderResult = outputWriter.ToString();
+            }
 
             // assert
-            var renderResult = outputWriter.ToString();
             Assert.Equal(expectedResult, renderResult);
         }
 
@@ -85,13 +94,16 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Output
                 new LogEventProperty("TestProperty2", new ScalarValue(2))
             };
             var testLogEvent = CreateTestLogEvent(new DateTimeOffset(2020, 3, 27, 14, 17, 0, TimeSpan.Zero), properties);
-            var outputWriter = new StringWriter();
 
             // act
-            _sut.Format(testLogEvent, outputWriter);
+            string renderResult;
+            using (var outputWriter = new StringWriter())
+            {
+                _sut.Format(testLogEvent, outputWriter);
+                renderResult = outputWriter.ToString();
+            }
 
             // assert
-            var renderResult = outputWriter.ToString();
             Assert.Equal(expectedResult, renderResult);
         }
 
@@ -107,13 +119,16 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Output
                 new LogEventProperty("TestProperty2", new ScalarValue(2))
             };
             var testLogEvent = CreateTestLogEvent(new DateTimeOffset(2020, 3, 27, 14, 17, 0, TimeSpan.Zero), properties);
-            var outputWriter = new StringWriter();
 
             // act
-            _sut.Format(testLogEvent, outputWriter);
+            string renderResult;
+            using (var outputWriter = new StringWriter())
+            {
+                _sut.Format(testLogEvent, outputWriter);
+                renderResult = outputWriter.ToString();
+            }
 
             // assert
-            var renderResult = outputWriter.ToString();
             Assert.Equal(expectedResult, renderResult);
         }
 
