@@ -31,6 +31,8 @@ namespace Serilog.Sinks.MSSqlServer
     /// </summary>
     public class MSSqlServerSink : PeriodicBatchingSink
     {
+        private readonly MSSqlServerSinkTraits _traits;
+
         /// <summary>
         ///     A reasonable default for the number of events posted in
         ///     each batch.
@@ -41,8 +43,6 @@ namespace Serilog.Sinks.MSSqlServer
         ///     A reasonable default time to wait between checking for event batches.
         /// </summary>
         public static readonly TimeSpan DefaultPeriod = TimeSpan.FromSeconds(5);
-
-        private readonly MSSqlServerSinkTraits _traits;
 
         /// <summary>
         ///     Construct a sink posting to the specified database.
@@ -119,7 +119,20 @@ namespace Serilog.Sinks.MSSqlServer
             }
         }
 
-        void FillDataTable(IEnumerable<LogEvent> events)
+        /// <summary>
+        ///     Disposes the connection
+        /// </summary>
+        /// <param name="disposing"></param>
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+            if (disposing)
+            {
+                _traits.Dispose();
+            }
+        }
+
+        private void FillDataTable(IEnumerable<LogEvent> events)
         {
             // Add the new rows to the collection. 
             foreach (var logEvent in events)
@@ -135,19 +148,6 @@ namespace Serilog.Sinks.MSSqlServer
             }
 
             _traits.EventTable.AcceptChanges();
-        }
-
-        /// <summary>
-        ///     Disposes the connection
-        /// </summary>
-        /// <param name="disposing"></param>
-        protected override void Dispose(bool disposing)
-        {
-            base.Dispose(disposing);
-            if (disposing)
-            {
-                _traits.Dispose();
-            }
         }
     }
 }

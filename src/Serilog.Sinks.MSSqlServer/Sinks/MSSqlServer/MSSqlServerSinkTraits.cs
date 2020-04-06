@@ -12,23 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Serilog.Debugging;
-using Serilog.Events;
-using Serilog.Formatting;
-using Serilog.Sinks.MSSqlServer.Output;
-using Serilog.Sinks.MSSqlServer.Platform;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using Serilog.Debugging;
+using Serilog.Events;
+using Serilog.Formatting;
+using Serilog.Sinks.MSSqlServer.Output;
+using Serilog.Sinks.MSSqlServer.Platform;
 
 namespace Serilog.Sinks.MSSqlServer
 {
     /// <summary>Contains common functionality and properties used by both MSSqlServerSinks.</summary>
-    internal sealed class MSSqlServerSinkTraits : IDisposable
+    internal class MSSqlServerSinkTraits : IDisposable
     {
+        private bool _disposedValue;
+
         public string ConnectionString { get; }
         public string TableName { get; }
         public string SchemaName { get; }
@@ -115,7 +117,7 @@ namespace Serilog.Sinks.MSSqlServer
             foreach (var column in ColumnOptions.Store)
             {
                 // skip Id (auto-incrementing identity)
-                if(column != StandardColumn.Id)
+                if (column != StandardColumn.Id)
                     yield return GetStandardColumnNameAndValue(column, logEvent);
             }
 
@@ -124,11 +126,6 @@ namespace Serilog.Sinks.MSSqlServer
                 foreach (var columnValuePair in ConvertPropertiesToColumn(logEvent.Properties))
                     yield return columnValuePair;
             }
-        }
-
-        public void Dispose()
-        {
-            EventTable.Dispose();
         }
 
         internal KeyValuePair<string, object> GetStandardColumnNameAndValue(StandardColumn column, LogEvent logEvent)
@@ -292,13 +289,13 @@ namespace Serilog.Sinks.MSSqlServer
                 var standardOpts = ColumnOptions.GetStandardColumnOptions(standardColumn);
                 var dataColumn = standardOpts.AsDataColumn();
                 eventsTable.Columns.Add(dataColumn);
-                if(standardOpts == ColumnOptions.PrimaryKey)
+                if (standardOpts == ColumnOptions.PrimaryKey)
                     eventsTable.PrimaryKey = new DataColumn[] { dataColumn };
             }
 
             if (ColumnOptions.AdditionalColumns != null)
             {
-                foreach(var addCol in ColumnOptions.AdditionalColumns)
+                foreach (var addCol in ColumnOptions.AdditionalColumns)
                 {
                     var dataColumn = addCol.AsDataColumn();
                     eventsTable.Columns.Add(dataColumn);
@@ -308,6 +305,21 @@ namespace Serilog.Sinks.MSSqlServer
             }
 
             return eventsTable;
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposedValue)
+            {
+                EventTable.Dispose();
+                _disposedValue = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
     }
 }

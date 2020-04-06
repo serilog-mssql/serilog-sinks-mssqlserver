@@ -13,11 +13,11 @@
 // limitations under the License.
 
 using System;
+using System.Configuration;
 using Serilog.Configuration;
 using Serilog.Events;
-using Serilog.Sinks.MSSqlServer;
-using System.Configuration;
 using Serilog.Formatting;
+using Serilog.Sinks.MSSqlServer;
 
 // System.Configuration support for .NET Framework 4.5.2 libraries and apps.
 

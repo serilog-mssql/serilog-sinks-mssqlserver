@@ -13,11 +13,11 @@
 // limitations under the License.
 
 using System;
+using Microsoft.Extensions.Configuration;
 using Serilog.Configuration;
 using Serilog.Events;
-using Serilog.Sinks.MSSqlServer;
-using Microsoft.Extensions.Configuration;
 using Serilog.Formatting;
+using Serilog.Sinks.MSSqlServer;
 
 // M.E.C. support for .NET Standard 2.0 libraries.
 

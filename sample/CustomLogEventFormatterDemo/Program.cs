@@ -1,15 +1,15 @@
-﻿using Serilog;
-using Serilog.Sinks.MSSqlServer;
-using System;
+﻿using System;
 using System.Threading;
+using Serilog;
+using Serilog.Sinks.MSSqlServer;
 
 namespace CustomLogEventFormatterDemo
 {
     public static class Program
     {
-        const string _connectionString = "Server=localhost;Database=LogTest;Integrated Security=SSPI;";
-        const string _schemaName = "dbo";
-        const string _tableName = "LogEvents";
+        private const string _connectionString = "Server=localhost;Database=LogTest;Integrated Security=SSPI;";
+        private const string _schemaName = "dbo";
+        private const string _tableName = "LogEvents";
 
         public static void Main()
         {
@@ -49,7 +49,7 @@ namespace CustomLogEventFormatterDemo
             Log.CloseAndFlush();
         }
 
-        static void Fail()
+        private static void Fail()
         {
             throw new DivideByZeroException();
         }

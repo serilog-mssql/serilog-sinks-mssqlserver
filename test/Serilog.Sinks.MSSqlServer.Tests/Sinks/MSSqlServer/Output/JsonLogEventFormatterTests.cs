@@ -1,10 +1,10 @@
-﻿using Serilog.Events;
-using Serilog.Parsing;
-using Serilog.Sinks.MSSqlServer.Output;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
+using Serilog.Events;
+using Serilog.Parsing;
+using Serilog.Sinks.MSSqlServer.Output;
 using Xunit;
 
 namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Output
@@ -14,7 +14,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Output
         private Serilog.Sinks.MSSqlServer.ColumnOptions _testColumnOptions;
         private MSSqlServerSinkTraits _testTraits;
         private JsonLogEventFormatter _sut;
-        private bool disposedValue;
+        private bool _disposedValue;
 
         public JsonLogEventFormatterTests()
         {
@@ -154,10 +154,10 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Output
 
         protected virtual void Dispose(bool disposing)
         {
-            if (!disposedValue)
+            if (!_disposedValue)
             {
                 _testTraits.Dispose();
-                disposedValue = true;
+                _disposedValue = true;
             }
         }
 

@@ -55,7 +55,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 autoCreateSqlTable: true,
                 batchPostingLimit: 1,
                 period: TimeSpan.FromSeconds(10),
-                columnOptions: new ColumnOptions { TimeStamp = { DataType = SqlDbType.DateTimeOffset, ConvertToUtc = false }})
+                columnOptions: new ColumnOptions { TimeStamp = { DataType = SqlDbType.DateTimeOffset, ConvertToUtc = false } })
                 .CreateLogger();
             var dateTimeOffsetNow = DateTimeOffset.Now;
 

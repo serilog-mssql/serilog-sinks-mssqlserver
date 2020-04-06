@@ -1,16 +1,16 @@
-﻿using Serilog;
+﻿using System;
+using System.Threading;
+using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.MSSqlServer;
-using System;
-using System.Threading;
 
 namespace AppConfigDemo
 {
     public static class Program
     {
-        const string _connectionString = "Server=localhost;Database=LogTest;Integrated Security=SSPI;";
-        const string _schemaName = "dbo";
-        const string _tableName = "LogEvents";
+        private const string _connectionString = "Server=localhost;Database=LogTest;Integrated Security=SSPI;";
+        private const string _schemaName = "dbo";
+        private const string _tableName = "LogEvents";
 
         public static void Main()
         {

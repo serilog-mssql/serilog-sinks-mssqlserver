@@ -4,9 +4,9 @@ using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using Dapper;
-using Xunit;
 using FluentAssertions;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
+using Xunit;
 using Xunit.Abstractions;
 
 namespace Serilog.Sinks.MSSqlServer.Tests

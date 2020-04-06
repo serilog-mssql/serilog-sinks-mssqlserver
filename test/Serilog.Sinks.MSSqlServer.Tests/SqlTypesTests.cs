@@ -1,8 +1,8 @@
-﻿using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
+using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -35,9 +35,9 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             });
 
             // Some underlying .NET equivalents have a higher MaxValue than the SQL types' defaults.
-            decimal maxDecimal = 999999999999999999M;
-            decimal maxMoney = 922337203685477.5807M;
-            decimal maxSmallMoney = 214748.3647M;
+            var maxDecimal = 999999999999999999M;
+            var maxMoney = 922337203685477.5807M;
+            var maxSmallMoney = 214748.3647M;
 
             // success: should not throw
 
@@ -67,12 +67,12 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             });
 
             // .NET DateTime is limited to 999ms, some of the SQL types have higher precision as noted
-            DateTime maxDate = new DateTime(9999, 12, 31);
-            DateTime maxDateTime = new DateTime(9999,12,31,23,59,59,997);
-            DateTime maxDateTime2 = new DateTime(9999, 12, 31, 23, 59, 59, 999); // SQL max 9999999ms
-            DateTimeOffset maxDateTimeOffset = new DateTimeOffset(9999, 12, 31, 23, 59, 59, 999, TimeSpan.FromMinutes(0)); // SQL max 9999999ms
-            DateTime maxSmallDateTime = new DateTime(2079, 6, 6, 23, 59, 0); // seconds round up or down, 59 seconds will overflow here
-            TimeSpan maxTime = new TimeSpan(0, 23, 59, 59, 999); // SQL max 9999999ms
+            var maxDate = new DateTime(9999, 12, 31);
+            var maxDateTime = new DateTime(9999, 12, 31, 23, 59, 59, 997);
+            var maxDateTime2 = new DateTime(9999, 12, 31, 23, 59, 59, 999); // SQL max 9999999ms
+            var maxDateTimeOffset = new DateTimeOffset(9999, 12, 31, 23, 59, 59, 999, TimeSpan.FromMinutes(0)); // SQL max 9999999ms
+            var maxSmallDateTime = new DateTime(2079, 6, 6, 23, 59, 0); // seconds round up or down, 59 seconds will overflow here
+            var maxTime = new TimeSpan(0, 23, 59, 59, 999); // SQL max 9999999ms
 
             // sucess: should not throw
 
@@ -96,8 +96,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 new SqlColumn("VarChar", SqlDbType.VarChar, dataLength: 20),
             });
 
-            string twentyChars = new string('x', 20);
-            string thirtyChars = new string('x', 30);
+            var twentyChars = new string('x', 20);
+            var thirtyChars = new string('x', 30);
 
             // sucess: should not throw
 
@@ -123,7 +123,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             });
 
             // SQL Server will convert strings internally automatically
-            string xmlAsStringData = "<?xml version=\"1.0\"?><test><node attrib = \"value1\">value2</node></test>";
+            var xmlAsStringData = "<?xml version=\"1.0\"?><test><node attrib = \"value1\">value2</node></test>";
 
             // sucess: should not throw
 

@@ -1,10 +1,10 @@
-﻿using Dapper;
+﻿using System.Data;
+using System.Data.SqlClient;
+using Dapper;
 using FluentAssertions;
 using Moq;
 using Serilog.Sinks.MSSqlServer.Platform;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
-using System.Data;
-using System.Data.SqlClient;
 using Xunit;
 using Xunit.Abstractions;
 
