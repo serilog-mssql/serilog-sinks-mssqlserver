@@ -64,7 +64,7 @@ namespace Serilog
             ColumnOptions columnOptions = null,
             string schemaName = "dbo",
             ITextFormatter logEventFormatter = null) =>
-            loggerConfiguration.MSSqlServer(
+            loggerConfiguration.MSSqlServerInternal(
                 configSectionName: AppConfigSectionName,
                 connectionString,
                 tableName,
@@ -75,10 +75,11 @@ namespace Serilog
                 autoCreateSqlTable,
                 columnOptions,
                 schemaName,
-                logEventFormatter);
+                logEventFormatter,
+                new ApplySystemConfiguration());
 
-        // Internal overload with parameter configSectionName used by tests to override the config section
-        internal static LoggerConfiguration MSSqlServer(
+        // Internal overload with parameters configSectionName and applySystemConfiguration used by tests to override the config section and inject mock
+        internal static LoggerConfiguration MSSqlServerInternal(
             this LoggerSinkConfiguration loggerConfiguration,
             string configSectionName,
             string connectionString,
@@ -90,7 +91,8 @@ namespace Serilog
             bool autoCreateSqlTable = false,
             ColumnOptions columnOptions = null,
             string schemaName = "dbo",
-            ITextFormatter logEventFormatter = null)
+            ITextFormatter logEventFormatter = null,
+            IApplySystemConfiguration applySystemConfiguration = null)
         {
             if (loggerConfiguration == null)
                 throw new ArgumentNullException(nameof(loggerConfiguration));
@@ -98,11 +100,10 @@ namespace Serilog
             var defaultedPeriod = period ?? MSSqlServerSink.DefaultPeriod;
             var colOpts = columnOptions ?? new ColumnOptions();
 
-            var systemConfiguration = new ApplySystemConfiguration();
             if (ConfigurationManager.GetSection(configSectionName) is MSSqlServerConfigurationSection serviceConfigSection)
-                colOpts = systemConfiguration.ConfigureColumnOptions(serviceConfigSection, colOpts);
+                colOpts = applySystemConfiguration.ConfigureColumnOptions(serviceConfigSection, colOpts);
 
-            connectionString = systemConfiguration.GetConnectionString(connectionString);
+            connectionString = applySystemConfiguration.GetConnectionString(connectionString);
 
             return loggerConfiguration.Sink(
                 new MSSqlServerSink(
@@ -145,7 +146,7 @@ namespace Serilog
             ColumnOptions columnOptions = null,
             string schemaName = "dbo",
             ITextFormatter logEventFormatter = null) =>
-            loggerAuditSinkConfiguration.MSSqlServer(
+            loggerAuditSinkConfiguration.MSSqlServerInternal(
                 configSectionName: AppConfigSectionName,
                 connectionString,
                 tableName,
@@ -154,10 +155,11 @@ namespace Serilog
                 autoCreateSqlTable,
                 columnOptions,
                 schemaName,
-                logEventFormatter);
+                logEventFormatter,
+                new ApplySystemConfiguration());
 
-        // Internal overload with parameter configSectionName used by tests to override the config section
-        internal static LoggerConfiguration MSSqlServer(
+        // Internal overload with parameters configSectionName and applySystemConfiguration used by tests to override the config section and inject mock
+        internal static LoggerConfiguration MSSqlServerInternal(
             this LoggerAuditSinkConfiguration loggerAuditSinkConfiguration,
             string configSectionName,
             string connectionString,
@@ -167,18 +169,18 @@ namespace Serilog
             bool autoCreateSqlTable = false,
             ColumnOptions columnOptions = null,
             string schemaName = "dbo",
-            ITextFormatter logEventFormatter = null)
+            ITextFormatter logEventFormatter = null,
+            IApplySystemConfiguration applySystemConfiguration = null)
         {
             if (loggerAuditSinkConfiguration == null)
                 throw new ArgumentNullException(nameof(loggerAuditSinkConfiguration));
 
             var colOpts = columnOptions ?? new ColumnOptions();
 
-            var systemConfiguration = new ApplySystemConfiguration();
             if (ConfigurationManager.GetSection(configSectionName) is MSSqlServerConfigurationSection serviceConfigSection)
-                colOpts = systemConfiguration.ConfigureColumnOptions(serviceConfigSection, colOpts);
+                colOpts = applySystemConfiguration.ConfigureColumnOptions(serviceConfigSection, colOpts);
 
-            connectionString = systemConfiguration.GetConnectionString(connectionString);
+            connectionString = applySystemConfiguration.GetConnectionString(connectionString);
 
             return loggerAuditSinkConfiguration.Sink(
                 new MSSqlServerAuditSink(

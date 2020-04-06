@@ -45,11 +45,12 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.System.Config
             var standardNames = new List<string> { "CustomMessage", "CustomMessageTemplate", "CustomLevel", "CustomTimeStamp", "CustomException", "CustomProperties" };
 
             var loggerConfiguration = new LoggerConfiguration();
-            Log.Logger = loggerConfiguration.WriteTo.MSSqlServer(
+            Log.Logger = loggerConfiguration.WriteTo.MSSqlServerInternal(
                 configSectionName: "CustomStandardColumnNames",
                 connectionString: DatabaseFixture.LogEventsConnectionString,
                 tableName: DatabaseFixture.LogTableName,
-                autoCreateSqlTable: true)
+                autoCreateSqlTable: true,
+                applySystemConfiguration: new ApplySystemConfiguration())
                 .CreateLogger();
             Log.CloseAndFlush();
 
@@ -71,11 +72,12 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.System.Config
         public void CustomizedColumnList()
         {
             var loggerConfiguration = new LoggerConfiguration();
-            Log.Logger = loggerConfiguration.WriteTo.MSSqlServer(
+            Log.Logger = loggerConfiguration.WriteTo.MSSqlServerInternal(
                 configSectionName: "CustomizedColumnList",
                 connectionString: DatabaseFixture.LogEventsConnectionString,
                 tableName: DatabaseFixture.LogTableName,
-                autoCreateSqlTable: true)
+                autoCreateSqlTable: true,
+                applySystemConfiguration: new ApplySystemConfiguration())
                 .CreateLogger();
             Log.CloseAndFlush();
 

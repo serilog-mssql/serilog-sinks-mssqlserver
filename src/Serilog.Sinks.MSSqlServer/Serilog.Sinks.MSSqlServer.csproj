@@ -80,6 +80,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="Configuration\Implementations\Microsoft.Extensions.Configuration\IApplyMicrosoftExtensionsConfiguration.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Include="Images\serilog-sink-nuget.png" Pack="true" PackagePath="" />
   </ItemGroup>
 

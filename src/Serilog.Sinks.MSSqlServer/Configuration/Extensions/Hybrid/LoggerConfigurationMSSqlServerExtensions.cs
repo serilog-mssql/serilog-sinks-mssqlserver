@@ -71,7 +71,40 @@ namespace Serilog
             ColumnOptions columnOptions = null,
             IConfigurationSection columnOptionsSection = null,
             string schemaName = "dbo",
-            ITextFormatter logEventFormatter = null)
+            ITextFormatter logEventFormatter = null) =>
+            loggerConfiguration.MSSqlServerInternal(
+                connectionString: connectionString,
+                tableName: tableName,
+                appConfiguration: appConfiguration,
+                restrictedToMinimumLevel: restrictedToMinimumLevel,
+                batchPostingLimit: batchPostingLimit,
+                period: period,
+                formatProvider: formatProvider,
+                autoCreateSqlTable: autoCreateSqlTable,
+                columnOptions: columnOptions,
+                columnOptionsSection: columnOptionsSection,
+                schemaName: schemaName,
+                logEventFormatter: logEventFormatter,
+                applySystemConfiguration: new ApplySystemConfiguration(),
+                applyMicrosoftExtensionsConfiguration: new ApplyMicrosoftExtensionsConfiguration());
+
+        // Internal overload with parameters applySystemConfiguration and applyMicrosoftExtensionsConfiguration used by tests to inject mocks
+        internal static LoggerConfiguration MSSqlServerInternal(
+            this LoggerSinkConfiguration loggerConfiguration,
+            string connectionString,
+            string tableName,
+            IConfiguration appConfiguration = null,
+            LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
+            int batchPostingLimit = MSSqlServerSink.DefaultBatchPostingLimit,
+            TimeSpan? period = null,
+            IFormatProvider formatProvider = null,
+            bool autoCreateSqlTable = false,
+            ColumnOptions columnOptions = null,
+            IConfigurationSection columnOptionsSection = null,
+            string schemaName = "dbo",
+            ITextFormatter logEventFormatter = null,
+            IApplySystemConfiguration applySystemConfiguration = null,
+            IApplyMicrosoftExtensionsConfiguration applyMicrosoftExtensionsConfiguration = null)
         {
             if (loggerConfiguration == null)
                 throw new ArgumentNullException(nameof(loggerConfiguration));
@@ -82,9 +115,8 @@ namespace Serilog
 
             if (ConfigurationManager.GetSection(AppConfigSectionName) is MSSqlServerConfigurationSection serviceConfigSection)
             {
-                var systemConfiguration = new ApplySystemConfiguration();
-                colOpts = systemConfiguration.ConfigureColumnOptions(serviceConfigSection, colOpts);
-                connStr = systemConfiguration.GetConnectionString(connStr);
+                colOpts = applySystemConfiguration.ConfigureColumnOptions(serviceConfigSection, colOpts);
+                connStr = applySystemConfiguration.GetConnectionString(connStr);
 
                 if (appConfiguration != null || columnOptionsSection != null)
                     SelfLog.WriteLine("Warning: Both System.Configuration (app.config or web.config) and Microsoft.Extensions.Configuration are being applied to the MSSQLServer sink.");
@@ -92,9 +124,8 @@ namespace Serilog
 
             if (appConfiguration != null || columnOptionsSection != null)
             {
-                var microsoftExtensionsConfiguration = new ApplyMicrosoftExtensionsConfiguration();
-                connStr = microsoftExtensionsConfiguration.GetConnectionString(connStr, appConfiguration);
-                colOpts = microsoftExtensionsConfiguration.ConfigureColumnOptions(colOpts, columnOptionsSection);
+                connStr = applyMicrosoftExtensionsConfiguration.GetConnectionString(connStr, appConfiguration);
+                colOpts = applyMicrosoftExtensionsConfiguration.ConfigureColumnOptions(colOpts, columnOptionsSection);
             }
 
             return loggerConfiguration.Sink(
@@ -138,7 +169,36 @@ namespace Serilog
             ColumnOptions columnOptions = null,
             IConfigurationSection columnOptionsSection = null,
             string schemaName = "dbo",
-            ITextFormatter logEventFormatter = null)
+            ITextFormatter logEventFormatter = null) =>
+            loggerAuditSinkConfiguration.MSSqlServerInternal(
+                connectionString: connectionString,
+                tableName: tableName,
+                appConfiguration: appConfiguration,
+                restrictedToMinimumLevel: restrictedToMinimumLevel,
+                formatProvider: formatProvider,
+                autoCreateSqlTable: autoCreateSqlTable,
+                columnOptions: columnOptions,
+                columnOptionsSection: columnOptionsSection,
+                schemaName: schemaName,
+                logEventFormatter: logEventFormatter,
+                applySystemConfiguration: new ApplySystemConfiguration(),
+                applyMicrosoftExtensionsConfiguration: new ApplyMicrosoftExtensionsConfiguration());
+
+        // Internal overload with parameters applySystemConfiguration and applyMicrosoftExtensionsConfiguration used by tests to inject mocks
+        internal static LoggerConfiguration MSSqlServerInternal(
+            this LoggerAuditSinkConfiguration loggerAuditSinkConfiguration,
+            string connectionString,
+            string tableName,
+            IConfiguration appConfiguration = null,
+            LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
+            IFormatProvider formatProvider = null,
+            bool autoCreateSqlTable = false,
+            ColumnOptions columnOptions = null,
+            IConfigurationSection columnOptionsSection = null,
+            string schemaName = "dbo",
+            ITextFormatter logEventFormatter = null,
+            IApplySystemConfiguration applySystemConfiguration = null,
+            IApplyMicrosoftExtensionsConfiguration applyMicrosoftExtensionsConfiguration = null)
         {
             if (loggerAuditSinkConfiguration == null)
                 throw new ArgumentNullException(nameof(loggerAuditSinkConfiguration));
@@ -148,9 +208,8 @@ namespace Serilog
 
             if (ConfigurationManager.GetSection(AppConfigSectionName) is MSSqlServerConfigurationSection serviceConfigSection)
             {
-                var systemConfiguration = new ApplySystemConfiguration();
-                colOpts = systemConfiguration.ConfigureColumnOptions(serviceConfigSection, colOpts);
-                connStr = systemConfiguration.GetConnectionString(connStr);
+                colOpts = applySystemConfiguration.ConfigureColumnOptions(serviceConfigSection, colOpts);
+                connStr = applySystemConfiguration.GetConnectionString(connStr);
 
                 if (appConfiguration != null || columnOptionsSection != null)
                     SelfLog.WriteLine("Warning: Both System.Configuration (app.config or web.config) and Microsoft.Extensions.Configuration are being applied to the MSSQLServer sink.");
@@ -158,9 +217,8 @@ namespace Serilog
 
             if (appConfiguration != null || columnOptionsSection != null)
             {
-                var microsoftExtensionsConfiguration = new ApplyMicrosoftExtensionsConfiguration();
-                connStr = microsoftExtensionsConfiguration.GetConnectionString(connStr, appConfiguration);
-                colOpts = microsoftExtensionsConfiguration.ConfigureColumnOptions(colOpts, columnOptionsSection);
+                connStr = applyMicrosoftExtensionsConfiguration.GetConnectionString(connStr, appConfiguration);
+                colOpts = applyMicrosoftExtensionsConfiguration.ConfigureColumnOptions(colOpts, columnOptionsSection);
             }
 
             return loggerAuditSinkConfiguration.Sink(

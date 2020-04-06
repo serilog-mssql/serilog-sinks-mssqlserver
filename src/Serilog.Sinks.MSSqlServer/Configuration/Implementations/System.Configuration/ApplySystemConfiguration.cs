@@ -6,7 +6,7 @@ namespace Serilog.Sinks.MSSqlServer
     /// <summary>
     /// Configures the sink's connection string and ColumnOtions object.
     /// </summary>
-    internal class ApplySystemConfiguration
+    internal class ApplySystemConfiguration : IApplySystemConfiguration
     {
         private readonly ISystemConfigurationConnectionStringProvider _connectionStringProvider;
         private readonly ISystemConfigurationColumnOptionsProvider _columnOptionsProvider;
