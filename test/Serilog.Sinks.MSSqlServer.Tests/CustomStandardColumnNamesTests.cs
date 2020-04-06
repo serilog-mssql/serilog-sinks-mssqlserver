@@ -26,7 +26,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             options.Id.ColumnName = customIdName;
 
             // act
-            var sink = new MSSqlServerSink(DatabaseFixture.LogEventsConnectionString, DatabaseFixture.LogTableName, 1, TimeSpan.FromSeconds(1), null, true, options, "dbo", null);
+            using (var sink = new MSSqlServerSink(DatabaseFixture.LogEventsConnectionString, DatabaseFixture.LogTableName, 1, TimeSpan.FromSeconds(1), null, true, options, "dbo", null))
+            { }
 
             // assert
             using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
@@ -52,7 +53,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             var options = new ColumnOptions();
 
             // act
-            var sink = new MSSqlServerSink(DatabaseFixture.LogEventsConnectionString, DatabaseFixture.LogTableName, 1, TimeSpan.FromSeconds(1), null, true, options, "dbo", null);
+            using (var sink = new MSSqlServerSink(DatabaseFixture.LogEventsConnectionString, DatabaseFixture.LogTableName, 1, TimeSpan.FromSeconds(1), null, true, options, "dbo", null))
+            { }
 
             // assert
             var idColumnName = "Id";
@@ -87,7 +89,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             options.Properties.ColumnName = "CustomProperties";
 
             // act
-            var sink = new MSSqlServerSink(DatabaseFixture.LogEventsConnectionString, DatabaseFixture.LogTableName, 1, TimeSpan.FromSeconds(1), null, true, options, "dbo", null);
+            using (var sink = new MSSqlServerSink(DatabaseFixture.LogEventsConnectionString, DatabaseFixture.LogTableName, 1, TimeSpan.FromSeconds(1), null, true, options, "dbo", null))
+            { }
 
             // assert
             using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
@@ -112,7 +115,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             var standardNames = new List<string> { "Message", "MessageTemplate", "Level", "TimeStamp", "Exception", "Properties" };
 
             // act
-            var sink = new MSSqlServerSink(DatabaseFixture.LogEventsConnectionString, DatabaseFixture.LogTableName, 1, TimeSpan.FromSeconds(1), null, true, options,  "dbo", null);
+            using (var sink = new MSSqlServerSink(DatabaseFixture.LogEventsConnectionString, DatabaseFixture.LogTableName, 1, TimeSpan.FromSeconds(1), null, true, options, "dbo", null))
+            { }
 
             // assert
             using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
@@ -149,13 +153,15 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 columnOptions: options)
                 .CreateLogger();
 
-            var file = File.CreateText("CustomColumnsEvent.Self.log");
-            Serilog.Debugging.SelfLog.Enable(TextWriter.Synchronized(file));
 
             // act
             const string loggingInformationMessage = "Logging Information message";
-            Log.Information(loggingInformationMessage);
-            Log.CloseAndFlush();
+            using (var file = File.CreateText("CustomColumnsEvent.Self.log"))
+            {
+                Serilog.Debugging.SelfLog.Enable(TextWriter.Synchronized(file));
+                Log.Information(loggingInformationMessage);
+                Log.CloseAndFlush();
+            }
 
             // assert
             using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
@@ -180,14 +186,15 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 columnOptions: new ColumnOptions())
                 .CreateLogger();
 
-            var file = File.CreateText("StandardColumns.Self.log");
-            Serilog.Debugging.SelfLog.Enable(TextWriter.Synchronized(file));
 
             // act
             const string loggingInformationMessage = "Logging Information message";
-            Log.Information(loggingInformationMessage);
-
-            Log.CloseAndFlush();
+            using (var file = File.CreateText("StandardColumns.Self.log"))
+            {
+                Serilog.Debugging.SelfLog.Enable(TextWriter.Synchronized(file));
+                Log.Information(loggingInformationMessage);
+                Log.CloseAndFlush();
+            }
 
             // assert
             using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
@@ -220,13 +227,15 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 columnOptions: options)
                 .CreateLogger();
 
-            var file = File.CreateText("CustomColumnsAuditEvent.Self.log");
-            Serilog.Debugging.SelfLog.Enable(TextWriter.Synchronized(file));
 
             // act
             const string loggingInformationMessage = "Logging Information message";
-            Log.Information(loggingInformationMessage);
-            Log.CloseAndFlush();
+            using (var file = File.CreateText("CustomColumnsAuditEvent.Self.log"))
+            {
+                Serilog.Debugging.SelfLog.Enable(TextWriter.Synchronized(file));
+                Log.Information(loggingInformationMessage);
+                Log.CloseAndFlush();
+            }
 
             // assert
             using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
@@ -249,14 +258,15 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 columnOptions: new ColumnOptions())
                 .CreateLogger();
 
-            var file = File.CreateText("StandardColumns.Audit.Self.log");
-            Serilog.Debugging.SelfLog.Enable(TextWriter.Synchronized(file));
-
             // act
             const string loggingInformationMessage = "Logging Information message";
-            Log.Information(loggingInformationMessage);
+            using (var file = File.CreateText("StandardColumns.Audit.Self.log"))
+            {
+                Serilog.Debugging.SelfLog.Enable(TextWriter.Synchronized(file));
 
-            Log.CloseAndFlush();
+                Log.Information(loggingInformationMessage);
+                Log.CloseAndFlush();
+            }
 
             // assert
             using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
