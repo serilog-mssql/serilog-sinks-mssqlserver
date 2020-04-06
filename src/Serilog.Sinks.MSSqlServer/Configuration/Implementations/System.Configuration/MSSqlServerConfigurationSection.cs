@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Serilog.Sinks.MSSqlServer;
 using System.Configuration;
+using Serilog.Sinks.MSSqlServer;
 
 // Disable XML comment warnings for internal config classes which are required to have public members
 #pragma warning disable 1591

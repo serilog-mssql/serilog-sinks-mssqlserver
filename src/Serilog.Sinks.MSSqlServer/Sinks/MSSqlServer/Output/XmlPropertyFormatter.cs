@@ -27,13 +27,12 @@ namespace Serilog.Sinks.MSSqlServer.Output
     /// </summary>
     internal static class XmlPropertyFormatter
     {
-
         /// <summary>
         /// Regex to trasnform any non-xml char into ?, acoiding any exceptions on inserting the xml properties into the database
         /// </summary>
-        private readonly static Regex _invalidXMLChars = new Regex(
-        @"(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F\uFEFF\uFFFE\uFFFF]",
-        RegexOptions.Compiled);
+        private static readonly Regex _invalidXMLChars = new Regex(
+            @"(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F\uFEFF\uFFFE\uFFFF]",
+            RegexOptions.Compiled);
 
         /// <summary>
         ///     Simplify the object so as to make handling the serialized
@@ -51,7 +50,7 @@ namespace Serilog.Sinks.MSSqlServer.Output
             {
                 var sb = new StringBuilder();
 
-                bool isEmpty = true;
+                var isEmpty = true;
 
                 foreach (var element in dict.Elements)
                 {
@@ -93,7 +92,7 @@ namespace Serilog.Sinks.MSSqlServer.Output
             {
                 var sb = new StringBuilder();
 
-                bool isEmpty = true;
+                var isEmpty = true;
 
                 foreach (var element in seq.Elements)
                 {
@@ -129,7 +128,7 @@ namespace Serilog.Sinks.MSSqlServer.Output
 
                 var sb = new StringBuilder();
 
-                bool isEmpty = true;
+                var isEmpty = true;
 
                 foreach (var element in props)
                 {
@@ -191,7 +190,7 @@ namespace Serilog.Sinks.MSSqlServer.Output
                 return "x";
             }
 
-            string validName = name.Trim();
+            var validName = name.Trim();
 
             if (!char.IsLetter(validName[0]) || validName.StartsWith("xml", true, CultureInfo.CurrentCulture))
             {

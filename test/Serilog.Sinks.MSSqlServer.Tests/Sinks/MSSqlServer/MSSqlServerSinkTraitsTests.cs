@@ -1,14 +1,14 @@
-﻿using Moq;
-using Serilog.Events;
-using Serilog.Formatting;
-using Serilog.Parsing;
-using Serilog.Sinks.MSSqlServer.Platform;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using Moq;
+using Serilog.Events;
+using Serilog.Formatting;
+using Serilog.Parsing;
+using Serilog.Sinks.MSSqlServer.Platform;
 using Xunit;
 
 namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer
@@ -19,7 +19,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer
         private readonly string _tableName = "tableName";
         private readonly string _schemaName = "schemaName";
         private MSSqlServerSinkTraits _sut;
-        private bool disposedValue;
+        private bool _disposedValue;
 
         [Trait("Bugfix", "#187")]
         [Fact]
@@ -197,7 +197,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer
         {
             if (sqlTableCreator == null)
             {
-                _sut = new MSSqlServerSinkTraits(_connectionString, _tableName, _schemaName, 
+                _sut = new MSSqlServerSinkTraits(_connectionString, _tableName, _schemaName,
                     options, CultureInfo.InvariantCulture, autoCreateSqlTable, logEventFormatter);
             }
             else
@@ -210,10 +210,10 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer
 
         protected virtual void Dispose(bool disposing)
         {
-            if (!disposedValue)
+            if (!_disposedValue)
             {
                 _sut.Dispose();
-                disposedValue = true;
+                _disposedValue = true;
             }
         }
 

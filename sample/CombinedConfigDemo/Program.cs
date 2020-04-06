@@ -1,7 +1,7 @@
-﻿using Microsoft.Extensions.Configuration;
-using Serilog;
-using System;
+﻿using System;
 using System.Threading;
+using Microsoft.Extensions.Configuration;
+using Serilog;
 
 namespace CombinedConfigDemo
 {
@@ -10,9 +10,9 @@ namespace CombinedConfigDemo
     // as parameters to the MSSqlServer() method.
     public static class Program
     {
-        const string _connectionStringName = "LogDatabase";
-        const string _schemaName = "dbo";
-        const string _tableName = "LogEvents";
+        private const string _connectionStringName = "LogDatabase";
+        private const string _schemaName = "dbo";
+        private const string _tableName = "LogEvents";
 
         public static void Main()
         {

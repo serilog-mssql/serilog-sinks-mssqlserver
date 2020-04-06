@@ -1,8 +1,8 @@
-﻿using Microsoft.Extensions.Configuration;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using Microsoft.Extensions.Configuration;
 
 namespace Serilog.Sinks.MSSqlServer.Configuration
 {
@@ -153,7 +153,7 @@ namespace Serilog.Sinks.MSSqlServer.Configuration
             SetProperty.IfNotNull<bool>(config["disableTriggers"], (val) => columnOptions.DisableTriggers = val);
             SetProperty.IfNotNull<bool>(config["clusteredColumnstoreIndex"], (val) => columnOptions.ClusteredColumnstoreIndex = val);
 
-            string pkName = config["primaryKeyColumnName"];
+            var pkName = config["primaryKeyColumnName"];
             if (!string.IsNullOrEmpty(pkName))
             {
                 if (columnOptions.ClusteredColumnstoreIndex)

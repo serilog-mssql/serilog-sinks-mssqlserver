@@ -1,7 +1,7 @@
-﻿using Dapper;
+﻿using System.Data.SqlClient;
+using Dapper;
 using FluentAssertions;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
-using System.Data.SqlClient;
 using Xunit;
 using Xunit.Abstractions;
 

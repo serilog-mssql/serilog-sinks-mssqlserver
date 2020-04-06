@@ -1,13 +1,13 @@
-﻿using Serilog.Debugging;
-using System;
+﻿using System;
 using System.Collections.ObjectModel;
+using Serilog.Debugging;
 
 namespace Serilog.Sinks.MSSqlServer
 {
     public partial class ColumnOptions
     {
-        private bool configurationFinalized = false;
-        
+        private bool _configurationFinalized = false;
+
         /// <summary>
         /// The logging sink and audit sink constructors call this. Defaults are resolved (like ensuring the
         /// primary key is non-null) and obsolete features are migrated to their replacement features so
@@ -15,10 +15,10 @@ namespace Serilog.Sinks.MSSqlServer
         /// </summary>
         internal void FinalizeConfigurationForSinkConstructor()
         {
-            if (configurationFinalized)
+            if (_configurationFinalized)
                 return;
 
-            #pragma warning disable 618 // deprecated: ColumnOptions.AddtionalDataColumns
+#pragma warning disable 618 // deprecated: ColumnOptions.AddtionalDataColumns
             if (AdditionalDataColumns != null)
             {
                 SelfLog.WriteLine("Deprecated: The \"AdditionalDataColumns\" collection will be removed in a future release. Please use the \"AdditionalColumns\" collection.");
@@ -32,7 +32,7 @@ namespace Serilog.Sinks.MSSqlServer
                 }
                 AdditionalDataColumns = null;
             }
-            #pragma warning restore 618
+#pragma warning restore 618
 
             // the constructor sets Id as the PK, remove it if the Id column was removed
             if (!Store.Contains(StandardColumn.Id) && PrimaryKey == Id)
@@ -72,7 +72,7 @@ namespace Serilog.Sinks.MSSqlServer
                 PrimaryKey.AllowNull = false;
             }
 
-            configurationFinalized = true;
+            _configurationFinalized = true;
         }
 
         private static void ColumnstoreCompatibilityCheck(SqlColumn column)

@@ -1,10 +1,10 @@
-﻿using Dapper;
-using Xunit;
-using FluentAssertions;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
+using Dapper;
+using FluentAssertions;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
+using Xunit;
 using Xunit.Abstractions;
 
 // Because System.Configuration is static and config is loaded automatically,
@@ -25,7 +25,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.System.Config
         [Fact]
         public void ConnectionStringByName()
         {
-            string ConnectionStringName = "NamedConnection";
+            var ConnectionStringName = "NamedConnection";
 
             var loggerConfiguration = new LoggerConfiguration();
             Log.Logger = loggerConfiguration.WriteTo.MSSqlServer(

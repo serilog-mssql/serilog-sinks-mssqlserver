@@ -13,13 +13,13 @@
 // limitations under the License.
 
 using System;
-using Serilog.Configuration;
-using Serilog.Events;
-using Serilog.Sinks.MSSqlServer;
-using Microsoft.Extensions.Configuration;
 using System.Configuration;
+using Microsoft.Extensions.Configuration;
+using Serilog.Configuration;
 using Serilog.Debugging;
+using Serilog.Events;
 using Serilog.Formatting;
+using Serilog.Sinks.MSSqlServer;
 
 // The "Hybrid" configuration system supports both Microsoft.Extensions.Configuration and System.Configuration.
 // This is necessary because .NET Framework 4.6.1+ and .NET Core 2.0+ apps support both approaches, whereas the

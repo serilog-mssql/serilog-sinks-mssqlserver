@@ -2,37 +2,22 @@
 using System.Data.SqlClient;
 using System.Linq;
 using Dapper;
-using Xunit;
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
+using Xunit;
 using Xunit.Abstractions;
 
 namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.Microsoft.Extensions.Configuration
 {
     public class ConfigurationExtensionsTests : DatabaseTestsBase
     {
-        private const string ConnectionStringName = "NamedConnection";
-        private const string ColumnOptionsSection = "CustomColumnNames";
+        private const string _connectionStringName = "NamedConnection";
+        private const string _columnOptionsSection = "CustomColumnNames";
 
         public ConfigurationExtensionsTests(ITestOutputHelper output) : base(output)
         {
         }
-
-        IConfiguration TestConfiguration() =>
-            new ConfigurationBuilder()
-                .AddInMemoryCollection(new Dictionary<string, string>
-                {
-                    { $"ConnectionStrings:{ConnectionStringName}", DatabaseFixture.LogEventsConnectionString },
-
-                    { $"{ColumnOptionsSection}:message:columnName", "CustomMessage" },
-                    { $"{ColumnOptionsSection}:messageTemplate:columnName", "CustomMessageTemplate" },
-                    { $"{ColumnOptionsSection}:level:columnName", "CustomLevel" },
-                    { $"{ColumnOptionsSection}:timeStamp:columnName", "CustomTimeStamp" },
-                    { $"{ColumnOptionsSection}:exception:columnName", "CustomException" },
-                    { $"{ColumnOptionsSection}:properties:columnName", "CustomProperties" },
-                })
-                .Build();
 
         [Fact]
         public void ConnectionStringByName()
@@ -41,7 +26,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.Microsoft.Ext
 
             var loggerConfiguration = new LoggerConfiguration();
             Log.Logger = loggerConfiguration.WriteTo.MSSqlServer(
-                connectionString: ConnectionStringName,
+                connectionString: _connectionStringName,
                 tableName: DatabaseFixture.LogTableName,
                 autoCreateSqlTable: true,
                 appConfiguration: appConfig)
@@ -57,7 +42,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.Microsoft.Ext
         {
             var standardNames = new List<string> { "CustomMessage", "CustomMessageTemplate", "CustomLevel", "CustomTimeStamp", "CustomException", "CustomProperties" };
 
-            var configSection = TestConfiguration().GetSection(ColumnOptionsSection);
+            var configSection = TestConfiguration().GetSection(_columnOptionsSection);
 
             var loggerConfiguration = new LoggerConfiguration();
             Log.Logger = loggerConfiguration.WriteTo.MSSqlServer(
@@ -68,12 +53,12 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.Microsoft.Ext
                 .CreateLogger();
             Log.CloseAndFlush();
 
-            using(var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
+            using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
             {
                 var logEvents = conn.Query<InfoSchema>($@"SELECT COLUMN_NAME AS ColumnName FROM {DatabaseFixture.Database}.INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{DatabaseFixture.LogTableName}'");
                 var infoSchema = logEvents as InfoSchema[] ?? logEvents.ToArray();
 
-                foreach(var column in standardNames)
+                foreach (var column in standardNames)
                 {
                     infoSchema.Should().Contain(columns => columns.ColumnName == column);
                 }
@@ -81,5 +66,20 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.Microsoft.Ext
                 infoSchema.Should().Contain(columns => columns.ColumnName == "Id");
             }
         }
+
+        private IConfiguration TestConfiguration() =>
+            new ConfigurationBuilder()
+                .AddInMemoryCollection(new Dictionary<string, string>
+                {
+                    { $"ConnectionStrings:{_connectionStringName}", DatabaseFixture.LogEventsConnectionString },
+
+                    { $"{_columnOptionsSection}:message:columnName", "CustomMessage" },
+                    { $"{_columnOptionsSection}:messageTemplate:columnName", "CustomMessageTemplate" },
+                    { $"{_columnOptionsSection}:level:columnName", "CustomLevel" },
+                    { $"{_columnOptionsSection}:timeStamp:columnName", "CustomTimeStamp" },
+                    { $"{_columnOptionsSection}:exception:columnName", "CustomException" },
+                    { $"{_columnOptionsSection}:properties:columnName", "CustomProperties" },
+                })
+                .Build();
     }
 }
