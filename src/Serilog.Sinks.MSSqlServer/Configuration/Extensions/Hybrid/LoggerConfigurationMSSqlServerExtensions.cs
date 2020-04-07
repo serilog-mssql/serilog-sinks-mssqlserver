@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System;
-using System.Configuration;
 using Microsoft.Extensions.Configuration;
 using Serilog.Configuration;
 using Serilog.Debugging;
