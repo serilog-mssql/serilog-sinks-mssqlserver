@@ -13,11 +13,11 @@
 // limitations under the License.
 
 using System;
-using System.Configuration;
 using Serilog.Configuration;
 using Serilog.Events;
 using Serilog.Formatting;
 using Serilog.Sinks.MSSqlServer;
+using Serilog.Sinks.MSSqlServer.Configuration.Factories;
 
 // System.Configuration support for .NET Framework 4.5.2 libraries and apps.
 
@@ -64,21 +64,23 @@ namespace Serilog
             ColumnOptions columnOptions = null,
             string schemaName = "dbo",
             ITextFormatter logEventFormatter = null) =>
-            loggerConfiguration.MSSqlServer(
+            loggerConfiguration.MSSqlServerInternal(
                 configSectionName: AppConfigSectionName,
-                connectionString,
-                tableName,
-                restrictedToMinimumLevel,
-                batchPostingLimit,
-                period,
-                formatProvider,
-                autoCreateSqlTable,
-                columnOptions,
-                schemaName,
-                logEventFormatter);
+                connectionString: connectionString,
+                tableName: tableName,
+                restrictedToMinimumLevel: restrictedToMinimumLevel,
+                batchPostingLimit: batchPostingLimit,
+                period: period,
+                formatProvider: formatProvider,
+                autoCreateSqlTable: autoCreateSqlTable,
+                columnOptions: columnOptions,
+                schemaName: schemaName,
+                logEventFormatter: logEventFormatter,
+                applySystemConfiguration: new ApplySystemConfiguration(),
+                sinkFactory: new MSSqlServerSinkFactory());
 
-        // Internal overload with parameter configSectionName used by tests to override the config section
-        internal static LoggerConfiguration MSSqlServer(
+        // Internal overload with parameters used by tests to override the config section and inject mocks
+        internal static LoggerConfiguration MSSqlServerInternal(
             this LoggerSinkConfiguration loggerConfiguration,
             string configSectionName,
             string connectionString,
@@ -90,7 +92,9 @@ namespace Serilog
             bool autoCreateSqlTable = false,
             ColumnOptions columnOptions = null,
             string schemaName = "dbo",
-            ITextFormatter logEventFormatter = null)
+            ITextFormatter logEventFormatter = null,
+            IApplySystemConfiguration applySystemConfiguration = null,
+            IMSSqlServerSinkFactory sinkFactory = null)
         {
             if (loggerConfiguration == null)
                 throw new ArgumentNullException(nameof(loggerConfiguration));
@@ -98,24 +102,16 @@ namespace Serilog
             var defaultedPeriod = period ?? MSSqlServerSink.DefaultPeriod;
             var colOpts = columnOptions ?? new ColumnOptions();
 
-            var systemConfiguration = new ApplySystemConfiguration();
-            if (ConfigurationManager.GetSection(configSectionName) is MSSqlServerConfigurationSection serviceConfigSection)
-                colOpts = systemConfiguration.ConfigureColumnOptions(serviceConfigSection, colOpts);
+            var serviceConfigSection = applySystemConfiguration.GetSinkConfigurationSection(configSectionName);
+            if (serviceConfigSection != null)
+                colOpts = applySystemConfiguration.ConfigureColumnOptions(serviceConfigSection, colOpts);
 
-            connectionString = systemConfiguration.GetConnectionString(connectionString);
+            connectionString = applySystemConfiguration.GetConnectionString(connectionString);
 
-            return loggerConfiguration.Sink(
-                new MSSqlServerSink(
-                    connectionString,
-                    tableName,
-                    batchPostingLimit,
-                    defaultedPeriod,
-                    formatProvider,
-                    autoCreateSqlTable,
-                    colOpts,
-                    schemaName,
-                    logEventFormatter),
-                restrictedToMinimumLevel);
+            var sink = sinkFactory.Create(connectionString, tableName, batchPostingLimit, defaultedPeriod,
+                formatProvider, autoCreateSqlTable, colOpts, schemaName, logEventFormatter);
+
+            return loggerConfiguration.Sink(sink, restrictedToMinimumLevel);
         }
 
         /// <summary>
@@ -145,19 +141,21 @@ namespace Serilog
             ColumnOptions columnOptions = null,
             string schemaName = "dbo",
             ITextFormatter logEventFormatter = null) =>
-            loggerAuditSinkConfiguration.MSSqlServer(
+            loggerAuditSinkConfiguration.MSSqlServerInternal(
                 configSectionName: AppConfigSectionName,
-                connectionString,
-                tableName,
-                restrictedToMinimumLevel,
-                formatProvider,
-                autoCreateSqlTable,
-                columnOptions,
-                schemaName,
-                logEventFormatter);
+                connectionString: connectionString,
+                tableName: tableName,
+                restrictedToMinimumLevel: restrictedToMinimumLevel,
+                formatProvider: formatProvider,
+                autoCreateSqlTable: autoCreateSqlTable,
+                columnOptions: columnOptions,
+                schemaName: schemaName,
+                logEventFormatter: logEventFormatter,
+                applySystemConfiguration: new ApplySystemConfiguration(),
+                auditSinkFactory: new MSSqlServerAuditSinkFactory());
 
-        // Internal overload with parameter configSectionName used by tests to override the config section
-        internal static LoggerConfiguration MSSqlServer(
+        // Internal overload with parameters used by tests to override the config section and inject mocks
+        internal static LoggerConfiguration MSSqlServerInternal(
             this LoggerAuditSinkConfiguration loggerAuditSinkConfiguration,
             string configSectionName,
             string connectionString,
@@ -167,29 +165,25 @@ namespace Serilog
             bool autoCreateSqlTable = false,
             ColumnOptions columnOptions = null,
             string schemaName = "dbo",
-            ITextFormatter logEventFormatter = null)
+            ITextFormatter logEventFormatter = null,
+            IApplySystemConfiguration applySystemConfiguration = null,
+            IMSSqlServerAuditSinkFactory auditSinkFactory = null)
         {
             if (loggerAuditSinkConfiguration == null)
                 throw new ArgumentNullException(nameof(loggerAuditSinkConfiguration));
 
             var colOpts = columnOptions ?? new ColumnOptions();
 
-            var systemConfiguration = new ApplySystemConfiguration();
-            if (ConfigurationManager.GetSection(configSectionName) is MSSqlServerConfigurationSection serviceConfigSection)
-                colOpts = systemConfiguration.ConfigureColumnOptions(serviceConfigSection, colOpts);
+            var serviceConfigSection = applySystemConfiguration.GetSinkConfigurationSection(configSectionName);
+            if (serviceConfigSection != null)
+                colOpts = applySystemConfiguration.ConfigureColumnOptions(serviceConfigSection, colOpts);
 
-            connectionString = systemConfiguration.GetConnectionString(connectionString);
+            connectionString = applySystemConfiguration.GetConnectionString(connectionString);
 
-            return loggerAuditSinkConfiguration.Sink(
-                new MSSqlServerAuditSink(
-                    connectionString,
-                    tableName,
-                    formatProvider,
-                    autoCreateSqlTable,
-                    colOpts,
-                    schemaName,
-                    logEventFormatter),
-                restrictedToMinimumLevel);
+            var auditSink = auditSinkFactory.Create(connectionString, tableName, formatProvider, autoCreateSqlTable,
+                colOpts, schemaName, logEventFormatter);
+
+            return loggerAuditSinkConfiguration.Sink(auditSink, restrictedToMinimumLevel);
         }
     }
 }

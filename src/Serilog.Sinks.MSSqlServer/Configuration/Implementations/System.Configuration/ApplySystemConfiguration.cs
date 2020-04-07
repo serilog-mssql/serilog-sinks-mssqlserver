@@ -1,4 +1,5 @@
-﻿using Serilog.Configuration;
+﻿using System.Configuration;
+using Serilog.Configuration;
 using Serilog.Sinks.MSSqlServer.Configuration;
 
 namespace Serilog.Sinks.MSSqlServer
@@ -6,7 +7,7 @@ namespace Serilog.Sinks.MSSqlServer
     /// <summary>
     /// Configures the sink's connection string and ColumnOtions object.
     /// </summary>
-    internal class ApplySystemConfiguration
+    internal class ApplySystemConfiguration : IApplySystemConfiguration
     {
         private readonly ISystemConfigurationConnectionStringProvider _connectionStringProvider;
         private readonly ISystemConfigurationColumnOptionsProvider _columnOptionsProvider;
@@ -24,6 +25,15 @@ namespace Serilog.Sinks.MSSqlServer
         {
             _connectionStringProvider = connectionStringProvider;
             _columnOptionsProvider = columnOptionsProvider;
+        }
+
+        /// <summary>
+        /// Gets the config section specified and returns it if of type MSSqlServerConfigurationSection or null otherwise.
+        /// </summary>
+        /// <param name="configurationSectionName">The name of the config section.</param>
+        public MSSqlServerConfigurationSection GetSinkConfigurationSection(string configurationSectionName)
+        {
+            return ConfigurationManager.GetSection(configurationSectionName) as MSSqlServerConfigurationSection;
         }
 
         /// <summary>
