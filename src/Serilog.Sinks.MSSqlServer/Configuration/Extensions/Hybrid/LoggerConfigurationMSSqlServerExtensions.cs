@@ -20,6 +20,7 @@ using Serilog.Debugging;
 using Serilog.Events;
 using Serilog.Formatting;
 using Serilog.Sinks.MSSqlServer;
+using Serilog.Sinks.MSSqlServer.Configuration.Extensions.Hybrid;
 
 // The "Hybrid" configuration system supports both Microsoft.Extensions.Configuration and System.Configuration.
 // This is necessary because .NET Framework 4.6.1+ and .NET Core 2.0+ apps support both approaches, whereas the
@@ -86,7 +87,8 @@ namespace Serilog
                 schemaName: schemaName,
                 logEventFormatter: logEventFormatter,
                 applySystemConfiguration: new ApplySystemConfiguration(),
-                applyMicrosoftExtensionsConfiguration: new ApplyMicrosoftExtensionsConfiguration());
+                applyMicrosoftExtensionsConfiguration: new ApplyMicrosoftExtensionsConfiguration(),
+                sinkFactory: new MSSqlServerSinkFactory());
 
         // Internal overload with parameters applySystemConfiguration and applyMicrosoftExtensionsConfiguration used by tests to inject mocks
         internal static LoggerConfiguration MSSqlServerInternal(
@@ -104,7 +106,8 @@ namespace Serilog
             string schemaName = "dbo",
             ITextFormatter logEventFormatter = null,
             IApplySystemConfiguration applySystemConfiguration = null,
-            IApplyMicrosoftExtensionsConfiguration applyMicrosoftExtensionsConfiguration = null)
+            IApplyMicrosoftExtensionsConfiguration applyMicrosoftExtensionsConfiguration = null,
+            IMSSqlServerSinkFactory sinkFactory = null)
         {
             if (loggerConfiguration == null)
                 throw new ArgumentNullException(nameof(loggerConfiguration));
@@ -122,24 +125,20 @@ namespace Serilog
                     SelfLog.WriteLine("Warning: Both System.Configuration (app.config or web.config) and Microsoft.Extensions.Configuration are being applied to the MSSQLServer sink.");
             }
 
-            if (appConfiguration != null || columnOptionsSection != null)
+            if (appConfiguration != null)
             {
                 connStr = applyMicrosoftExtensionsConfiguration.GetConnectionString(connStr, appConfiguration);
+            }
+
+            if (columnOptionsSection != null)
+            {
                 colOpts = applyMicrosoftExtensionsConfiguration.ConfigureColumnOptions(colOpts, columnOptionsSection);
             }
 
-            return loggerConfiguration.Sink(
-                new MSSqlServerSink(
-                    connStr,
-                    tableName,
-                    batchPostingLimit,
-                    defaultedPeriod,
-                    formatProvider,
-                    autoCreateSqlTable,
-                    colOpts,
-                    schemaName,
-                    logEventFormatter),
-                restrictedToMinimumLevel);
+            var sink = sinkFactory.Create(connStr, tableName, batchPostingLimit, defaultedPeriod, formatProvider,
+                autoCreateSqlTable, colOpts, schemaName, logEventFormatter);
+
+            return loggerConfiguration.Sink(sink, restrictedToMinimumLevel);
         }
 
         /// <summary>
@@ -215,9 +214,13 @@ namespace Serilog
                     SelfLog.WriteLine("Warning: Both System.Configuration (app.config or web.config) and Microsoft.Extensions.Configuration are being applied to the MSSQLServer sink.");
             }
 
-            if (appConfiguration != null || columnOptionsSection != null)
+            if (appConfiguration != null)
             {
                 connStr = applyMicrosoftExtensionsConfiguration.GetConnectionString(connStr, appConfiguration);
+            }
+
+            if (columnOptionsSection != null)
+            {
                 colOpts = applyMicrosoftExtensionsConfiguration.ConfigureColumnOptions(colOpts, columnOptionsSection);
             }
 
