@@ -3,6 +3,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using Dapper;
 using FluentAssertions;
+using Serilog.Sinks.MSSqlServer.Configuration.Factories;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
 using Xunit.Abstractions;
@@ -50,7 +51,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.System.Config
                 connectionString: DatabaseFixture.LogEventsConnectionString,
                 tableName: DatabaseFixture.LogTableName,
                 autoCreateSqlTable: true,
-                applySystemConfiguration: new ApplySystemConfiguration())
+                applySystemConfiguration: new ApplySystemConfiguration(),
+                sinkFactory: new MSSqlServerSinkFactory())
                 .CreateLogger();
             Log.CloseAndFlush();
 
@@ -77,7 +79,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.System.Config
                 connectionString: DatabaseFixture.LogEventsConnectionString,
                 tableName: DatabaseFixture.LogTableName,
                 autoCreateSqlTable: true,
-                applySystemConfiguration: new ApplySystemConfiguration())
+                applySystemConfiguration: new ApplySystemConfiguration(),
+                sinkFactory: new MSSqlServerSinkFactory())
                 .CreateLogger();
             Log.CloseAndFlush();
 

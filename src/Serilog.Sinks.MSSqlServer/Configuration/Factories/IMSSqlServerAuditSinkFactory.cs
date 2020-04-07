@@ -1,15 +1,13 @@
 ﻿using System;
 using Serilog.Formatting;
 
-namespace Serilog.Sinks.MSSqlServer.Configuration.Extensions.Hybrid
+namespace Serilog.Sinks.MSSqlServer.Configuration.Factories
 {
-    internal interface IMSSqlServerSinkFactory
+    internal interface IMSSqlServerAuditSinkFactory
     {
-        MSSqlServerSink Create(
+        MSSqlServerAuditSink Create(
             string connectionString,
             string tableName,
-            int batchPostingLimit,
-            TimeSpan defaultedPeriod,
             IFormatProvider formatProvider,
             bool autoCreateSqlTable,
             ColumnOptions columnOptions,

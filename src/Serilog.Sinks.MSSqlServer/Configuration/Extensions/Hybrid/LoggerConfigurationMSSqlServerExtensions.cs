@@ -20,7 +20,7 @@ using Serilog.Debugging;
 using Serilog.Events;
 using Serilog.Formatting;
 using Serilog.Sinks.MSSqlServer;
-using Serilog.Sinks.MSSqlServer.Configuration.Extensions.Hybrid;
+using Serilog.Sinks.MSSqlServer.Configuration.Factories;
 
 // The "Hybrid" configuration system supports both Microsoft.Extensions.Configuration and System.Configuration.
 // This is necessary because .NET Framework 4.6.1+ and .NET Core 2.0+ apps support both approaches, whereas the
@@ -90,7 +90,7 @@ namespace Serilog
                 applyMicrosoftExtensionsConfiguration: new ApplyMicrosoftExtensionsConfiguration(),
                 sinkFactory: new MSSqlServerSinkFactory());
 
-        // Internal overload with parameters applySystemConfiguration and applyMicrosoftExtensionsConfiguration used by tests to inject mocks
+        // Internal overload with parameters used by tests to override the config section and inject mocks
         internal static LoggerConfiguration MSSqlServerInternal(
             this LoggerSinkConfiguration loggerConfiguration,
             string connectionString,
@@ -116,7 +116,8 @@ namespace Serilog
             var colOpts = columnOptions ?? new ColumnOptions();
             var connStr = connectionString;
 
-            if (ConfigurationManager.GetSection(AppConfigSectionName) is MSSqlServerConfigurationSection serviceConfigSection)
+            var serviceConfigSection = applySystemConfiguration.GetSinkConfigurationSection(AppConfigSectionName);
+            if (serviceConfigSection != null)
             {
                 colOpts = applySystemConfiguration.ConfigureColumnOptions(serviceConfigSection, colOpts);
                 connStr = applySystemConfiguration.GetConnectionString(connStr);
@@ -181,9 +182,10 @@ namespace Serilog
                 schemaName: schemaName,
                 logEventFormatter: logEventFormatter,
                 applySystemConfiguration: new ApplySystemConfiguration(),
-                applyMicrosoftExtensionsConfiguration: new ApplyMicrosoftExtensionsConfiguration());
+                applyMicrosoftExtensionsConfiguration: new ApplyMicrosoftExtensionsConfiguration(),
+                auditSinkFactory: new MSSqlServerAuditSinkFactory());
 
-        // Internal overload with parameters applySystemConfiguration and applyMicrosoftExtensionsConfiguration used by tests to inject mocks
+        // Internal overload with parameters used by tests to override the config section and inject mocks
         internal static LoggerConfiguration MSSqlServerInternal(
             this LoggerAuditSinkConfiguration loggerAuditSinkConfiguration,
             string connectionString,
@@ -197,7 +199,8 @@ namespace Serilog
             string schemaName = "dbo",
             ITextFormatter logEventFormatter = null,
             IApplySystemConfiguration applySystemConfiguration = null,
-            IApplyMicrosoftExtensionsConfiguration applyMicrosoftExtensionsConfiguration = null)
+            IApplyMicrosoftExtensionsConfiguration applyMicrosoftExtensionsConfiguration = null,
+            IMSSqlServerAuditSinkFactory auditSinkFactory = null)
         {
             if (loggerAuditSinkConfiguration == null)
                 throw new ArgumentNullException(nameof(loggerAuditSinkConfiguration));
@@ -205,7 +208,8 @@ namespace Serilog
             var colOpts = columnOptions ?? new ColumnOptions();
             var connStr = connectionString;
 
-            if (ConfigurationManager.GetSection(AppConfigSectionName) is MSSqlServerConfigurationSection serviceConfigSection)
+            var serviceConfigSection = applySystemConfiguration.GetSinkConfigurationSection(AppConfigSectionName);
+            if (serviceConfigSection != null)
             {
                 colOpts = applySystemConfiguration.ConfigureColumnOptions(serviceConfigSection, colOpts);
                 connStr = applySystemConfiguration.GetConnectionString(connStr);
@@ -224,16 +228,10 @@ namespace Serilog
                 colOpts = applyMicrosoftExtensionsConfiguration.ConfigureColumnOptions(colOpts, columnOptionsSection);
             }
 
-            return loggerAuditSinkConfiguration.Sink(
-                new MSSqlServerAuditSink(
-                    connStr,
-                    tableName,
-                    formatProvider,
-                    autoCreateSqlTable,
-                    colOpts,
-                    schemaName,
-                    logEventFormatter),
-                restrictedToMinimumLevel);
+            var auditSink = auditSinkFactory.Create(connStr, tableName, formatProvider, autoCreateSqlTable,
+                colOpts, schemaName, logEventFormatter);
+
+            return loggerAuditSinkConfiguration.Sink(auditSink, restrictedToMinimumLevel);
         }
     }
 }

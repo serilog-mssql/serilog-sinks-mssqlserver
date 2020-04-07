@@ -1,7 +1,7 @@
 ﻿using System;
 using Serilog.Formatting;
 
-namespace Serilog.Sinks.MSSqlServer.Configuration.Extensions.Hybrid
+namespace Serilog.Sinks.MSSqlServer.Configuration.Factories
 {
     internal class MSSqlServerSinkFactory : IMSSqlServerSinkFactory
     {
@@ -14,9 +14,8 @@ namespace Serilog.Sinks.MSSqlServer.Configuration.Extensions.Hybrid
             bool autoCreateSqlTable,
             ColumnOptions columnOptions,
             string schemaName,
-            ITextFormatter logEventFormatter)
-        {
-            return new MSSqlServerSink(
+            ITextFormatter logEventFormatter) =>
+            new MSSqlServerSink(
                 connectionString,
                 tableName,
                 batchPostingLimit,
@@ -26,6 +25,5 @@ namespace Serilog.Sinks.MSSqlServer.Configuration.Extensions.Hybrid
                 columnOptions,
                 schemaName,
                 logEventFormatter);
-        }
     }
 }

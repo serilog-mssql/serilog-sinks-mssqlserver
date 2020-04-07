@@ -84,6 +84,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="Configuration\Factories\IMSSqlServerSinkFactory.cs" />
+    <None Include="Configuration\Factories\MSSqlServerSinkFactory.cs" />
     <None Include="Images\serilog-sink-nuget.png" Pack="true" PackagePath="" />
   </ItemGroup>
 

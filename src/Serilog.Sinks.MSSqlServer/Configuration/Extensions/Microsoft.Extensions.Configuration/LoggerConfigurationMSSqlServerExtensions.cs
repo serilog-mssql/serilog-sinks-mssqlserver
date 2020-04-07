@@ -18,6 +18,7 @@ using Serilog.Configuration;
 using Serilog.Events;
 using Serilog.Formatting;
 using Serilog.Sinks.MSSqlServer;
+using Serilog.Sinks.MSSqlServer.Configuration.Factories;
 
 // M.E.C. support for .NET Standard 2.0 libraries.
 
@@ -69,22 +70,15 @@ namespace Serilog
 
             var defaultedPeriod = period ?? MSSqlServerSink.DefaultPeriod;
 
-            var microsoftExtensionsConfiguration = new ApplyMicrosoftExtensionsConfiguration();
+            IApplyMicrosoftExtensionsConfiguration microsoftExtensionsConfiguration = new ApplyMicrosoftExtensionsConfiguration();
             var connectionStr = microsoftExtensionsConfiguration.GetConnectionString(connectionString, appConfiguration);
             var colOpts = microsoftExtensionsConfiguration.ConfigureColumnOptions(columnOptions, columnOptionsSection);
 
-            return loggerConfiguration.Sink(
-                new MSSqlServerSink(
-                    connectionStr,
-                    tableName,
-                    batchPostingLimit,
-                    defaultedPeriod,
-                    formatProvider,
-                    autoCreateSqlTable,
-                    colOpts,
-                    schemaName,
-                    logEventFormatter),
-                restrictedToMinimumLevel);
+            IMSSqlServerSinkFactory sinkFactory = new MSSqlServerSinkFactory();
+            var sink = sinkFactory.Create(connectionStr, tableName, batchPostingLimit, defaultedPeriod,
+                formatProvider, autoCreateSqlTable, colOpts, schemaName, logEventFormatter);
+
+            return loggerConfiguration.Sink(sink, restrictedToMinimumLevel);
         }
 
         /// <summary>
@@ -119,20 +113,15 @@ namespace Serilog
             if (loggerAuditSinkConfiguration == null)
                 throw new ArgumentNullException(nameof(loggerAuditSinkConfiguration));
 
-            var microsoftExtensionsConfiguration = new ApplyMicrosoftExtensionsConfiguration();
+            IApplyMicrosoftExtensionsConfiguration microsoftExtensionsConfiguration = new ApplyMicrosoftExtensionsConfiguration();
             connectionString = microsoftExtensionsConfiguration.GetConnectionString(connectionString, appConfiguration);
             columnOptions = microsoftExtensionsConfiguration.ConfigureColumnOptions(columnOptions, columnOptionsSection);
 
-            return loggerAuditSinkConfiguration.Sink(
-                new MSSqlServerAuditSink(
-                    connectionString,
-                    tableName,
-                    formatProvider,
-                    autoCreateSqlTable,
-                    columnOptions,
-                    schemaName,
-                    logEventFormatter),
-                restrictedToMinimumLevel);
+            IMSSqlServerAuditSinkFactory auditSinkFactory = new MSSqlServerAuditSinkFactory();
+            var auditSink = auditSinkFactory.Create(connectionString, tableName, formatProvider, autoCreateSqlTable,
+                columnOptions, schemaName, logEventFormatter);
+
+            return loggerAuditSinkConfiguration.Sink(auditSink, restrictedToMinimumLevel);
         }
     }
 }
