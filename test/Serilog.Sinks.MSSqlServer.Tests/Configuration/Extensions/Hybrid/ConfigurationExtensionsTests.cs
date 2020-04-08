@@ -8,7 +8,7 @@ using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.Microsoft.Extensions.Configuration
+namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.Hybrid
 {
     public class ConfigurationExtensionsTests : DatabaseTestsBase
     {

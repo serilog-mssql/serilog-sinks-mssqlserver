@@ -69,7 +69,6 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
     <Compile Include="Configuration\Extensions\Hybrid\**\*.cs" />
-    <Compile Include="Configuration\Extensions\Microsoft.Extensions.Configuration\**\*.cs" />
     <Compile Include="Configuration\Implementations\Microsoft.Extensions.Configuration\**\*.cs" />
     <Compile Include="Configuration\Implementations\System.Configuration\**\*.cs" />
   </ItemGroup>
