@@ -9,17 +9,23 @@ using Serilog.Events;
 using Serilog.Formatting;
 using Serilog.Parsing;
 using Serilog.Sinks.MSSqlServer.Platform;
+using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform;
 using Xunit;
 
 namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer
 {
     public class MSSqlServerSinkTraitsTests : IDisposable
     {
-        private readonly string _connectionString = "connectionString";
+        private readonly Mock<ISqlConnectionFactory> _sqlConnectionFactoryMock;
         private readonly string _tableName = "tableName";
         private readonly string _schemaName = "schemaName";
         private MSSqlServerSinkTraits _sut;
         private bool _disposedValue;
+
+        public MSSqlServerSinkTraitsTests()
+        {
+            _sqlConnectionFactoryMock = new Mock<ISqlConnectionFactory>();
+        }
 
         [Trait("Bugfix", "#187")]
         [Fact]
@@ -162,7 +168,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer
             SetupSut(options, autoCreateSqlTable: true, sqlTableCreator: sqlTableCreatorMock.Object);
 
             // Assert
-            sqlTableCreatorMock.Verify(c => c.CreateTable(_connectionString, _schemaName, _tableName,
+            sqlTableCreatorMock.Verify(c => c.CreateTable(_schemaName, _tableName,
                 It.IsAny<DataTable>(), options),
                 Times.Once);
         }
@@ -178,7 +184,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer
             SetupSut(options, autoCreateSqlTable: false, sqlTableCreator: sqlTableCreatorMock.Object);
 
             // Assert
-            sqlTableCreatorMock.Verify(c => c.CreateTable(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(),
+            sqlTableCreatorMock.Verify(c => c.CreateTable(It.IsAny<string>(), It.IsAny<string>(),
                 It.IsAny<DataTable>(), It.IsAny<Serilog.Sinks.MSSqlServer.ColumnOptions>()),
                 Times.Never);
         }
@@ -197,14 +203,14 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer
         {
             if (sqlTableCreator == null)
             {
-                _sut = new MSSqlServerSinkTraits(_connectionString, _tableName, _schemaName,
+                _sut = new MSSqlServerSinkTraits(_sqlConnectionFactoryMock.Object, _tableName, _schemaName,
                     options, CultureInfo.InvariantCulture, autoCreateSqlTable, logEventFormatter);
             }
             else
             {
                 // Internal constructor to use ISqlTableCreator mock
-                _sut = new MSSqlServerSinkTraits(_connectionString, _tableName, _schemaName,
-                    options, CultureInfo.InvariantCulture, autoCreateSqlTable, logEventFormatter, sqlTableCreator);
+                _sut = new MSSqlServerSinkTraits(_tableName, _schemaName, options, CultureInfo.InvariantCulture,
+                    autoCreateSqlTable, logEventFormatter, sqlTableCreator);
             }
         }
 

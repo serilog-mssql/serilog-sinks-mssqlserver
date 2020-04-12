@@ -20,6 +20,7 @@ using Serilog.Core;
 using Serilog.Debugging;
 using Serilog.Events;
 using Serilog.Formatting;
+using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform;
 
 namespace Serilog.Sinks.MSSqlServer
 {
@@ -29,6 +30,7 @@ namespace Serilog.Sinks.MSSqlServer
     /// </summary>
     public class MSSqlServerAuditSink : ILogEventSink, IDisposable
     {
+        private readonly ISqlConnectionFactory _sqlConnectionFactory;
         private readonly MSSqlServerSinkTraits _traits;
 
         /// <summary>
@@ -58,8 +60,8 @@ namespace Serilog.Sinks.MSSqlServer
                     throw new NotSupportedException($"The {nameof(ColumnOptions.DisableTriggers)} option is not supported for auditing.");
             }
 
-            _traits = new MSSqlServerSinkTraits(connectionString, tableName, schemaName, columnOptions, formatProvider, autoCreateSqlTable, logEventFormatter);
-
+            _sqlConnectionFactory = new SqlConnectionFactory(connectionString);
+            _traits = new MSSqlServerSinkTraits(_sqlConnectionFactory, tableName, schemaName, columnOptions, formatProvider, autoCreateSqlTable, logEventFormatter);
         }
 
         /// <summary>Emit the provided log event to the sink.</summary>
@@ -68,7 +70,7 @@ namespace Serilog.Sinks.MSSqlServer
         {
             try
             {
-                using (var connection = new SqlConnection(_traits.ConnectionString))
+                using (var connection = _sqlConnectionFactory.Create())
                 {
                     connection.Open();
                     using (SqlCommand command = connection.CreateCommand())

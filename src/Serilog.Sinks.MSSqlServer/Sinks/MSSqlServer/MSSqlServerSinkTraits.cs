@@ -23,6 +23,7 @@ using Serilog.Events;
 using Serilog.Formatting;
 using Serilog.Sinks.MSSqlServer.Output;
 using Serilog.Sinks.MSSqlServer.Platform;
+using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform;
 
 namespace Serilog.Sinks.MSSqlServer
 {
@@ -31,7 +32,6 @@ namespace Serilog.Sinks.MSSqlServer
     {
         private bool _disposedValue;
 
-        public string ConnectionString { get; }
         public string TableName { get; }
         public string SchemaName { get; }
         public ColumnOptions ColumnOptions { get; }
@@ -42,21 +42,20 @@ namespace Serilog.Sinks.MSSqlServer
         public ISet<string> StandardColumnNames { get; }
 
         public MSSqlServerSinkTraits(
-            string connectionString,
+            ISqlConnectionFactory sqlConnectionFactory,
             string tableName,
             string schemaName,
             ColumnOptions columnOptions,
             IFormatProvider formatProvider,
             bool autoCreateSqlTable,
             ITextFormatter logEventFormatter)
-            : this(connectionString, tableName, schemaName, columnOptions, formatProvider, autoCreateSqlTable,
-                logEventFormatter, new SqlTableCreator(new SqlCreateTableWriter()))
+            : this(tableName, schemaName, columnOptions, formatProvider, autoCreateSqlTable,
+                logEventFormatter, new SqlTableCreator(new SqlCreateTableWriter(), sqlConnectionFactory))
         {
         }
 
         // Internal constructor with injectable dependencies for better testability
         internal MSSqlServerSinkTraits(
-            string connectionString,
             string tableName,
             string schemaName,
             ColumnOptions columnOptions,
@@ -65,13 +64,12 @@ namespace Serilog.Sinks.MSSqlServer
             ITextFormatter logEventFormatter,
             ISqlTableCreator sqlTableCreator)
         {
-            if (string.IsNullOrWhiteSpace(connectionString))
-                throw new ArgumentNullException(nameof(connectionString));
-
             if (string.IsNullOrWhiteSpace(tableName))
                 throw new ArgumentNullException(nameof(tableName));
 
-            ConnectionString = connectionString;
+            if (sqlTableCreator == null)
+                throw new ArgumentNullException(nameof(sqlTableCreator));
+
             TableName = tableName;
             SchemaName = schemaName;
             ColumnOptions = columnOptions ?? new ColumnOptions();
@@ -98,7 +96,7 @@ namespace Serilog.Sinks.MSSqlServer
             {
                 try
                 {
-                    sqlTableCreator.CreateTable(ConnectionString, SchemaName, TableName, EventTable, ColumnOptions); // return code ignored, 0 = failure?
+                    sqlTableCreator.CreateTable(SchemaName, TableName, EventTable, ColumnOptions); // return code ignored, 0 = failure?
                 }
                 catch (Exception ex)
                 {
