@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
+using Moq;
 using Serilog.Events;
 using Serilog.Parsing;
 using Serilog.Sinks.MSSqlServer.Output;
+using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform;
 using Xunit;
 
 namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Output
@@ -136,7 +138,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Output
         {
             _testColumnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions();
             _testColumnOptions.Store.Add(StandardColumn.LogEvent);
-            _testTraits = new MSSqlServerSinkTraits("ConnectionString", "TableName", "SchemaName", _testColumnOptions,
+            _testTraits = new MSSqlServerSinkTraits(new Mock<ISqlConnectionFactory>().Object, "TableName", "SchemaName", _testColumnOptions,
                 formatProvider: null, autoCreateSqlTable: false, logEventFormatter: null);
             _sut = new JsonLogEventFormatter(_testTraits);
         }

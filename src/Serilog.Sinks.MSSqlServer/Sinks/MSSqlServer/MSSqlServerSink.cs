@@ -22,6 +22,7 @@ using System.Threading.Tasks;
 using Serilog.Debugging;
 using Serilog.Events;
 using Serilog.Formatting;
+using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform;
 using Serilog.Sinks.PeriodicBatching;
 
 namespace Serilog.Sinks.MSSqlServer
@@ -31,6 +32,7 @@ namespace Serilog.Sinks.MSSqlServer
     /// </summary>
     public class MSSqlServerSink : PeriodicBatchingSink
     {
+        private readonly ISqlConnectionFactory _sqlConnectionFactory;
         private readonly MSSqlServerSinkTraits _traits;
 
         /// <summary>
@@ -69,7 +71,9 @@ namespace Serilog.Sinks.MSSqlServer
             : base(batchPostingLimit, period)
         {
             columnOptions?.FinalizeConfigurationForSinkConstructor();
-            _traits = new MSSqlServerSinkTraits(connectionString, tableName, schemaName, columnOptions, formatProvider, autoCreateSqlTable, logEventFormatter);
+
+            _sqlConnectionFactory = new SqlConnectionFactory(connectionString);
+            _traits = new MSSqlServerSinkTraits(_sqlConnectionFactory, tableName, schemaName, columnOptions, formatProvider, autoCreateSqlTable, logEventFormatter);
         }
 
         /// <summary>
@@ -88,7 +92,7 @@ namespace Serilog.Sinks.MSSqlServer
 
             try
             {
-                using (var cn = new SqlConnection(_traits.ConnectionString))
+                using (var cn = _sqlConnectionFactory.Create())
                 {
                     await cn.OpenAsync().ConfigureAwait(false);
                     using (var copy = _traits.ColumnOptions.DisableTriggers
