@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
 using Microsoft.Extensions.Configuration;
@@ -133,7 +134,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
         {
             // Arrange
             SetupConfigurationSectionMocks();
-            var columnSectionMock =  SetupColumnSectionMock("id");
+            var columnSectionMock = SetupColumnSectionMock("id");
             columnSectionMock.Setup(s => s["bigInt"]).Returns("true");
             var sut = new MicrosoftExtensionsColumnOptionsProvider();
 
@@ -475,7 +476,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
             // Arrange
             SetupConfigurationSectionMocks();
             var columnSectionMock = SetupColumnSectionMock("logEvent");
-            columnSectionMock.Setup(s => s["ExcludeStandardColumns"]).Returns("true");
+            columnSectionMock.Setup(s => s["excludeStandardColumns"]).Returns("true");
             var sut = new MicrosoftExtensionsColumnOptionsProvider();
 
             // Act
@@ -570,6 +571,91 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
 
             // Assert
             Assert.True(result.ClusteredColumnstoreIndex);
+        }
+
+        [Fact]
+        public void ConfigureColumnOptionsThrowsWhenSettingPrimaryKeyColumnNameAndClusteredColumnstoreIndex()
+        {
+            // Arrange
+            SetupConfigurationSectionMocks();
+            _configurationSectionMock.Setup(s => s["primaryKeyColumnName"]).Returns("TestPrimaryKeyColumnName");
+            _configurationSectionMock.Setup(s => s["clusteredColumnstoreIndex"]).Returns("true");
+            var sut = new MicrosoftExtensionsColumnOptionsProvider();
+
+            // Act + assert
+            Assert.Throws<ArgumentException>(() => sut.ConfigureColumnOptions(new ColumnOptions(), _configurationSectionMock.Object));
+        }
+
+        [Fact]
+        public void ConfigureColumnOptionsSetsPrimaryKeyWhenSettingPrimaryKeyColumnNameToStandardColumnName()
+        {
+            // Arrange
+            SetupConfigurationSectionMocks();
+            _configurationSectionMock.Setup(s => s["primaryKeyColumnName"]).Returns("Message");
+            var sut = new MicrosoftExtensionsColumnOptionsProvider();
+
+            // Act
+            var result = sut.ConfigureColumnOptions(new ColumnOptions(), _configurationSectionMock.Object);
+
+            // Assert
+            Assert.Equal(result.Message, result.PrimaryKey);
+        }
+
+        [Fact]
+        public void ConfigureColumnOptionsSetsPrimaryKeyWhenSettingPrimaryKeyColumnNameToAdditionalColumn()
+        {
+            // Arrange
+            const string customColumnName = "TestCustomColumn";
+            var customColumn = new SqlColumn { ColumnName = customColumnName };
+            var columnOptions = new ColumnOptions
+            {
+                PrimaryKey = null,
+                AdditionalColumns = new List<SqlColumn> { customColumn }
+            };
+            SetupConfigurationSectionMocks();
+            _configurationSectionMock.Setup(s => s["primaryKeyColumnName"]).Returns(customColumnName);
+            var sut = new MicrosoftExtensionsColumnOptionsProvider();
+
+            // Act
+            var result = sut.ConfigureColumnOptions(columnOptions, _configurationSectionMock.Object);
+
+            // Assert
+            Assert.Equal(customColumn, result.PrimaryKey);
+        }
+
+        [Fact]
+        public void ConfigureColumnOptionsSetsPrimaryKeyWhenSettingPrimaryKeyColumnNameToAdditionalColumnCaseInsensitive()
+        {
+            // Arrange
+            var customColumn = new SqlColumn { ColumnName = "TestCustomColumn" };
+            var columnOptions = new ColumnOptions
+            {
+                PrimaryKey = null,
+                AdditionalColumns = new List<SqlColumn> { customColumn }
+            };
+            SetupConfigurationSectionMocks();
+            _configurationSectionMock.Setup(s => s["primaryKeyColumnName"]).Returns("testCustomColumn");
+            var sut = new MicrosoftExtensionsColumnOptionsProvider();
+
+            // Act
+            var result = sut.ConfigureColumnOptions(columnOptions, _configurationSectionMock.Object);
+
+            // Assert
+            Assert.Equal(customColumn, result.PrimaryKey);
+        }
+
+        [Fact]
+        public void ConfigureColumnOptionsThrowsWhenSettingPrimaryKeyColumnNameToUndefinedColumnNameAndPrimaryKeyRemainsNull()
+        {
+            // Arrange
+            var columnOptions = new ColumnOptions();
+            columnOptions.PrimaryKey = null;
+            SetupConfigurationSectionMocks();
+            _configurationSectionMock.Setup(s => s["primaryKeyColumnName"]).Returns("TestUndefinedPrimaryKeyColumnName");
+            var sut = new MicrosoftExtensionsColumnOptionsProvider();
+
+            // Act + assert
+            Assert.Throws<ArgumentException>(() => sut.ConfigureColumnOptions(columnOptions, _configurationSectionMock.Object));
         }
 
         private static void AssertColumnSqlOptions(string expectedColumnName, SqlDbType expectedDataType, bool expectedAllowNull, bool expectedNonClusteredIndex, SqlColumn actualColumn)

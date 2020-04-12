@@ -133,7 +133,7 @@ namespace Serilog.Sinks.MSSqlServer.Configuration
             {
                 SetCommonColumnOptions(section, columnOptions.LogEvent);
                 SetProperty.IfNotNull<bool>(section["excludeAdditionalProperties"], (val) => columnOptions.LogEvent.ExcludeAdditionalProperties = val);
-                SetProperty.IfNotNull<bool>(section["ExcludeStandardColumns"], (val) => columnOptions.LogEvent.ExcludeStandardColumns = val);
+                SetProperty.IfNotNull<bool>(section["excludeStandardColumns"], (val) => columnOptions.LogEvent.ExcludeStandardColumns = val);
             }
 
             section = config.GetSection("message");
