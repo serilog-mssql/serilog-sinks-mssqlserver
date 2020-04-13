@@ -19,6 +19,7 @@ using Serilog.Events;
 using Serilog.Formatting;
 using Serilog.Sinks.MSSqlServer;
 using Serilog.Sinks.MSSqlServer.Configuration.Factories;
+using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
 
 // M.E.C. support for .NET Standard 2.0 libraries.
 
@@ -48,6 +49,8 @@ namespace Serilog
         /// <param name="columnOptionsSection">A config section defining various column settings</param>
         /// <param name="schemaName">Name of the schema for the table to store the data in. The default is 'dbo'.</param>
         /// <param name="logEventFormatter">Supplies custom formatter for the LogEvent column, or null</param>
+        /// <param name="sinkOptions">Supplies additional settings for the sink</param>
+        /// <param name="sinkOptionsSection">A config section defining additional settings for the sink</param>
         /// <returns>Logger configuration, allowing configuration to continue.</returns>
         /// <exception cref="ArgumentNullException">A required parameter is null.</exception>
         public static LoggerConfiguration MSSqlServer(
@@ -63,7 +66,11 @@ namespace Serilog
             ColumnOptions columnOptions = null,
             IConfigurationSection columnOptionsSection = null,
             string schemaName = "dbo",
-            ITextFormatter logEventFormatter = null)
+            ITextFormatter logEventFormatter = null,
+            SinkOptions sinkOptions = null,
+#pragma warning disable CA1801
+            IConfigurationSection sinkOptionsSection = null)
+#pragma warning restore CA1801
         {
             if (loggerConfiguration == null)
                 throw new ArgumentNullException(nameof(loggerConfiguration));
@@ -71,12 +78,13 @@ namespace Serilog
             var defaultedPeriod = period ?? MSSqlServerSink.DefaultPeriod;
 
             IApplyMicrosoftExtensionsConfiguration microsoftExtensionsConfiguration = new ApplyMicrosoftExtensionsConfiguration();
-            var connectionStr = microsoftExtensionsConfiguration.GetConnectionString(connectionString, appConfiguration);
-            var colOpts = microsoftExtensionsConfiguration.ConfigureColumnOptions(columnOptions, columnOptionsSection);
+            connectionString = microsoftExtensionsConfiguration.GetConnectionString(connectionString, appConfiguration);
+            columnOptions = microsoftExtensionsConfiguration.ConfigureColumnOptions(columnOptions, columnOptionsSection);
+            // TODO read sink options from configuration
 
             IMSSqlServerSinkFactory sinkFactory = new MSSqlServerSinkFactory();
-            var sink = sinkFactory.Create(connectionStr, tableName, batchPostingLimit, defaultedPeriod,
-                formatProvider, autoCreateSqlTable, colOpts, schemaName, logEventFormatter);
+            var sink = sinkFactory.Create(connectionString, tableName, batchPostingLimit, defaultedPeriod,
+                formatProvider, autoCreateSqlTable, columnOptions, schemaName, logEventFormatter, sinkOptions);
 
             return loggerConfiguration.Sink(sink, restrictedToMinimumLevel);
         }
@@ -95,6 +103,8 @@ namespace Serilog
         /// <param name="columnOptionsSection">A config section defining various column settings</param>
         /// <param name="schemaName">Name of the schema for the table to store the data in. The default is 'dbo'.</param>
         /// <param name="logEventFormatter">Supplies custom formatter for the LogEvent column, or null</param>
+        /// <param name="sinkOptions">Supplies additional settings for the sink</param>
+        /// <param name="sinkOptionsSection">A config section defining additional settings for the sink</param>
         /// <returns>Logger configuration, allowing configuration to continue.</returns>
         /// <exception cref="ArgumentNullException">A required parameter is null.</exception>
         public static LoggerConfiguration MSSqlServer(
@@ -108,7 +118,11 @@ namespace Serilog
             ColumnOptions columnOptions = null,
             IConfigurationSection columnOptionsSection = null,
             string schemaName = "dbo",
-            ITextFormatter logEventFormatter = null)
+            ITextFormatter logEventFormatter = null,
+            SinkOptions sinkOptions = null,
+#pragma warning disable CA1801
+            IConfigurationSection sinkOptionsSection = null)
+#pragma warning restore CA1801
         {
             if (loggerAuditSinkConfiguration == null)
                 throw new ArgumentNullException(nameof(loggerAuditSinkConfiguration));
@@ -116,10 +130,11 @@ namespace Serilog
             IApplyMicrosoftExtensionsConfiguration microsoftExtensionsConfiguration = new ApplyMicrosoftExtensionsConfiguration();
             connectionString = microsoftExtensionsConfiguration.GetConnectionString(connectionString, appConfiguration);
             columnOptions = microsoftExtensionsConfiguration.ConfigureColumnOptions(columnOptions, columnOptionsSection);
+            // TODO read sink options from configuration
 
             IMSSqlServerAuditSinkFactory auditSinkFactory = new MSSqlServerAuditSinkFactory();
             var auditSink = auditSinkFactory.Create(connectionString, tableName, formatProvider, autoCreateSqlTable,
-                columnOptions, schemaName, logEventFormatter);
+                columnOptions, schemaName, logEventFormatter, sinkOptions);
 
             return loggerAuditSinkConfiguration.Sink(auditSink, restrictedToMinimumLevel);
         }

@@ -4,6 +4,7 @@ using Moq;
 using Serilog.Configuration;
 using Serilog.Formatting;
 using Serilog.Sinks.MSSqlServer.Configuration.Factories;
+using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
 using Xunit;
 
 namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.Hybrid
@@ -66,7 +67,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.Hybrid
 
             // Assert
             sinkFactoryMock.Verify(f => f.Create(configConnectionString, It.IsAny<string>(), It.IsAny<int>(), It.IsAny<TimeSpan>(),
-                It.IsAny<IFormatProvider>(), It.IsAny<bool>(), It.IsAny<ColumnOptions>(), It.IsAny<string>(), It.IsAny<ITextFormatter>()), Times.Once);
+                It.IsAny<IFormatProvider>(), It.IsAny<bool>(), It.IsAny<ColumnOptions>(), It.IsAny<string>(), It.IsAny<ITextFormatter>(),
+                It.IsAny<SinkOptions>()), Times.Once);
         }
 
         [Fact]
@@ -133,7 +135,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.Hybrid
 
             // Assert
             sinkFactoryMock.Verify(f => f.Create(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<TimeSpan>(),
-                It.IsAny<IFormatProvider>(), It.IsAny<bool>(), configColumnOptions, It.IsAny<string>(), It.IsAny<ITextFormatter>()), Times.Once);
+                It.IsAny<IFormatProvider>(), It.IsAny<bool>(), configColumnOptions, It.IsAny<string>(), It.IsAny<ITextFormatter>(),
+                It.IsAny<SinkOptions>()), Times.Once);
         }
 
         [Fact]
@@ -198,7 +201,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.Hybrid
 
             // Assert
             sinkFactoryMock.Verify(f => f.Create(configConnectionString, It.IsAny<string>(), It.IsAny<int>(), It.IsAny<TimeSpan>(),
-                It.IsAny<IFormatProvider>(), It.IsAny<bool>(), It.IsAny<ColumnOptions>(), It.IsAny<string>(), It.IsAny<ITextFormatter>()), Times.Once);
+                It.IsAny<IFormatProvider>(), It.IsAny<bool>(), It.IsAny<ColumnOptions>(), It.IsAny<string>(), It.IsAny<ITextFormatter>(),
+                It.IsAny<SinkOptions>()), Times.Once);
         }
 
         [Fact]
@@ -265,7 +269,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.Hybrid
 
             // Assert
             sinkFactoryMock.Verify(f => f.Create(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<TimeSpan>(),
-                It.IsAny<IFormatProvider>(), It.IsAny<bool>(), configColumnOptions, It.IsAny<string>(), It.IsAny<ITextFormatter>()), Times.Once);
+                It.IsAny<IFormatProvider>(), It.IsAny<bool>(), configColumnOptions, It.IsAny<string>(), It.IsAny<ITextFormatter>(),
+                It.IsAny<SinkOptions>()), Times.Once);
         }
 
         [Fact]
@@ -300,6 +305,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.Hybrid
             var batchPeriod = new TimeSpan(0, 0, 44);
             var formatProviderMock = new Mock<IFormatProvider>();
             var logEventFormatterMock = new Mock<ITextFormatter>();
+            var sinkOptions = new SinkOptions();
 
             var sinkFactoryMock = new Mock<IMSSqlServerSinkFactory>();
 
@@ -314,14 +320,15 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.Hybrid
                 autoCreateSqlTable: autoCreateSqlTable,
                 schemaName: schemaName,
                 logEventFormatter: logEventFormatterMock.Object,
+                sinkOptions: sinkOptions,
                 applySystemConfiguration: _applySystemConfigurationMock.Object,
                 applyMicrosoftExtensionsConfiguration: _applyMicrosoftExtensionsConfigurationMock.Object,
                 sinkFactory: sinkFactoryMock.Object);
 
             // Assert
             sinkFactoryMock.Verify(f => f.Create(connectionString, tableName, batchPostingLimit, batchPeriod,
-                formatProviderMock.Object, autoCreateSqlTable, columnOptions, schemaName, logEventFormatterMock.Object),
-                Times.Once);
+                formatProviderMock.Object, autoCreateSqlTable, columnOptions, schemaName, logEventFormatterMock.Object,
+                sinkOptions), Times.Once);
         }
 
         [Fact]
@@ -369,7 +376,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.Hybrid
 
             // Assert
             auditSinkFactoryMock.Verify(f => f.Create(configConnectionString, It.IsAny<string>(), It.IsAny<IFormatProvider>(),
-                It.IsAny<bool>(), It.IsAny<ColumnOptions>(), It.IsAny<string>(), It.IsAny<ITextFormatter>()), Times.Once);
+                It.IsAny<bool>(), It.IsAny<ColumnOptions>(), It.IsAny<string>(), It.IsAny<ITextFormatter>(),
+                It.IsAny<SinkOptions>()), Times.Once);
         }
 
         [Fact]
@@ -436,7 +444,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.Hybrid
 
             // Assert
             auditSinkFactoryMock.Verify(f => f.Create(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IFormatProvider>(),
-                It.IsAny<bool>(), configColumnOptions, It.IsAny<string>(), It.IsAny<ITextFormatter>()), Times.Once);
+                It.IsAny<bool>(), configColumnOptions, It.IsAny<string>(), It.IsAny<ITextFormatter>(),
+                It.IsAny<SinkOptions>()), Times.Once);
         }
 
         [Fact]
@@ -501,7 +510,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.Hybrid
 
             // Assert
             auditSinkFactoryMock.Verify(f => f.Create(configConnectionString, It.IsAny<string>(), It.IsAny<IFormatProvider>(),
-                It.IsAny<bool>(), It.IsAny<ColumnOptions>(), It.IsAny<string>(), It.IsAny<ITextFormatter>()), Times.Once);
+                It.IsAny<bool>(), It.IsAny<ColumnOptions>(), It.IsAny<string>(), It.IsAny<ITextFormatter>(),
+                It.IsAny<SinkOptions>()), Times.Once);
         }
 
         [Fact]
@@ -568,7 +578,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.Hybrid
 
             // Assert
             auditSinkFactoryMock.Verify(f => f.Create(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IFormatProvider>(),
-                It.IsAny<bool>(), configColumnOptions, It.IsAny<string>(), It.IsAny<ITextFormatter>()), Times.Once);
+                It.IsAny<bool>(), configColumnOptions, It.IsAny<string>(), It.IsAny<ITextFormatter>(),
+                It.IsAny<SinkOptions>()), Times.Once);
         }
 
         [Fact]
@@ -602,6 +613,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.Hybrid
             var batchPeriod = new TimeSpan(0, 0, 44);
             var formatProviderMock = new Mock<IFormatProvider>();
             var logEventFormatterMock = new Mock<ITextFormatter>();
+            var sinkOptions = new SinkOptions();
 
             var auditSinkFactoryMock = new Mock<IMSSqlServerAuditSinkFactory>();
 
@@ -614,14 +626,15 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.Hybrid
                 autoCreateSqlTable: autoCreateSqlTable,
                 schemaName: schemaName,
                 logEventFormatter: logEventFormatterMock.Object,
+                sinkOptions: sinkOptions,
                 applySystemConfiguration: _applySystemConfigurationMock.Object,
                 applyMicrosoftExtensionsConfiguration: _applyMicrosoftExtensionsConfigurationMock.Object,
                 auditSinkFactory: auditSinkFactoryMock.Object);
 
             // Assert
             auditSinkFactoryMock.Verify(f => f.Create(connectionString, tableName,
-                formatProviderMock.Object, autoCreateSqlTable, columnOptions, schemaName, logEventFormatterMock.Object),
-                Times.Once);
+                formatProviderMock.Object, autoCreateSqlTable, columnOptions, schemaName, logEventFormatterMock.Object,
+                sinkOptions), Times.Once);
         }
     }
 }

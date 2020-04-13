@@ -20,6 +20,7 @@ using Serilog.Core;
 using Serilog.Debugging;
 using Serilog.Events;
 using Serilog.Formatting;
+using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
 using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform;
 
 namespace Serilog.Sinks.MSSqlServer
@@ -43,6 +44,7 @@ namespace Serilog.Sinks.MSSqlServer
         /// <param name="autoCreateSqlTable">Create log table with the provided name on destination sql server.</param>
         /// <param name="columnOptions">Options that pertain to columns</param>
         /// <param name="logEventFormatter">Supplies custom formatter for the LogEvent column, or null</param>
+        /// <param name="sinkOptions">Supplies additional options for the sink</param>
         public MSSqlServerAuditSink(
             string connectionString,
             string tableName,
@@ -50,9 +52,11 @@ namespace Serilog.Sinks.MSSqlServer
             bool autoCreateSqlTable = false,
             ColumnOptions columnOptions = null,
             string schemaName = "dbo",
-            ITextFormatter logEventFormatter = null)
+            ITextFormatter logEventFormatter = null,
+            SinkOptions sinkOptions = null)
         {
             columnOptions?.FinalizeConfigurationForSinkConstructor();
+            sinkOptions = sinkOptions ?? new SinkOptions();
 
             if (columnOptions != null)
             {
@@ -60,10 +64,10 @@ namespace Serilog.Sinks.MSSqlServer
                     throw new NotSupportedException($"The {nameof(ColumnOptions.DisableTriggers)} option is not supported for auditing.");
             }
 
-            // TODO initialize authenticator from parameters
-            var azureManagedServiceAuthenticator = new AzureManagedServiceAuthenticator(false, null);
-
+            var azureManagedServiceAuthenticator = new AzureManagedServiceAuthenticator(sinkOptions.UseAzureManagedIdentity,
+                sinkOptions.AzureServiceTokenProviderResource);
             _sqlConnectionFactory = new SqlConnectionFactory(connectionString, azureManagedServiceAuthenticator);
+
             _traits = new MSSqlServerSinkTraits(_sqlConnectionFactory, tableName, schemaName, columnOptions, formatProvider, autoCreateSqlTable, logEventFormatter);
         }
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using Serilog.Formatting;
+using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
 
 namespace Serilog.Sinks.MSSqlServer.Configuration.Factories
 {
@@ -12,6 +13,7 @@ namespace Serilog.Sinks.MSSqlServer.Configuration.Factories
             bool autoCreateSqlTable,
             ColumnOptions columnOptions,
             string schemaName,
-            ITextFormatter logEventFormatter);
+            ITextFormatter logEventFormatter,
+            SinkOptions sinkOptions);
     }
 }
