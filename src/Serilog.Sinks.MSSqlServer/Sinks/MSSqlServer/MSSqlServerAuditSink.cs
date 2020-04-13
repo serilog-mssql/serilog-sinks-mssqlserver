@@ -60,7 +60,10 @@ namespace Serilog.Sinks.MSSqlServer
                     throw new NotSupportedException($"The {nameof(ColumnOptions.DisableTriggers)} option is not supported for auditing.");
             }
 
-            _sqlConnectionFactory = new SqlConnectionFactory(connectionString);
+            // TODO initialize authenticator from parameters
+            var azureManagedServiceAuthenticator = new AzureManagedServiceAuthenticator(false, null);
+
+            _sqlConnectionFactory = new SqlConnectionFactory(connectionString, azureManagedServiceAuthenticator);
             _traits = new MSSqlServerSinkTraits(_sqlConnectionFactory, tableName, schemaName, columnOptions, formatProvider, autoCreateSqlTable, logEventFormatter);
         }
 

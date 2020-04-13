@@ -6,17 +6,31 @@ namespace Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform
     internal class SqlConnectionFactory : ISqlConnectionFactory
     {
         private readonly string _connectionString;
+        private readonly IAzureManagedServiceAuthenticator _azureManagedServiceAuthenticator;
 
-        public SqlConnectionFactory(string connectionString)
+        public SqlConnectionFactory(string connectionString, IAzureManagedServiceAuthenticator azureManagedServiceAuthenticator)
         {
             if (string.IsNullOrWhiteSpace(connectionString))
             {
                 throw new ArgumentNullException(nameof(connectionString));
             }
 
+            if (azureManagedServiceAuthenticator == null)
+            {
+                throw new ArgumentNullException(nameof(azureManagedServiceAuthenticator));
+            }
+
             _connectionString = connectionString;
+            _azureManagedServiceAuthenticator = azureManagedServiceAuthenticator;
         }
 
-        public SqlConnection Create() => new SqlConnection(_connectionString);
+        public SqlConnection Create()
+        {
+            var sqlConnection = new SqlConnection(_connectionString);
+
+            _azureManagedServiceAuthenticator.SetAuthenticationToken(sqlConnection);
+
+            return sqlConnection;
+        }
     }
 }

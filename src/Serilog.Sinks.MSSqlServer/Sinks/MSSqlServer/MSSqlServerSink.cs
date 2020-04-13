@@ -72,7 +72,10 @@ namespace Serilog.Sinks.MSSqlServer
         {
             columnOptions?.FinalizeConfigurationForSinkConstructor();
 
-            _sqlConnectionFactory = new SqlConnectionFactory(connectionString);
+            // TODO initialize authenticator from parameters
+            var azureManagedServiceAuthenticator = new AzureManagedServiceAuthenticator(false, null);
+
+            _sqlConnectionFactory = new SqlConnectionFactory(connectionString, azureManagedServiceAuthenticator);
             _traits = new MSSqlServerSinkTraits(_sqlConnectionFactory, tableName, schemaName, columnOptions, formatProvider, autoCreateSqlTable, logEventFormatter);
         }
 
