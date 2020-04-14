@@ -14,9 +14,18 @@ namespace Serilog.Sinks.MSSqlServer.Configuration
                 return sinkOptions;
             }
 
+            ReadTableOptions(config, sinkOptions);
+            // TODO read all sink options values from configuration
             ReadAzureManagedIdentitiesOptions(config, sinkOptions);
 
             return sinkOptions;
+        }
+
+        private void ReadTableOptions(IConfigurationSection config, SinkOptions sinkOptions)
+        {
+            SetProperty.IfNotNull<string>(config["tableName"], val => sinkOptions.TableName = val);
+            SetProperty.IfNotNull<string>(config["schemaName"], val => sinkOptions.SchemaName = val);
+            SetProperty.IfNotNull<bool>(config["autoCreateSqlTable"], val => sinkOptions.AutoCreateSqlTable = val);
         }
 
         private void ReadAzureManagedIdentitiesOptions(IConfigurationSection config, SinkOptions sinkOptions)

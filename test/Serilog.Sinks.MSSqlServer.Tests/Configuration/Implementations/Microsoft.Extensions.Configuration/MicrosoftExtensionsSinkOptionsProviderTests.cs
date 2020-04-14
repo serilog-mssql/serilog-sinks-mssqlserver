@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Globalization;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Moq;
 using Serilog.Sinks.MSSqlServer.Configuration;
 using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
