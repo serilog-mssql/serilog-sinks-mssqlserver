@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Moq;
 using Serilog.Sinks.MSSqlServer.Configuration;
+using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
 using Xunit;
 
 namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsoft.Extensions.Configuration
@@ -16,7 +17,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
             var configurationMock = new Mock<IConfiguration>();
             var connectionStringProviderMock = new Mock<IMicrosoftExtensionsConnectionStringProvider>();
             connectionStringProviderMock.Setup(p => p.GetConnectionString(It.IsAny<string>(), It.IsAny<IConfiguration>())).Returns(expectedResult);
-            var sut = new ApplyMicrosoftExtensionsConfiguration(connectionStringProviderMock.Object, null);
+            var sut = new ApplyMicrosoftExtensionsConfiguration(connectionStringProviderMock.Object, null, null);
 
             // Act
             var result = sut.GetConnectionString(connectionStringName, configurationMock.Object);
@@ -36,13 +37,33 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
             var columnOptionsProviderMock = new Mock<IMicrosoftExtensionsColumnOptionsProvider>();
             columnOptionsProviderMock.Setup(p => p.ConfigureColumnOptions(It.IsAny<ColumnOptions>(), It.IsAny<IConfigurationSection>()))
                 .Returns(expectedResult);
-            var sut = new ApplyMicrosoftExtensionsConfiguration(null, columnOptionsProviderMock.Object);
+            var sut = new ApplyMicrosoftExtensionsConfiguration(null, columnOptionsProviderMock.Object, null);
 
             // Act
             var result = sut.ConfigureColumnOptions(inputColumnOptions, configurationSectionMock.Object);
 
             // Assert
             columnOptionsProviderMock.Verify(p => p.ConfigureColumnOptions(inputColumnOptions, configurationSectionMock.Object), Times.Once);
+            Assert.Same(expectedResult, result);
+        }
+
+        [Fact]
+        public void ConfigureSinkOptionsCallsAttachedSinkOptionsProvider()
+        {
+            // Arrange
+            var inputSinkOptions = new SinkOptions();
+            var expectedResult = new SinkOptions();
+            var configurationSectionMock = new Mock<IConfigurationSection>();
+            var sinkOptionsProviderMock = new Mock<IMicrosoftExtensionsSinkOptionsProvider>();
+            sinkOptionsProviderMock.Setup(p => p.ConfigureSinkOptions(It.IsAny<SinkOptions>(), It.IsAny<IConfigurationSection>()))
+                .Returns(expectedResult);
+            var sut = new ApplyMicrosoftExtensionsConfiguration(null, null, sinkOptionsProviderMock.Object);
+
+            // Act
+            var result = sut.ConfigureSinkOptions(inputSinkOptions, configurationSectionMock.Object);
+
+            // Assert
+            sinkOptionsProviderMock.Verify(p => p.ConfigureSinkOptions(inputSinkOptions, configurationSectionMock.Object), Times.Once);
             Assert.Same(expectedResult, result);
         }
     }

@@ -128,10 +128,11 @@ namespace Serilog
             var serviceConfigSection = applySystemConfiguration.GetSinkConfigurationSection(AppConfigSectionName);
             if (serviceConfigSection != null)
             {
-                colOpts = applySystemConfiguration.ConfigureColumnOptions(serviceConfigSection, colOpts);
                 connStr = applySystemConfiguration.GetConnectionString(connStr);
+                colOpts = applySystemConfiguration.ConfigureColumnOptions(serviceConfigSection, colOpts);
+                // TODO get sink options from config
 
-                if (appConfiguration != null || columnOptionsSection != null)
+                if (appConfiguration != null || columnOptionsSection != null || sinkOptionsSection != null)
                     SelfLog.WriteLine("Warning: Both System.Configuration (app.config or web.config) and Microsoft.Extensions.Configuration are being applied to the MSSQLServer sink.");
             }
 
@@ -147,7 +148,7 @@ namespace Serilog
 
             if (sinkOptionsSection != null)
             {
-                // TODO read sink options from configuration
+                sinkOpts = applyMicrosoftExtensionsConfiguration.ConfigureSinkOptions(sinkOpts, sinkOptionsSection);
             }
 
             var sink = sinkFactory.Create(connStr, tableName, batchPostingLimit, defaultedPeriod, formatProvider,
@@ -234,10 +235,11 @@ namespace Serilog
             var serviceConfigSection = applySystemConfiguration.GetSinkConfigurationSection(AppConfigSectionName);
             if (serviceConfigSection != null)
             {
-                colOpts = applySystemConfiguration.ConfigureColumnOptions(serviceConfigSection, colOpts);
                 connStr = applySystemConfiguration.GetConnectionString(connStr);
+                colOpts = applySystemConfiguration.ConfigureColumnOptions(serviceConfigSection, colOpts);
+                // TODO get sink options from config
 
-                if (appConfiguration != null || columnOptionsSection != null)
+                if (appConfiguration != null || columnOptionsSection != null || sinkOptionsSection != null)
                     SelfLog.WriteLine("Warning: Both System.Configuration (app.config or web.config) and Microsoft.Extensions.Configuration are being applied to the MSSQLServer sink.");
             }
 
@@ -253,7 +255,7 @@ namespace Serilog
 
             if (sinkOptionsSection != null)
             {
-                // TODO read sink options from configuration
+                sinkOpts = applyMicrosoftExtensionsConfiguration.ConfigureSinkOptions(sinkOpts, sinkOptionsSection);
             }
 
             var auditSink = auditSinkFactory.Create(connStr, tableName, formatProvider, autoCreateSqlTable,

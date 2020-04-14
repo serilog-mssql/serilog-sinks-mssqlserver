@@ -68,9 +68,7 @@ namespace Serilog
             string schemaName = "dbo",
             ITextFormatter logEventFormatter = null,
             SinkOptions sinkOptions = null,
-#pragma warning disable CA1801
             IConfigurationSection sinkOptionsSection = null)
-#pragma warning restore CA1801
         {
             if (loggerConfiguration == null)
                 throw new ArgumentNullException(nameof(loggerConfiguration));
@@ -80,7 +78,7 @@ namespace Serilog
             IApplyMicrosoftExtensionsConfiguration microsoftExtensionsConfiguration = new ApplyMicrosoftExtensionsConfiguration();
             connectionString = microsoftExtensionsConfiguration.GetConnectionString(connectionString, appConfiguration);
             columnOptions = microsoftExtensionsConfiguration.ConfigureColumnOptions(columnOptions, columnOptionsSection);
-            // TODO read sink options from configuration
+            sinkOptions = microsoftExtensionsConfiguration.ConfigureSinkOptions(sinkOptions, sinkOptionsSection);
 
             IMSSqlServerSinkFactory sinkFactory = new MSSqlServerSinkFactory();
             var sink = sinkFactory.Create(connectionString, tableName, batchPostingLimit, defaultedPeriod,
@@ -120,9 +118,7 @@ namespace Serilog
             string schemaName = "dbo",
             ITextFormatter logEventFormatter = null,
             SinkOptions sinkOptions = null,
-#pragma warning disable CA1801
             IConfigurationSection sinkOptionsSection = null)
-#pragma warning restore CA1801
         {
             if (loggerAuditSinkConfiguration == null)
                 throw new ArgumentNullException(nameof(loggerAuditSinkConfiguration));
@@ -130,7 +126,7 @@ namespace Serilog
             IApplyMicrosoftExtensionsConfiguration microsoftExtensionsConfiguration = new ApplyMicrosoftExtensionsConfiguration();
             connectionString = microsoftExtensionsConfiguration.GetConnectionString(connectionString, appConfiguration);
             columnOptions = microsoftExtensionsConfiguration.ConfigureColumnOptions(columnOptions, columnOptionsSection);
-            // TODO read sink options from configuration
+            sinkOptions = microsoftExtensionsConfiguration.ConfigureSinkOptions(sinkOptions, sinkOptionsSection);
 
             IMSSqlServerAuditSinkFactory auditSinkFactory = new MSSqlServerAuditSinkFactory();
             var auditSink = auditSinkFactory.Create(connectionString, tableName, formatProvider, autoCreateSqlTable,

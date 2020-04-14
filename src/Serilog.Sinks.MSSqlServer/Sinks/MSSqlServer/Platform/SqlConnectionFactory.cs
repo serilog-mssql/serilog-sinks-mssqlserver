@@ -15,13 +15,9 @@ namespace Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform
                 throw new ArgumentNullException(nameof(connectionString));
             }
 
-            if (azureManagedServiceAuthenticator == null)
-            {
-                throw new ArgumentNullException(nameof(azureManagedServiceAuthenticator));
-            }
-
             _connectionString = connectionString;
-            _azureManagedServiceAuthenticator = azureManagedServiceAuthenticator;
+            _azureManagedServiceAuthenticator = azureManagedServiceAuthenticator
+                ?? throw new ArgumentNullException(nameof(azureManagedServiceAuthenticator));
         }
 
         public SqlConnection Create()
