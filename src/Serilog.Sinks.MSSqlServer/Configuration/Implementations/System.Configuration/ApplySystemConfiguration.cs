@@ -1,6 +1,7 @@
 ﻿using System.Configuration;
 using Serilog.Configuration;
 using Serilog.Sinks.MSSqlServer.Configuration;
+using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
 
 namespace Serilog.Sinks.MSSqlServer
 {
@@ -8,20 +9,24 @@ namespace Serilog.Sinks.MSSqlServer
     {
         private readonly ISystemConfigurationConnectionStringProvider _connectionStringProvider;
         private readonly ISystemConfigurationColumnOptionsProvider _columnOptionsProvider;
+        private readonly ISystemConfigurationSinkOptionsProvider _sinkOptionsProvider;
 
-        public ApplySystemConfiguration() : this (
+        public ApplySystemConfiguration() : this(
             new SystemConfigurationConnectionStringProvider(),
-            new SystemConfigurationColumnOptionsProvider())
+            new SystemConfigurationColumnOptionsProvider(),
+            new SystemConfigurationSinkOptionsProvider())
         {
         }
 
         // Constructor with injectable dependencies for tests
         internal ApplySystemConfiguration(
             ISystemConfigurationConnectionStringProvider connectionStringProvider,
-            ISystemConfigurationColumnOptionsProvider columnOptionsProvider)
+            ISystemConfigurationColumnOptionsProvider columnOptionsProvider,
+            ISystemConfigurationSinkOptionsProvider sinkOptionsProvider)
         {
             _connectionStringProvider = connectionStringProvider;
             _columnOptionsProvider = columnOptionsProvider;
+            _sinkOptionsProvider = sinkOptionsProvider;
         }
 
         public MSSqlServerConfigurationSection GetSinkConfigurationSection(string configurationSectionName)
@@ -34,5 +39,9 @@ namespace Serilog.Sinks.MSSqlServer
 
         public ColumnOptions ConfigureColumnOptions(MSSqlServerConfigurationSection config, ColumnOptions columnOptions) =>
             _columnOptionsProvider.ConfigureColumnOptions(config, columnOptions);
+
+        public SinkOptions ConfigureSinkOptions(MSSqlServerConfigurationSection config, SinkOptions sinkOptions) =>
+            _sinkOptionsProvider.ConfigureSinkOptions(config, sinkOptions);
+
     }
 }

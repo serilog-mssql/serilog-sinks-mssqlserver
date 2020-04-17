@@ -52,7 +52,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Platform
             // Act + assert
             using (var sqlConnection = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
             {
-                Assert.Throws<AzureServiceTokenProviderException>(() =>  sut.SetAuthenticationToken(sqlConnection));
+                Assert.Throws<AzureServiceTokenProviderException>(() => sut.SetAuthenticationToken(sqlConnection));
             }
         }
     }

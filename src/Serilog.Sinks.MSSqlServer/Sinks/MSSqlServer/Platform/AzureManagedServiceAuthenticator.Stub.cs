@@ -1,4 +1,5 @@
-﻿using System.Data.SqlClient;
+﻿using System;
+using System.Data.SqlClient;
 using System.Diagnostics.CodeAnalysis;
 
 // This is an empty stub implementaion of IAzureManagedServiceAuthenticator for the target frameworks
@@ -13,6 +14,12 @@ namespace Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform
 
         public AzureManagedServiceAuthenticator(bool useAzureManagedIdentity, string azureServiceTokenProviderResource)
         {
+            if (useAzureManagedIdentity)
+            {
+                throw new InvalidOperationException(
+                    $"{nameof(useAzureManagedIdentity)} set to true on a target framework that does not support it. Refer to MSSQLServer sink documentation for details.");
+            }
+
             _useAzureManagedIdentity = useAzureManagedIdentity;
             _azureServiceTokenProviderResource = azureServiceTokenProviderResource;
         }

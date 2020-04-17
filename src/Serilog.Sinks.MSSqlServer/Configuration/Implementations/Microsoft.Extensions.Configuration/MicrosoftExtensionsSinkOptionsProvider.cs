@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using Microsoft.Extensions.Configuration;
 using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
 
@@ -15,7 +14,7 @@ namespace Serilog.Sinks.MSSqlServer.Configuration
             }
 
             ReadTableOptions(config, sinkOptions);
-            // TODO read all sink options values from configuration
+            ReadBatchSettings(config, sinkOptions);
             ReadAzureManagedIdentitiesOptions(config, sinkOptions);
 
             return sinkOptions;
@@ -26,6 +25,12 @@ namespace Serilog.Sinks.MSSqlServer.Configuration
             SetProperty.IfNotNull<string>(config["tableName"], val => sinkOptions.TableName = val);
             SetProperty.IfNotNull<string>(config["schemaName"], val => sinkOptions.SchemaName = val);
             SetProperty.IfNotNull<bool>(config["autoCreateSqlTable"], val => sinkOptions.AutoCreateSqlTable = val);
+        }
+
+        private void ReadBatchSettings(IConfigurationSection config, SinkOptions sinkOptions)
+        {
+            SetProperty.IfNotNull<int>(config["batchPostingLimit"], val => sinkOptions.BatchPostingLimit = val);
+            SetProperty.IfNotNull<TimeSpan>(config["batchPeriod"], val => sinkOptions.BatchPeriod = val);
         }
 
         private void ReadAzureManagedIdentitiesOptions(IConfigurationSection config, SinkOptions sinkOptions)

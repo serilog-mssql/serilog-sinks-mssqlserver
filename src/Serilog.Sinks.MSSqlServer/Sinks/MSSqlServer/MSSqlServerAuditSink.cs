@@ -35,7 +35,10 @@ namespace Serilog.Sinks.MSSqlServer
         private readonly MSSqlServerSinkTraits _traits;
 
         /// <summary>
-        ///     Construct a sink posting to the specified database.
+        /// Construct a sink posting to the specified database.
+        ///
+        /// Note: this is the legacy version of the extension method. Please use the new one using SinkOptions instead.
+        /// 
         /// </summary>
         /// <param name="connectionString">Connection string to access the database.</param>
         /// <param name="tableName">Name of the table to store the data in.</param>
@@ -44,19 +47,42 @@ namespace Serilog.Sinks.MSSqlServer
         /// <param name="autoCreateSqlTable">Create log table with the provided name on destination sql server.</param>
         /// <param name="columnOptions">Options that pertain to columns</param>
         /// <param name="logEventFormatter">Supplies custom formatter for the LogEvent column, or null</param>
-        /// <param name="sinkOptions">Supplies additional options for the sink</param>
         public MSSqlServerAuditSink(
             string connectionString,
             string tableName,
             IFormatProvider formatProvider,
             bool autoCreateSqlTable = false,
             ColumnOptions columnOptions = null,
-            string schemaName = "dbo",
-            ITextFormatter logEventFormatter = null,
-            SinkOptions sinkOptions = null)
+            string schemaName = MSSqlServerSink.DefaultSchemaName,
+            ITextFormatter logEventFormatter = null)
+            : this(connectionString, new SinkOptions(tableName, null, null, autoCreateSqlTable, schemaName),
+                  formatProvider, columnOptions, logEventFormatter)
         {
+            // Do not add new parameters here. This interface is considered legacy and will be deprecated in the future.
+            // For adding new input parameters use the SinkOptions class and the method overload that accepts SinkOptions.
+        }
+
+        /// <summary>
+        /// Construct a sink posting to the specified database.
+        /// </summary>
+        /// <param name="connectionString">Connection string to access the database.</param>
+        /// <param name="sinkOptions">Supplies additional options for the sink</param>
+        /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
+        /// <param name="columnOptions">Options that pertain to columns</param>
+        /// <param name="logEventFormatter">Supplies custom formatter for the LogEvent column, or null</param>
+        public MSSqlServerAuditSink(
+            string connectionString,
+            SinkOptions sinkOptions,
+            IFormatProvider formatProvider,
+            ColumnOptions columnOptions = null,
+            ITextFormatter logEventFormatter = null)
+        {
+            if (sinkOptions?.TableName == null)
+            {
+                throw new InvalidOperationException("Table name must be specified!");
+            }
+
             columnOptions?.FinalizeConfigurationForSinkConstructor();
-            sinkOptions = sinkOptions ?? new SinkOptions();
 
             if (columnOptions != null)
             {
@@ -68,7 +94,8 @@ namespace Serilog.Sinks.MSSqlServer
                 sinkOptions.AzureServiceTokenProviderResource);
             _sqlConnectionFactory = new SqlConnectionFactory(connectionString, azureManagedServiceAuthenticator);
 
-            _traits = new MSSqlServerSinkTraits(_sqlConnectionFactory, tableName, schemaName, columnOptions, formatProvider, autoCreateSqlTable, logEventFormatter);
+            _traits = new MSSqlServerSinkTraits(_sqlConnectionFactory, sinkOptions.TableName, sinkOptions.SchemaName,
+                columnOptions, formatProvider, sinkOptions.AutoCreateSqlTable, logEventFormatter);
         }
 
         /// <summary>Emit the provided log event to the sink.</summary>

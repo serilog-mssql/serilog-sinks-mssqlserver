@@ -54,7 +54,7 @@ namespace Serilog.Sinks.MSSqlServer
         /// <summary>
         /// Construct a sink posting to the specified database.
         ///
-        /// Note: this is the legacy version of the extension method. Please use the new one using SinkOptions instead of separate parameters.
+        /// Note: this is the legacy version of the extension method. Please use the new one using SinkOptions instead.
         /// 
         /// </summary>
         /// <param name="connectionString">Connection string to access the database.</param>
@@ -79,6 +79,8 @@ namespace Serilog.Sinks.MSSqlServer
             : this(connectionString, new SinkOptions(tableName, batchPostingLimit, period, autoCreateSqlTable, schemaName),
                   formatProvider, columnOptions, logEventFormatter)
         {
+            // Do not add new parameters here. This interface is considered legacy and will be deprecated in the future.
+            // For adding new input parameters use the SinkOptions class and the method overload that accepts SinkOptions.
         }
 
         /// <summary>

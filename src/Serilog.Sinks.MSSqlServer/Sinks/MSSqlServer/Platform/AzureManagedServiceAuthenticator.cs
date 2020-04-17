@@ -29,7 +29,6 @@ namespace Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform
                 return;
             }
 
-            // TODO make the whole call hierarchy async
             sqlConnection.AccessToken = _azureServiceTokenProvider.GetAccessTokenAsync(
                 _azureServiceTokenProviderResource).GetAwaiter().GetResult();
         }

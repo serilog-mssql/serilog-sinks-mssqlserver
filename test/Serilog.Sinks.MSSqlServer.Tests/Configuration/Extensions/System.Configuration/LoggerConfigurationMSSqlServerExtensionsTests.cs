@@ -30,7 +30,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.System.Config
             _loggerConfiguration.WriteTo.MSSqlServerInternal(
                 configSectionName: inputSectionName,
                 connectionString: "TestConnectionString",
-                tableName: "TestTableName",
+                sinkOptions: new SinkOptions { TableName = "TestTableName" },
                 applySystemConfiguration: _applySystemConfigurationMock.Object,
                 sinkFactory: sinkFactoryMock.Object);
 
@@ -52,7 +52,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.System.Config
             _loggerConfiguration.WriteTo.MSSqlServerInternal(
                 configSectionName: "TestConfigSectionName",
                 connectionString: inputConnectionString,
-                tableName: "TestTableName",
+                sinkOptions: new SinkOptions { TableName = "TestTableName" },
                 applySystemConfiguration: _applySystemConfigurationMock.Object,
                 sinkFactory: sinkFactoryMock.Object);
 
@@ -76,14 +76,13 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.System.Config
             _loggerConfiguration.WriteTo.MSSqlServerInternal(
                 configSectionName: "TestConfigSectionName",
                 connectionString: "TestConnectionString",
-                tableName: "TestTableName",
+                sinkOptions: new SinkOptions { TableName = "TestTableName" },
                 applySystemConfiguration: _applySystemConfigurationMock.Object,
                 sinkFactory: sinkFactoryMock.Object);
 
             // Assert
-            sinkFactoryMock.Verify(f => f.Create(configConnectionString, It.IsAny<string>(), It.IsAny<int>(), It.IsAny<TimeSpan>(),
-                It.IsAny<IFormatProvider>(), It.IsAny<bool>(), It.IsAny<ColumnOptions>(), It.IsAny<string>(), It.IsAny<ITextFormatter>(),
-                It.IsAny<SinkOptions>()), Times.Once);
+            sinkFactoryMock.Verify(f => f.Create(configConnectionString, It.IsAny<SinkOptions>(), It.IsAny<IFormatProvider>(),
+                It.IsAny<ColumnOptions>(), It.IsAny<ITextFormatter>()), Times.Once);
         }
 
         [Fact]
@@ -100,7 +99,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.System.Config
             _loggerConfiguration.WriteTo.MSSqlServerInternal(
                 configSectionName: "TestConfigSectionName",
                 connectionString: "TestConnectionString",
-                tableName: "TestTableName",
+                sinkOptions: new SinkOptions { TableName = "TestTableName" },
                 columnOptions: columnOptions,
                 applySystemConfiguration: _applySystemConfigurationMock.Object,
                 sinkFactory: sinkFactoryMock.Object);
@@ -125,15 +124,14 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.System.Config
             _loggerConfiguration.WriteTo.MSSqlServerInternal(
                 configSectionName: "TestConfigSectionName",
                 connectionString: "TestConnectionString",
-                tableName: "TestTableName",
+                sinkOptions: new SinkOptions { TableName = "TestTableName" },
                 columnOptions: new ColumnOptions(),
                 applySystemConfiguration: _applySystemConfigurationMock.Object,
                 sinkFactory: sinkFactoryMock.Object);
 
             // Assert
-            sinkFactoryMock.Verify(f => f.Create(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<TimeSpan>(),
-                It.IsAny<IFormatProvider>(), It.IsAny<bool>(), configColumnOptions, It.IsAny<string>(), It.IsAny<ITextFormatter>(),
-                It.IsAny<SinkOptions>()), Times.Once);
+            sinkFactoryMock.Verify(f => f.Create(It.IsAny<string>(), It.IsAny<SinkOptions>(),
+                It.IsAny<IFormatProvider>(), configColumnOptions, It.IsAny<ITextFormatter>()), Times.Once);
         }
 
         [Fact]
@@ -146,7 +144,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.System.Config
             _loggerConfiguration.WriteTo.MSSqlServerInternal(
                 configSectionName: "TestConfigSectionName",
                 connectionString: "TestConnectionString",
-                tableName: "TestTableName",
+                sinkOptions: new SinkOptions { TableName = "TestTableName" },
                 applySystemConfiguration: _applySystemConfigurationMock.Object,
                 sinkFactory: sinkFactoryMock.Object);
 
@@ -159,38 +157,28 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.System.Config
         public void MSSqlServerCallsSinkFactoryWithSuppliedParameters()
         {
             // Arrange
-            const string tableName = "TestTableName";
-            const int batchPostingLimit = 12345;
-            const bool autoCreateSqlTable = true;
-            const string schemaName = "TestSchemaName";
+            var sinkOptions = new SinkOptions { TableName = "TestTableName" };
             var columnOptions = new ColumnOptions();
-            var batchPeriod = new TimeSpan(0, 0, 44);
             var formatProviderMock = new Mock<IFormatProvider>();
             var logEventFormatterMock = new Mock<ITextFormatter>();
-            var sinkOptions = new SinkOptions();
-
             var sinkFactoryMock = new Mock<IMSSqlServerSinkFactory>();
+            _applySystemConfigurationMock.Setup(c => c.GetConnectionString(It.IsAny<string>()))
+                .Returns<string>(c => c);
 
             // Act
             _loggerConfiguration.WriteTo.MSSqlServerInternal(
                 configSectionName: "TestConfigSectionName",
                 connectionString: "TestConnectionString",
-                tableName: tableName,
-                columnOptions: columnOptions,
-                batchPostingLimit: batchPostingLimit,
-                period: batchPeriod,
-                formatProvider: formatProviderMock.Object,
-                autoCreateSqlTable: autoCreateSqlTable,
-                schemaName: schemaName,
-                logEventFormatter: logEventFormatterMock.Object,
                 sinkOptions: sinkOptions,
+                columnOptions: columnOptions,
+                formatProvider: formatProviderMock.Object,
+                logEventFormatter: logEventFormatterMock.Object,
                 applySystemConfiguration: _applySystemConfigurationMock.Object,
                 sinkFactory: sinkFactoryMock.Object);
 
             // Assert
-            sinkFactoryMock.Verify(f => f.Create(It.IsAny<string>(), tableName, batchPostingLimit, batchPeriod,
-                formatProviderMock.Object, autoCreateSqlTable, columnOptions, schemaName, logEventFormatterMock.Object,
-                sinkOptions), Times.Once);
+            sinkFactoryMock.Verify(f => f.Create(It.IsAny<string>(), sinkOptions, formatProviderMock.Object,
+                columnOptions, logEventFormatterMock.Object), Times.Once);
         }
 
         [Fact]
@@ -204,7 +192,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.System.Config
             _loggerConfiguration.AuditTo.MSSqlServerInternal(
                 configSectionName: inputSectionName,
                 connectionString: "TestConnectionString",
-                tableName: "TestTableName",
+                sinkOptions: new SinkOptions { TableName = "TestTableName" },
                 applySystemConfiguration: _applySystemConfigurationMock.Object,
                 auditSinkFactory: auditSinkFactoryMock.Object);
 
@@ -226,7 +214,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.System.Config
             _loggerConfiguration.AuditTo.MSSqlServerInternal(
                 configSectionName: "TestConfigSectionName",
                 connectionString: inputConnectionString,
-                tableName: "TestTableName",
+                sinkOptions: new SinkOptions { TableName = "TestTableName" },
                 applySystemConfiguration: _applySystemConfigurationMock.Object,
                 auditSinkFactory: auditSinkFactoryMock.Object);
 
@@ -250,14 +238,13 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.System.Config
             _loggerConfiguration.AuditTo.MSSqlServerInternal(
                 configSectionName: "TestConfigSectionName",
                 connectionString: "TestConnectionString",
-                tableName: "TestTableName",
+                sinkOptions: new SinkOptions { TableName = "TestTableName" },
                 applySystemConfiguration: _applySystemConfigurationMock.Object,
                 auditSinkFactory: auditSinkFactoryMock.Object);
 
             // Assert
-            auditSinkFactoryMock.Verify(f => f.Create(configConnectionString, It.IsAny<string>(), It.IsAny<IFormatProvider>(),
-                It.IsAny<bool>(), It.IsAny<ColumnOptions>(), It.IsAny<string>(), It.IsAny<ITextFormatter>(),
-                It.IsAny<SinkOptions>()), Times.Once);
+            auditSinkFactoryMock.Verify(f => f.Create(configConnectionString, It.IsAny<SinkOptions>(), It.IsAny<IFormatProvider>(),
+                It.IsAny<ColumnOptions>(), It.IsAny<ITextFormatter>()), Times.Once);
         }
 
         [Fact]
@@ -274,7 +261,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.System.Config
             _loggerConfiguration.AuditTo.MSSqlServerInternal(
                 configSectionName: "TestConfigSectionName",
                 connectionString: "TestConnectionString",
-                tableName: "TestTableName",
+                sinkOptions: new SinkOptions { TableName = "TestTableName" },
                 columnOptions: columnOptions,
                 applySystemConfiguration: _applySystemConfigurationMock.Object,
                 auditSinkFactory: auditSinkFactoryMock.Object);
@@ -299,15 +286,14 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.System.Config
             _loggerConfiguration.AuditTo.MSSqlServerInternal(
                 configSectionName: "TestConfigSectionName",
                 connectionString: "TestConnectionString",
-                tableName: "TestTableName",
+                sinkOptions: new SinkOptions { TableName = "TestTableName" },
                 columnOptions: new ColumnOptions(),
                 applySystemConfiguration: _applySystemConfigurationMock.Object,
                 auditSinkFactory: auditSinkFactoryMock.Object);
 
             // Assert
-            auditSinkFactoryMock.Verify(f => f.Create(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IFormatProvider>(),
-                It.IsAny<bool>(), configColumnOptions, It.IsAny<string>(), It.IsAny<ITextFormatter>(),
-                It.IsAny<SinkOptions>()), Times.Once);
+            auditSinkFactoryMock.Verify(f => f.Create(It.IsAny<string>(), It.IsAny<SinkOptions>(), It.IsAny<IFormatProvider>(),
+                configColumnOptions, It.IsAny<ITextFormatter>()), Times.Once);
         }
 
         [Fact]
@@ -320,7 +306,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.System.Config
             _loggerConfiguration.AuditTo.MSSqlServerInternal(
                 configSectionName: "TestConfigSectionName",
                 connectionString: "TestConnectionString",
-                tableName: "TestTableName",
+                sinkOptions: new SinkOptions { TableName = "TestTableName" },
                 applySystemConfiguration: _applySystemConfigurationMock.Object,
                 auditSinkFactory: auditSinkFactoryMock.Object);
 
@@ -333,14 +319,10 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.System.Config
         public void MSSqlServerAuditCallsSinkFactoryWithSuppliedParameters()
         {
             // Arrange
-            const string tableName = "TestTableName";
-            const bool autoCreateSqlTable = true;
-            const string schemaName = "TestSchemaName";
+            var sinkOptions = new SinkOptions { TableName = "TestTableName" };
             var columnOptions = new ColumnOptions();
-            var batchPeriod = new TimeSpan(0, 0, 44);
             var formatProviderMock = new Mock<IFormatProvider>();
             var logEventFormatterMock = new Mock<ITextFormatter>();
-            var sinkOptions = new SinkOptions();
 
             var auditSinkFactoryMock = new Mock<IMSSqlServerAuditSinkFactory>();
 
@@ -348,20 +330,16 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.System.Config
             _loggerConfiguration.AuditTo.MSSqlServerInternal(
                 configSectionName: "TestConfigSectionName",
                 connectionString: "TestConnectionString",
-                tableName: tableName,
+                sinkOptions: sinkOptions,
                 columnOptions: columnOptions,
                 formatProvider: formatProviderMock.Object,
-                autoCreateSqlTable: autoCreateSqlTable,
-                schemaName: schemaName,
                 logEventFormatter: logEventFormatterMock.Object,
-                sinkOptions: sinkOptions,
                 applySystemConfiguration: _applySystemConfigurationMock.Object,
                 auditSinkFactory: auditSinkFactoryMock.Object);
 
             // Assert
-            auditSinkFactoryMock.Verify(f => f.Create(It.IsAny<string>(), tableName,
-                formatProviderMock.Object, autoCreateSqlTable, columnOptions, schemaName, logEventFormatterMock.Object,
-                sinkOptions), Times.Once);
+            auditSinkFactoryMock.Verify(f => f.Create(It.IsAny<string>(), sinkOptions, formatProviderMock.Object,
+                columnOptions, logEventFormatterMock.Object), Times.Once);
         }
     }
 }

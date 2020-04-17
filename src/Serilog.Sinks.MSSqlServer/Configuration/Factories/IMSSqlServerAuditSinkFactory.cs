@@ -8,12 +8,9 @@ namespace Serilog.Sinks.MSSqlServer.Configuration.Factories
     {
         MSSqlServerAuditSink Create(
             string connectionString,
-            string tableName,
+            SinkOptions sinkOptions,
             IFormatProvider formatProvider,
-            bool autoCreateSqlTable,
             ColumnOptions columnOptions,
-            string schemaName,
-            ITextFormatter logEventFormatter,
-            SinkOptions sinkOptions);
+            ITextFormatter logEventFormatter);
     }
 }

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Security.Principal;
 
 namespace Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options
 {
@@ -20,13 +19,13 @@ namespace Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options
 
         internal SinkOptions(
             string tableName,
-            int batchPostingLimit,
+            int? batchPostingLimit,
             TimeSpan? batchPeriod,
             bool autoCreateSqlTable,
             string schemaName) : this()
         {
             TableName = tableName;
-            BatchPostingLimit = batchPostingLimit;
+            BatchPostingLimit = batchPostingLimit ?? BatchPostingLimit;
             BatchPeriod = batchPeriod ?? BatchPeriod;
             AutoCreateSqlTable = autoCreateSqlTable;
             SchemaName = schemaName ?? SchemaName;
@@ -55,7 +54,7 @@ namespace Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options
         /// <summary>
         /// Time span until a batch of log events is written to the database (default: 5 seconds)
         /// </summary>
-        public TimeSpan BatchPeriod{ get; set; }
+        public TimeSpan BatchPeriod { get; set; }
 
         /// <summary>
         /// Flag to enable SQL authentication using Azure Managed Identities (default: false)
