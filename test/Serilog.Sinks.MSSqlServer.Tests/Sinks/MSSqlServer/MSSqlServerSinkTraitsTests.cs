@@ -174,7 +174,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer
         }
 
         [Fact]
-        public void InitializeWithoutAutoCreateSqlTableDoesNotCallsSqlTableCreator()
+        public void InitializeWithoutAutoCreateSqlTableDoesNotCallSqlTableCreator()
         {
             // Arrange
             var options = new Serilog.Sinks.MSSqlServer.ColumnOptions();

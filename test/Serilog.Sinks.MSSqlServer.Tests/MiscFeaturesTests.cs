@@ -5,6 +5,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using Dapper;
 using FluentAssertions;
+using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
 using Xunit.Abstractions;
@@ -200,7 +201,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
 
         [Trait("Bugfix", "#107")]
         [Fact]
-        public void AutoCreateSchema()
+        public void AutoCreateSchemaLegacyInterface()
         {
             // Use a custom table name because DROP SCHEMA can
             // require permissions higher than the test-runner
@@ -208,8 +209,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             // to create misleading results in other tests.
 
             // arrange
-            string schemaName = "CustomTestSchema";
-            string tableName = "CustomSchemaLogTable";
+            var schemaName = "CustomTestSchema";
+            var tableName = "CustomSchemaLogTable";
             var columnOptions = new ColumnOptions();
 
             Log.Logger = new LoggerConfiguration()
@@ -222,6 +223,47 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                     autoCreateSqlTable: true,
                     batchPostingLimit: 1,
                     period: TimeSpan.FromSeconds(10)
+                )
+                .CreateLogger();
+            Log.CloseAndFlush();
+
+            // assert
+            using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
+            {
+                var query = conn.Query<InfoSchema>("SELECT SCHEMA_NAME AS SchemaName FROM INFORMATION_SCHEMA.SCHEMATA");
+                var results = query as InfoSchema[] ?? query.ToArray();
+
+                results.Should().Contain(x => x.SchemaName == schemaName);
+            }
+        }
+
+        [Trait("Bugfix", "#107")]
+        [Fact]
+        public void AutoCreateSchemaSinkOptionsInterface()
+        {
+            // Use a custom table name because DROP SCHEMA can
+            // require permissions higher than the test-runner
+            // needs, and we don't want this left-over table
+            // to create misleading results in other tests.
+
+            // arrange
+            var schemaName = "CustomTestSchema";
+            var tableName = "CustomSchemaLogTable";
+            var columnOptions = new ColumnOptions();
+
+            Log.Logger = new LoggerConfiguration()
+                .WriteTo.MSSqlServer
+                (
+                    connectionString: DatabaseFixture.LogEventsConnectionString,
+                    sinkOptions: new SinkOptions
+                    {
+                        SchemaName = schemaName,
+                        TableName = tableName,
+                        AutoCreateSqlTable = true,
+                        BatchPostingLimit = 1,
+                        BatchPeriod = TimeSpan.FromSeconds(10)
+                    },
+                    columnOptions: columnOptions
                 )
                 .CreateLogger();
             Log.CloseAndFlush();

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using Microsoft.Extensions.Configuration;
 using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
 
@@ -30,7 +31,7 @@ namespace Serilog.Sinks.MSSqlServer.Configuration
         private void ReadBatchSettings(IConfigurationSection config, SinkOptions sinkOptions)
         {
             SetProperty.IfNotNull<int>(config["batchPostingLimit"], val => sinkOptions.BatchPostingLimit = val);
-            SetProperty.IfNotNull<TimeSpan>(config["batchPeriod"], val => sinkOptions.BatchPeriod = val);
+            SetProperty.IfNotNull<string>(config["batchPeriod"], val => sinkOptions.BatchPeriod = TimeSpan.Parse(val, CultureInfo.InvariantCulture));
         }
 
         private void ReadAzureManagedIdentitiesOptions(IConfigurationSection config, SinkOptions sinkOptions)

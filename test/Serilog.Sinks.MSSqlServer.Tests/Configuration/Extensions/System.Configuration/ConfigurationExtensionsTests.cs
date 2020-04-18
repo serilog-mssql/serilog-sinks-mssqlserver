@@ -1,8 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Data.SqlClient;
-using System.Linq;
-using Dapper;
-using FluentAssertions;
 using Serilog.Sinks.MSSqlServer.Configuration.Factories;
 using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
@@ -76,7 +72,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.System.Config
                 .CreateLogger();
             Log.CloseAndFlush();
 
-            VerifyDatabaseSchema(standardNames);
+            VerifyDatabaseColumnsWereCreated(standardNames);
         }
 
         [Fact]
@@ -93,7 +89,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.System.Config
                 .CreateLogger();
             Log.CloseAndFlush();
 
-            VerifyDatabaseSchema(standardNames);
+            VerifyDatabaseColumnsWereCreated(standardNames);
         }
 
         [Fact]
@@ -109,30 +105,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.System.Config
                 .CreateLogger();
             Log.CloseAndFlush();
 
-            using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
-            {
-                var logEvents = conn.Query<InfoSchema>($@"SELECT COLUMN_NAME AS ColumnName FROM {DatabaseFixture.Database}.INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{DatabaseFixture.LogTableName}'");
-                var infoSchema = logEvents as InfoSchema[] ?? logEvents.ToArray();
-
-                infoSchema.Should().Contain(columns => columns.ColumnName == "LogEvent");
-                infoSchema.Should().Contain(columns => columns.ColumnName == "CustomColumn");
-            }
-        }
-
-        private static void VerifyDatabaseSchema(List<string> standardNames)
-        {
-            using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
-            {
-                var logEvents = conn.Query<InfoSchema>($@"SELECT COLUMN_NAME AS ColumnName FROM {DatabaseFixture.Database}.INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{DatabaseFixture.LogTableName}'");
-                var infoSchema = logEvents as InfoSchema[] ?? logEvents.ToArray();
-
-                foreach (var column in standardNames)
-                {
-                    infoSchema.Should().Contain(columns => columns.ColumnName == column);
-                }
-
-                infoSchema.Should().Contain(columns => columns.ColumnName == "Id");
-            }
+            // Assert
+            VerifyDatabaseColumnsWereCreated(new List<string> { "LogEvent", "CustomColumn" });
         }
     }
 }

@@ -1,8 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Data.SqlClient;
-using System.Linq;
-using Dapper;
-using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
@@ -63,10 +59,11 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.Hybrid
         [Fact]
         public void ColumnOptionsFromConfigSectionLegacyInterface()
         {
+            // Arrange
             var standardNames = new List<string> { "CustomMessage", "CustomMessageTemplate", "CustomLevel", "CustomTimeStamp", "CustomException", "CustomProperties" };
-
             var columnOptionsSection = TestConfiguration().GetSection(_columnOptionsSection);
 
+            // Act
             var loggerConfiguration = new LoggerConfiguration();
             Log.Logger = loggerConfiguration.WriteTo.MSSqlServer(
                 connectionString: DatabaseFixture.LogEventsConnectionString,
@@ -76,16 +73,18 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.Hybrid
                 .CreateLogger();
             Log.CloseAndFlush();
 
-            VerifyDatabaseSchema(standardNames);
+            // Assert
+            VerifyDatabaseColumnsWereCreated(standardNames);
         }
 
         [Fact]
         public void ColumnOptionsFromConfigSectionSinkOptionsInterface()
         {
+            // Arrange
             var standardNames = new List<string> { "CustomMessage", "CustomMessageTemplate", "CustomLevel", "CustomTimeStamp", "CustomException", "CustomProperties" };
-
             var columnOptionsSection = TestConfiguration().GetSection(_columnOptionsSection);
 
+            // Act
             var loggerConfiguration = new LoggerConfiguration();
             Log.Logger = loggerConfiguration.WriteTo.MSSqlServer(
                 connectionString: DatabaseFixture.LogEventsConnectionString,
@@ -98,17 +97,19 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.Hybrid
                 .CreateLogger();
             Log.CloseAndFlush();
 
-            VerifyDatabaseSchema(standardNames);
+            // Assert
+            VerifyDatabaseColumnsWereCreated(standardNames);
         }
 
         [Fact]
         public void SinkOptionsFromConfigSection()
         {
+            // Arrange
             var standardNames = new List<string> { "CustomMessage", "CustomMessageTemplate", "CustomLevel", "CustomTimeStamp", "CustomException", "CustomProperties" };
-
             var columnOptionsSection = TestConfiguration().GetSection(_columnOptionsSection);
             var sinkOptionsSection = TestConfiguration().GetSection(_sinkOptionsSection);
 
+            // Act
             var loggerConfiguration = new LoggerConfiguration();
             Log.Logger = loggerConfiguration.WriteTo.MSSqlServer(
                 connectionString: DatabaseFixture.LogEventsConnectionString,
@@ -117,23 +118,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.Hybrid
                 .CreateLogger();
             Log.CloseAndFlush();
 
-            VerifyDatabaseSchema(standardNames);
-        }
-
-        private static void VerifyDatabaseSchema(List<string> standardNames)
-        {
-            using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
-            {
-                var logEvents = conn.Query<InfoSchema>($@"SELECT COLUMN_NAME AS ColumnName FROM {DatabaseFixture.Database}.INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{DatabaseFixture.LogTableName}'");
-                var infoSchema = logEvents as InfoSchema[] ?? logEvents.ToArray();
-
-                foreach (var column in standardNames)
-                {
-                    infoSchema.Should().Contain(columns => columns.ColumnName == column);
-                }
-
-                infoSchema.Should().Contain(columns => columns.ColumnName == "Id");
-            }
+            // Assert
+            VerifyDatabaseColumnsWereCreated(standardNames);
         }
 
         private IConfiguration TestConfiguration() =>

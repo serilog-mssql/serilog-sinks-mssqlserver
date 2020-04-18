@@ -41,9 +41,11 @@
   <ItemGroup>
     <!-- Ensure MSBuild ignores all build-target-specific files by default -->
     <Compile Remove="Configuration\**\*.*" />
+    <Compile Remove="Sinks\MSSqlServer\Platform\AzureManagedServiceAuthenticatorStubTests.cs" />
     <Compile Remove="Sinks\MSSqlServer\Platform\AzureManagedServiceAuthenticatorTests.cs" />
     <!-- Show in VStudio, but MSBuild ignores these (indicates files are not code, non-published-content, etc.) -->
     <None Include="Configuration\**\*.*" />
+    <None Include="Sinks\MSSqlServer\Platform\AzureManagedServiceAuthenticatorStubTests.cs" />
     <None Include="Sinks\MSSqlServer\Platform\AzureManagedServiceAuthenticatorTests.cs" />
     <!-- ItemGroups below with TFM conditions will re-include the compile targets -->
   </ItemGroup>
@@ -55,6 +57,7 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.1" />
     <Compile Include="Configuration\Extensions\System.Configuration\**\*.cs" />
     <Compile Include="Configuration\Implementations\System.Configuration\**\*.cs" />
+    <Compile Include="Sinks\MSSqlServer\Platform\AzureManagedServiceAuthenticatorStubTests.cs" />
   </ItemGroup>
 
   <!--<ItemGroup Condition=" '$(TargetFramework)' == 'net472' ">
@@ -84,6 +87,7 @@
     <Compile Include="Configuration\Extensions\Hybrid\**\*.cs" />
     <Compile Include="Configuration\Implementations\Microsoft.Extensions.Configuration\**\*.cs" />
     <Compile Include="Configuration\Implementations\System.Configuration\**\*.cs" />
+    <Compile Include="Sinks\MSSqlServer\Platform\AzureManagedServiceAuthenticatorStubTests.cs" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.2' ">
