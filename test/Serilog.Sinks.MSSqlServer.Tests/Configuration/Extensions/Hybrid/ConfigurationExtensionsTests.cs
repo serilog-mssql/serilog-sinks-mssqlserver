@@ -136,7 +136,9 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.Hybrid
                     { $"{_columnOptionsSection}:properties:columnName", "CustomProperties" },
 
                     { $"{_sinkOptionsSection}:tableName", DatabaseFixture.LogTableName },
-                    { $"{_sinkOptionsSection}:autoCreateSqlTable", "true" }
+                    { $"{_sinkOptionsSection}:autoCreateSqlTable", "true" },
+                    { $"{_sinkOptionsSection}:batchPostingLimit", "13" },
+                    { $"{_sinkOptionsSection}:batchPeriod", "00:00:15" }
                 })
                 .Build();
     }
