@@ -19,6 +19,7 @@ using Serilog.Events;
 using Serilog.Formatting;
 using Serilog.Sinks.MSSqlServer;
 using Serilog.Sinks.MSSqlServer.Configuration.Factories;
+using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
 
 // M.E.C. support for .NET Standard 2.0 libraries.
 
@@ -34,6 +35,9 @@ namespace Serilog
         /// Create a database and execute the table creation script found here
         /// https://gist.github.com/mivano/10429656
         /// or use the autoCreateSqlTable option.
+        ///
+        /// Note: this is the legacy version of the extension method. Please use the new one using SinkOptions instead.
+        /// 
         /// </summary>
         /// <param name="loggerConfiguration">The logger configuration.</param>
         /// <param name="connectionString">The connection string to the database where to store the events.</param>
@@ -62,27 +66,78 @@ namespace Serilog
             bool autoCreateSqlTable = false,
             ColumnOptions columnOptions = null,
             IConfigurationSection columnOptionsSection = null,
-            string schemaName = "dbo",
+            string schemaName = MSSqlServerSink.DefaultSchemaName,
             ITextFormatter logEventFormatter = null)
+        {
+            // Do not add new parameters here. This interface is considered legacy and will be deprecated in the future.
+            // For adding new input parameters use the SinkOptions class and the method overload that accepts SinkOptions.
+
+            var sinkOptions = new SinkOptions(tableName, batchPostingLimit, period, autoCreateSqlTable, schemaName);
+
+            return loggerConfiguration.MSSqlServer(
+                connectionString: connectionString,
+                sinkOptions: sinkOptions,
+                appConfiguration: appConfiguration,
+                restrictedToMinimumLevel: restrictedToMinimumLevel,
+                formatProvider: formatProvider,
+                columnOptions: columnOptions,
+                columnOptionsSection: columnOptionsSection,
+                logEventFormatter: logEventFormatter,
+                sinkOptionsSection: null);
+        }
+
+        /// <summary>
+        /// Adds a sink that writes log events to a table in a MSSqlServer database.
+        /// Create a database and execute the table creation script found here
+        /// https://gist.github.com/mivano/10429656
+        /// or use the autoCreateSqlTable option.
+        /// </summary>
+        /// <param name="loggerConfiguration">The logger configuration.</param>
+        /// <param name="connectionString">The connection string to the database where to store the events.</param>
+        /// <param name="sinkOptions">Supplies additional settings for the sink</param>
+        /// <param name="appConfiguration">Additional application-level configuration. Required if connectionString is a name.</param>
+        /// <param name="restrictedToMinimumLevel">The minimum log event level required in order to write an event to the sink.</param>
+        /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
+        /// <param name="columnOptions">An externally-modified group of column settings</param>
+        /// <param name="columnOptionsSection">A config section defining various column settings</param>
+        /// <param name="logEventFormatter">Supplies custom formatter for the LogEvent column, or null</param>
+        /// <param name="sinkOptionsSection">A config section defining additional settings for the sink</param>
+        /// <returns>Logger configuration, allowing configuration to continue.</returns>
+        /// <exception cref="ArgumentNullException">A required parameter is null.</exception>
+        public static LoggerConfiguration MSSqlServer(
+            this LoggerSinkConfiguration loggerConfiguration,
+            string connectionString,
+            SinkOptions sinkOptions = null,
+            IConfiguration appConfiguration = null,
+            LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
+            IFormatProvider formatProvider = null,
+            ColumnOptions columnOptions = null,
+            IConfigurationSection columnOptionsSection = null,
+            ITextFormatter logEventFormatter = null,
+            IConfigurationSection sinkOptionsSection = null)
         {
             if (loggerConfiguration == null)
                 throw new ArgumentNullException(nameof(loggerConfiguration));
 
-            var defaultedPeriod = period ?? MSSqlServerSink.DefaultPeriod;
+            sinkOptions = sinkOptions ?? new SinkOptions();
+            columnOptions = columnOptions ?? new ColumnOptions();
 
             IApplyMicrosoftExtensionsConfiguration microsoftExtensionsConfiguration = new ApplyMicrosoftExtensionsConfiguration();
-            var connectionStr = microsoftExtensionsConfiguration.GetConnectionString(connectionString, appConfiguration);
-            var colOpts = microsoftExtensionsConfiguration.ConfigureColumnOptions(columnOptions, columnOptionsSection);
+            connectionString = microsoftExtensionsConfiguration.GetConnectionString(connectionString, appConfiguration);
+            columnOptions = microsoftExtensionsConfiguration.ConfigureColumnOptions(columnOptions, columnOptionsSection);
+            sinkOptions = microsoftExtensionsConfiguration.ConfigureSinkOptions(sinkOptions, sinkOptionsSection);
 
             IMSSqlServerSinkFactory sinkFactory = new MSSqlServerSinkFactory();
-            var sink = sinkFactory.Create(connectionStr, tableName, batchPostingLimit, defaultedPeriod,
-                formatProvider, autoCreateSqlTable, colOpts, schemaName, logEventFormatter);
+            var sink = sinkFactory.Create(connectionString, sinkOptions, formatProvider, columnOptions, logEventFormatter);
 
             return loggerConfiguration.Sink(sink, restrictedToMinimumLevel);
         }
 
         /// <summary>
         /// Adds a sink that writes log events to a table in a MSSqlServer database.
+        ///
+        /// Note: this is the legacy version of the extension method. Please use the new one using SinkOptions instead.
+        /// 
         /// </summary>
         /// <param name="loggerAuditSinkConfiguration">The logger configuration.</param>
         /// <param name="connectionString">The connection string to the database where to store the events.</param>
@@ -107,19 +162,66 @@ namespace Serilog
             bool autoCreateSqlTable = false,
             ColumnOptions columnOptions = null,
             IConfigurationSection columnOptionsSection = null,
-            string schemaName = "dbo",
+            string schemaName = MSSqlServerSink.DefaultSchemaName,
             ITextFormatter logEventFormatter = null)
+        {
+            // Do not add new parameters here. This interface is considered legacy and will be deprecated in the future.
+            // For adding new input parameters use the SinkOptions class and the method overload that accepts SinkOptions.
+
+            var sinkOptions = new SinkOptions(tableName, null, null, autoCreateSqlTable, schemaName);
+
+            return loggerAuditSinkConfiguration.MSSqlServer(
+                connectionString: connectionString,
+                sinkOptions: sinkOptions,
+                appConfiguration: appConfiguration,
+                restrictedToMinimumLevel: restrictedToMinimumLevel,
+                formatProvider: formatProvider,
+                columnOptions: columnOptions,
+                columnOptionsSection: columnOptionsSection,
+                logEventFormatter: logEventFormatter,
+                sinkOptionsSection: null);
+        }
+
+        /// <summary>
+        /// Adds a sink that writes log events to a table in a MSSqlServer database.
+        /// </summary>
+        /// <param name="loggerAuditSinkConfiguration">The logger configuration.</param>
+        /// <param name="connectionString">The connection string to the database where to store the events.</param>
+        /// <param name="sinkOptions">Supplies additional settings for the sink</param>
+        /// <param name="appConfiguration">Additional application-level configuration. Required if connectionString is a name.</param>
+        /// <param name="restrictedToMinimumLevel">The minimum log event level required in order to write an event to the sink.</param>
+        /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
+        /// <param name="columnOptions">An externally-modified group of column settings</param>
+        /// <param name="columnOptionsSection">A config section defining various column settings</param>
+        /// <param name="logEventFormatter">Supplies custom formatter for the LogEvent column, or null</param>
+        /// <param name="sinkOptionsSection">A config section defining additional settings for the sink</param>
+        /// <returns>Logger configuration, allowing configuration to continue.</returns>
+        /// <exception cref="ArgumentNullException">A required parameter is null.</exception>
+        public static LoggerConfiguration MSSqlServer(
+            this LoggerAuditSinkConfiguration loggerAuditSinkConfiguration,
+            string connectionString,
+            SinkOptions sinkOptions = null,
+            IConfiguration appConfiguration = null,
+            LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
+            IFormatProvider formatProvider = null,
+            ColumnOptions columnOptions = null,
+            IConfigurationSection columnOptionsSection = null,
+            ITextFormatter logEventFormatter = null,
+            IConfigurationSection sinkOptionsSection = null)
         {
             if (loggerAuditSinkConfiguration == null)
                 throw new ArgumentNullException(nameof(loggerAuditSinkConfiguration));
 
+            sinkOptions = sinkOptions ?? new SinkOptions();
+            columnOptions = columnOptions ?? new ColumnOptions();
+
             IApplyMicrosoftExtensionsConfiguration microsoftExtensionsConfiguration = new ApplyMicrosoftExtensionsConfiguration();
             connectionString = microsoftExtensionsConfiguration.GetConnectionString(connectionString, appConfiguration);
             columnOptions = microsoftExtensionsConfiguration.ConfigureColumnOptions(columnOptions, columnOptionsSection);
+            sinkOptions = microsoftExtensionsConfiguration.ConfigureSinkOptions(sinkOptions, sinkOptionsSection);
 
             IMSSqlServerAuditSinkFactory auditSinkFactory = new MSSqlServerAuditSinkFactory();
-            var auditSink = auditSinkFactory.Create(connectionString, tableName, formatProvider, autoCreateSqlTable,
-                columnOptions, schemaName, logEventFormatter);
+            var auditSink = auditSinkFactory.Create(connectionString, sinkOptions, formatProvider, columnOptions, logEventFormatter);
 
             return loggerAuditSinkConfiguration.Sink(auditSink, restrictedToMinimumLevel);
         }

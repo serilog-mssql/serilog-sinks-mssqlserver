@@ -1,9 +1,6 @@
 ﻿using System.Collections.Generic;
-using System.Data.SqlClient;
-using System.Linq;
-using Dapper;
-using FluentAssertions;
 using Microsoft.Extensions.Configuration;
+using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
 using Xunit.Abstractions;
@@ -14,13 +11,14 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.Hybrid
     {
         private const string _connectionStringName = "NamedConnection";
         private const string _columnOptionsSection = "CustomColumnNames";
+        private const string _sinkOptionsSection = "SinkOptions";
 
         public ConfigurationExtensionsTests(ITestOutputHelper output) : base(output)
         {
         }
 
         [Fact]
-        public void ConnectionStringByName()
+        public void ConnectionStringByNameFromConfigLegacyInterface()
         {
             var appConfig = TestConfiguration();
 
@@ -38,33 +36,90 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.Hybrid
         }
 
         [Fact]
-        public void ColumnOptionsFromConfigSection()
+        public void ConnectionStringByNameFromConfigSinkOptionsInterface()
         {
+            var appConfig = TestConfiguration();
+
+            var loggerConfiguration = new LoggerConfiguration();
+            Log.Logger = loggerConfiguration.WriteTo.MSSqlServer(
+                connectionString: _connectionStringName,
+                sinkOptions: new SinkOptions
+                {
+                    TableName = DatabaseFixture.LogTableName,
+                    AutoCreateSqlTable = true
+                },
+                appConfiguration: appConfig)
+                .CreateLogger();
+
+            // should not throw
+
+            Log.CloseAndFlush();
+        }
+
+        [Fact]
+        public void ColumnOptionsFromConfigSectionLegacyInterface()
+        {
+            // Arrange
             var standardNames = new List<string> { "CustomMessage", "CustomMessageTemplate", "CustomLevel", "CustomTimeStamp", "CustomException", "CustomProperties" };
+            var columnOptionsSection = TestConfiguration().GetSection(_columnOptionsSection);
 
-            var configSection = TestConfiguration().GetSection(_columnOptionsSection);
-
+            // Act
             var loggerConfiguration = new LoggerConfiguration();
             Log.Logger = loggerConfiguration.WriteTo.MSSqlServer(
                 connectionString: DatabaseFixture.LogEventsConnectionString,
                 tableName: DatabaseFixture.LogTableName,
                 autoCreateSqlTable: true,
-                columnOptionsSection: configSection)
+                columnOptionsSection: columnOptionsSection)
                 .CreateLogger();
             Log.CloseAndFlush();
 
-            using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
-            {
-                var logEvents = conn.Query<InfoSchema>($@"SELECT COLUMN_NAME AS ColumnName FROM {DatabaseFixture.Database}.INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{DatabaseFixture.LogTableName}'");
-                var infoSchema = logEvents as InfoSchema[] ?? logEvents.ToArray();
+            // Assert
+            VerifyDatabaseColumnsWereCreated(standardNames);
+        }
 
-                foreach (var column in standardNames)
+        [Fact]
+        public void ColumnOptionsFromConfigSectionSinkOptionsInterface()
+        {
+            // Arrange
+            var standardNames = new List<string> { "CustomMessage", "CustomMessageTemplate", "CustomLevel", "CustomTimeStamp", "CustomException", "CustomProperties" };
+            var columnOptionsSection = TestConfiguration().GetSection(_columnOptionsSection);
+
+            // Act
+            var loggerConfiguration = new LoggerConfiguration();
+            Log.Logger = loggerConfiguration.WriteTo.MSSqlServer(
+                connectionString: DatabaseFixture.LogEventsConnectionString,
+                sinkOptions: new SinkOptions
                 {
-                    infoSchema.Should().Contain(columns => columns.ColumnName == column);
-                }
+                    TableName = DatabaseFixture.LogTableName,
+                    AutoCreateSqlTable = true
+                },
+                columnOptionsSection: columnOptionsSection)
+                .CreateLogger();
+            Log.CloseAndFlush();
 
-                infoSchema.Should().Contain(columns => columns.ColumnName == "Id");
-            }
+            // Assert
+            VerifyDatabaseColumnsWereCreated(standardNames);
+        }
+
+        [Fact]
+        public void SinkOptionsFromConfigSection()
+        {
+            // Arrange
+            var standardNames = new List<string> { "CustomMessage", "CustomMessageTemplate", "CustomLevel", "CustomTimeStamp", "CustomException", "CustomProperties" };
+            var columnOptionsSection = TestConfiguration().GetSection(_columnOptionsSection);
+            var sinkOptionsSection = TestConfiguration().GetSection(_sinkOptionsSection);
+
+            // Act
+            var loggerConfiguration = new LoggerConfiguration();
+            Log.Logger = loggerConfiguration.WriteTo.MSSqlServer(
+                connectionString: DatabaseFixture.LogEventsConnectionString,
+                sinkOptionsSection: sinkOptionsSection,
+                columnOptionsSection: columnOptionsSection)
+                .CreateLogger();
+            Log.CloseAndFlush();
+
+            // Assert
+            VerifyDatabaseColumnsWereCreated(standardNames);
         }
 
         private IConfiguration TestConfiguration() =>
@@ -79,6 +134,11 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.Hybrid
                     { $"{_columnOptionsSection}:timeStamp:columnName", "CustomTimeStamp" },
                     { $"{_columnOptionsSection}:exception:columnName", "CustomException" },
                     { $"{_columnOptionsSection}:properties:columnName", "CustomProperties" },
+
+                    { $"{_sinkOptionsSection}:tableName", DatabaseFixture.LogTableName },
+                    { $"{_sinkOptionsSection}:autoCreateSqlTable", "true" },
+                    { $"{_sinkOptionsSection}:batchPostingLimit", "13" },
+                    { $"{_sinkOptionsSection}:batchPeriod", "00:00:15" }
                 })
                 .Build();
     }

@@ -1,4 +1,5 @@
-﻿using System.Configuration;
+﻿using System;
+using System.Configuration;
 using Serilog.Debugging;
 
 namespace Serilog.Sinks.MSSqlServer.Configuration
@@ -9,7 +10,7 @@ namespace Serilog.Sinks.MSSqlServer.Configuration
         {
             // If there is an `=`, we assume this is a raw connection string not a named value
             // If there are no `=`, attempt to pull the named value from config
-            if (nameOrConnectionString.IndexOf('=') < 0)
+            if (nameOrConnectionString.IndexOf("=", StringComparison.InvariantCultureIgnoreCase) < 0)
             {
                 var cs = ConfigurationManager.ConnectionStrings[nameOrConnectionString];
                 if (cs != null)

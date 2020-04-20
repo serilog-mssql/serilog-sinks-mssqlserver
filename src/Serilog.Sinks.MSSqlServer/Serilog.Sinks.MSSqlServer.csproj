@@ -2,9 +2,9 @@
 
   <PropertyGroup>
     <Description>A Serilog sink that writes events to Microsoft SQL Server</Description>
-    <VersionPrefix>5.3.0</VersionPrefix>
+    <VersionPrefix>5.4.0</VersionPrefix>
     <Authors>Michiel van Oudheusden;Serilog Contributors</Authors>
-    <TargetFrameworks>netstandard2.0;net452;netcoreapp2.0;net461</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net452;net461;net472;netcoreapp2.0;netcoreapp2.2</TargetFrameworks>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <AssemblyName>Serilog.Sinks.MSSqlServer</AssemblyName>
@@ -41,12 +41,16 @@
     <Compile Remove="Configuration\Extensions\System.Configuration\**\*.*" />
     <Compile Remove="Configuration\Implementations\Microsoft.Extensions.Configuration\**\*.*" />
     <Compile Remove="Configuration\Implementations\System.Configuration\**\*.*" />
+    <Compile Remove="Sinks\MSSqlServer\Platform\AzureManagedServiceAuthenticator.cs" />
+    <Compile Remove="Sinks\MSSqlServer\Platform\AzureManagedServiceAuthenticatorStub.cs" />
     <!-- Show in VStudio, but MSBuild ignores these (indicates files are not code, non-published-content, etc.) -->
     <None Include="Configuration\Extensions\Hybrid\**\*.*" />
     <None Include="Configuration\Extensions\Microsoft.Extensions.Configuration\**\*.*" />
     <None Include="Configuration\Extensions\System.Configuration\**\*.*" />
     <None Include="Configuration\Implementations\Microsoft.Extensions.Configuration\**\*.*" />
     <None Include="Configuration\Implementations\System.Configuration\**\*.*" />
+    <None Include="Sinks\MSSqlServer\Platform\AzureManagedServiceAuthenticator.cs" />
+    <None Include="Sinks\MSSqlServer\Platform\AzureManagedServiceAuthenticatorStub.cs" />
     <!-- ItemGroups below with TFM conditions will re-include the compile targets -->
   </ItemGroup>
 
@@ -56,6 +60,7 @@
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="2.0.0" />
     <Compile Include="Configuration\Extensions\Microsoft.Extensions.Configuration\**\*.cs" />
     <Compile Include="Configuration\Implementations\Microsoft.Extensions.Configuration\**\*.cs" />
+    <Compile Include="Sinks\MSSqlServer\Platform\AzureManagedServiceAuthenticatorStub.cs" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.0' Or '$(TargetFramework)' == 'net461' ">
@@ -66,6 +71,19 @@
     <Compile Include="Configuration\Extensions\Hybrid\**\*.cs" />
     <Compile Include="Configuration\Implementations\Microsoft.Extensions.Configuration\**\*.cs" />
     <Compile Include="Configuration\Implementations\System.Configuration\**\*.cs" />
+    <Compile Include="Sinks\MSSqlServer\Platform\AzureManagedServiceAuthenticatorStub.cs" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.2' Or '$(TargetFramework)' == 'net472' ">
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.5.0" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.6.0" />
+    <PackageReference Include="Microsoft.Azure.Services.AppAuthentication" Version="1.4.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="2.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="2.0.0" />
+    <Compile Include="Configuration\Extensions\Hybrid\**\*.cs" />
+    <Compile Include="Configuration\Implementations\Microsoft.Extensions.Configuration\**\*.cs" />
+    <Compile Include="Configuration\Implementations\System.Configuration\**\*.cs" />
+    <Compile Include="Sinks\MSSqlServer\Platform\AzureManagedServiceAuthenticator.cs" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net452' ">
@@ -77,6 +95,7 @@
     <Reference Include="Microsoft.CSharp" />
     <Compile Include="Configuration\Extensions\System.Configuration\**\*.cs" />
     <Compile Include="Configuration\Implementations\System.Configuration\**\*.cs" />
+    <Compile Include="Sinks\MSSqlServer\Platform\AzureManagedServiceAuthenticatorStub.cs" />
   </ItemGroup>
 
   <ItemGroup>

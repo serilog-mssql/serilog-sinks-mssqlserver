@@ -648,8 +648,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
         public void ConfigureColumnOptionsThrowsWhenSettingPrimaryKeyColumnNameToUndefinedColumnNameAndPrimaryKeyRemainsNull()
         {
             // Arrange
-            var columnOptions = new ColumnOptions();
-            columnOptions.PrimaryKey = null;
+            var columnOptions = new ColumnOptions { PrimaryKey = null };
             SetupConfigurationSectionMocks();
             _configurationSectionMock.Setup(s => s["primaryKeyColumnName"]).Returns("TestUndefinedPrimaryKeyColumnName");
             var sut = new MicrosoftExtensionsColumnOptionsProvider();

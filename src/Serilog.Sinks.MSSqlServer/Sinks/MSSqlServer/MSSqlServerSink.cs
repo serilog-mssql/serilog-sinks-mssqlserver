@@ -22,6 +22,7 @@ using System.Threading.Tasks;
 using Serilog.Debugging;
 using Serilog.Events;
 using Serilog.Formatting;
+using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
 using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform;
 using Serilog.Sinks.PeriodicBatching;
 
@@ -36,18 +37,25 @@ namespace Serilog.Sinks.MSSqlServer
         private readonly MSSqlServerSinkTraits _traits;
 
         /// <summary>
-        ///     A reasonable default for the number of events posted in
-        ///     each batch.
+        /// The default database schema name.
+        /// </summary>
+        public const string DefaultSchemaName = "dbo";
+
+        /// <summary>
+        /// A reasonable default for the number of events posted in each batch.
         /// </summary>
         public const int DefaultBatchPostingLimit = 50;
 
         /// <summary>
-        ///     A reasonable default time to wait between checking for event batches.
+        /// A reasonable default time to wait between checking for event batches.
         /// </summary>
         public static readonly TimeSpan DefaultPeriod = TimeSpan.FromSeconds(5);
 
         /// <summary>
-        ///     Construct a sink posting to the specified database.
+        /// Construct a sink posting to the specified database.
+        ///
+        /// Note: this is the legacy version of the extension method. Please use the new one using SinkOptions instead.
+        /// 
         /// </summary>
         /// <param name="connectionString">Connection string to access the database.</param>
         /// <param name="tableName">Name of the table to store the data in.</param>
@@ -66,14 +74,44 @@ namespace Serilog.Sinks.MSSqlServer
             IFormatProvider formatProvider,
             bool autoCreateSqlTable = false,
             ColumnOptions columnOptions = null,
-            string schemaName = "dbo",
+            string schemaName = DefaultSchemaName,
             ITextFormatter logEventFormatter = null)
-            : base(batchPostingLimit, period)
+            : this(connectionString, new SinkOptions(tableName, batchPostingLimit, period, autoCreateSqlTable, schemaName),
+                  formatProvider, columnOptions, logEventFormatter)
         {
+            // Do not add new parameters here. This interface is considered legacy and will be deprecated in the future.
+            // For adding new input parameters use the SinkOptions class and the method overload that accepts SinkOptions.
+        }
+
+        /// <summary>
+        /// Construct a sink posting to the specified database.
+        /// </summary>
+        /// <param name="connectionString">Connection string to access the database.</param>
+        /// <param name="sinkOptions">Supplies additional options for the sink</param>
+        /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
+        /// <param name="columnOptions">Options that pertain to columns</param>
+        /// <param name="logEventFormatter">Supplies custom formatter for the LogEvent column, or null</param>
+        public MSSqlServerSink(
+            string connectionString,
+            SinkOptions sinkOptions,
+            IFormatProvider formatProvider,
+            ColumnOptions columnOptions = null,
+            ITextFormatter logEventFormatter = null)
+            : base(sinkOptions?.BatchPostingLimit ?? DefaultBatchPostingLimit, sinkOptions?.BatchPeriod ?? DefaultPeriod)
+        {
+            if (sinkOptions?.TableName == null)
+            {
+                throw new InvalidOperationException("Table name must be specified!");
+            }
+
             columnOptions?.FinalizeConfigurationForSinkConstructor();
 
-            _sqlConnectionFactory = new SqlConnectionFactory(connectionString);
-            _traits = new MSSqlServerSinkTraits(_sqlConnectionFactory, tableName, schemaName, columnOptions, formatProvider, autoCreateSqlTable, logEventFormatter);
+            var azureManagedServiceAuthenticator = new AzureManagedServiceAuthenticator(sinkOptions.UseAzureManagedIdentity,
+                sinkOptions.AzureServiceTokenProviderResource);
+            _sqlConnectionFactory = new SqlConnectionFactory(connectionString, azureManagedServiceAuthenticator);
+
+            _traits = new MSSqlServerSinkTraits(_sqlConnectionFactory, sinkOptions.TableName, sinkOptions.SchemaName,
+                columnOptions, formatProvider, sinkOptions.AutoCreateSqlTable, logEventFormatter);
         }
 
         /// <summary>

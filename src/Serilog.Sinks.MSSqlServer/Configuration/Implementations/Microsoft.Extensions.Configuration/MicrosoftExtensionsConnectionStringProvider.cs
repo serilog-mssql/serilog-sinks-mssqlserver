@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using System;
+using Microsoft.Extensions.Configuration;
 using Serilog.Debugging;
 
 namespace Serilog.Sinks.MSSqlServer.Configuration
@@ -9,8 +10,8 @@ namespace Serilog.Sinks.MSSqlServer.Configuration
         {
             // If there is an `=`, we assume this is a raw connection string not a named value
             // If there are no `=`, attempt to pull the named value from config
-            if (nameOrConnectionString.IndexOf('=') > -1) return nameOrConnectionString;
-            string cs = appConfiguration?.GetConnectionString(nameOrConnectionString);
+            if (nameOrConnectionString.IndexOf("=", StringComparison.InvariantCultureIgnoreCase) > -1) return nameOrConnectionString;
+            var cs = appConfiguration?.GetConnectionString(nameOrConnectionString);
             if (string.IsNullOrEmpty(cs))
             {
                 SelfLog.WriteLine("MSSqlServer sink configured value {0} is not found in ConnectionStrings settings and does not appear to be a raw connection string.",
