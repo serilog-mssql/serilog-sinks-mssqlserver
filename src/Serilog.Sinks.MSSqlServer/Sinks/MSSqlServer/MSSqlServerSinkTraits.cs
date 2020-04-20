@@ -12,23 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Globalization;
+using System.Linq;
+using System.Text;
 using Serilog.Debugging;
 using Serilog.Events;
 using Serilog.Formatting;
 using Serilog.Sinks.MSSqlServer.Output;
 using Serilog.Sinks.MSSqlServer.Platform;
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Text;
+using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform;
 
 namespace Serilog.Sinks.MSSqlServer
 {
     /// <summary>Contains common functionality and properties used by both MSSqlServerSinks.</summary>
-    internal sealed class MSSqlServerSinkTraits : IDisposable
+    internal class MSSqlServerSinkTraits : IDisposable
     {
-        public string ConnectionString { get; }
+        private bool _disposedValue;
+
         public string TableName { get; }
         public string SchemaName { get; }
         public ColumnOptions ColumnOptions { get; }
@@ -39,21 +42,34 @@ namespace Serilog.Sinks.MSSqlServer
         public ISet<string> StandardColumnNames { get; }
 
         public MSSqlServerSinkTraits(
-            string connectionString,
+            ISqlConnectionFactory sqlConnectionFactory,
             string tableName,
             string schemaName,
             ColumnOptions columnOptions,
             IFormatProvider formatProvider,
             bool autoCreateSqlTable,
             ITextFormatter logEventFormatter)
+            : this(tableName, schemaName, columnOptions, formatProvider, autoCreateSqlTable,
+                logEventFormatter, new SqlTableCreator(new SqlCreateTableWriter(), sqlConnectionFactory))
         {
-            if (string.IsNullOrWhiteSpace(connectionString))
-                throw new ArgumentNullException(nameof(connectionString));
+        }
 
+        // Internal constructor with injectable dependencies for better testability
+        internal MSSqlServerSinkTraits(
+            string tableName,
+            string schemaName,
+            ColumnOptions columnOptions,
+            IFormatProvider formatProvider,
+            bool autoCreateSqlTable,
+            ITextFormatter logEventFormatter,
+            ISqlTableCreator sqlTableCreator)
+        {
             if (string.IsNullOrWhiteSpace(tableName))
                 throw new ArgumentNullException(nameof(tableName));
 
-            ConnectionString = connectionString;
+            if (sqlTableCreator == null)
+                throw new ArgumentNullException(nameof(sqlTableCreator));
+
             TableName = tableName;
             SchemaName = schemaName;
             ColumnOptions = columnOptions ?? new ColumnOptions();
@@ -80,8 +96,7 @@ namespace Serilog.Sinks.MSSqlServer
             {
                 try
                 {
-                    SqlTableCreator tableCreator = new SqlTableCreator(ConnectionString, SchemaName, TableName, EventTable, ColumnOptions);
-                    tableCreator.CreateTable(); // return code ignored, 0 = failure?
+                    sqlTableCreator.CreateTable(SchemaName, TableName, EventTable, ColumnOptions); // return code ignored, 0 = failure?
                 }
                 catch (Exception ex)
                 {
@@ -100,7 +115,7 @@ namespace Serilog.Sinks.MSSqlServer
             foreach (var column in ColumnOptions.Store)
             {
                 // skip Id (auto-incrementing identity)
-                if(column != StandardColumn.Id)
+                if (column != StandardColumn.Id)
                     yield return GetStandardColumnNameAndValue(column, logEvent);
             }
 
@@ -109,11 +124,6 @@ namespace Serilog.Sinks.MSSqlServer
                 foreach (var columnValuePair in ConvertPropertiesToColumn(logEvent.Properties))
                     yield return columnValuePair;
             }
-        }
-
-        public void Dispose()
-        {
-            EventTable.Dispose();
         }
 
         internal KeyValuePair<string, object> GetStandardColumnNameAndValue(StandardColumn column, LogEvent logEvent)
@@ -135,7 +145,7 @@ namespace Serilog.Sinks.MSSqlServer
                 case StandardColumn.LogEvent:
                     return new KeyValuePair<string, object>(ColumnOptions.LogEvent.ColumnName, RenderLogEventColumn(logEvent));
                 default:
-                    throw new ArgumentOutOfRangeException();
+                    throw new ArgumentOutOfRangeException(nameof(column));
             }
         }
 
@@ -184,7 +194,7 @@ namespace Serilog.Sinks.MSSqlServer
 
             var sb = new StringBuilder();
 
-            sb.AppendFormat("<{0}>", options.RootElementName);
+            sb.AppendFormat(CultureInfo.InvariantCulture, "<{0}>", options.RootElementName);
 
             foreach (var property in properties)
             {
@@ -196,15 +206,15 @@ namespace Serilog.Sinks.MSSqlServer
 
                 if (options.UsePropertyKeyAsElementName)
                 {
-                    sb.AppendFormat("<{0}>{1}</{0}>", XmlPropertyFormatter.GetValidElementName(property.Key), value);
+                    sb.AppendFormat(CultureInfo.InvariantCulture, "<{0}>{1}</{0}>", XmlPropertyFormatter.GetValidElementName(property.Key), value);
                 }
                 else
                 {
-                    sb.AppendFormat("<{0} key='{1}'>{2}</{0}>", options.PropertyElementName, property.Key, value);
+                    sb.AppendFormat(CultureInfo.InvariantCulture, "<{0} key='{1}'>{2}</{0}>", options.PropertyElementName, property.Key, value);
                 }
             }
 
-            sb.AppendFormat("</{0}>", options.RootElementName);
+            sb.AppendFormat(CultureInfo.InvariantCulture, "</{0}>", options.RootElementName);
 
             return sb.ToString();
         }
@@ -259,7 +269,7 @@ namespace Serilog.Sinks.MSSqlServer
             conversion = null;
             try
             {
-                conversion = Convert.ChangeType(obj, type);
+                conversion = Convert.ChangeType(obj, type, CultureInfo.InvariantCulture);
                 return true;
             }
             catch
@@ -277,13 +287,13 @@ namespace Serilog.Sinks.MSSqlServer
                 var standardOpts = ColumnOptions.GetStandardColumnOptions(standardColumn);
                 var dataColumn = standardOpts.AsDataColumn();
                 eventsTable.Columns.Add(dataColumn);
-                if(standardOpts == ColumnOptions.PrimaryKey)
+                if (standardOpts == ColumnOptions.PrimaryKey)
                     eventsTable.PrimaryKey = new DataColumn[] { dataColumn };
             }
 
             if (ColumnOptions.AdditionalColumns != null)
             {
-                foreach(var addCol in ColumnOptions.AdditionalColumns)
+                foreach (var addCol in ColumnOptions.AdditionalColumns)
                 {
                     var dataColumn = addCol.AsDataColumn();
                     eventsTable.Columns.Add(dataColumn);
@@ -295,5 +305,19 @@ namespace Serilog.Sinks.MSSqlServer
             return eventsTable;
         }
 
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposedValue)
+            {
+                EventTable.Dispose();
+                _disposedValue = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
     }
 }

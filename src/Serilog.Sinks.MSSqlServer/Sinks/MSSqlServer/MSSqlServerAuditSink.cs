@@ -12,14 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Serilog.Core;
-using Serilog.Debugging;
-using Serilog.Events;
-using Serilog.Formatting;
 using System;
 using System.Data;
 using System.Data.SqlClient;
 using System.Text;
+using Serilog.Core;
+using Serilog.Debugging;
+using Serilog.Events;
+using Serilog.Formatting;
+using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform;
 
 namespace Serilog.Sinks.MSSqlServer
 {
@@ -29,6 +30,7 @@ namespace Serilog.Sinks.MSSqlServer
     /// </summary>
     public class MSSqlServerAuditSink : ILogEventSink, IDisposable
     {
+        private readonly ISqlConnectionFactory _sqlConnectionFactory;
         private readonly MSSqlServerSinkTraits _traits;
 
         /// <summary>
@@ -50,7 +52,7 @@ namespace Serilog.Sinks.MSSqlServer
             string schemaName = "dbo",
             ITextFormatter logEventFormatter = null)
         {
-            columnOptions.FinalizeConfigurationForSinkConstructor();
+            columnOptions?.FinalizeConfigurationForSinkConstructor();
 
             if (columnOptions != null)
             {
@@ -58,8 +60,8 @@ namespace Serilog.Sinks.MSSqlServer
                     throw new NotSupportedException($"The {nameof(ColumnOptions.DisableTriggers)} option is not supported for auditing.");
             }
 
-            _traits = new MSSqlServerSinkTraits(connectionString, tableName, schemaName, columnOptions, formatProvider, autoCreateSqlTable, logEventFormatter);
-            
+            _sqlConnectionFactory = new SqlConnectionFactory(connectionString);
+            _traits = new MSSqlServerSinkTraits(_sqlConnectionFactory, tableName, schemaName, columnOptions, formatProvider, autoCreateSqlTable, logEventFormatter);
         }
 
         /// <summary>Emit the provided log event to the sink.</summary>
@@ -68,17 +70,17 @@ namespace Serilog.Sinks.MSSqlServer
         {
             try
             {
-                using (SqlConnection connection = new SqlConnection(_traits.ConnectionString))
+                using (var connection = _sqlConnectionFactory.Create())
                 {
                     connection.Open();
                     using (SqlCommand command = connection.CreateCommand())
                     {
                         command.CommandType = CommandType.Text;
 
-                        StringBuilder fieldList = new StringBuilder($"INSERT INTO [{_traits.SchemaName}].[{_traits.TableName}] (");
-                        StringBuilder parameterList = new StringBuilder(") VALUES (");
+                        var fieldList = new StringBuilder($"INSERT INTO [{_traits.SchemaName}].[{_traits.TableName}] (");
+                        var parameterList = new StringBuilder(") VALUES (");
 
-                        int index = 0;
+                        var index = 0;
                         foreach (var field in _traits.GetColumnsAndValues(logEvent))
                         {
                             if (index != 0)
@@ -91,7 +93,7 @@ namespace Serilog.Sinks.MSSqlServer
                             parameterList.Append("@P");
                             parameterList.Append(index);
 
-                            SqlParameter parameter = new SqlParameter($"@P{index}", field.Value ?? DBNull.Value);                            
+                            var parameter = new SqlParameter($"@P{index}", field.Value ?? DBNull.Value);
 
                             // The default is SqlDbType.DateTime, which will truncate the DateTime value if the actual
                             // type in the database table is datetime2. So we explicitly set it to DateTime2, which will
@@ -118,7 +120,7 @@ namespace Serilog.Sinks.MSSqlServer
             {
                 SelfLog.WriteLine("Unable to write log event to the database due to following error: {1}", ex.Message);
                 throw;
-            }            
+            }
         }
 
         /// <summary>

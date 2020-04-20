@@ -21,10 +21,10 @@ namespace Serilog.Sinks.MSSqlServer
         [ConfigurationProperty("ConvertToUtc")]
         public string ConvertToUtc
         {
-            get => (string)base["ConvertToUtc"];
+            get => (string)base[nameof(ConvertToUtc)];
             set
             {
-                base["ConvertToUtc"] = value;
+                base[nameof(ConvertToUtc)] = value;
             }
         }
 

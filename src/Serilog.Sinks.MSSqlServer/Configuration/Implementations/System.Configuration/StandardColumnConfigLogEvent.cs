@@ -21,20 +21,20 @@ namespace Serilog.Sinks.MSSqlServer
         [ConfigurationProperty("ExcludeAdditionalProperties")]
         public string ExcludeAdditionalProperties
         {
-            get => (string)base["ExcludeAdditionalProperties"];
+            get => (string)base[nameof(ExcludeAdditionalProperties)];
             set
             {
-                base["ExcludeAdditionalProperties"] = value;
+                base[nameof(ExcludeAdditionalProperties)] = value;
             }
         }
 
         [ConfigurationProperty("ExcludeStandardColumns")]
         public string ExcludeStandardColumns
         {
-            get => (string)base["ExcludeStandardColumns"];
+            get => (string)base[nameof(ExcludeStandardColumns)];
             set
             {
-                base["ExcludeStandardColumns"] = value;
+                base[nameof(ExcludeStandardColumns)] = value;
             }
         }
     }

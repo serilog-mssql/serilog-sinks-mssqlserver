@@ -8,8 +8,8 @@ namespace Serilog.Sinks.MSSqlServer
     /// </summary>
     public class SqlColumn
     {
-        private SqlDbType dataType = SqlDbType.VarChar; // backwards-compatibility default
-        private string columnName = string.Empty;
+        private SqlDbType _dataType = SqlDbType.VarChar; // backwards-compatibility default
+        private string _columnName = string.Empty;
 
         /// <summary>
         /// Default constructor.
@@ -33,17 +33,17 @@ namespace Serilog.Sinks.MSSqlServer
         /// </summary>
         public SqlColumn(DataColumn dataColumn)
         {
-            ColumnName = dataColumn.ColumnName;
+            ColumnName = dataColumn?.ColumnName;
             AllowNull = dataColumn.AllowDBNull;
 
             if (!SqlDataTypes.ReverseTypeMap.ContainsKey(dataColumn.DataType))
-                throw new ArgumentException($".NET type {dataColumn.DataType.ToString()} does not map to a supported SQL column data type.");
+                throw new ArgumentException($".NET type {dataColumn.DataType} does not map to a supported SQL column data type.");
 
             DataType = SqlDataTypes.ReverseTypeMap[dataColumn.DataType];
             DataLength = dataColumn.MaxLength;
 
-            if(DataLength == 0 && SqlDataTypes.DataLengthRequired.Contains(DataType))
-                throw new ArgumentException($".NET type {dataColumn.DataType.ToString()} maps to a SQL column data type requiring a non-zero DataLength property.");
+            if (DataLength == 0 && SqlDataTypes.DataLengthRequired.Contains(DataType))
+                throw new ArgumentException($".NET type {dataColumn.DataType} maps to a SQL column data type requiring a non-zero DataLength property.");
         }
 
         /// <summary>
@@ -53,13 +53,13 @@ namespace Serilog.Sinks.MSSqlServer
         {
             get
             {
-                if (string.IsNullOrWhiteSpace(columnName) && StandardColumnIdentifier != null)
+                if (string.IsNullOrWhiteSpace(_columnName) && StandardColumnIdentifier != null)
                     return StandardColumnIdentifier.ToString();
-                return columnName;
+                return _columnName;
             }
             set
             {
-                columnName = value;
+                _columnName = value;
             }
         }
 
@@ -69,12 +69,12 @@ namespace Serilog.Sinks.MSSqlServer
         // Some Standard Columns hide this (via "new") to impose a more restricted list.
         public SqlDbType DataType
         {
-            get => dataType;
+            get => _dataType;
             set
             {
                 if (!SqlDataTypes.SystemTypeMap.ContainsKey(value))
-                    throw new ArgumentException($"SQL column data type {value.ToString()} is not supported by this sink.");
-                dataType = value;
+                    throw new ArgumentException($"SQL column data type {value} is not supported by this sink.");
+                _dataType = value;
             }
         }
 
@@ -82,7 +82,7 @@ namespace Serilog.Sinks.MSSqlServer
         /// Indicates whether NULLs can be stored in this column. Default is true. Always required.
         /// </summary>
         // The Id Standard Column hides this (via "new") to force this to false.
-        public bool AllowNull { get; set; } = true; 
+        public bool AllowNull { get; set; } = true;
 
         /// <summary>
         /// For character-storage DataTypes such as CHAR or VARCHAR, this defines the maximum size. The default -1 represents MAX.
@@ -106,7 +106,7 @@ namespace Serilog.Sinks.MSSqlServer
         /// SqlColumn object is stored in the DataColumn's ExtendedProperties collection.
         /// Virtual so that the Id Standard Column can perform additional configuration.
         /// </summary>
-        internal virtual DataColumn AsDataColumn() 
+        internal virtual DataColumn AsDataColumn()
         {
             var dataColumn = new DataColumn
             {
@@ -117,8 +117,8 @@ namespace Serilog.Sinks.MSSqlServer
 
             if (SqlDataTypes.DataLengthRequired.Contains(DataType))
             {
-                if(DataLength == 0)
-                    throw new ArgumentException($"Column \"{ColumnName}\" is of type {DataType.ToString().ToLowerInvariant()} which requires a non-zero DataLength.");
+                if (DataLength == 0)
+                    throw new ArgumentException($"Column \"{ColumnName}\" is of type {DataType.ToString().ToUpperInvariant()} which requires a non-zero DataLength.");
 
                 dataColumn.MaxLength = DataLength;
             }

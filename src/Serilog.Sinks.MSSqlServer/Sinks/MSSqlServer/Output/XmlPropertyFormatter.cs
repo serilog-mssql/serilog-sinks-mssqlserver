@@ -27,13 +27,12 @@ namespace Serilog.Sinks.MSSqlServer.Output
     /// </summary>
     internal static class XmlPropertyFormatter
     {
-
         /// <summary>
         /// Regex to trasnform any non-xml char into ?, acoiding any exceptions on inserting the xml properties into the database
         /// </summary>
-        private static Regex _invalidXMLChars = new Regex(
-        @"(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F\uFEFF\uFFFE\uFFFF]",
-        RegexOptions.Compiled);
+        private static readonly Regex _invalidXMLChars = new Regex(
+            @"(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F\uFEFF\uFFFE\uFFFF]",
+            RegexOptions.Compiled);
 
         /// <summary>
         ///     Simplify the object so as to make handling the serialized
@@ -51,7 +50,7 @@ namespace Serilog.Sinks.MSSqlServer.Output
             {
                 var sb = new StringBuilder();
 
-                bool isEmpty = true;
+                var isEmpty = true;
 
                 foreach (var element in dict.Elements)
                 {
@@ -66,24 +65,24 @@ namespace Serilog.Sinks.MSSqlServer.Output
                         isEmpty = false;
                         if (!options.OmitDictionaryContainerElement)
                         {
-                            sb.AppendFormat("<{0}>", options.DictionaryElementName);
+                            sb.AppendFormat(CultureInfo.InvariantCulture, "<{0}>", options.DictionaryElementName);
                         }
                     }
 
                     var key = SimplifyScalar(element.Key.Value);
                     if (options.UsePropertyKeyAsElementName)
                     {
-                        sb.AppendFormat("<{0}>{1}</{0}>", GetValidElementName(key), itemValue);
+                        sb.AppendFormat(CultureInfo.InvariantCulture, "<{0}>{1}</{0}>", GetValidElementName(key), itemValue);
                     }
                     else
                     {
-                        sb.AppendFormat("<{0} key='{1}'>{2}</{0}>", options.ItemElementName, key, itemValue);
+                        sb.AppendFormat(CultureInfo.InvariantCulture, "<{0} key='{1}'>{2}</{0}>", options.ItemElementName, key, itemValue);
                     }
                 }
 
                 if (!isEmpty && !options.OmitDictionaryContainerElement)
                 {
-                    sb.AppendFormat("</{0}>", options.DictionaryElementName);
+                    sb.AppendFormat(CultureInfo.InvariantCulture, "</{0}>", options.DictionaryElementName);
                 }
 
                 return sb.ToString();
@@ -93,7 +92,7 @@ namespace Serilog.Sinks.MSSqlServer.Output
             {
                 var sb = new StringBuilder();
 
-                bool isEmpty = true;
+                var isEmpty = true;
 
                 foreach (var element in seq.Elements)
                 {
@@ -108,16 +107,16 @@ namespace Serilog.Sinks.MSSqlServer.Output
                         isEmpty = false;
                         if (!options.OmitSequenceContainerElement)
                         {
-                            sb.AppendFormat("<{0}>", options.SequenceElementName);
+                            sb.AppendFormat(CultureInfo.InvariantCulture, "<{0}>", options.SequenceElementName);
                         }
                     }
 
-                    sb.AppendFormat("<{0}>{1}</{0}>", options.ItemElementName, itemValue);
+                    sb.AppendFormat(CultureInfo.InvariantCulture, "<{0}>{1}</{0}>", options.ItemElementName, itemValue);
                 }
 
                 if (!isEmpty && !options.OmitSequenceContainerElement)
                 {
-                    sb.AppendFormat("</{0}>", options.SequenceElementName);
+                    sb.AppendFormat(CultureInfo.InvariantCulture, "</{0}>", options.SequenceElementName);
                 }
 
                 return sb.ToString();
@@ -129,7 +128,7 @@ namespace Serilog.Sinks.MSSqlServer.Output
 
                 var sb = new StringBuilder();
 
-                bool isEmpty = true;
+                var isEmpty = true;
 
                 foreach (var element in props)
                 {
@@ -146,22 +145,22 @@ namespace Serilog.Sinks.MSSqlServer.Output
                         {
                             if (options.UsePropertyKeyAsElementName)
                             {
-                                sb.AppendFormat("<{0}>", GetValidElementName(str.TypeTag));
+                                sb.AppendFormat(CultureInfo.InvariantCulture, "<{0}>", GetValidElementName(str.TypeTag));
                             }
                             else
                             {
-                                sb.AppendFormat("<{0} type='{1}'>", options.StructureElementName, str.TypeTag);
+                                sb.AppendFormat(CultureInfo.InvariantCulture, "<{0} type='{1}'>", options.StructureElementName, str.TypeTag);
                             }
                         }
                     }
 
                     if (options.UsePropertyKeyAsElementName)
                     {
-                        sb.AppendFormat("<{0}>{1}</{0}>", GetValidElementName(element.Key), itemValue);
+                        sb.AppendFormat(CultureInfo.InvariantCulture, "<{0}>{1}</{0}>", GetValidElementName(element.Key), itemValue);
                     }
                     else
                     {
-                        sb.AppendFormat("<{0} key='{1}'>{2}</{0}>", options.PropertyElementName,
+                        sb.AppendFormat(CultureInfo.InvariantCulture, "<{0} key='{1}'>{2}</{0}>", options.PropertyElementName,
                             element.Key, itemValue);
                     }
                 }
@@ -170,11 +169,11 @@ namespace Serilog.Sinks.MSSqlServer.Output
                 {
                     if (options.UsePropertyKeyAsElementName)
                     {
-                        sb.AppendFormat("</{0}>", GetValidElementName(str.TypeTag));
+                        sb.AppendFormat(CultureInfo.InvariantCulture, "</{0}>", GetValidElementName(str.TypeTag));
                     }
                     else
                     {
-                        sb.AppendFormat("</{0}>", options.StructureElementName);
+                        sb.AppendFormat(CultureInfo.InvariantCulture, "</{0}>", options.StructureElementName);
                     }
                 }
 
@@ -191,7 +190,7 @@ namespace Serilog.Sinks.MSSqlServer.Output
                 return "x";
             }
 
-            string validName = name.Trim();
+            var validName = name.Trim();
 
             if (!char.IsLetter(validName[0]) || validName.StartsWith("xml", true, CultureInfo.CurrentCulture))
             {
@@ -207,7 +206,7 @@ namespace Serilog.Sinks.MSSqlServer.Output
         {
             if (value == null) return null;
 
-            return new XText(_invalidXMLChars.Replace(value.ToString(), m => "\\u" + ((ushort)m.Value[0]).ToString("x4"))).ToString();
+            return new XText(_invalidXMLChars.Replace(value.ToString(), m => "\\u" + ((ushort)m.Value[0]).ToString("x4", CultureInfo.InvariantCulture))).ToString();
         }
     }
 }

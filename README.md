@@ -5,7 +5,6 @@ A Serilog sink that writes events to Microsoft SQL Server. This sink will write 
 **Package** - [Serilog.Sinks.MSSqlServer](http://nuget.org/packages/serilog.sinks.mssqlserver)
 | **Minimum Platforms** - .NET Framework 4.5.2, .NET Core 2.0, .NET Standard 2.0
 
-From version 5.1 and up, this sink also support the Audit capabilities.
 #### Topics
 
 * [Sink Configuration Options](#sink-configuration-options)

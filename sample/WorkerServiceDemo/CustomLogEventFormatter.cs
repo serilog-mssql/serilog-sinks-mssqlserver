@@ -1,7 +1,7 @@
-﻿using Serilog.Events;
-using Serilog.Formatting;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
+using Serilog.Events;
+using Serilog.Formatting;
 
 namespace WorkerServiceDemo
 {

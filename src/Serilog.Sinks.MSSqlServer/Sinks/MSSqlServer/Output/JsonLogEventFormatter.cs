@@ -12,15 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Globalization;
+using System.IO;
+using System.Linq;
 using Serilog.Events;
 using Serilog.Formatting;
 using Serilog.Formatting.Json;
 using Serilog.Parsing;
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.IO;
-using System.Linq;
 
 namespace Serilog.Sinks.MSSqlServer.Output
 {
@@ -29,11 +30,10 @@ namespace Serilog.Sinks.MSSqlServer.Output
     /// </summary>
     internal class JsonLogEventFormatter : ITextFormatter
     {
-        static readonly JsonValueFormatter ValueFormatter = new JsonValueFormatter(typeTagName: null);
-        private const string COMMA_DELIMITER = ",";
-
+        private const string _commaDelimiter = ",";
+        private readonly JsonValueFormatter _valueFormatter;
         private readonly MSSqlServerSinkTraits _traits;
- 
+
         /// <summary>
         /// Constructor. A reference to the parent Traits object is used so that JSON
         /// can serialize Standard Column values exactly the way they would be written
@@ -42,6 +42,7 @@ namespace Serilog.Sinks.MSSqlServer.Output
         public JsonLogEventFormatter(MSSqlServerSinkTraits parent)
         {
             _traits = parent;
+            _valueFormatter = new JsonValueFormatter(typeTagName: null);
         }
 
         /// <summary>
@@ -54,7 +55,7 @@ namespace Serilog.Sinks.MSSqlServer.Output
 
             output.Write("{");
 
-            string precedingDelimiter = "";
+            var precedingDelimiter = "";
 
             if (_traits.ColumnOptions.LogEvent.ExcludeStandardColumns == false)
             {
@@ -74,7 +75,7 @@ namespace Serilog.Sinks.MSSqlServer.Output
             {
                 output.Write(precedingDelimiter);
                 WriteProperties(logEvent.Properties, output);
-                precedingDelimiter = COMMA_DELIMITER;
+                precedingDelimiter = _commaDelimiter;
             }
 
             var tokensWithFormat = logEvent.MessageTemplate.Tokens
@@ -107,9 +108,9 @@ namespace Serilog.Sinks.MSSqlServer.Output
                 return;
 
             output.Write(precedingDelimiter);
-            precedingDelimiter = COMMA_DELIMITER;
+            precedingDelimiter = _commaDelimiter;
             var colData = WritePropertyName(logEvent, output, col);
-            string value = (colData.Value ?? string.Empty).ToString();
+            var value = (colData.Value ?? string.Empty).ToString();
             JsonValueFormatter.WriteQuotedJsonString(value, output);
         }
 
@@ -119,11 +120,11 @@ namespace Serilog.Sinks.MSSqlServer.Output
                 return;
 
             output.Write(precedingDelimiter);
-            precedingDelimiter = COMMA_DELIMITER;
+            precedingDelimiter = _commaDelimiter;
             var colData = WritePropertyName(logEvent, output, StandardColumn.TimeStamp);
-            string value = _traits.ColumnOptions.TimeStamp.DataType == SqlDbType.DateTime
-                ? ((DateTime)colData.Value).ToString("o")
-                : ((DateTimeOffset)colData.Value).ToString("o");
+            var value = _traits.ColumnOptions.TimeStamp.DataType == SqlDbType.DateTime
+                ? ((DateTime)colData.Value).ToString("o", CultureInfo.InvariantCulture)
+                : ((DateTimeOffset)colData.Value).ToString("o", CultureInfo.InvariantCulture);
             JsonValueFormatter.WriteQuotedJsonString(value, output);
         }
 
@@ -136,32 +137,32 @@ namespace Serilog.Sinks.MSSqlServer.Output
             return colData;
         }
 
-        static void WriteProperties(IReadOnlyDictionary<string, LogEventPropertyValue> properties, TextWriter output)
+        private void WriteProperties(IReadOnlyDictionary<string, LogEventPropertyValue> properties, TextWriter output)
         {
             output.Write("\"Properties\":{");
 
-            string precedingDelimiter = "";
+            var precedingDelimiter = "";
             foreach (var property in properties)
             {
                 output.Write(precedingDelimiter);
-                precedingDelimiter = COMMA_DELIMITER;
+                precedingDelimiter = _commaDelimiter;
                 JsonValueFormatter.WriteQuotedJsonString(property.Key, output);
                 output.Write(':');
-                ValueFormatter.Format(property.Value, output);
+                _valueFormatter.Format(property.Value, output);
             }
 
             output.Write('}');
         }
 
-        static void WriteRenderings(IEnumerable<IGrouping<string, PropertyToken>> tokensWithFormat, IReadOnlyDictionary<string, LogEventPropertyValue> properties, TextWriter output)
+        private static void WriteRenderings(IEnumerable<IGrouping<string, PropertyToken>> tokensWithFormat, IReadOnlyDictionary<string, LogEventPropertyValue> properties, TextWriter output)
         {
             output.Write("\"Renderings\":{");
 
-            string precedingDelimiter = "";
+            var precedingDelimiter = "";
             foreach (var ptoken in tokensWithFormat)
             {
                 output.Write(precedingDelimiter);
-                precedingDelimiter = COMMA_DELIMITER;
+                precedingDelimiter = _commaDelimiter;
 
                 JsonValueFormatter.WriteQuotedJsonString(ptoken.Key, output);
                 output.Write(":[");
@@ -170,15 +171,17 @@ namespace Serilog.Sinks.MSSqlServer.Output
                 foreach (var format in ptoken)
                 {
                     output.Write(fdelim);
-                    fdelim = COMMA_DELIMITER;
+                    fdelim = _commaDelimiter;
 
                     output.Write("{\"Format\":");
                     JsonValueFormatter.WriteQuotedJsonString(format.Format, output);
 
                     output.Write(",\"Rendering\":");
-                    var sw = new StringWriter();
-                    format.Render(properties, sw);
-                    JsonValueFormatter.WriteQuotedJsonString(sw.ToString(), output);
+                    using (var sw = new StringWriter())
+                    {
+                        format.Render(properties, sw);
+                        JsonValueFormatter.WriteQuotedJsonString(sw.ToString(), output);
+                    }
                     output.Write('}');
                 }
 

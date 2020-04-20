@@ -16,11 +16,13 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Serilog.Debugging;
 using Serilog.Events;
 using Serilog.Formatting;
+using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform;
 using Serilog.Sinks.PeriodicBatching;
 
 namespace Serilog.Sinks.MSSqlServer
@@ -30,6 +32,9 @@ namespace Serilog.Sinks.MSSqlServer
     /// </summary>
     public class MSSqlServerSink : PeriodicBatchingSink
     {
+        private readonly ISqlConnectionFactory _sqlConnectionFactory;
+        private readonly MSSqlServerSinkTraits _traits;
+
         /// <summary>
         ///     A reasonable default for the number of events posted in
         ///     each batch.
@@ -40,8 +45,6 @@ namespace Serilog.Sinks.MSSqlServer
         ///     A reasonable default time to wait between checking for event batches.
         /// </summary>
         public static readonly TimeSpan DefaultPeriod = TimeSpan.FromSeconds(5);
-
-        private readonly MSSqlServerSinkTraits _traits;
 
         /// <summary>
         ///     Construct a sink posting to the specified database.
@@ -67,8 +70,10 @@ namespace Serilog.Sinks.MSSqlServer
             ITextFormatter logEventFormatter = null)
             : base(batchPostingLimit, period)
         {
-            columnOptions.FinalizeConfigurationForSinkConstructor();
-            _traits = new MSSqlServerSinkTraits(connectionString, tableName, schemaName, columnOptions, formatProvider, autoCreateSqlTable, logEventFormatter);
+            columnOptions?.FinalizeConfigurationForSinkConstructor();
+
+            _sqlConnectionFactory = new SqlConnectionFactory(connectionString);
+            _traits = new MSSqlServerSinkTraits(_sqlConnectionFactory, tableName, schemaName, columnOptions, formatProvider, autoCreateSqlTable, logEventFormatter);
         }
 
         /// <summary>
@@ -87,7 +92,7 @@ namespace Serilog.Sinks.MSSqlServer
 
             try
             {
-                using (var cn = new SqlConnection(_traits.ConnectionString))
+                using (var cn = _sqlConnectionFactory.Create())
                 {
                     await cn.OpenAsync().ConfigureAwait(false);
                     using (var copy = _traits.ColumnOptions.DisableTriggers
@@ -95,7 +100,7 @@ namespace Serilog.Sinks.MSSqlServer
                             : new SqlBulkCopy(cn, SqlBulkCopyOptions.CheckConstraints | SqlBulkCopyOptions.FireTriggers, null)
                     )
                     {
-                        copy.DestinationTableName = string.Format("[{0}].[{1}]", _traits.SchemaName, _traits.TableName);
+                        copy.DestinationTableName = string.Format(CultureInfo.InvariantCulture, "[{0}].[{1}]", _traits.SchemaName, _traits.TableName);
                         foreach (var column in _traits.EventTable.Columns)
                         {
                             var columnName = ((DataColumn)column).ColumnName;
@@ -118,7 +123,20 @@ namespace Serilog.Sinks.MSSqlServer
             }
         }
 
-        void FillDataTable(IEnumerable<LogEvent> events)
+        /// <summary>
+        ///     Disposes the connection
+        /// </summary>
+        /// <param name="disposing"></param>
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+            if (disposing)
+            {
+                _traits.Dispose();
+            }
+        }
+
+        private void FillDataTable(IEnumerable<LogEvent> events)
         {
             // Add the new rows to the collection. 
             foreach (var logEvent in events)
@@ -134,19 +152,6 @@ namespace Serilog.Sinks.MSSqlServer
             }
 
             _traits.EventTable.AcceptChanges();
-        }
-
-        /// <summary>
-        ///     Disposes the connection
-        /// </summary>
-        /// <param name="disposing"></param>
-        protected override void Dispose(bool disposing)
-        {
-            base.Dispose(disposing);
-            if (disposing)
-            {
-                _traits.Dispose();
-            }
         }
     }
 }
