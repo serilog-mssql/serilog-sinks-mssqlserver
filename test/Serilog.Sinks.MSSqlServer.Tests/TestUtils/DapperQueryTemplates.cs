@@ -25,6 +25,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests.TestUtils
         public string ColumnName { get; set; }
         public string SchemaName { get; set; }
         public string DataType { get; set; }
+        public string DataLength { get; set; }
+        public string AllowNull { get; set; }
     }
 
     public class sp_pkey

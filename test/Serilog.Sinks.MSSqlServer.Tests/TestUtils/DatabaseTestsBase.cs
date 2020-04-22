@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
+using System.Globalization;
 using System.Linq;
 using Dapper;
 using FluentAssertions;
@@ -40,6 +41,41 @@ namespace Serilog.Sinks.MSSqlServer.Tests.TestUtils
                 }
 
                 infoSchema.Should().Contain(columns => columns.ColumnName == "Id");
+            }
+        }
+
+        protected static void VerifyDatabaseColumnsWereCreated(IEnumerable<SqlColumn> columnDefinitions)
+        {
+            if (columnDefinitions == null)
+            {
+                return;
+            }
+
+            using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
+            {
+                var logEvents = conn.Query<InfoSchema>($@"SELECT COLUMN_NAME AS ColumnName, UPPER(DATA_TYPE) as DataType, CHARACTER_MAXIMUM_LENGTH as DataLength, IS_NULLABLE as AllowNull
+                    FROM {DatabaseFixture.Database}.INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{DatabaseFixture.LogTableName}'");
+                var infoSchema = logEvents as InfoSchema[] ?? logEvents.ToArray();
+
+                foreach (var definition in columnDefinitions)
+                {
+                    var column = infoSchema.SingleOrDefault(c => c.ColumnName == definition.ColumnName);
+                    Assert.NotNull(column);
+                    var definitionDataType = definition.DataType.ToString().ToUpperInvariant();
+                    Assert.Equal(definitionDataType, column.DataType);
+                    if (definitionDataType == "NVARCHAR" || definitionDataType == "VARCHAR")
+                    {
+                        Assert.Equal(definition.DataLength.ToString(CultureInfo.InvariantCulture), column.DataLength);
+                    }
+                    if (definition.AllowNull)
+                    {
+                        Assert.Equal("YES", column.AllowNull);
+                    }
+                    else
+                    {
+                        Assert.Equal("NO", column.AllowNull);
+                    }
+                }
             }
         }
 
