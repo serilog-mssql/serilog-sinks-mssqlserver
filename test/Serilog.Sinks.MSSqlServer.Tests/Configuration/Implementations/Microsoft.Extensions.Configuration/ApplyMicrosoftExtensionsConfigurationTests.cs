@@ -2,10 +2,12 @@
 using Moq;
 using Serilog.Sinks.MSSqlServer.Configuration;
 using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
+using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
 
 namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsoft.Extensions.Configuration
 {
+    [Trait(TestCategory.TraitName, TestCategory.Unit)]
     public class ApplyMicrosoftExtensionsConfigurationTests
     {
         [Fact]

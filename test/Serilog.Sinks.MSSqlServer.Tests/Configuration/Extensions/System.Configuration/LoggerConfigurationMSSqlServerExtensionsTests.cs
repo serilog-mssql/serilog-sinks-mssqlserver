@@ -4,10 +4,12 @@ using Serilog.Configuration;
 using Serilog.Formatting;
 using Serilog.Sinks.MSSqlServer.Configuration.Factories;
 using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
+using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
 
 namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.System.Configuration
 {
+    [Trait(TestCategory.TraitName, TestCategory.Unit)]
     public class LoggerConfigurationMSSqlServerExtensionsTests
     {
         private readonly LoggerConfiguration _loggerConfiguration;

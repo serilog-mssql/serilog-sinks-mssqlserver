@@ -9,6 +9,7 @@ using Xunit.Abstractions;
 
 namespace Serilog.Sinks.MSSqlServer.Tests
 {
+    [Trait(TestCategory.TraitName, TestCategory.Integration)]
     public class IndexingFeaturesTests : DatabaseTestsBase
     {
         public IndexingFeaturesTests(ITestOutputHelper output) : base(output)
@@ -18,7 +19,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         [Fact]
         public void NonClusteredDefaultIdPrimaryKey()
         {
-            // arrange
+            // Arrange
             var columnOptions = new ColumnOptions();
             columnOptions.Id.NonClusteredIndex = true;
 
@@ -35,7 +36,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 .CreateLogger();
             Log.CloseAndFlush();
 
-            // assert
+            // Assert
             using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
             {
                 conn.Execute($"use {DatabaseFixture.Database}");
@@ -50,7 +51,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         [Fact]
         public void AlternatePrimaryKey()
         {
-            // arrange
+            // Arrange
             var columnOptions = new ColumnOptions();
             columnOptions.PrimaryKey = columnOptions.TimeStamp;
 
@@ -67,7 +68,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 .CreateLogger();
             Log.CloseAndFlush();
 
-            // assert
+            // Assert
             using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
             {
                 conn.Execute($"use {DatabaseFixture.Database}");
@@ -82,7 +83,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         [Fact]
         public void ColumnstoreIndex()
         {
-            // arrange
+            // Arrange
             var columnOptions = new ColumnOptions();
             // char MAX not supported prior to SQL2017
             columnOptions.Exception.DataLength = 512;
@@ -105,7 +106,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 .CreateLogger();
             Log.CloseAndFlush();
 
-            // assert
+            // Assert
             using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
             {
                 conn.Execute($"use {DatabaseFixture.Database}");

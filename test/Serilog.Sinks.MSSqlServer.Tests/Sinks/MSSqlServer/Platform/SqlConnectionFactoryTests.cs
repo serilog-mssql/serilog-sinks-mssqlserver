@@ -6,6 +6,7 @@ using Xunit;
 
 namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Platform
 {
+    [Trait(TestCategory.TraitName, TestCategory.Unit)]
     public class SqlConnectionFactoryTests
     {
         private readonly Mock<IAzureManagedServiceAuthenticator> _azureManagedServiceAuthenticatorMock;

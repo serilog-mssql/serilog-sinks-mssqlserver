@@ -8,6 +8,7 @@ using Xunit.Abstractions;
 
 namespace Serilog.Sinks.MSSqlServer.Tests
 {
+    [Trait(TestCategory.TraitName, TestCategory.Integration)]
     public class SqlTypesTests : DatabaseTestsBase
     {
         public SqlTypesTests(ITestOutputHelper output) : base(output)

@@ -12,6 +12,7 @@ using Xunit.Abstractions;
 
 namespace Serilog.Sinks.MSSqlServer.Tests
 {
+    [Trait(TestCategory.TraitName, TestCategory.Integration)]
     public class MiscFeaturesTests : DatabaseTestsBase
     {
         public MiscFeaturesTests(ITestOutputHelper output) : base(output)
@@ -25,7 +26,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             // meaning custom properties which have their own column. This was the original
             // meaning of the flag. Contrast with LogEventExcludeStandardProperties below.
 
-            // arrange
+            // Arrange
             var columnOptions = new ColumnOptions()
             {
                 AdditionalColumns = new List<SqlColumn>
@@ -49,7 +50,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 )
                 .CreateLogger();
 
-            // act
+            // Act
             Log.Logger
                 .ForContext("A", "AValue")
                 .ForContext("B", "BValue")
@@ -57,7 +58,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
 
             Log.CloseAndFlush();
 
-            // assert
+            // Assert
             using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
             {
                 var logEvents = conn.Query<LogEventColumn>($"SELECT LogEvent from {DatabaseFixture.LogTableName}");
@@ -71,7 +72,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         [Fact]
         public void LogEventExcludeStandardColumns()
         {
-            // arrange
+            // Arrange
             var columnOptions = new ColumnOptions();
             columnOptions.Store.Remove(StandardColumn.Properties);
             columnOptions.Store.Add(StandardColumn.LogEvent);
@@ -89,14 +90,14 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 )
                 .CreateLogger();
 
-            // act
+            // Act
             Log.Logger
                 .ForContext("A", "AValue")
                 .Information("Logging message");
 
             Log.CloseAndFlush();
 
-            // assert
+            // Assert
             using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
             {
                 var logEvents = conn.Query<LogEventColumn>($"SELECT LogEvent from {DatabaseFixture.LogTableName}");
@@ -109,7 +110,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         [Fact]
         public void ExcludeIdColumn()
         {
-            // arrange
+            // Arrange
             var columnOptions = new ColumnOptions();
             columnOptions.Store.Remove(StandardColumn.Id);
 
@@ -126,7 +127,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 .CreateLogger();
             Log.CloseAndFlush();
 
-            // assert
+            // Assert
             using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
             {
                 conn.Execute($"use {DatabaseFixture.Database}");
@@ -141,7 +142,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         [Fact]
         public void BigIntIdColumn()
         {
-            // arrange
+            // Arrange
             var columnOptions = new ColumnOptions();
             columnOptions.Id.DataType = SqlDbType.BigInt;
 
@@ -158,7 +159,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 .CreateLogger();
             Log.CloseAndFlush();
 
-            // assert
+            // Assert
             using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
             {
                 var query = conn.Query<InfoSchema>($@"SELECT DATA_TYPE AS DataType FROM {DatabaseFixture.Database}.INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{DatabaseFixture.LogTableName}' AND COLUMN_NAME = '{columnOptions.Id.ColumnName}'");
@@ -172,7 +173,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         [Fact]
         public void XmlPropertyColumn()
         {
-            // arrange
+            // Arrange
             var columnOptions = new ColumnOptions();
             columnOptions.Properties.DataType = SqlDbType.Xml;
 
@@ -189,7 +190,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 .CreateLogger();
             Log.CloseAndFlush();
 
-            // assert
+            // Assert
             using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
             {
                 var query = conn.Query<InfoSchema>($@"SELECT DATA_TYPE AS DataType FROM {DatabaseFixture.Database}.INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{DatabaseFixture.LogTableName}' AND COLUMN_NAME = '{columnOptions.Properties.ColumnName}'");
@@ -208,7 +209,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             // needs, and we don't want this left-over table
             // to create misleading results in other tests.
 
-            // arrange
+            // Arrange
             var schemaName = "CustomTestSchema";
             var tableName = "CustomSchemaLogTable";
             var columnOptions = new ColumnOptions();
@@ -227,7 +228,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 .CreateLogger();
             Log.CloseAndFlush();
 
-            // assert
+            // Assert
             using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
             {
                 var query = conn.Query<InfoSchema>("SELECT SCHEMA_NAME AS SchemaName FROM INFORMATION_SCHEMA.SCHEMATA");
@@ -246,7 +247,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             // needs, and we don't want this left-over table
             // to create misleading results in other tests.
 
-            // arrange
+            // Arrange
             var schemaName = "CustomTestSchema";
             var tableName = "CustomSchemaLogTable";
             var columnOptions = new ColumnOptions();
@@ -268,7 +269,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 .CreateLogger();
             Log.CloseAndFlush();
 
-            // assert
+            // Assert
             using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
             {
                 var query = conn.Query<InfoSchema>("SELECT SCHEMA_NAME AS SchemaName FROM INFORMATION_SCHEMA.SCHEMATA");
@@ -282,7 +283,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         [Fact]
         public void LogEventStoreAsEnum()
         {
-            // arrange
+            // Arrange
             var columnOptions = new ColumnOptions();
             columnOptions.Level.StoreAsEnum = true;
             columnOptions.Store.Add(StandardColumn.LogEvent);
@@ -297,13 +298,13 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 )
                 .CreateLogger();
 
-            // act
+            // Act
             Log.Logger
                 .Information("Logging message");
 
             Log.CloseAndFlush();
 
-            // assert
+            // Assert
             using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
             {
                 var logEventCount = conn.Query<LogEventColumn>($"SELECT Id from {DatabaseFixture.LogTableName}");

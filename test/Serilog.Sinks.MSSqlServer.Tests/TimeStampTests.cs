@@ -9,6 +9,7 @@ using Xunit.Abstractions;
 
 namespace Serilog.Sinks.MSSqlServer.Tests
 {
+    [Trait(TestCategory.TraitName, TestCategory.Integration)]
     public class TimeStampTests : DatabaseTestsBase
     {
         public TimeStampTests(ITestOutputHelper output) : base(output)
@@ -19,7 +20,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         [Fact]
         public void CanCreateDatabaseWithDateTimeByDefault()
         {
-            // arrange
+            // Arrange
             var loggerConfiguration = new LoggerConfiguration();
             Log.Logger = loggerConfiguration.WriteTo.MSSqlServer(
                 connectionString: DatabaseFixture.LogEventsConnectionString,
@@ -30,12 +31,12 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 columnOptions: new ColumnOptions())
                 .CreateLogger();
 
-            // act
+            // Act
             const string loggingInformationMessage = "Logging Information message";
             Log.Information(loggingInformationMessage);
             Log.CloseAndFlush();
 
-            // assert
+            // Assert
             using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
             {
                 var logEvents = conn.Query<TestTimeStampDateTimeEntry>($"SELECT TimeStamp FROM {DatabaseFixture.LogTableName}");
@@ -47,7 +48,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         [Fact]
         public void CanStoreDateTimeOffsetWithCorrectLocalTimeZone()
         {
-            // arrange
+            // Arrange
             var loggerConfiguration = new LoggerConfiguration();
             Log.Logger = loggerConfiguration.WriteTo.MSSqlServer(
                 connectionString: DatabaseFixture.LogEventsConnectionString,
@@ -59,12 +60,12 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 .CreateLogger();
             var dateTimeOffsetNow = DateTimeOffset.Now;
 
-            // act
+            // Act
             const string loggingInformationMessage = "Logging Information message";
             Log.Information(loggingInformationMessage);
             Log.CloseAndFlush();
 
-            // assert
+            // Assert
             using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
             {
                 var logEvents = conn.Query<TestTimeStampDateTimeOffsetEntry>($"SELECT TimeStamp FROM {DatabaseFixture.LogTableName}");
@@ -76,7 +77,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         [Fact]
         public void CanStoreDateTimeOffsetWithUtcTimeZone()
         {
-            // arrange
+            // Arrange
             var loggerConfiguration = new LoggerConfiguration();
             Log.Logger = loggerConfiguration.WriteTo.MSSqlServer(
                 connectionString: DatabaseFixture.LogEventsConnectionString,
@@ -87,12 +88,12 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 columnOptions: new ColumnOptions { TimeStamp = { DataType = SqlDbType.DateTimeOffset, ConvertToUtc = true } })
                 .CreateLogger();
 
-            // act
+            // Act
             const string loggingInformationMessage = "Logging Information message";
             Log.Information(loggingInformationMessage);
             Log.CloseAndFlush();
 
-            // assert
+            // Assert
             using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
             {
                 var logEvents = conn.Query<TestTimeStampDateTimeOffsetEntry>($"SELECT TimeStamp FROM {DatabaseFixture.LogTableName}");

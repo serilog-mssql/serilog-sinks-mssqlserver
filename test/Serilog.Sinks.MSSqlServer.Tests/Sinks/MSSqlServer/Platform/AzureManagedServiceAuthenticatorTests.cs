@@ -7,6 +7,7 @@ using Xunit;
 
 namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Platform
 {
+    [Trait(TestCategory.TraitName, TestCategory.Unit)]
     public class AzureManagedServiceAuthenticatorTests
     {
         [Fact]

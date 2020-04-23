@@ -10,7 +10,7 @@ using Xunit.Abstractions;
 
 namespace Serilog.Sinks.MSSqlServer.Tests.TestUtils
 {
-    [Collection("LogTest")]
+    [Collection("DatabaseTests")]
     public abstract class DatabaseTestsBase : IDisposable
     {
         private readonly ITestOutputHelper _output;
