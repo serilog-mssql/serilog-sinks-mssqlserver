@@ -7,6 +7,7 @@ using Xunit.Abstractions;
 
 namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.Hybrid
 {
+    [Trait(TestCategory.TraitName, TestCategory.Integration)]
     public class ConfigurationExtensionsTests : DatabaseTestsBase
     {
         private const string _connectionStringName = "NamedConnection";

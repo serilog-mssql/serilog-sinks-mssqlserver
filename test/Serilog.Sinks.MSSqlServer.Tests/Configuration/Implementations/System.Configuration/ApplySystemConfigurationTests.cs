@@ -2,10 +2,12 @@
 using Serilog.Configuration;
 using Serilog.Sinks.MSSqlServer.Configuration;
 using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
+using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
 
 namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.System.Configuration
 {
+    [Trait(TestCategory.TraitName, TestCategory.Unit)]
     public class ApplySystemConfigurationTests
     {
         [Fact]

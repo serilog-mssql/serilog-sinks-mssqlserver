@@ -10,6 +10,7 @@ using Xunit.Abstractions;
 
 namespace Serilog.Sinks.MSSqlServer.Tests
 {
+    [Trait(TestCategory.TraitName, TestCategory.Integration)]
     public class LevelAsEnumTests : DatabaseTestsBase
     {
         public LevelAsEnumTests(ITestOutputHelper output) : base(output)
@@ -19,7 +20,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         [Fact]
         public void CanStoreLevelAsEnum()
         {
-            // arrange
+            // Arrange
             var loggerConfiguration = new LoggerConfiguration();
             Log.Logger = loggerConfiguration.WriteTo.MSSqlServer(
                 connectionString: DatabaseFixture.LogEventsConnectionString,
@@ -30,7 +31,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 columnOptions: new ColumnOptions { Level = { StoreAsEnum = true } })
                 .CreateLogger();
 
-            // act
+            // Act
             const string loggingInformationMessage = "Logging Information message";
             using (var file = File.CreateText("LevelAsEnum.True.Enum.Self.log"))
             {
@@ -39,7 +40,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 Log.CloseAndFlush();
             }
 
-            // assert
+            // Assert
             using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
             {
                 var logEvents = conn.Query<EnumLevelStandardLogColumns>($"SELECT Message, Level FROM {DatabaseFixture.LogTableName}");
@@ -51,7 +52,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         [Fact]
         public void CanStoreLevelAsString()
         {
-            // arrange
+            // Arrange
             var loggerConfiguration = new LoggerConfiguration();
             Log.Logger = loggerConfiguration.WriteTo.MSSqlServer(
                 connectionString: DatabaseFixture.LogEventsConnectionString,
@@ -62,7 +63,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 columnOptions: new ColumnOptions { Level = { StoreAsEnum = false } })
                 .CreateLogger();
 
-            // act
+            // Act
             const string loggingInformationMessage = "Logging Information message";
             using (var file = File.CreateText("LevelAsEnum.False.Self.log"))
             {
@@ -71,7 +72,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 Log.CloseAndFlush();
             }
 
-            // assert
+            // Assert
             using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
             {
                 var logEvents = conn.Query<StringLevelStandardLogColumns>($"SELECT Message, Level FROM {DatabaseFixture.LogTableName}");
@@ -83,7 +84,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         [Fact]
         public void AuditCanStoreLevelAsEnum()
         {
-            // arrange
+            // Arrange
             var loggerConfiguration = new LoggerConfiguration();
             Log.Logger = loggerConfiguration.AuditTo.MSSqlServer(
                 connectionString: DatabaseFixture.LogEventsConnectionString,
@@ -92,7 +93,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 columnOptions: new ColumnOptions { Level = { StoreAsEnum = true } })
                 .CreateLogger();
 
-            // act
+            // Act
             const string loggingInformationMessage = "Logging Information message";
             using (var file = File.CreateText("LevelAsEnum.Audit.True.Enum.Self.log"))
             {
@@ -101,7 +102,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 Log.CloseAndFlush();
             }
 
-            // assert
+            // Assert
             using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
             {
                 var logEvents = conn.Query<EnumLevelStandardLogColumns>($"SELECT Message, Level FROM {DatabaseFixture.LogTableName}");
@@ -113,7 +114,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         [Fact]
         public void AuditCanStoreLevelAsString()
         {
-            // arrange
+            // Arrange
             var loggerConfiguration = new LoggerConfiguration();
             Log.Logger = loggerConfiguration.AuditTo.MSSqlServer(
                 connectionString: DatabaseFixture.LogEventsConnectionString,
@@ -122,7 +123,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 columnOptions: new ColumnOptions { Level = { StoreAsEnum = false } })
                 .CreateLogger();
 
-            // act
+            // Act
             const string loggingInformationMessage = "Logging Information message";
             using (var file = File.CreateText("LevelAsEnum.Audit.False.Self.log"))
             {
@@ -131,7 +132,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 Log.CloseAndFlush();
             }
 
-            // assert
+            // Assert
             using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
             {
                 var logEvents = conn.Query<StringLevelStandardLogColumns>($"SELECT Message, Level FROM {DatabaseFixture.LogTableName}");

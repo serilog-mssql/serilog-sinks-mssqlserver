@@ -10,10 +10,12 @@ using Serilog.Formatting;
 using Serilog.Parsing;
 using Serilog.Sinks.MSSqlServer.Platform;
 using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform;
+using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
 
 namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer
 {
+    [Trait(TestCategory.TraitName, TestCategory.Unit)]
     public class MSSqlServerSinkTraitsTests : IDisposable
     {
         private readonly Mock<ISqlConnectionFactory> _sqlConnectionFactoryMock;

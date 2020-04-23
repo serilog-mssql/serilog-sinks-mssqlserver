@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Data;
 using Serilog.Sinks.MSSqlServer.Platform;
+using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
 
 namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Platform
 {
+    [Trait(TestCategory.TraitName, TestCategory.Unit)]
     public class SqlCreateTableWriterTests
     {
         private readonly SqlCreateTableWriter _sut;

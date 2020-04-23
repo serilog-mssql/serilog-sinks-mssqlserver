@@ -33,6 +33,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Platform
         }
 
         [Fact]
+        [Trait(TestCategory.TraitName, TestCategory.Unit)]
         public void CreateTableCallsSqlCreateTableWriterWithPassedValues()
         {
             // Arrange
@@ -51,6 +52,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Platform
         }
 
         [Fact]
+        [Trait(TestCategory.TraitName, TestCategory.Unit)]
         public void CreateTableCallsSqlConnectionFactory()
         {
             // Act
@@ -64,6 +66,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Platform
         }
 
         [Fact]
+        [Trait(TestCategory.TraitName, TestCategory.Integration)]
         public void CreateTableExecutesCommandReturnedBySqlCreateTableWriter()
         {
             // Arrange

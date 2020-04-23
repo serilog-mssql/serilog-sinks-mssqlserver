@@ -14,6 +14,7 @@ using Xunit.Abstractions;
 
 namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.System.Configuration
 {
+    [Trait(TestCategory.TraitName, TestCategory.Integration)]
     public class ConfigurationExtensionsTests : DatabaseTestsBase
     {
         public ConfigurationExtensionsTests(ITestOutputHelper output) : base(output)

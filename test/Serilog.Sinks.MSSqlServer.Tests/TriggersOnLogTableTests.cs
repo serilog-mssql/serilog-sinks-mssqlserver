@@ -8,6 +8,7 @@ using Xunit.Abstractions;
 
 namespace Serilog.Sinks.MSSqlServer.Tests
 {
+    [Trait(TestCategory.TraitName, TestCategory.Integration)]
     public class TriggersOnLogTableTests : DatabaseTestsBase
     {
         private bool _disposedValue;
@@ -19,7 +20,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         [Fact]
         public void TestTriggerOnLogTableFire()
         {
-            // arrange
+            // Arrange
             var loggerConfiguration = new LoggerConfiguration();
             Log.Logger = loggerConfiguration.WriteTo.MSSqlServer(
                 connectionString: DatabaseFixture.LogEventsConnectionString,
@@ -32,13 +33,13 @@ namespace Serilog.Sinks.MSSqlServer.Tests
 
             CreateTrigger();
 
-            // act
+            // Act
             const string loggingInformationMessage = "Logging Information message";
             Log.Information(loggingInformationMessage);
 
             Log.CloseAndFlush();
 
-            // assert
+            // Assert
             using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
             {
                 var logTriggerEvents = conn.Query<TestTriggerEntry>($"SELECT * FROM {LogTriggerTableName}");
@@ -50,7 +51,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         [Fact]
         public void TestOptionsDisableTriggersOnLogTable()
         {
-            // arrange
+            // Arrange
             var options = new ColumnOptions { DisableTriggers = true };
             var loggerConfiguration = new LoggerConfiguration();
             Log.Logger = loggerConfiguration.WriteTo.MSSqlServer(
@@ -64,13 +65,13 @@ namespace Serilog.Sinks.MSSqlServer.Tests
 
             CreateTrigger();
 
-            // act
+            // Act
             const string loggingInformationMessage = "Logging Information message";
             Log.Information(loggingInformationMessage);
 
             Log.CloseAndFlush();
 
-            // assert
+            // Assert
             using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
             {
                 var logTriggerEvents = conn.Query<TestTriggerEntry>($"SELECT * FROM {LogTriggerTableName}");
@@ -82,7 +83,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         [Fact]
         public void TestAuditTriggerOnLogTableFire()
         {
-            // arrange
+            // Arrange
             var loggerConfiguration = new LoggerConfiguration();
             Log.Logger = loggerConfiguration.AuditTo.MSSqlServer(
                 connectionString: DatabaseFixture.LogEventsConnectionString,
@@ -93,13 +94,13 @@ namespace Serilog.Sinks.MSSqlServer.Tests
 
             CreateTrigger();
 
-            // act
+            // Act
             const string loggingInformationMessage = "Logging Information message";
             Log.Information(loggingInformationMessage);
 
             Log.CloseAndFlush();
 
-            // assert
+            // Assert
             using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
             {
                 var logTriggerEvents = conn.Query<TestTriggerEntry>($"SELECT * FROM {LogTriggerTableName}");
@@ -111,7 +112,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         [Fact]
         public void TestAuditOptionsDisableTriggersOnLogTableThrowsNotSupportedException()
         {
-            // arrange
+            // Arrange
             var options = new ColumnOptions { DisableTriggers = true };
             var loggerConfiguration = new LoggerConfiguration();
             Assert.Throws<NotSupportedException>(() => loggerConfiguration.AuditTo.MSSqlServer(
