@@ -37,7 +37,7 @@ namespace Serilog.Sinks.MSSqlServer
         public ColumnOptions ColumnOptions { get; }
         public IFormatProvider FormatProvider { get; }
         public ITextFormatter LogEventFormatter { get; }
-        public ISet<string> AdditionalColumnNames { get; }
+        public ISet<string> AdditionalColumnPropertyNames { get; }
         public DataTable EventTable { get; }
         public ISet<string> StandardColumnNames { get; }
 
@@ -82,10 +82,10 @@ namespace Serilog.Sinks.MSSqlServer
                 StandardColumnNames.Add(col.ColumnName);
             }
 
-            AdditionalColumnNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            AdditionalColumnPropertyNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             if (ColumnOptions.AdditionalColumns != null)
                 foreach (var col in ColumnOptions.AdditionalColumns)
-                    AdditionalColumnNames.Add(col.ColumnName);
+                    AdditionalColumnPropertyNames.Add(col.PropertyName);
 
             if (ColumnOptions.Store.Contains(StandardColumn.LogEvent))
                 LogEventFormatter = logEventFormatter ?? new JsonLogEventFormatter(this);
@@ -163,7 +163,7 @@ namespace Serilog.Sinks.MSSqlServer
         {
             if (ColumnOptions.LogEvent.ExcludeAdditionalProperties)
             {
-                var filteredProperties = logEvent.Properties.Where(p => !AdditionalColumnNames.Contains(p.Key));
+                var filteredProperties = logEvent.Properties.Where(p => !AdditionalColumnPropertyNames.Contains(p.Key));
                 logEvent = new LogEvent(logEvent.Timestamp, logEvent.Level, logEvent.Exception, logEvent.MessageTemplate, filteredProperties.Select(x => new LogEventProperty(x.Key, x.Value)));
             }
 
@@ -178,7 +178,7 @@ namespace Serilog.Sinks.MSSqlServer
             var options = ColumnOptions.Properties;
 
             if (options.ExcludeAdditionalProperties)
-                properties = properties.Where(p => !AdditionalColumnNames.Contains(p.Key));
+                properties = properties.Where(p => !AdditionalColumnPropertyNames.Contains(p.Key));
 
             if (options.PropertiesFilter != null)
             {
