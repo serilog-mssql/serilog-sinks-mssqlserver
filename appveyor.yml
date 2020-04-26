@@ -1,6 +1,6 @@
 version: '{build}'
 skip_tags: true
-image: Visual Studio 2017
+image: Visual Studio 2019
 configuration: Release
 install:
   - ps: mkdir -Force ".\build\" | Out-Null
@@ -9,17 +9,10 @@ build_script:
 test: off
 artifacts:
 - path: artifacts/Serilog.*.nupkg
-only_commits:
-  files:
-    - serilog-sinks-mssqlserver.sln
-    - src/Serilog.Sinks.MSSqlServer/
-    - Build.ps1
-    - assets/
-    - test/Serilog.Sinks.MSSqlServer.Tests/
 deploy:
 - provider: NuGet
   api_key:
-    secure: bd9z4P73oltOXudAjPehwp9iDKsPtC+HbgshOrSgoyQKr5xVK+bxJQngrDJkHdY8
+    secure: N59tiJECUYpip6tEn0xvdmDAEiP9SIzyLEFLpwiigm/8WhJvBNs13QxzT1/3/JW/
   skip_symbols: true
   on:
     branch: /^(master|dev)$/

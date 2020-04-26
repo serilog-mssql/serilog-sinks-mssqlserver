@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlTypes;
 
 namespace Serilog.Sinks.MSSqlServer
 {
@@ -14,7 +13,7 @@ namespace Serilog.Sinks.MSSqlServer
         /// SqlDbType doesn't have anything like "None" so we indicate an unsupported type by
         /// referencing a type we can guarantee the rest of the sink will never recognize.
         /// </summary>
-        public static SqlDbType NotSupported = SqlDbType.Variant;
+        public const SqlDbType NotSupported = SqlDbType.Variant;
 
         /// <summary>
         /// A collection keyed on the SqlDbType enum with values representing the equivalent DataColumn .NET type.
@@ -69,8 +68,7 @@ namespace Serilog.Sinks.MSSqlServer
         /// </summary>
         public static bool TryParseIfSupported(string requestedType, out SqlDbType supportedSqlDbType)
         {
-            supportedSqlDbType = NotSupported;
-            if(Enum.TryParse(requestedType, ignoreCase: true, result: out supportedSqlDbType))
+            if (Enum.TryParse(requestedType, ignoreCase: true, result: out supportedSqlDbType))
             {
                 return SystemTypeMap.ContainsKey(supportedSqlDbType);
             }
@@ -129,6 +127,6 @@ namespace Serilog.Sinks.MSSqlServer
             SqlDbType.UniqueIdentifier
         };
 
-        
+
     }
 }

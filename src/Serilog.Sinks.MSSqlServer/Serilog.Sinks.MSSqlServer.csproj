@@ -2,9 +2,9 @@
 
   <PropertyGroup>
     <Description>A Serilog sink that writes events to Microsoft SQL Server</Description>
-    <VersionPrefix>5.1.3</VersionPrefix>
+    <VersionPrefix>5.4.0</VersionPrefix>
     <Authors>Michiel van Oudheusden;Serilog Contributors</Authors>
-    <TargetFrameworks>netstandard2.0;net452;netcoreapp2.0;net461</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net452;net461;net472;netcoreapp2.0;netcoreapp2.2</TargetFrameworks>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <AssemblyName>Serilog.Sinks.MSSqlServer</AssemblyName>
@@ -13,9 +13,9 @@
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
     <PackageId>Serilog.Sinks.MSSqlServer</PackageId>
     <PackageTags>serilog;sinks;mssqlserver</PackageTags>
-    <PackageIconUrl>http://serilog.net/images/serilog-sink-nuget.png</PackageIconUrl>
+    <PackageIcon>serilog-sink-nuget.png</PackageIcon>
     <PackageProjectUrl>https://github.com/serilog/serilog-sinks-mssqlserver</PackageProjectUrl>
-    <PackageLicenseUrl>http://www.apache.org/licenses/LICENSE-2.0</PackageLicenseUrl>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <RepositoryUrl>https://github.com/serilog/serilog-sinks-mssqlserver</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <RuntimeIdentifiers>win</RuntimeIdentifiers>
@@ -26,6 +26,10 @@
 
   <ItemGroup>
     <!-- Whenever these are updated, also update versions in packages.config for net452 -->
+    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.8">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Serilog" Version="2.5.0" />
     <PackageReference Include="Serilog.Sinks.PeriodicBatching" Version="2.1.1" />
   </ItemGroup>
@@ -37,21 +41,26 @@
     <Compile Remove="Configuration\Extensions\System.Configuration\**\*.*" />
     <Compile Remove="Configuration\Implementations\Microsoft.Extensions.Configuration\**\*.*" />
     <Compile Remove="Configuration\Implementations\System.Configuration\**\*.*" />
+    <Compile Remove="Sinks\MSSqlServer\Platform\AzureManagedServiceAuthenticator.cs" />
+    <Compile Remove="Sinks\MSSqlServer\Platform\AzureManagedServiceAuthenticatorStub.cs" />
     <!-- Show in VStudio, but MSBuild ignores these (indicates files are not code, non-published-content, etc.) -->
     <None Include="Configuration\Extensions\Hybrid\**\*.*" />
     <None Include="Configuration\Extensions\Microsoft.Extensions.Configuration\**\*.*" />
     <None Include="Configuration\Extensions\System.Configuration\**\*.*" />
     <None Include="Configuration\Implementations\Microsoft.Extensions.Configuration\**\*.*" />
     <None Include="Configuration\Implementations\System.Configuration\**\*.*" />
+    <None Include="Sinks\MSSqlServer\Platform\AzureManagedServiceAuthenticator.cs" />
+    <None Include="Sinks\MSSqlServer\Platform\AzureManagedServiceAuthenticatorStub.cs" />
     <!-- ItemGroups below with TFM conditions will re-include the compile targets -->
   </ItemGroup>
- 
+
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
     <PackageReference Include="System.Data.SqlClient" Version="4.4.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="2.0.0" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="2.0.0" />
     <Compile Include="Configuration\Extensions\Microsoft.Extensions.Configuration\**\*.cs" />
     <Compile Include="Configuration\Implementations\Microsoft.Extensions.Configuration\**\*.cs" />
+    <Compile Include="Sinks\MSSqlServer\Platform\AzureManagedServiceAuthenticatorStub.cs" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.0' Or '$(TargetFramework)' == 'net461' ">
@@ -62,6 +71,19 @@
     <Compile Include="Configuration\Extensions\Hybrid\**\*.cs" />
     <Compile Include="Configuration\Implementations\Microsoft.Extensions.Configuration\**\*.cs" />
     <Compile Include="Configuration\Implementations\System.Configuration\**\*.cs" />
+    <Compile Include="Sinks\MSSqlServer\Platform\AzureManagedServiceAuthenticatorStub.cs" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.2' Or '$(TargetFramework)' == 'net472' ">
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.5.0" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.6.0" />
+    <PackageReference Include="Microsoft.Azure.Services.AppAuthentication" Version="1.4.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="2.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="2.0.0" />
+    <Compile Include="Configuration\Extensions\Hybrid\**\*.cs" />
+    <Compile Include="Configuration\Implementations\Microsoft.Extensions.Configuration\**\*.cs" />
+    <Compile Include="Configuration\Implementations\System.Configuration\**\*.cs" />
+    <Compile Include="Sinks\MSSqlServer\Platform\AzureManagedServiceAuthenticator.cs" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net452' ">
@@ -73,6 +95,13 @@
     <Reference Include="Microsoft.CSharp" />
     <Compile Include="Configuration\Extensions\System.Configuration\**\*.cs" />
     <Compile Include="Configuration\Implementations\System.Configuration\**\*.cs" />
+    <Compile Include="Sinks\MSSqlServer\Platform\AzureManagedServiceAuthenticatorStub.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Configuration\Factories\IMSSqlServerSinkFactory.cs" />
+    <None Include="Configuration\Factories\MSSqlServerSinkFactory.cs" />
+    <None Include="Images\serilog-sink-nuget.png" Pack="true" PackagePath="" />
   </ItemGroup>
 
 </Project>

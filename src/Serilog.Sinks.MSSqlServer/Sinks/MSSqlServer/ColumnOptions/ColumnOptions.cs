@@ -10,7 +10,7 @@ namespace Serilog.Sinks.MSSqlServer
     /// </summary>
     public partial class ColumnOptions
     {
-        ICollection<StandardColumn> _store;
+        private ICollection<StandardColumn> _store;
 
         /// <summary>
         /// Default constructor.
@@ -132,7 +132,7 @@ namespace Serilog.Sinks.MSSqlServer
         /// Options for the Message column.
         /// </summary>
         public MessageColumnOptions Message { get; set; }
-        
+
         /// <summary>
         /// Options for the TimeStamp column.
         /// </summary>
@@ -148,7 +148,7 @@ namespace Serilog.Sinks.MSSqlServer
         /// </summary>
         internal SqlColumn GetStandardColumnOptions(StandardColumn standardColumn)
         {
-            switch(standardColumn)
+            switch (standardColumn)
             {
                 case StandardColumn.Id: return Id;
                 case StandardColumn.Level: return Level;

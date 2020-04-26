@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Serilog.Sinks.MSSqlServer;
 using System.Configuration;
+using Serilog.Sinks.MSSqlServer;
 
 // Disable XML comment warnings for internal config classes which are required to have public members
 #pragma warning disable 1591
@@ -34,94 +34,94 @@ namespace Serilog.Configuration
 
         public MSSqlServerConfigurationSection()
         {
-            base["Level"] = new StandardColumnConfigLevel();
+            base[nameof(Level)] = new StandardColumnConfigLevel();
         }
 
-        [ConfigurationProperty("DisableTriggers")]
+        [ConfigurationProperty(nameof(DisableTriggers))]
         public string DisableTriggers
         {
-            get => (string)base["DisableTriggers"];
+            get => (string)base[nameof(DisableTriggers)];
             set
             {
-                base["DisableTriggers"] = value;
+                base[nameof(DisableTriggers)] = value;
             }
         }
 
-        [ConfigurationProperty("ClusteredColumnstoreIndex")]
+        [ConfigurationProperty(nameof(ClusteredColumnstoreIndex))]
         public string ClusteredColumnstoreIndex
         {
-            get => (string)base["ClusteredColumnstoreIndex"];
+            get => (string)base[nameof(ClusteredColumnstoreIndex)];
             set
             {
-                base["ClusteredColumnstoreIndex"] = value;
+                base[nameof(ClusteredColumnstoreIndex)] = value;
             }
         }
 
-        [ConfigurationProperty("PrimaryKeyColumnName")]
+        [ConfigurationProperty(nameof(PrimaryKeyColumnName))]
         public string PrimaryKeyColumnName
         {
-            get => (string)base["PrimaryKeyColumnName"];
+            get => (string)base[nameof(PrimaryKeyColumnName)];
             set
             {
-                base["PrimaryKeyColumnName"] = value;
+                base[nameof(PrimaryKeyColumnName)] = value;
             }
         }
 
-        [ConfigurationProperty("AddStandardColumns", IsDefaultCollection = false)]
+        [ConfigurationProperty(nameof(AddStandardColumns), IsDefaultCollection = false)]
         [ConfigurationCollection(typeof(StandardColumnCollection), AddItemName = "add")]
         public StandardColumnCollection AddStandardColumns
         {
-            get => (StandardColumnCollection)base["AddStandardColumns"];
+            get => (StandardColumnCollection)base[nameof(AddStandardColumns)];
         }
 
-        [ConfigurationProperty("RemoveStandardColumns", IsDefaultCollection = false)]
+        [ConfigurationProperty(nameof(RemoveStandardColumns), IsDefaultCollection = false)]
         [ConfigurationCollection(typeof(StandardColumnCollection), AddItemName = "remove")]
         public StandardColumnCollection RemoveStandardColumns
         {
-            get => (StandardColumnCollection)base["RemoveStandardColumns"];
+            get => (StandardColumnCollection)base[nameof(RemoveStandardColumns)];
         }
 
-        [ConfigurationProperty("Columns", IsDefaultCollection = false)]
+        [ConfigurationProperty(nameof(Columns), IsDefaultCollection = false)]
         [ConfigurationCollection(typeof(ColumnCollection), AddItemName = "add")]
         public ColumnCollection Columns
         {
-            get => (ColumnCollection)base["Columns"];
+            get => (ColumnCollection)base[nameof(Columns)];
         }
 
-        [ConfigurationProperty("Exception")]
+        [ConfigurationProperty(nameof(Exception))]
         public StandardColumnConfigException Exception
         {
-            get => (StandardColumnConfigException)base["Exception"];
+            get => (StandardColumnConfigException)base[nameof(Exception)];
         }
 
-        [ConfigurationProperty("Id")]
+        [ConfigurationProperty(nameof(Id))]
         public StandardColumnConfigId Id
         {
-            get => (StandardColumnConfigId)base["Id"];
+            get => (StandardColumnConfigId)base[nameof(Id)];
         }
 
-        [ConfigurationProperty("Level")]
+        [ConfigurationProperty(nameof(Level))]
         public StandardColumnConfigLevel Level
         {
-            get => (StandardColumnConfigLevel)base["Level"];
+            get => (StandardColumnConfigLevel)base[nameof(Level)];
         }
 
-        [ConfigurationProperty("LogEvent")]
+        [ConfigurationProperty(nameof(LogEvent))]
         public StandardColumnConfigLogEvent LogEvent
         {
-            get => (StandardColumnConfigLogEvent)base["LogEvent"];
+            get => (StandardColumnConfigLogEvent)base[nameof(LogEvent)];
         }
 
-        [ConfigurationProperty("Message")]
+        [ConfigurationProperty(nameof(Message))]
         public StandardColumnConfigMessage Message
         {
-            get => (StandardColumnConfigMessage)base["Message"];
+            get => (StandardColumnConfigMessage)base[nameof(Message)];
         }
 
-        [ConfigurationProperty("MessageTemplate")]
+        [ConfigurationProperty(nameof(MessageTemplate))]
         public StandardColumnConfigMessageTemplate MessageTemplate
         {
-            get => (StandardColumnConfigMessageTemplate)base["MessageTemplate"];
+            get => (StandardColumnConfigMessageTemplate)base[nameof(MessageTemplate)];
         }
 
         // Name changed to avoid conflict with Properties in ConfigurationElement base class
@@ -131,10 +131,54 @@ namespace Serilog.Configuration
             get => (StandardColumnConfigProperties)base["Properties"];
         }
 
-        [ConfigurationProperty("TimeStamp")]
+        [ConfigurationProperty(nameof(TimeStamp))]
         public StandardColumnConfigTimeStamp TimeStamp
         {
-            get => (StandardColumnConfigTimeStamp)base["TimeStamp"];
+            get => (StandardColumnConfigTimeStamp)base[nameof(TimeStamp)];
+        }
+
+        // SinkOptions configuration properties
+
+        [ConfigurationProperty(nameof(TableName))]
+        public ValueConfigElement TableName
+        {
+            get => (ValueConfigElement)base[nameof(TableName)];
+        }
+
+        [ConfigurationProperty(nameof(SchemaName))]
+        public ValueConfigElement SchemaName
+        {
+            get => (ValueConfigElement)base[nameof(SchemaName)];
+        }
+
+        [ConfigurationProperty(nameof(AutoCreateSqlTable))]
+        public ValueConfigElement AutoCreateSqlTable
+        {
+            get => (ValueConfigElement)base[nameof(AutoCreateSqlTable)];
+        }
+
+        [ConfigurationProperty(nameof(BatchPostingLimit))]
+        public ValueConfigElement BatchPostingLimit
+        {
+            get => (ValueConfigElement)base[nameof(BatchPostingLimit)];
+        }
+
+        [ConfigurationProperty(nameof(BatchPeriod))]
+        public ValueConfigElement BatchPeriod
+        {
+            get => (ValueConfigElement)base[nameof(BatchPeriod)];
+        }
+
+        [ConfigurationProperty(nameof(UseAzureManagedIdentity))]
+        public ValueConfigElement UseAzureManagedIdentity
+        {
+            get => (ValueConfigElement)base[nameof(UseAzureManagedIdentity)];
+        }
+
+        [ConfigurationProperty(nameof(AzureServiceTokenProviderResource))]
+        public ValueConfigElement AzureServiceTokenProviderResource
+        {
+            get => (ValueConfigElement)base[nameof(AzureServiceTokenProviderResource)];
         }
     }
 }

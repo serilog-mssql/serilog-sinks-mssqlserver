@@ -1,4 +1,4 @@
-﻿// Copyright 2018 Serilog Contributors 
+﻿// Copyright 2020 Serilog Contributors 
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,14 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Serilog.Core;
-using Serilog.Debugging;
-using Serilog.Events;
 using System;
 using System.Data;
 using System.Data.SqlClient;
-using System.Linq;
 using System.Text;
+using Serilog.Core;
+using Serilog.Debugging;
+using Serilog.Events;
+using Serilog.Formatting;
+using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
+using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform;
 
 namespace Serilog.Sinks.MSSqlServer
 {
@@ -29,10 +31,14 @@ namespace Serilog.Sinks.MSSqlServer
     /// </summary>
     public class MSSqlServerAuditSink : ILogEventSink, IDisposable
     {
+        private readonly ISqlConnectionFactory _sqlConnectionFactory;
         private readonly MSSqlServerSinkTraits _traits;
 
         /// <summary>
-        ///     Construct a sink posting to the specified database.
+        /// Construct a sink posting to the specified database.
+        ///
+        /// Note: this is the legacy version of the extension method. Please use the new one using SinkOptions instead.
+        /// 
         /// </summary>
         /// <param name="connectionString">Connection string to access the database.</param>
         /// <param name="tableName">Name of the table to store the data in.</param>
@@ -40,16 +46,43 @@ namespace Serilog.Sinks.MSSqlServer
         /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
         /// <param name="autoCreateSqlTable">Create log table with the provided name on destination sql server.</param>
         /// <param name="columnOptions">Options that pertain to columns</param>
+        /// <param name="logEventFormatter">Supplies custom formatter for the LogEvent column, or null</param>
         public MSSqlServerAuditSink(
             string connectionString,
             string tableName,
             IFormatProvider formatProvider,
             bool autoCreateSqlTable = false,
             ColumnOptions columnOptions = null,
-            string schemaName = "dbo"
-            )
+            string schemaName = MSSqlServerSink.DefaultSchemaName,
+            ITextFormatter logEventFormatter = null)
+            : this(connectionString, new SinkOptions(tableName, null, null, autoCreateSqlTable, schemaName),
+                  formatProvider, columnOptions, logEventFormatter)
         {
-            columnOptions.FinalizeConfigurationForSinkConstructor();
+            // Do not add new parameters here. This interface is considered legacy and will be deprecated in the future.
+            // For adding new input parameters use the SinkOptions class and the method overload that accepts SinkOptions.
+        }
+
+        /// <summary>
+        /// Construct a sink posting to the specified database.
+        /// </summary>
+        /// <param name="connectionString">Connection string to access the database.</param>
+        /// <param name="sinkOptions">Supplies additional options for the sink</param>
+        /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
+        /// <param name="columnOptions">Options that pertain to columns</param>
+        /// <param name="logEventFormatter">Supplies custom formatter for the LogEvent column, or null</param>
+        public MSSqlServerAuditSink(
+            string connectionString,
+            SinkOptions sinkOptions,
+            IFormatProvider formatProvider,
+            ColumnOptions columnOptions = null,
+            ITextFormatter logEventFormatter = null)
+        {
+            if (sinkOptions?.TableName == null)
+            {
+                throw new InvalidOperationException("Table name must be specified!");
+            }
+
+            columnOptions?.FinalizeConfigurationForSinkConstructor();
 
             if (columnOptions != null)
             {
@@ -57,8 +90,12 @@ namespace Serilog.Sinks.MSSqlServer
                     throw new NotSupportedException($"The {nameof(ColumnOptions.DisableTriggers)} option is not supported for auditing.");
             }
 
-            _traits = new MSSqlServerSinkTraits(connectionString, tableName, schemaName, columnOptions, formatProvider, autoCreateSqlTable);
-            
+            var azureManagedServiceAuthenticator = new AzureManagedServiceAuthenticator(sinkOptions.UseAzureManagedIdentity,
+                sinkOptions.AzureServiceTokenProviderResource);
+            _sqlConnectionFactory = new SqlConnectionFactory(connectionString, azureManagedServiceAuthenticator);
+
+            _traits = new MSSqlServerSinkTraits(_sqlConnectionFactory, sinkOptions.TableName, sinkOptions.SchemaName,
+                columnOptions, formatProvider, sinkOptions.AutoCreateSqlTable, logEventFormatter);
         }
 
         /// <summary>Emit the provided log event to the sink.</summary>
@@ -67,17 +104,17 @@ namespace Serilog.Sinks.MSSqlServer
         {
             try
             {
-                using (SqlConnection connection = new SqlConnection(_traits.connectionString))
+                using (var connection = _sqlConnectionFactory.Create())
                 {
                     connection.Open();
                     using (SqlCommand command = connection.CreateCommand())
                     {
                         command.CommandType = CommandType.Text;
 
-                        StringBuilder fieldList = new StringBuilder($"INSERT INTO [{_traits.schemaName}].[{_traits.tableName}] (");
-                        StringBuilder parameterList = new StringBuilder(") VALUES (");
+                        var fieldList = new StringBuilder($"INSERT INTO [{_traits.SchemaName}].[{_traits.TableName}] (");
+                        var parameterList = new StringBuilder(") VALUES (");
 
-                        int index = 0;
+                        var index = 0;
                         foreach (var field in _traits.GetColumnsAndValues(logEvent))
                         {
                             if (index != 0)
@@ -90,7 +127,7 @@ namespace Serilog.Sinks.MSSqlServer
                             parameterList.Append("@P");
                             parameterList.Append(index);
 
-                            SqlParameter parameter = new SqlParameter($"@P{index}", field.Value ?? DBNull.Value);                            
+                            var parameter = new SqlParameter($"@P{index}", field.Value ?? DBNull.Value);
 
                             // The default is SqlDbType.DateTime, which will truncate the DateTime value if the actual
                             // type in the database table is datetime2. So we explicitly set it to DateTime2, which will
@@ -117,7 +154,7 @@ namespace Serilog.Sinks.MSSqlServer
             {
                 SelfLog.WriteLine("Unable to write log event to the database due to following error: {1}", ex.Message);
                 throw;
-            }            
+            }
         }
 
         /// <summary>

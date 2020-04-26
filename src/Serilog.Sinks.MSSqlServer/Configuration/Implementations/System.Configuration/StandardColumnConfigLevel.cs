@@ -21,10 +21,10 @@ namespace Serilog.Sinks.MSSqlServer
         [ConfigurationProperty("StoreAsEnum")]
         public string StoreAsEnum
         {
-            get => (string)base["StoreAsEnum"];
+            get => (string)base[nameof(StoreAsEnum)];
             set
             {
-                base["StoreAsEnum"] = value;
+                base[nameof(StoreAsEnum)] = value;
             }
         }
 
