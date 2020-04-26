@@ -1,4 +1,4 @@
-﻿// Copyright 2015 Serilog Contributors
+// Copyright 2015 Serilog Contributors
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -43,8 +43,8 @@ namespace Serilog.Sinks.MSSqlServer
         [ConfigurationProperty("PropertyName")]
         public virtual string PropertyName
         {
-            get { return (string)this["PropertyName"]; }
-            set { this["PropertyName"] = value; }
+            get { return (string)this[nameof(PropertyName)]; }
+            set { this[nameof(PropertyName)] = value; }
         }
 
         [ConfigurationProperty("DataType")]

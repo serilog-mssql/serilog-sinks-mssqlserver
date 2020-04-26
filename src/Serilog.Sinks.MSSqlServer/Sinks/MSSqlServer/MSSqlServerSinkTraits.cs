@@ -1,4 +1,4 @@
-﻿// Copyright 2020 Serilog Contributors 
+// Copyright 2020 Serilog Contributors 
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -223,17 +223,17 @@ namespace Serilog.Sinks.MSSqlServer
         ///     Mapping values from properties which have a corresponding data row.
         ///     Matching is done based on Column name and property key
         ///     Standard columns are not mapped
-        /// </summary>        
+        /// </summary>
         /// <param name="properties"></param>
         private IEnumerable<KeyValuePair<string, object>> ConvertPropertiesToColumn(IReadOnlyDictionary<string, LogEventPropertyValue> properties)
         {
             foreach (var property in properties)
             {
-                var additionalColumn = columnOptions
+                var additionalColumn = ColumnOptions
                     .AdditionalColumns
                     .FirstOrDefault(ac => ac.PropertyName == property.Key);
 
-                if (additionalColumn == null || standardColumnNames.Contains(property.Key))
+                if (additionalColumn == null || StandardColumnNames.Contains(property.Key))
                     continue;
 
                 var columnName = additionalColumn.ColumnName;
