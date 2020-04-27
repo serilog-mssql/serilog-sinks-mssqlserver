@@ -29,6 +29,7 @@ namespace Serilog.Sinks.MSSqlServer.Configuration
         {
             // Standard Columns are subclasses of the SqlColumn class
             SetProperty.IfNotNullOrEmpty<string>(section["columnName"], (val) => target.ColumnName = val);
+            SetProperty.IfNotNullOrEmpty<string>(section["propertyName"], (val) => target.PropertyName = val);
             SetProperty.IfNotNull<string>(section["dataType"], (val) => target.SetDataTypeFromConfigString(val));
             SetProperty.IfNotNull<bool>(section["allowNull"], (val) => target.AllowNull = val);
             SetProperty.IfNotNull<int>(section["dataLength"], (val) => target.DataLength = val);

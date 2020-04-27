@@ -659,6 +659,12 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
             Assert.Throws<ArgumentException>(() => sut.ConfigureColumnOptions(columnOptions, _configurationSectionMock.Object));
         }
 
+        [Fact]
+        public void ConfigureColumnOptionsSetsPropertyNameForAdditionalColumn()
+        {
+            // TODO Implement test
+        }
+
         private static void AssertColumnSqlOptions(string expectedColumnName, SqlDbType expectedDataType, bool expectedAllowNull, bool expectedNonClusteredIndex, SqlColumn actualColumn)
         {
             Assert.Equal(expectedColumnName, actualColumn.ColumnName);
