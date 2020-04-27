@@ -94,7 +94,7 @@ namespace Serilog.Sinks.MSSqlServer
         public MSSqlServerSink(
             string connectionString,
             SinkOptions sinkOptions,
-            IFormatProvider formatProvider,
+            IFormatProvider formatProvider = null,
             ColumnOptions columnOptions = null,
             ITextFormatter logEventFormatter = null)
             : base(sinkOptions?.BatchPostingLimit ?? DefaultBatchPostingLimit, sinkOptions?.BatchPeriod ?? DefaultPeriod)

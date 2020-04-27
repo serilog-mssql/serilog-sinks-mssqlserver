@@ -156,34 +156,8 @@ namespace Serilog
             if (loggerConfiguration == null)
                 throw new ArgumentNullException(nameof(loggerConfiguration));
 
-            sinkOptions = sinkOptions ?? new SinkOptions();
-            columnOptions = columnOptions ?? new ColumnOptions();
-
-            var serviceConfigSection = applySystemConfiguration.GetSinkConfigurationSection(AppConfigSectionName);
-            if (serviceConfigSection != null)
-            {
-                connectionString = applySystemConfiguration.GetConnectionString(connectionString);
-                columnOptions = applySystemConfiguration.ConfigureColumnOptions(serviceConfigSection, columnOptions);
-                sinkOptions = applySystemConfiguration.ConfigureSinkOptions(serviceConfigSection, sinkOptions);
-
-                if (appConfiguration != null || columnOptionsSection != null || sinkOptionsSection != null)
-                    SelfLog.WriteLine("Warning: Both System.Configuration (app.config or web.config) and Microsoft.Extensions.Configuration are being applied to the MSSQLServer sink.");
-            }
-
-            if (appConfiguration != null)
-            {
-                connectionString = applyMicrosoftExtensionsConfiguration.GetConnectionString(connectionString, appConfiguration);
-            }
-
-            if (columnOptionsSection != null)
-            {
-                columnOptions = applyMicrosoftExtensionsConfiguration.ConfigureColumnOptions(columnOptions, columnOptionsSection);
-            }
-
-            if (sinkOptionsSection != null)
-            {
-                sinkOptions = applyMicrosoftExtensionsConfiguration.ConfigureSinkOptions(sinkOptions, sinkOptionsSection);
-            }
+            ReadConfiguration(ref connectionString, ref sinkOptions, sinkOptionsSection, appConfiguration,
+                ref columnOptions, columnOptionsSection, applySystemConfiguration, applyMicrosoftExtensionsConfiguration);
 
             var sink = sinkFactory.Create(connectionString, sinkOptions, formatProvider, columnOptions, logEventFormatter);
 
@@ -298,6 +272,24 @@ namespace Serilog
             if (loggerAuditSinkConfiguration == null)
                 throw new ArgumentNullException(nameof(loggerAuditSinkConfiguration));
 
+            ReadConfiguration(ref connectionString, ref sinkOptions, sinkOptionsSection, appConfiguration,
+                ref columnOptions, columnOptionsSection, applySystemConfiguration, applyMicrosoftExtensionsConfiguration);
+
+            var auditSink = auditSinkFactory.Create(connectionString, sinkOptions, formatProvider, columnOptions, logEventFormatter);
+
+            return loggerAuditSinkConfiguration.Sink(auditSink, restrictedToMinimumLevel);
+        }
+
+        private static void ReadConfiguration(
+            ref string connectionString,
+            ref SinkOptions sinkOptions,
+            IConfigurationSection sinkOptionsSection,
+            IConfiguration appConfiguration,
+            ref ColumnOptions columnOptions,
+            IConfigurationSection columnOptionsSection,
+            IApplySystemConfiguration applySystemConfiguration,
+            IApplyMicrosoftExtensionsConfiguration applyMicrosoftExtensionsConfiguration)
+        {
             sinkOptions = sinkOptions ?? new SinkOptions();
             columnOptions = columnOptions ?? new ColumnOptions();
 
@@ -326,10 +318,6 @@ namespace Serilog
             {
                 sinkOptions = applyMicrosoftExtensionsConfiguration.ConfigureSinkOptions(sinkOptions, sinkOptionsSection);
             }
-
-            var auditSink = auditSinkFactory.Create(connectionString, sinkOptions, formatProvider, columnOptions, logEventFormatter);
-
-            return loggerAuditSinkConfiguration.Sink(auditSink, restrictedToMinimumLevel);
         }
     }
 }

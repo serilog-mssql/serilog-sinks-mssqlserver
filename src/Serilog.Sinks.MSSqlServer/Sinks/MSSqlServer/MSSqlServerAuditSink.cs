@@ -73,7 +73,7 @@ namespace Serilog.Sinks.MSSqlServer
         public MSSqlServerAuditSink(
             string connectionString,
             SinkOptions sinkOptions,
-            IFormatProvider formatProvider,
+            IFormatProvider formatProvider = null,
             ColumnOptions columnOptions = null,
             ITextFormatter logEventFormatter = null)
         {
