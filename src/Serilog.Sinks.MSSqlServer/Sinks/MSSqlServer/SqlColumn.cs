@@ -10,6 +10,7 @@ namespace Serilog.Sinks.MSSqlServer
     {
         private SqlDbType _dataType = SqlDbType.VarChar; // backwards-compatibility default
         private string _columnName = string.Empty;
+        private string _propertyName;
 
         /// <summary>
         /// Default constructor.
@@ -95,6 +96,16 @@ namespace Serilog.Sinks.MSSqlServer
         /// </summary>
         public bool NonClusteredIndex { get; set; } = false;
 
+        /// <summary>
+        /// The name of the Serilog property to use as the value when filling the DataTable.
+        /// If not specified, the ColumnName and PropertyName are the same.
+        /// </summary>
+        public string PropertyName
+        {
+            get => _propertyName ?? ColumnName;
+            set => _propertyName = value;
+        }
+
         // Set by the constructors of the Standard Column classes that inherit from this;
         // allows Standard Columns and user-defined columns to coexist but remain identifiable
         // and allows casting back to the Standard Column without a lot of switch gymnastics.
@@ -128,7 +139,7 @@ namespace Serilog.Sinks.MSSqlServer
         }
 
         /// <summary>
-        /// Configuration accepts DataType as a simple string ("nvarchar" for example) for ease-of-use. 
+        /// Configuration accepts DataType as a simple string ("nvarchar" for example) for ease-of-use.
         /// This converts to SqlDbType and stores it into the DataType property.
         /// </summary>
         internal void SetDataTypeFromConfigString(string requestedSqlType)

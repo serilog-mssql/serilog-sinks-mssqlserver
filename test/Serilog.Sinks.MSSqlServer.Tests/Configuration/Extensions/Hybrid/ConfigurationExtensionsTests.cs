@@ -13,6 +13,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.Hybrid
         private const string _connectionStringName = "NamedConnection";
         private const string _columnOptionsSection = "CustomColumnNames";
         private const string _sinkOptionsSection = "SinkOptions";
+        private const string _additionalColumn1Name = "AdditionalColumn1Name";
+        private const string _additionalColumn1PropertyName = "AdditionalColumn1PropertyName";
 
         public ConfigurationExtensionsTests(ITestOutputHelper output) : base(output)
         {
@@ -61,8 +63,12 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.Hybrid
         public void ColumnOptionsFromConfigSectionLegacyInterface()
         {
             // Arrange
-            var standardNames = new List<string> { "CustomMessage", "CustomMessageTemplate", "CustomLevel", "CustomTimeStamp", "CustomException", "CustomProperties" };
+            var standardNames = new List<string> { "CustomMessage", "CustomMessageTemplate", "CustomLevel", "CustomTimeStamp",
+                "CustomException", "CustomProperties", _additionalColumn1Name };
             var columnOptionsSection = TestConfiguration().GetSection(_columnOptionsSection);
+            var messageTemplate = $"Hello {{{_additionalColumn1PropertyName}}}!";
+            var propertyValue = 2;
+            var expectedMessage = $"Hello {propertyValue}!";
 
             // Act
             var loggerConfiguration = new LoggerConfiguration();
@@ -72,18 +78,25 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.Hybrid
                 autoCreateSqlTable: true,
                 columnOptionsSection: columnOptionsSection)
                 .CreateLogger();
+            Log.Information(messageTemplate, propertyValue);
             Log.CloseAndFlush();
 
             // Assert
             VerifyDatabaseColumnsWereCreated(standardNames);
+            VerifyLogMessageWasWritten(expectedMessage, "CustomMessage");
+            VerifyIntegerColumnWritten(_additionalColumn1Name, propertyValue);
         }
 
         [Fact]
         public void ColumnOptionsFromConfigSectionSinkOptionsInterface()
         {
             // Arrange
-            var standardNames = new List<string> { "CustomMessage", "CustomMessageTemplate", "CustomLevel", "CustomTimeStamp", "CustomException", "CustomProperties" };
+            var standardNames = new List<string> { "CustomMessage", "CustomMessageTemplate", "CustomLevel", "CustomTimeStamp",
+                "CustomException", "CustomProperties", _additionalColumn1Name };
             var columnOptionsSection = TestConfiguration().GetSection(_columnOptionsSection);
+            var messageTemplate = $"Hello {{{_additionalColumn1PropertyName}}}!";
+            var propertyValue = 2;
+            var expectedMessage = $"Hello {propertyValue}!";
 
             // Act
             var loggerConfiguration = new LoggerConfiguration();
@@ -96,10 +109,13 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.Hybrid
                 },
                 columnOptionsSection: columnOptionsSection)
                 .CreateLogger();
+            Log.Information(messageTemplate, propertyValue);
             Log.CloseAndFlush();
 
             // Assert
             VerifyDatabaseColumnsWereCreated(standardNames);
+            VerifyLogMessageWasWritten(expectedMessage, "CustomMessage");
+            VerifyIntegerColumnWritten(_additionalColumn1Name, propertyValue);
         }
 
         [Fact]
@@ -135,6 +151,9 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.Hybrid
                     { $"{_columnOptionsSection}:timeStamp:columnName", "CustomTimeStamp" },
                     { $"{_columnOptionsSection}:exception:columnName", "CustomException" },
                     { $"{_columnOptionsSection}:properties:columnName", "CustomProperties" },
+                    { $"{_columnOptionsSection}:additionalColumns:0:columnName", _additionalColumn1Name },
+                    { $"{_columnOptionsSection}:additionalColumns:0:propertyName", _additionalColumn1PropertyName },
+                    { $"{_columnOptionsSection}:additionalColumns:0:dataType", "8" },
 
                     { $"{_sinkOptionsSection}:tableName", DatabaseFixture.LogTableName },
                     { $"{_sinkOptionsSection}:autoCreateSqlTable", "true" },

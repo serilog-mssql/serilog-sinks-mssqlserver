@@ -109,5 +109,33 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.System.Config
             // Assert
             VerifyDatabaseColumnsWereCreated(new List<string> { "LogEvent", "CustomColumn" });
         }
+
+        [Fact]
+        public void AdditionalColumnWithCustomPropertyNameFromConfig()
+        {
+            // Arrange
+            const string additionalColumnName = "AdditionalColumn1";
+            const string additionalPropertyName = "AdditionalProperty1";
+            var messageTemplate = $"Hello {{{additionalPropertyName}}}!";
+            var propertyValue = 2;
+            var expectedMessage = $"Hello {propertyValue}!";
+
+            // Act
+            var loggerConfiguration = new LoggerConfiguration();
+            Log.Logger = loggerConfiguration.WriteTo.MSSqlServerInternal(
+                configSectionName: "AdditionalColumnCustomPropertyList",
+                connectionString: DatabaseFixture.LogEventsConnectionString,
+                sinkOptions: new SinkOptions { TableName = DatabaseFixture.LogTableName, AutoCreateSqlTable = true },
+                applySystemConfiguration: new ApplySystemConfiguration(),
+                sinkFactory: new MSSqlServerSinkFactory())
+                .CreateLogger();
+            Log.Information(messageTemplate, propertyValue);
+            Log.CloseAndFlush();
+
+            // Assert
+            VerifyDatabaseColumnsWereCreated(new List<string> { additionalColumnName });
+            VerifyIntegerColumnWritten(additionalColumnName, propertyValue);
+            VerifyLogMessageWasWritten(expectedMessage);
+        }
     }
 }
