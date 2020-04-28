@@ -2,7 +2,6 @@
 using System.Threading;
 using Serilog;
 using Serilog.Events;
-using Serilog.Sinks.MSSqlServer;
 using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
 
 namespace AppConfigDemo
