@@ -119,13 +119,8 @@ namespace Serilog
             if (loggerConfiguration == null)
                 throw new ArgumentNullException(nameof(loggerConfiguration));
 
-            sinkOptions = sinkOptions ?? new SinkOptions();
-            columnOptions = columnOptions ?? new ColumnOptions();
-
-            IApplyMicrosoftExtensionsConfiguration microsoftExtensionsConfiguration = new ApplyMicrosoftExtensionsConfiguration();
-            connectionString = microsoftExtensionsConfiguration.GetConnectionString(connectionString, appConfiguration);
-            columnOptions = microsoftExtensionsConfiguration.ConfigureColumnOptions(columnOptions, columnOptionsSection);
-            sinkOptions = microsoftExtensionsConfiguration.ConfigureSinkOptions(sinkOptions, sinkOptionsSection);
+            ReadConfiguration(ref connectionString, ref sinkOptions, appConfiguration, ref columnOptions,
+                columnOptionsSection, sinkOptionsSection);
 
             IMSSqlServerSinkFactory sinkFactory = new MSSqlServerSinkFactory();
             var sink = sinkFactory.Create(connectionString, sinkOptions, formatProvider, columnOptions, logEventFormatter);
@@ -212,6 +207,23 @@ namespace Serilog
             if (loggerAuditSinkConfiguration == null)
                 throw new ArgumentNullException(nameof(loggerAuditSinkConfiguration));
 
+            ReadConfiguration(ref connectionString, ref sinkOptions, appConfiguration, ref columnOptions,
+                columnOptionsSection, sinkOptionsSection);
+
+            IMSSqlServerAuditSinkFactory auditSinkFactory = new MSSqlServerAuditSinkFactory();
+            var auditSink = auditSinkFactory.Create(connectionString, sinkOptions, formatProvider, columnOptions, logEventFormatter);
+
+            return loggerAuditSinkConfiguration.Sink(auditSink, restrictedToMinimumLevel);
+        }
+
+        private static void ReadConfiguration(
+            ref string connectionString,
+            ref SinkOptions sinkOptions,
+            IConfiguration appConfiguration,
+            ref ColumnOptions columnOptions,
+            IConfigurationSection columnOptionsSection,
+            IConfigurationSection sinkOptionsSection)
+        {
             sinkOptions = sinkOptions ?? new SinkOptions();
             columnOptions = columnOptions ?? new ColumnOptions();
 
@@ -219,11 +231,6 @@ namespace Serilog
             connectionString = microsoftExtensionsConfiguration.GetConnectionString(connectionString, appConfiguration);
             columnOptions = microsoftExtensionsConfiguration.ConfigureColumnOptions(columnOptions, columnOptionsSection);
             sinkOptions = microsoftExtensionsConfiguration.ConfigureSinkOptions(sinkOptions, sinkOptionsSection);
-
-            IMSSqlServerAuditSinkFactory auditSinkFactory = new MSSqlServerAuditSinkFactory();
-            var auditSink = auditSinkFactory.Create(connectionString, sinkOptions, formatProvider, columnOptions, logEventFormatter);
-
-            return loggerAuditSinkConfiguration.Sink(auditSink, restrictedToMinimumLevel);
         }
     }
 }

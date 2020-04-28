@@ -133,17 +133,7 @@ namespace Serilog
             if (loggerConfiguration == null)
                 throw new ArgumentNullException(nameof(loggerConfiguration));
 
-            sinkOptions = sinkOptions ?? new SinkOptions();
-            columnOptions = columnOptions ?? new ColumnOptions();
-
-            var serviceConfigSection = applySystemConfiguration.GetSinkConfigurationSection(configSectionName);
-            if (serviceConfigSection != null)
-            {
-                columnOptions = applySystemConfiguration.ConfigureColumnOptions(serviceConfigSection, columnOptions);
-                sinkOptions = applySystemConfiguration.ConfigureSinkOptions(serviceConfigSection, sinkOptions);
-            }
-
-            connectionString = applySystemConfiguration.GetConnectionString(connectionString);
+            ReadConfiguration(configSectionName, ref connectionString, ref sinkOptions, ref columnOptions, applySystemConfiguration);
 
             var sink = sinkFactory.Create(connectionString, sinkOptions, formatProvider, columnOptions, logEventFormatter);
 
@@ -245,8 +235,22 @@ namespace Serilog
             if (loggerAuditSinkConfiguration == null)
                 throw new ArgumentNullException(nameof(loggerAuditSinkConfiguration));
 
-            columnOptions = columnOptions ?? new ColumnOptions();
+            ReadConfiguration(configSectionName, ref connectionString, ref sinkOptions, ref columnOptions, applySystemConfiguration);
+
+            var auditSink = auditSinkFactory.Create(connectionString, sinkOptions, formatProvider, columnOptions, logEventFormatter);
+
+            return loggerAuditSinkConfiguration.Sink(auditSink, restrictedToMinimumLevel);
+        }
+
+        private static void ReadConfiguration(
+            string configSectionName,
+            ref string connectionString,
+            ref SinkOptions sinkOptions,
+            ref ColumnOptions columnOptions,
+            IApplySystemConfiguration applySystemConfiguration)
+        {
             sinkOptions = sinkOptions ?? new SinkOptions();
+            columnOptions = columnOptions ?? new ColumnOptions();
 
             var serviceConfigSection = applySystemConfiguration.GetSinkConfigurationSection(configSectionName);
             if (serviceConfigSection != null)
@@ -256,10 +260,6 @@ namespace Serilog
             }
 
             connectionString = applySystemConfiguration.GetConnectionString(connectionString);
-
-            var auditSink = auditSinkFactory.Create(connectionString, sinkOptions, formatProvider, columnOptions, logEventFormatter);
-
-            return loggerAuditSinkConfiguration.Sink(auditSink, restrictedToMinimumLevel);
         }
     }
 }
