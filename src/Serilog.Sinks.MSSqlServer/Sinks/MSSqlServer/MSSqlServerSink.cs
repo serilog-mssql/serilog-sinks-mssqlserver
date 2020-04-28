@@ -33,6 +33,8 @@ namespace Serilog.Sinks.MSSqlServer
     /// </summary>
     public class MSSqlServerSink : PeriodicBatchingSink
     {
+        private readonly SinkOptions _sinkOptions;
+        private readonly ColumnOptions _columnOptions;
         private readonly ISqlConnectionFactory _sqlConnectionFactory;
         private readonly MSSqlServerSinkTraits _traits;
 
@@ -99,19 +101,21 @@ namespace Serilog.Sinks.MSSqlServer
             ITextFormatter logEventFormatter = null)
             : base(sinkOptions?.BatchPostingLimit ?? DefaultBatchPostingLimit, sinkOptions?.BatchPeriod ?? DefaultPeriod)
         {
+            _sinkOptions = sinkOptions;
             if (sinkOptions?.TableName == null)
             {
                 throw new InvalidOperationException("Table name must be specified!");
             }
 
-            columnOptions?.FinalizeConfigurationForSinkConstructor();
+            _columnOptions = columnOptions ?? new ColumnOptions();
+            _columnOptions.FinalizeConfigurationForSinkConstructor();
 
             var azureManagedServiceAuthenticator = new AzureManagedServiceAuthenticator(sinkOptions.UseAzureManagedIdentity,
                 sinkOptions.AzureServiceTokenProviderResource);
             _sqlConnectionFactory = new SqlConnectionFactory(connectionString, azureManagedServiceAuthenticator);
 
             _traits = new MSSqlServerSinkTraits(_sqlConnectionFactory, sinkOptions.TableName, sinkOptions.SchemaName,
-                columnOptions, formatProvider, sinkOptions.AutoCreateSqlTable, logEventFormatter);
+                _columnOptions, formatProvider, sinkOptions.AutoCreateSqlTable, logEventFormatter);
         }
 
         /// <summary>
@@ -133,12 +137,12 @@ namespace Serilog.Sinks.MSSqlServer
                 using (var cn = _sqlConnectionFactory.Create())
                 {
                     await cn.OpenAsync().ConfigureAwait(false);
-                    using (var copy = _traits.ColumnOptions.DisableTriggers
+                    using (var copy = _columnOptions.DisableTriggers
                             ? new SqlBulkCopy(cn)
                             : new SqlBulkCopy(cn, SqlBulkCopyOptions.CheckConstraints | SqlBulkCopyOptions.FireTriggers, null)
                     )
                     {
-                        copy.DestinationTableName = string.Format(CultureInfo.InvariantCulture, "[{0}].[{1}]", _traits.SchemaName, _traits.TableName);
+                        copy.DestinationTableName = string.Format(CultureInfo.InvariantCulture, "[{0}].[{1}]", _sinkOptions.SchemaName, _sinkOptions.TableName);
                         foreach (var column in _traits.EventTable.Columns)
                         {
                             var columnName = ((DataColumn)column).ColumnName;

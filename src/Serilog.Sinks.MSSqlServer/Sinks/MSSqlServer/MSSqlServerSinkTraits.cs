@@ -27,12 +27,12 @@ namespace Serilog.Sinks.MSSqlServer
     /// <summary>Contains common functionality and properties used by both MSSqlServerSinks.</summary>
     internal class MSSqlServerSinkTraits : IDisposable
     {
+        private readonly string _tableName;
+        private readonly string _schemaName;
+        private readonly ColumnOptions _columnOptions;
         private readonly ILogEventDataGenerator _logEventDataGenerator;
         private bool _disposedValue;
 
-        public string TableName { get; }
-        public string SchemaName { get; }
-        public ColumnOptions ColumnOptions { get; }
         public DataTable EventTable { get; }
 
         public MSSqlServerSinkTraits(
@@ -61,12 +61,12 @@ namespace Serilog.Sinks.MSSqlServer
             if (string.IsNullOrWhiteSpace(tableName))
                 throw new ArgumentNullException(nameof(tableName));
 
+            _tableName = tableName;
+            _schemaName = schemaName;
+            _columnOptions = columnOptions;
+
             if (sqlTableCreator == null)
                 throw new ArgumentNullException(nameof(sqlTableCreator));
-
-            TableName = tableName;
-            SchemaName = schemaName;
-            ColumnOptions = columnOptions ?? new ColumnOptions();
 
             // TODO initialize this outside of this class
             var standardColumnDataGenerator = new StandardColumnDataGenerator(columnOptions, formatProvider, logEventFormatter);
@@ -79,7 +79,7 @@ namespace Serilog.Sinks.MSSqlServer
             {
                 try
                 {
-                    sqlTableCreator.CreateTable(SchemaName, TableName, EventTable, ColumnOptions); // return code ignored, 0 = failure?
+                    sqlTableCreator.CreateTable(_schemaName, _tableName, EventTable, _columnOptions); // return code ignored, 0 = failure?
                 }
                 catch (Exception ex)
                 {
@@ -95,24 +95,24 @@ namespace Serilog.Sinks.MSSqlServer
 
         private DataTable CreateDataTable()
         {
-            var eventsTable = new DataTable(TableName);
+            var eventsTable = new DataTable(_tableName);
 
-            foreach (var standardColumn in ColumnOptions.Store)
+            foreach (var standardColumn in _columnOptions.Store)
             {
-                var standardOpts = ColumnOptions.GetStandardColumnOptions(standardColumn);
+                var standardOpts = _columnOptions.GetStandardColumnOptions(standardColumn);
                 var dataColumn = standardOpts.AsDataColumn();
                 eventsTable.Columns.Add(dataColumn);
-                if (standardOpts == ColumnOptions.PrimaryKey)
+                if (standardOpts == _columnOptions.PrimaryKey)
                     eventsTable.PrimaryKey = new DataColumn[] { dataColumn };
             }
 
-            if (ColumnOptions.AdditionalColumns != null)
+            if (_columnOptions.AdditionalColumns != null)
             {
-                foreach (var addCol in ColumnOptions.AdditionalColumns)
+                foreach (var addCol in _columnOptions.AdditionalColumns)
                 {
                     var dataColumn = addCol.AsDataColumn();
                     eventsTable.Columns.Add(dataColumn);
-                    if (addCol == ColumnOptions.PrimaryKey)
+                    if (addCol == _columnOptions.PrimaryKey)
                         eventsTable.PrimaryKey = new DataColumn[] { dataColumn };
                 }
             }

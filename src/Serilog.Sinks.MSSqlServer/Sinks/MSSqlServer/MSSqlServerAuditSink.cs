@@ -31,6 +31,7 @@ namespace Serilog.Sinks.MSSqlServer
     /// </summary>
     public class MSSqlServerAuditSink : ILogEventSink, IDisposable
     {
+        private readonly SinkOptions _sinkOptions;
         private readonly ISqlConnectionFactory _sqlConnectionFactory;
         private readonly MSSqlServerSinkTraits _traits;
 
@@ -77,25 +78,23 @@ namespace Serilog.Sinks.MSSqlServer
             ColumnOptions columnOptions = null,
             ITextFormatter logEventFormatter = null)
         {
-            if (sinkOptions?.TableName == null)
+            _sinkOptions = sinkOptions;
+            if (_sinkOptions?.TableName == null)
             {
                 throw new InvalidOperationException("Table name must be specified!");
             }
 
-            columnOptions?.FinalizeConfigurationForSinkConstructor();
+            columnOptions = columnOptions ?? new ColumnOptions();
+            columnOptions.FinalizeConfigurationForSinkConstructor();
+            if (columnOptions.DisableTriggers)
+                throw new NotSupportedException($"The {nameof(ColumnOptions.DisableTriggers)} option is not supported for auditing.");
 
-            if (columnOptions != null)
-            {
-                if (columnOptions.DisableTriggers)
-                    throw new NotSupportedException($"The {nameof(ColumnOptions.DisableTriggers)} option is not supported for auditing.");
-            }
-
-            var azureManagedServiceAuthenticator = new AzureManagedServiceAuthenticator(sinkOptions.UseAzureManagedIdentity,
-                sinkOptions.AzureServiceTokenProviderResource);
+            var azureManagedServiceAuthenticator = new AzureManagedServiceAuthenticator(_sinkOptions.UseAzureManagedIdentity,
+                _sinkOptions.AzureServiceTokenProviderResource);
             _sqlConnectionFactory = new SqlConnectionFactory(connectionString, azureManagedServiceAuthenticator);
 
-            _traits = new MSSqlServerSinkTraits(_sqlConnectionFactory, sinkOptions.TableName, sinkOptions.SchemaName,
-                columnOptions, formatProvider, sinkOptions.AutoCreateSqlTable, logEventFormatter);
+            _traits = new MSSqlServerSinkTraits(_sqlConnectionFactory, _sinkOptions.TableName, _sinkOptions.SchemaName,
+                columnOptions, formatProvider, _sinkOptions.AutoCreateSqlTable, logEventFormatter);
         }
 
         /// <summary>Emit the provided log event to the sink.</summary>
@@ -111,7 +110,7 @@ namespace Serilog.Sinks.MSSqlServer
                     {
                         command.CommandType = CommandType.Text;
 
-                        var fieldList = new StringBuilder($"INSERT INTO [{_traits.SchemaName}].[{_traits.TableName}] (");
+                        var fieldList = new StringBuilder($"INSERT INTO [{_sinkOptions.SchemaName}].[{_sinkOptions.TableName}] (");
                         var parameterList = new StringBuilder(") VALUES (");
 
                         var index = 0;
