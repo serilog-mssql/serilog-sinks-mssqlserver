@@ -332,7 +332,7 @@ Any valid SQL column name can be used. Standard Columns have default names assig
 
 ### PropertyName
 
-The optional name of a Serilog property to use as the value for the SqlColumn.  If not provided, the property used is the one that has the same name as the specified ColumnName.
+The optional name of a Serilog property to use as the value for a custom column. If not provided, the property used is the one that has the same name as the specified ColumnName. It applies only to custom columns defined in `AdditionalColumns` and is ignored for standard columns.
 
 ### DataType
 

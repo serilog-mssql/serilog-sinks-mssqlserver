@@ -94,16 +94,9 @@ namespace Serilog.Sinks.MSSqlServer.Tests.TestUtils
             }
         }
 
-        protected static void VerifyLogMessageWasWritten(string expectedMessage)
+        protected static void VerifyLogMessageWasWritten(string expectedMessage, string messageColumnName = "Message")
         {
-            //using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
-            //{
-            //    var logEvents = conn.Query<DefaultStandardLogColumns>($"SELECT * FROM {DatabaseFixture.LogTableName}");
-
-            //    logEvents.Should().Contain(e => e.Message.Contains(message));
-            //}
-
-            VerifyStringColumnWritten("Message", expectedMessage);
+            VerifyStringColumnWritten(messageColumnName, expectedMessage);
         }
 
         protected static void VerifyStringColumnWritten(string columnName, string expectedValue)
