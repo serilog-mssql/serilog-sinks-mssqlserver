@@ -77,14 +77,7 @@ namespace Serilog.Sinks.MSSqlServer
 
             if (autoCreateSqlTable)
             {
-                try
-                {
-                    sqlTableCreator.CreateTable(_schemaName, _tableName, EventTable, _columnOptions); // return code ignored, 0 = failure?
-                }
-                catch (Exception ex)
-                {
-                    SelfLog.WriteLine($"Exception creating table {tableName}:\n{ex}");
-                }
+                sqlTableCreator.CreateTable(_schemaName, _tableName, EventTable, _columnOptions);
             }
         }
 
