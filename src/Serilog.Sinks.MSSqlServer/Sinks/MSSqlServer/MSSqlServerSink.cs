@@ -22,6 +22,7 @@ using System.Threading.Tasks;
 using Serilog.Debugging;
 using Serilog.Events;
 using Serilog.Formatting;
+using Serilog.Sinks.MSSqlServer.Output;
 using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
 using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform;
 using Serilog.Sinks.PeriodicBatching;
@@ -36,6 +37,7 @@ namespace Serilog.Sinks.MSSqlServer
         private readonly SinkOptions _sinkOptions;
         private readonly ColumnOptions _columnOptions;
         private readonly ISqlConnectionFactory _sqlConnectionFactory;
+        private readonly ILogEventDataGenerator _logEventDataGenerator;
         private readonly MSSqlServerSinkTraits _traits;
 
         /// <summary>
@@ -99,6 +101,23 @@ namespace Serilog.Sinks.MSSqlServer
             IFormatProvider formatProvider = null,
             ColumnOptions columnOptions = null,
             ITextFormatter logEventFormatter = null)
+            : this(sinkOptions, columnOptions,
+                new SqlConnectionFactory(connectionString,
+                    new AzureManagedServiceAuthenticator(
+                        sinkOptions?.UseAzureManagedIdentity ?? default,
+                        sinkOptions.AzureServiceTokenProviderResource)),
+                new LogEventDataGenerator(columnOptions,
+                    new StandardColumnDataGenerator(columnOptions, formatProvider, logEventFormatter),
+                    new PropertiesColumnDataGenerator(columnOptions)))
+        {
+        }
+
+        // Internal constructor with injectable dependencies for better testability
+        internal MSSqlServerSink(
+            SinkOptions sinkOptions,
+            ColumnOptions columnOptions,
+            ISqlConnectionFactory sqlConnectionFactory,
+            ILogEventDataGenerator logEventDataGenerator)
             : base(sinkOptions?.BatchPostingLimit ?? DefaultBatchPostingLimit, sinkOptions?.BatchPeriod ?? DefaultPeriod)
         {
             _sinkOptions = sinkOptions;
@@ -110,12 +129,12 @@ namespace Serilog.Sinks.MSSqlServer
             _columnOptions = columnOptions ?? new ColumnOptions();
             _columnOptions.FinalizeConfigurationForSinkConstructor();
 
-            var azureManagedServiceAuthenticator = new AzureManagedServiceAuthenticator(sinkOptions.UseAzureManagedIdentity,
-                sinkOptions.AzureServiceTokenProviderResource);
-            _sqlConnectionFactory = new SqlConnectionFactory(connectionString, azureManagedServiceAuthenticator);
+            _sqlConnectionFactory = sqlConnectionFactory ?? throw new ArgumentNullException(nameof(sqlConnectionFactory));
+
+            _logEventDataGenerator = logEventDataGenerator ?? throw new ArgumentNullException(nameof(logEventDataGenerator));
 
             _traits = new MSSqlServerSinkTraits(_sqlConnectionFactory, sinkOptions.TableName, sinkOptions.SchemaName,
-                _columnOptions, formatProvider, sinkOptions.AutoCreateSqlTable, logEventFormatter);
+                _columnOptions, sinkOptions.AutoCreateSqlTable);
         }
 
         /// <summary>
@@ -185,7 +204,7 @@ namespace Serilog.Sinks.MSSqlServer
             {
                 var row = _traits.EventTable.NewRow();
 
-                foreach (var field in _traits.GetColumnsAndValues(logEvent))
+                foreach (var field in _logEventDataGenerator.GetColumnsAndValues(logEvent))
                 {
                     row[field.Key] = field.Value;
                 }

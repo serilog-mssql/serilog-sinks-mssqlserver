@@ -20,6 +20,7 @@ using Serilog.Core;
 using Serilog.Debugging;
 using Serilog.Events;
 using Serilog.Formatting;
+using Serilog.Sinks.MSSqlServer.Output;
 using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
 using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform;
 
@@ -33,6 +34,7 @@ namespace Serilog.Sinks.MSSqlServer
     {
         private readonly SinkOptions _sinkOptions;
         private readonly ISqlConnectionFactory _sqlConnectionFactory;
+        private readonly ILogEventDataGenerator _logEventDataGenerator;
         private readonly MSSqlServerSinkTraits _traits;
 
         /// <summary>
@@ -77,6 +79,23 @@ namespace Serilog.Sinks.MSSqlServer
             IFormatProvider formatProvider = null,
             ColumnOptions columnOptions = null,
             ITextFormatter logEventFormatter = null)
+            : this(sinkOptions, columnOptions, 
+                new SqlConnectionFactory(connectionString,
+                    new AzureManagedServiceAuthenticator(
+                        sinkOptions?.UseAzureManagedIdentity ?? default,
+                        sinkOptions.AzureServiceTokenProviderResource)),
+                new LogEventDataGenerator(columnOptions,
+                    new StandardColumnDataGenerator(columnOptions, formatProvider, logEventFormatter),
+                    new PropertiesColumnDataGenerator(columnOptions)))
+        {
+        }
+
+        // Internal constructor with injectable dependencies for better testability
+        internal MSSqlServerAuditSink(
+            SinkOptions sinkOptions,
+            ColumnOptions columnOptions,
+            ISqlConnectionFactory sqlConnectionFactory,
+            ILogEventDataGenerator logEventDataGenerator)
         {
             _sinkOptions = sinkOptions;
             if (_sinkOptions?.TableName == null)
@@ -89,12 +108,12 @@ namespace Serilog.Sinks.MSSqlServer
             if (columnOptions.DisableTriggers)
                 throw new NotSupportedException($"The {nameof(ColumnOptions.DisableTriggers)} option is not supported for auditing.");
 
-            var azureManagedServiceAuthenticator = new AzureManagedServiceAuthenticator(_sinkOptions.UseAzureManagedIdentity,
-                _sinkOptions.AzureServiceTokenProviderResource);
-            _sqlConnectionFactory = new SqlConnectionFactory(connectionString, azureManagedServiceAuthenticator);
+            _sqlConnectionFactory = sqlConnectionFactory ?? throw new ArgumentNullException(nameof(sqlConnectionFactory));
+
+            _logEventDataGenerator = logEventDataGenerator ?? throw new ArgumentNullException(nameof(logEventDataGenerator));
 
             _traits = new MSSqlServerSinkTraits(_sqlConnectionFactory, _sinkOptions.TableName, _sinkOptions.SchemaName,
-                columnOptions, formatProvider, _sinkOptions.AutoCreateSqlTable, logEventFormatter);
+                columnOptions, _sinkOptions.AutoCreateSqlTable);
         }
 
         /// <summary>Emit the provided log event to the sink.</summary>
@@ -114,7 +133,7 @@ namespace Serilog.Sinks.MSSqlServer
                         var parameterList = new StringBuilder(") VALUES (");
 
                         var index = 0;
-                        foreach (var field in _traits.GetColumnsAndValues(logEvent))
+                        foreach (var field in _logEventDataGenerator.GetColumnsAndValues(logEvent))
                         {
                             if (index != 0)
                             {
