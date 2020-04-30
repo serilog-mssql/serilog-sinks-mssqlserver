@@ -30,8 +30,6 @@ namespace Serilog.Sinks.MSSqlServer
     /// </summary>
     public class MSSqlServerSink : PeriodicBatchingSink
     {
-        private readonly SinkOptions _sinkOptions;
-        private readonly ColumnOptions _columnOptions;
         private readonly ISqlBulkBatchWriter _sqlBulkBatchWriter;
         private readonly DataTable _eventTable;
 
@@ -108,14 +106,13 @@ namespace Serilog.Sinks.MSSqlServer
             SinkDependencies sinkDependencies)
             : base(sinkOptions?.BatchPostingLimit ?? DefaultBatchPostingLimit, sinkOptions?.BatchPeriod ?? DefaultPeriod)
         {
-            _sinkOptions = sinkOptions;
             if (sinkOptions?.TableName == null)
             {
                 throw new InvalidOperationException("Table name must be specified!");
             }
 
-            _columnOptions = columnOptions ?? new ColumnOptions();
-            _columnOptions.FinalizeConfigurationForSinkConstructor();
+            columnOptions = columnOptions ?? new ColumnOptions();
+            columnOptions.FinalizeConfigurationForSinkConstructor();
 
             if (sinkDependencies == null)
             {
@@ -130,13 +127,13 @@ namespace Serilog.Sinks.MSSqlServer
             }
             _eventTable = sinkDependencies.DataTableCreator.CreateDataTable(sinkOptions.TableName, columnOptions);
 
-            if (_sinkOptions.AutoCreateSqlTable)
+            if (sinkOptions.AutoCreateSqlTable)
             {
                 if (sinkDependencies?.SqlBulkBatchWriter == null)
                 {
                     throw new InvalidOperationException($"SqlTableCreator is not initialized!");
                 }
-                sinkDependencies.SqlTableCreator.CreateTable(sinkOptions.SchemaName, sinkOptions.TableName, _eventTable, _columnOptions);
+                sinkDependencies.SqlTableCreator.CreateTable(sinkOptions.SchemaName, sinkOptions.TableName, _eventTable, columnOptions);
             }
         }
 

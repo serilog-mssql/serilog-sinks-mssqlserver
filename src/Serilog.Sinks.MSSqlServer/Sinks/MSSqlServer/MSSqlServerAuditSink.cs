@@ -28,7 +28,6 @@ namespace Serilog.Sinks.MSSqlServer
     /// </summary>
     public class MSSqlServerAuditSink : ILogEventSink, IDisposable
     {
-        private readonly SinkOptions _sinkOptions;
         private readonly ISqlLogEventWriter _sqlLogEventWriter;
 
         /// <summary>
@@ -84,8 +83,7 @@ namespace Serilog.Sinks.MSSqlServer
             ColumnOptions columnOptions,
             SinkDependencies sinkDependencies)
         {
-            _sinkOptions = sinkOptions;
-            if (_sinkOptions?.TableName == null)
+            if (sinkOptions?.TableName == null)
             {
                 throw new InvalidOperationException("Table name must be specified!");
             }
@@ -101,16 +99,16 @@ namespace Serilog.Sinks.MSSqlServer
             }
             _sqlLogEventWriter = sinkDependencies?.SqlLogEventWriter ?? throw new InvalidOperationException($"SqlLogEventWriter is not initialized!");
 
-            if (_sinkOptions.AutoCreateSqlTable)
+            if (sinkOptions.AutoCreateSqlTable)
             {
                 if (sinkDependencies?.DataTableCreator == null)
                 {
                     throw new InvalidOperationException($"DataTableCreator is not initialized!");
                 }
 
-                using (var eventTable = sinkDependencies.DataTableCreator.CreateDataTable(_sinkOptions.TableName, columnOptions))
+                using (var eventTable = sinkDependencies.DataTableCreator.CreateDataTable(sinkOptions.TableName, columnOptions))
                 {
-                    sinkDependencies.SqlTableCreator.CreateTable(_sinkOptions.SchemaName, _sinkOptions.TableName, eventTable, columnOptions);
+                    sinkDependencies.SqlTableCreator.CreateTable(sinkOptions.SchemaName, sinkOptions.TableName, eventTable, columnOptions);
                 }
             }
         }
