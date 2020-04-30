@@ -19,23 +19,27 @@ namespace Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Dependencies
             columnOptions = columnOptions ?? new ColumnOptions();
             columnOptions.FinalizeConfigurationForSinkConstructor();
 
+            var sqlConnectionFactory =
+                new SqlConnectionFactory(connectionString,
+                    new AzureManagedServiceAuthenticator(
+                        sinkOptions?.UseAzureManagedIdentity ?? default,
+                        sinkOptions.AzureServiceTokenProviderResource));
+            var logEventDataGenerator =
+                new LogEventDataGenerator(columnOptions,
+                    new StandardColumnDataGenerator(columnOptions, formatProvider, logEventFormatter),
+                    new PropertiesColumnDataGenerator(columnOptions));
+
             var sinkDependencies = new SinkDependencies
             {
+                SqlTableCreator = new SqlTableCreator(new SqlCreateTableWriter(), sqlConnectionFactory),
                 DataTableCreator = new DataTableCreator(),
-                SqlConnectionFactory =
-                    new SqlConnectionFactory(connectionString,
-                        new AzureManagedServiceAuthenticator(
-                            sinkOptions?.UseAzureManagedIdentity ?? default,
-                            sinkOptions.AzureServiceTokenProviderResource)),
-                LogEventDataGenerator =
-                    new LogEventDataGenerator(columnOptions,
-                        new StandardColumnDataGenerator(columnOptions, formatProvider, logEventFormatter),
-                        new PropertiesColumnDataGenerator(columnOptions))
+                SqlBulkBatchWriter = new SqlBulkBatchWriter(
+                    sinkOptions.TableName, sinkOptions.SchemaName,
+                    columnOptions.DisableTriggers, sqlConnectionFactory, logEventDataGenerator),
+                SqlLogEventWriter = new SqlLogEventWriter(
+                    sinkOptions.TableName, sinkOptions.SchemaName,
+                    sqlConnectionFactory, logEventDataGenerator)
             };
-            sinkDependencies.SqlTableCreator = new SqlTableCreator(
-                new SqlCreateTableWriter(), sinkDependencies.SqlConnectionFactory);
-            sinkDependencies.SqlBulkBatchWriter = new SqlBulkBatchWriter(sinkOptions.TableName, sinkOptions.SchemaName,
-                columnOptions.DisableTriggers, sinkDependencies.SqlConnectionFactory, sinkDependencies.LogEventDataGenerator);
 
             return sinkDependencies;
         }

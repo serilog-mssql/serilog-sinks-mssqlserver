@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Data;
 using Moq;
-using Serilog.Sinks.MSSqlServer.Output;
 using Serilog.Sinks.MSSqlServer.Platform;
 using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Dependencies;
 using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
@@ -33,6 +32,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer
 
             _sqlTableCreatorMock = new Mock<ISqlTableCreator>();
             _sqlBulkBatchWriter = new Mock<ISqlBulkBatchWriter>();
+
             _sinkDependencies = new SinkDependencies
             {
                 DataTableCreator = _dataTableCreatorMock.Object,
