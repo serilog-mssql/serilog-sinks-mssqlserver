@@ -16,9 +16,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer
     {
         private readonly SinkDependencies _sinkDependencies;
         private readonly Mock<IDataTableCreator> _dataTableCreatorMock;
-        private readonly Mock<ISqlConnectionFactory> _sqlConnectionFactoryMock;
         private readonly Mock<ISqlTableCreator> _sqlTableCreatorMock;
-        private readonly Mock<ILogEventDataGenerator> _logEventDataGeneratorMock;
+        private readonly Mock<ISqlBulkBatchWriter> _sqlBulkBatchWriter;
         private readonly string _tableName = "tableName";
         private readonly string _schemaName = "schemaName";
         private readonly DataTable _dataTable;
@@ -32,15 +31,13 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer
             _dataTableCreatorMock.Setup(d => d.CreateDataTable(It.IsAny<string>(), It.IsAny<Serilog.Sinks.MSSqlServer.ColumnOptions>()))
                 .Returns(_dataTable);
 
-            _sqlConnectionFactoryMock = new Mock<ISqlConnectionFactory>();
             _sqlTableCreatorMock = new Mock<ISqlTableCreator>();
-            _logEventDataGeneratorMock = new Mock<ILogEventDataGenerator>();
+            _sqlBulkBatchWriter = new Mock<ISqlBulkBatchWriter>();
             _sinkDependencies = new SinkDependencies
             {
                 DataTableCreator = _dataTableCreatorMock.Object,
-                SqlConnectionFactory = _sqlConnectionFactoryMock.Object,
                 SqlTableCreator = _sqlTableCreatorMock.Object,
-                LogEventDataGenerator = _logEventDataGeneratorMock.Object
+                SqlBulkBatchWriter = _sqlBulkBatchWriter.Object
             };
         }
 

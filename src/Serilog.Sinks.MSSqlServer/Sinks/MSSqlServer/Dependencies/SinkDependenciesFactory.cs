@@ -16,6 +16,9 @@ namespace Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Dependencies
             ColumnOptions columnOptions,
             ITextFormatter logEventFormatter)
         {
+            columnOptions = columnOptions ?? new ColumnOptions();
+            columnOptions.FinalizeConfigurationForSinkConstructor();
+
             var sinkDependencies = new SinkDependencies
             {
                 DataTableCreator = new DataTableCreator(),
@@ -31,6 +34,8 @@ namespace Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Dependencies
             };
             sinkDependencies.SqlTableCreator = new SqlTableCreator(
                 new SqlCreateTableWriter(), sinkDependencies.SqlConnectionFactory);
+            sinkDependencies.SqlBulkBatchWriter = new SqlBulkBatchWriter(sinkOptions.TableName, sinkOptions.SchemaName,
+                columnOptions.DisableTriggers, sinkDependencies.SqlConnectionFactory, sinkDependencies.LogEventDataGenerator);
 
             return sinkDependencies;
         }

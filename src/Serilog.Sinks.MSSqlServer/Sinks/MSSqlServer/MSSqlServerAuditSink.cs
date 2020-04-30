@@ -105,11 +105,16 @@ namespace Serilog.Sinks.MSSqlServer
             {
                 throw new ArgumentNullException(nameof(sinkDependencies));
             }
-            _sqlConnectionFactory = sinkDependencies?.SqlConnectionFactory ?? throw new InvalidOperationException($"{nameof(SqlConnectionFactory)} is not initialized");
-            _logEventDataGenerator = sinkDependencies?.LogEventDataGenerator ?? throw new InvalidOperationException($"{nameof(LogEventDataGenerator)} is not initialized");
+            _sqlConnectionFactory = sinkDependencies?.SqlConnectionFactory ?? throw new InvalidOperationException($"SqlConnectionFactory is not initialized!");
+            _logEventDataGenerator = sinkDependencies?.LogEventDataGenerator ?? throw new InvalidOperationException($"LogEventDataGenerator is not initialized!");
 
             if (_sinkOptions.AutoCreateSqlTable)
             {
+                if (sinkDependencies?.DataTableCreator == null)
+                {
+                    throw new InvalidOperationException($"DataTableCreator is not initialized!");
+                }
+
                 using (var eventTable = sinkDependencies.DataTableCreator.CreateDataTable(_sinkOptions.TableName, columnOptions))
                 {
                     sinkDependencies.SqlTableCreator.CreateTable(_sinkOptions.SchemaName, _sinkOptions.TableName, eventTable, columnOptions);
@@ -183,7 +188,7 @@ namespace Serilog.Sinks.MSSqlServer
         /// <param name="disposing">True to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
         protected virtual void Dispose(bool disposing)
         {
-            // This class needn't to be IDisposable anymore. This is just here for backwards compatibility.
+            // This class needn't to dispose anything. This is just here for sink interface compatibility.
         }
 
         /// <summary>

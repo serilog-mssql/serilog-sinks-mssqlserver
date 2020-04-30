@@ -10,5 +10,6 @@ namespace Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Dependencies
         public ISqlConnectionFactory SqlConnectionFactory { get; set; }
         public ISqlTableCreator SqlTableCreator { get; set; }
         public ILogEventDataGenerator LogEventDataGenerator { get; set; }
+        public ISqlBulkBatchWriter SqlBulkBatchWriter { get; set; }
     }
 }
