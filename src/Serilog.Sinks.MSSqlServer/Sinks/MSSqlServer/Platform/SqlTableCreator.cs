@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Data;
 using System.Data.SqlClient;
+using Serilog.Debugging;
 using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform;
 
 namespace Serilog.Sinks.MSSqlServer.Platform
@@ -16,17 +17,23 @@ namespace Serilog.Sinks.MSSqlServer.Platform
             _sqlConnectionFactory = sqlConnectionFactory ?? throw new ArgumentNullException(nameof(sqlConnectionFactory));
         }
 
-        public int CreateTable(string schemaName, string tableName, DataTable dataTable, ColumnOptions columnOptions)
+        public void CreateTable(string schemaName, string tableName, DataTable dataTable, ColumnOptions columnOptions)
         {
-            using (var conn = _sqlConnectionFactory.Create())
+            try
             {
-                var sql = _sqlCreateTableWriter.GetSqlFromDataTable(schemaName, tableName, dataTable, columnOptions);
-                using (var cmd = new SqlCommand(sql, conn))
+                using (var conn = _sqlConnectionFactory.Create())
                 {
-                    conn.Open();
-                    return cmd.ExecuteNonQuery();
+                    var sql = _sqlCreateTableWriter.GetSqlFromDataTable(schemaName, tableName, dataTable, columnOptions);
+                    using (var cmd = new SqlCommand(sql, conn))
+                    {
+                        conn.Open();
+                        cmd.ExecuteNonQuery();
+                    }
                 }
-
+            }
+            catch (Exception ex)
+            {
+                SelfLog.WriteLine($"Exception creating table {tableName}:\n{ex}");
             }
         }
     }

@@ -1,33 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using Moq;
 using Serilog.Events;
 using Serilog.Formatting;
 using Serilog.Parsing;
-using Serilog.Sinks.MSSqlServer.Platform;
-using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform;
+using Serilog.Sinks.MSSqlServer.Output;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
 
-namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer
+namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Output
 {
     [Trait(TestCategory.TraitName, TestCategory.Unit)]
-    public class MSSqlServerSinkTraitsTests : IDisposable
+    public class LogEventDataGeneratorTests
     {
-        private readonly Mock<ISqlConnectionFactory> _sqlConnectionFactoryMock;
-        private readonly string _tableName = "tableName";
-        private readonly string _schemaName = "schemaName";
-        private MSSqlServerSinkTraits _sut;
-        private bool _disposedValue;
-
-        public MSSqlServerSinkTraitsTests()
-        {
-            _sqlConnectionFactoryMock = new Mock<ISqlConnectionFactory>();
-        }
+        private LogEventDataGenerator _sut;
 
         [Trait("Bugfix", "#187")]
         [Fact]
@@ -159,38 +148,6 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer
             Assert.Equal(expectedLogEventContent, logEventColumn.Value);
         }
 
-        [Fact]
-        public void InitializeWithAutoCreateSqlTableCallsSqlTableCreator()
-        {
-            // Arrange
-            var options = new Serilog.Sinks.MSSqlServer.ColumnOptions();
-            var sqlTableCreatorMock = new Mock<ISqlTableCreator>();
-
-            // Act
-            SetupSut(options, autoCreateSqlTable: true, sqlTableCreator: sqlTableCreatorMock.Object);
-
-            // Assert
-            sqlTableCreatorMock.Verify(c => c.CreateTable(_schemaName, _tableName,
-                It.IsAny<DataTable>(), options),
-                Times.Once);
-        }
-
-        [Fact]
-        public void InitializeWithoutAutoCreateSqlTableDoesNotCallSqlTableCreator()
-        {
-            // Arrange
-            var options = new Serilog.Sinks.MSSqlServer.ColumnOptions();
-            var sqlTableCreatorMock = new Mock<ISqlTableCreator>();
-
-            // Act
-            SetupSut(options, autoCreateSqlTable: false, sqlTableCreator: sqlTableCreatorMock.Object);
-
-            // Assert
-            sqlTableCreatorMock.Verify(c => c.CreateTable(It.IsAny<string>(), It.IsAny<string>(),
-                It.IsAny<DataTable>(), It.IsAny<Serilog.Sinks.MSSqlServer.ColumnOptions>()),
-                Times.Never);
-        }
-
         private static LogEvent CreateLogEvent(DateTimeOffset testDateTimeOffset)
         {
             return new LogEvent(testDateTimeOffset, LogEventLevel.Information, null,
@@ -199,36 +156,12 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer
 
         private void SetupSut(
             Serilog.Sinks.MSSqlServer.ColumnOptions options,
-            bool autoCreateSqlTable = false,
-            ITextFormatter logEventFormatter = null,
-            ISqlTableCreator sqlTableCreator = null)
+            ITextFormatter logEventFormatter = null)
         {
-            if (sqlTableCreator == null)
-            {
-                _sut = new MSSqlServerSinkTraits(_sqlConnectionFactoryMock.Object, _tableName, _schemaName,
-                    options, CultureInfo.InvariantCulture, autoCreateSqlTable, logEventFormatter);
-            }
-            else
-            {
-                // Internal constructor to use ISqlTableCreator mock
-                _sut = new MSSqlServerSinkTraits(_tableName, _schemaName, options, CultureInfo.InvariantCulture,
-                    autoCreateSqlTable, logEventFormatter, sqlTableCreator);
-            }
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!_disposedValue)
-            {
-                _sut.Dispose();
-                _disposedValue = true;
-            }
-        }
-
-        public void Dispose()
-        {
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
+            // TODO replace StandardColumnDataGenerator and with mocks and move tests to separate test classes
+            _sut = new LogEventDataGenerator(options,
+                new StandardColumnDataGenerator(options, null, logEventFormatter),
+                new PropertiesColumnDataGenerator(options));
         }
     }
 }

@@ -15,13 +15,10 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlClient;
-using System.Globalization;
-using System.Linq;
 using System.Threading.Tasks;
-using Serilog.Debugging;
 using Serilog.Events;
 using Serilog.Formatting;
+using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Dependencies;
 using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
 using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform;
 using Serilog.Sinks.PeriodicBatching;
@@ -33,8 +30,8 @@ namespace Serilog.Sinks.MSSqlServer
     /// </summary>
     public class MSSqlServerSink : PeriodicBatchingSink
     {
-        private readonly ISqlConnectionFactory _sqlConnectionFactory;
-        private readonly MSSqlServerSinkTraits _traits;
+        private readonly ISqlBulkBatchWriter _sqlBulkBatchWriter;
+        private readonly DataTable _eventTable;
 
         /// <summary>
         /// The default database schema name.
@@ -97,6 +94,16 @@ namespace Serilog.Sinks.MSSqlServer
             IFormatProvider formatProvider = null,
             ColumnOptions columnOptions = null,
             ITextFormatter logEventFormatter = null)
+            : this(sinkOptions, columnOptions,
+                  SinkDependenciesFactory.Create(connectionString, sinkOptions, formatProvider, columnOptions, logEventFormatter))
+        {
+        }
+
+        // Internal constructor with injectable dependencies for better testability
+        internal MSSqlServerSink(
+            SinkOptions sinkOptions,
+            ColumnOptions columnOptions,
+            SinkDependencies sinkDependencies)
             : base(sinkOptions?.BatchPostingLimit ?? DefaultBatchPostingLimit, sinkOptions?.BatchPeriod ?? DefaultPeriod)
         {
             if (sinkOptions?.TableName == null)
@@ -104,14 +111,30 @@ namespace Serilog.Sinks.MSSqlServer
                 throw new InvalidOperationException("Table name must be specified!");
             }
 
-            columnOptions?.FinalizeConfigurationForSinkConstructor();
+            columnOptions = columnOptions ?? new ColumnOptions();
+            columnOptions.FinalizeConfigurationForSinkConstructor();
 
-            var azureManagedServiceAuthenticator = new AzureManagedServiceAuthenticator(sinkOptions.UseAzureManagedIdentity,
-                sinkOptions.AzureServiceTokenProviderResource);
-            _sqlConnectionFactory = new SqlConnectionFactory(connectionString, azureManagedServiceAuthenticator);
+            if (sinkDependencies == null)
+            {
+                throw new ArgumentNullException(nameof(sinkDependencies));
+            }
 
-            _traits = new MSSqlServerSinkTraits(_sqlConnectionFactory, sinkOptions.TableName, sinkOptions.SchemaName,
-                columnOptions, formatProvider, sinkOptions.AutoCreateSqlTable, logEventFormatter);
+            _sqlBulkBatchWriter = sinkDependencies?.SqlBulkBatchWriter ?? throw new InvalidOperationException($"SqlBulkBatchWriter is not initialized!");
+
+            if (sinkDependencies?.DataTableCreator == null)
+            {
+                throw new InvalidOperationException($"DataTableCreator is not initialized!");
+            }
+            _eventTable = sinkDependencies.DataTableCreator.CreateDataTable(sinkOptions.TableName, columnOptions);
+
+            if (sinkOptions.AutoCreateSqlTable)
+            {
+                if (sinkDependencies?.SqlBulkBatchWriter == null)
+                {
+                    throw new InvalidOperationException($"SqlTableCreator is not initialized!");
+                }
+                sinkDependencies.SqlTableCreator.CreateTable(sinkOptions.SchemaName, sinkOptions.TableName, _eventTable, columnOptions);
+            }
         }
 
         /// <summary>
@@ -123,43 +146,8 @@ namespace Serilog.Sinks.MSSqlServer
         ///     ,
         ///     not both.
         /// </remarks>
-        protected override async Task EmitBatchAsync(IEnumerable<LogEvent> events)
-        {
-            // Copy the events to the data table
-            FillDataTable(events);
-
-            try
-            {
-                using (var cn = _sqlConnectionFactory.Create())
-                {
-                    await cn.OpenAsync().ConfigureAwait(false);
-                    using (var copy = _traits.ColumnOptions.DisableTriggers
-                            ? new SqlBulkCopy(cn)
-                            : new SqlBulkCopy(cn, SqlBulkCopyOptions.CheckConstraints | SqlBulkCopyOptions.FireTriggers, null)
-                    )
-                    {
-                        copy.DestinationTableName = string.Format(CultureInfo.InvariantCulture, "[{0}].[{1}]", _traits.SchemaName, _traits.TableName);
-                        foreach (var column in _traits.EventTable.Columns)
-                        {
-                            var columnName = ((DataColumn)column).ColumnName;
-                            var mapping = new SqlBulkCopyColumnMapping(columnName, columnName);
-                            copy.ColumnMappings.Add(mapping);
-                        }
-
-                        await copy.WriteToServerAsync(_traits.EventTable).ConfigureAwait(false);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                SelfLog.WriteLine("Unable to write {0} log events to the database due to following error: {1}", events.Count(), ex.Message);
-            }
-            finally
-            {
-                // Processed the items, clear for the next run
-                _traits.EventTable.Clear();
-            }
-        }
+        protected override Task EmitBatchAsync(IEnumerable<LogEvent> events) =>
+            _sqlBulkBatchWriter.WriteBatch(events, _eventTable);
 
         /// <summary>
         ///     Disposes the connection
@@ -170,26 +158,8 @@ namespace Serilog.Sinks.MSSqlServer
             base.Dispose(disposing);
             if (disposing)
             {
-                _traits.Dispose();
+                _eventTable.Dispose();
             }
-        }
-
-        private void FillDataTable(IEnumerable<LogEvent> events)
-        {
-            // Add the new rows to the collection. 
-            foreach (var logEvent in events)
-            {
-                var row = _traits.EventTable.NewRow();
-
-                foreach (var field in _traits.GetColumnsAndValues(logEvent))
-                {
-                    row[field.Key] = field.Value;
-                }
-
-                _traits.EventTable.Rows.Add(row);
-            }
-
-            _traits.EventTable.AcceptChanges();
         }
     }
 }
