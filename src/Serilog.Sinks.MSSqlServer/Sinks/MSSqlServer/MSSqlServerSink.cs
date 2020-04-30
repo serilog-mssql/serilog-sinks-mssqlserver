@@ -23,6 +23,7 @@ using Serilog.Debugging;
 using Serilog.Events;
 using Serilog.Formatting;
 using Serilog.Sinks.MSSqlServer.Output;
+using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Dependencies;
 using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
 using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform;
 using Serilog.Sinks.PeriodicBatching;
@@ -38,7 +39,7 @@ namespace Serilog.Sinks.MSSqlServer
         private readonly ColumnOptions _columnOptions;
         private readonly ISqlConnectionFactory _sqlConnectionFactory;
         private readonly ILogEventDataGenerator _logEventDataGenerator;
-        private readonly MSSqlServerSinkTraits _traits;
+        private readonly DataTable _eventTable;
 
         /// <summary>
         /// The default database schema name.
@@ -102,13 +103,7 @@ namespace Serilog.Sinks.MSSqlServer
             ColumnOptions columnOptions = null,
             ITextFormatter logEventFormatter = null)
             : this(sinkOptions, columnOptions,
-                new SqlConnectionFactory(connectionString,
-                    new AzureManagedServiceAuthenticator(
-                        sinkOptions?.UseAzureManagedIdentity ?? default,
-                        sinkOptions.AzureServiceTokenProviderResource)),
-                new LogEventDataGenerator(columnOptions,
-                    new StandardColumnDataGenerator(columnOptions, formatProvider, logEventFormatter),
-                    new PropertiesColumnDataGenerator(columnOptions)))
+                  SinkDependenciesFactory.Create(connectionString, sinkOptions, formatProvider, columnOptions, logEventFormatter))
         {
         }
 
@@ -116,8 +111,7 @@ namespace Serilog.Sinks.MSSqlServer
         internal MSSqlServerSink(
             SinkOptions sinkOptions,
             ColumnOptions columnOptions,
-            ISqlConnectionFactory sqlConnectionFactory,
-            ILogEventDataGenerator logEventDataGenerator)
+            SinkDependencies sinkDependencies)
             : base(sinkOptions?.BatchPostingLimit ?? DefaultBatchPostingLimit, sinkOptions?.BatchPeriod ?? DefaultPeriod)
         {
             _sinkOptions = sinkOptions;
@@ -129,12 +123,19 @@ namespace Serilog.Sinks.MSSqlServer
             _columnOptions = columnOptions ?? new ColumnOptions();
             _columnOptions.FinalizeConfigurationForSinkConstructor();
 
-            _sqlConnectionFactory = sqlConnectionFactory ?? throw new ArgumentNullException(nameof(sqlConnectionFactory));
+            if (sinkDependencies == null)
+            {
+                throw new ArgumentNullException(nameof(sinkDependencies));
+            }
+            _sqlConnectionFactory = sinkDependencies?.SqlConnectionFactory ?? throw new InvalidOperationException($"{nameof(SqlConnectionFactory)} is not initialized");
+            _logEventDataGenerator = sinkDependencies?.LogEventDataGenerator ?? throw new InvalidOperationException($"{nameof(LogEventDataGenerator)} is not initialized");
 
-            _logEventDataGenerator = logEventDataGenerator ?? throw new ArgumentNullException(nameof(logEventDataGenerator));
+            _eventTable = sinkDependencies.DataTableCreator.CreateDataTable(sinkOptions.TableName, columnOptions);
 
-            _traits = new MSSqlServerSinkTraits(_sqlConnectionFactory, sinkOptions.TableName, sinkOptions.SchemaName,
-                _columnOptions, sinkOptions.AutoCreateSqlTable);
+            if (_sinkOptions.AutoCreateSqlTable)
+            {
+                sinkDependencies.SqlTableCreator.CreateTable(sinkOptions.SchemaName, sinkOptions.TableName, _eventTable, _columnOptions);
+            }
         }
 
         /// <summary>
@@ -162,14 +163,14 @@ namespace Serilog.Sinks.MSSqlServer
                     )
                     {
                         copy.DestinationTableName = string.Format(CultureInfo.InvariantCulture, "[{0}].[{1}]", _sinkOptions.SchemaName, _sinkOptions.TableName);
-                        foreach (var column in _traits.EventTable.Columns)
+                        foreach (var column in _eventTable.Columns)
                         {
                             var columnName = ((DataColumn)column).ColumnName;
                             var mapping = new SqlBulkCopyColumnMapping(columnName, columnName);
                             copy.ColumnMappings.Add(mapping);
                         }
 
-                        await copy.WriteToServerAsync(_traits.EventTable).ConfigureAwait(false);
+                        await copy.WriteToServerAsync(_eventTable).ConfigureAwait(false);
                     }
                 }
             }
@@ -180,7 +181,7 @@ namespace Serilog.Sinks.MSSqlServer
             finally
             {
                 // Processed the items, clear for the next run
-                _traits.EventTable.Clear();
+                _eventTable.Clear();
             }
         }
 
@@ -193,7 +194,7 @@ namespace Serilog.Sinks.MSSqlServer
             base.Dispose(disposing);
             if (disposing)
             {
-                _traits.Dispose();
+                _eventTable.Dispose();
             }
         }
 
@@ -202,17 +203,17 @@ namespace Serilog.Sinks.MSSqlServer
             // Add the new rows to the collection. 
             foreach (var logEvent in events)
             {
-                var row = _traits.EventTable.NewRow();
+                var row = _eventTable.NewRow();
 
                 foreach (var field in _logEventDataGenerator.GetColumnsAndValues(logEvent))
                 {
                     row[field.Key] = field.Value;
                 }
 
-                _traits.EventTable.Rows.Add(row);
+                _eventTable.Rows.Add(row);
             }
 
-            _traits.EventTable.AcceptChanges();
+            _eventTable.AcceptChanges();
         }
     }
 }

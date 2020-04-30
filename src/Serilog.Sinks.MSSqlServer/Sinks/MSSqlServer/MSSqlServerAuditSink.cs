@@ -21,6 +21,7 @@ using Serilog.Debugging;
 using Serilog.Events;
 using Serilog.Formatting;
 using Serilog.Sinks.MSSqlServer.Output;
+using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Dependencies;
 using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
 using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform;
 
@@ -35,7 +36,6 @@ namespace Serilog.Sinks.MSSqlServer
         private readonly SinkOptions _sinkOptions;
         private readonly ISqlConnectionFactory _sqlConnectionFactory;
         private readonly ILogEventDataGenerator _logEventDataGenerator;
-        private readonly MSSqlServerSinkTraits _traits;
 
         /// <summary>
         /// Construct a sink posting to the specified database.
@@ -79,14 +79,8 @@ namespace Serilog.Sinks.MSSqlServer
             IFormatProvider formatProvider = null,
             ColumnOptions columnOptions = null,
             ITextFormatter logEventFormatter = null)
-            : this(sinkOptions, columnOptions, 
-                new SqlConnectionFactory(connectionString,
-                    new AzureManagedServiceAuthenticator(
-                        sinkOptions?.UseAzureManagedIdentity ?? default,
-                        sinkOptions.AzureServiceTokenProviderResource)),
-                new LogEventDataGenerator(columnOptions,
-                    new StandardColumnDataGenerator(columnOptions, formatProvider, logEventFormatter),
-                    new PropertiesColumnDataGenerator(columnOptions)))
+            : this(sinkOptions, columnOptions,
+                  SinkDependenciesFactory.Create(connectionString, sinkOptions, formatProvider, columnOptions, logEventFormatter))
         {
         }
 
@@ -94,8 +88,7 @@ namespace Serilog.Sinks.MSSqlServer
         internal MSSqlServerAuditSink(
             SinkOptions sinkOptions,
             ColumnOptions columnOptions,
-            ISqlConnectionFactory sqlConnectionFactory,
-            ILogEventDataGenerator logEventDataGenerator)
+            SinkDependencies sinkDependencies)
         {
             _sinkOptions = sinkOptions;
             if (_sinkOptions?.TableName == null)
@@ -108,12 +101,20 @@ namespace Serilog.Sinks.MSSqlServer
             if (columnOptions.DisableTriggers)
                 throw new NotSupportedException($"The {nameof(ColumnOptions.DisableTriggers)} option is not supported for auditing.");
 
-            _sqlConnectionFactory = sqlConnectionFactory ?? throw new ArgumentNullException(nameof(sqlConnectionFactory));
+            if (sinkDependencies == null)
+            {
+                throw new ArgumentNullException(nameof(sinkDependencies));
+            }
+            _sqlConnectionFactory = sinkDependencies?.SqlConnectionFactory ?? throw new InvalidOperationException($"{nameof(SqlConnectionFactory)} is not initialized");
+            _logEventDataGenerator = sinkDependencies?.LogEventDataGenerator ?? throw new InvalidOperationException($"{nameof(LogEventDataGenerator)} is not initialized");
 
-            _logEventDataGenerator = logEventDataGenerator ?? throw new ArgumentNullException(nameof(logEventDataGenerator));
-
-            _traits = new MSSqlServerSinkTraits(_sqlConnectionFactory, _sinkOptions.TableName, _sinkOptions.SchemaName,
-                columnOptions, _sinkOptions.AutoCreateSqlTable);
+            if (_sinkOptions.AutoCreateSqlTable)
+            {
+                using (var eventTable = sinkDependencies.DataTableCreator.CreateDataTable(_sinkOptions.TableName, columnOptions))
+                {
+                    sinkDependencies.SqlTableCreator.CreateTable(_sinkOptions.SchemaName, _sinkOptions.TableName, eventTable, columnOptions);
+                }
+            }
         }
 
         /// <summary>Emit the provided log event to the sink.</summary>
@@ -179,14 +180,10 @@ namespace Serilog.Sinks.MSSqlServer
         /// Releases the unmanaged resources used by the Serilog.Sinks.MSSqlServer.MSSqlServerAuditSink and optionally
         /// releases the managed resources.
         /// </summary>
-        /// <param name="disposing">True to release both managed and unmanaged resources; false to release only unmanaged
-        ///                         resources.</param>
+        /// <param name="disposing">True to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
         protected virtual void Dispose(bool disposing)
         {
-            if (disposing)
-            {
-                _traits.Dispose();
-            }
+            // This class needn't to be IDisposable anymore. This is just here for backwards compatibility.
         }
 
         /// <summary>
