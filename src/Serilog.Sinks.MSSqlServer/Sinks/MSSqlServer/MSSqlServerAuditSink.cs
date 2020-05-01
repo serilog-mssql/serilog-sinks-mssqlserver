@@ -23,8 +23,8 @@ using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform;
 namespace Serilog.Sinks.MSSqlServer
 {
     /// <summary>
-    ///  Writes log events as rows in a table of MSSqlServer database using Audit logic, meaning that each row is synchronously committed
-    ///  and any errors that occur are propagated to the caller.
+    /// Writes log events as rows in a table of MSSqlServer database using Audit logic, meaning that each row is synchronously committed
+    /// and any errors that occur are propagated to the caller.
     /// </summary>
     public class MSSqlServerAuditSink : ILogEventSink, IDisposable
     {
@@ -83,38 +83,27 @@ namespace Serilog.Sinks.MSSqlServer
             ColumnOptions columnOptions,
             SinkDependencies sinkDependencies)
         {
-            if (sinkOptions?.TableName == null)
-            {
-                throw new InvalidOperationException("Table name must be specified!");
-            }
+            ValidateParameters(sinkOptions, columnOptions);
+            CheckSinkDependencies(sinkDependencies);
 
-            if (columnOptions.DisableTriggers)
-                throw new NotSupportedException($"The {nameof(ColumnOptions.DisableTriggers)} option is not supported for auditing.");
+            _sqlLogEventWriter = sinkDependencies.SqlLogEventWriter;
 
-            if (sinkDependencies == null)
-            {
-                throw new ArgumentNullException(nameof(sinkDependencies));
-            }
-            _sqlLogEventWriter = sinkDependencies?.SqlLogEventWriter ?? throw new InvalidOperationException($"SqlLogEventWriter is not initialized!");
-
-            if (sinkOptions.AutoCreateSqlTable)
-            {
-                if (sinkDependencies?.DataTableCreator == null)
-                {
-                    throw new InvalidOperationException($"DataTableCreator is not initialized!");
-                }
-
-                using (var eventTable = sinkDependencies.DataTableCreator.CreateDataTable())
-                {
-                    sinkDependencies.SqlTableCreator.CreateTable(eventTable);
-                }
-            }
+            CreateTable(sinkOptions, sinkDependencies);
         }
 
         /// <summary>Emit the provided log event to the sink.</summary>
         /// <param name="logEvent">The log event to write.</param>
         public void Emit(LogEvent logEvent) =>
             _sqlLogEventWriter.WriteEvent(logEvent);
+
+        /// <summary>
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
 
         /// <summary>
         /// Releases the unmanaged resources used by the Serilog.Sinks.MSSqlServer.MSSqlServerAuditSink and optionally
@@ -126,13 +115,49 @@ namespace Serilog.Sinks.MSSqlServer
             // This class needn't to dispose anything. This is just here for sink interface compatibility.
         }
 
-        /// <summary>
-        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
-        /// </summary>
-        public void Dispose()
+        private static void ValidateParameters(SinkOptions sinkOptions, ColumnOptions columnOptions)
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
+            if (sinkOptions?.TableName == null)
+            {
+                throw new InvalidOperationException("Table name must be specified!");
+            }
+
+            if (columnOptions.DisableTriggers)
+                throw new NotSupportedException($"The {nameof(ColumnOptions.DisableTriggers)} option is not supported for auditing.");
+        }
+
+        private static void CheckSinkDependencies(SinkDependencies sinkDependencies)
+        {
+            if (sinkDependencies == null)
+            {
+                throw new ArgumentNullException(nameof(sinkDependencies));
+            }
+
+            if (sinkDependencies.DataTableCreator == null)
+            {
+                throw new InvalidOperationException($"DataTableCreator is not initialized!");
+            }
+
+            if (sinkDependencies.SqlTableCreator == null)
+            {
+                throw new InvalidOperationException($"SqlTableCreator is not initialized!");
+            }
+
+            if (sinkDependencies.SqlLogEventWriter == null)
+            {
+                throw new InvalidOperationException($"SqlLogEventWriter is not initialized!");
+            }
+        }
+
+        private static void CreateTable(SinkOptions sinkOptions, SinkDependencies sinkDependencies)
+        {
+            if (sinkOptions.AutoCreateSqlTable)
+            {
+                using (var eventTable = sinkDependencies.DataTableCreator.CreateDataTable())
+                {
+                    sinkDependencies.SqlTableCreator.CreateTable(eventTable);
+                }
+            }
         }
     }
 }
