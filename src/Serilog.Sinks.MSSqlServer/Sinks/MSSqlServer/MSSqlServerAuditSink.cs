@@ -88,8 +88,6 @@ namespace Serilog.Sinks.MSSqlServer
                 throw new InvalidOperationException("Table name must be specified!");
             }
 
-            columnOptions = columnOptions ?? new ColumnOptions();
-            columnOptions.FinalizeConfigurationForSinkConstructor();
             if (columnOptions.DisableTriggers)
                 throw new NotSupportedException($"The {nameof(ColumnOptions.DisableTriggers)} option is not supported for auditing.");
 
@@ -106,9 +104,9 @@ namespace Serilog.Sinks.MSSqlServer
                     throw new InvalidOperationException($"DataTableCreator is not initialized!");
                 }
 
-                using (var eventTable = sinkDependencies.DataTableCreator.CreateDataTable(sinkOptions.TableName, columnOptions))
+                using (var eventTable = sinkDependencies.DataTableCreator.CreateDataTable())
                 {
-                    sinkDependencies.SqlTableCreator.CreateTable(sinkOptions.SchemaName, sinkOptions.TableName, eventTable, columnOptions);
+                    sinkDependencies.SqlTableCreator.CreateTable(eventTable);
                 }
             }
         }

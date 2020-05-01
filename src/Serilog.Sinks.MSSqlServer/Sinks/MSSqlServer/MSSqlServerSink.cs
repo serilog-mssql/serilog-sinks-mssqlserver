@@ -94,15 +94,13 @@ namespace Serilog.Sinks.MSSqlServer
             IFormatProvider formatProvider = null,
             ColumnOptions columnOptions = null,
             ITextFormatter logEventFormatter = null)
-            : this(sinkOptions, columnOptions,
-                  SinkDependenciesFactory.Create(connectionString, sinkOptions, formatProvider, columnOptions, logEventFormatter))
+            : this(sinkOptions, SinkDependenciesFactory.Create(connectionString, sinkOptions, formatProvider, columnOptions, logEventFormatter))
         {
         }
 
         // Internal constructor with injectable dependencies for better testability
         internal MSSqlServerSink(
             SinkOptions sinkOptions,
-            ColumnOptions columnOptions,
             SinkDependencies sinkDependencies)
             : base(sinkOptions?.BatchPostingLimit ?? DefaultBatchPostingLimit, sinkOptions?.BatchPeriod ?? DefaultPeriod)
         {
@@ -110,9 +108,6 @@ namespace Serilog.Sinks.MSSqlServer
             {
                 throw new InvalidOperationException("Table name must be specified!");
             }
-
-            columnOptions = columnOptions ?? new ColumnOptions();
-            columnOptions.FinalizeConfigurationForSinkConstructor();
 
             if (sinkDependencies == null)
             {
@@ -125,7 +120,7 @@ namespace Serilog.Sinks.MSSqlServer
             {
                 throw new InvalidOperationException($"DataTableCreator is not initialized!");
             }
-            _eventTable = sinkDependencies.DataTableCreator.CreateDataTable(sinkOptions.TableName, columnOptions);
+            _eventTable = sinkDependencies.DataTableCreator.CreateDataTable();
 
             if (sinkOptions.AutoCreateSqlTable)
             {
@@ -133,7 +128,7 @@ namespace Serilog.Sinks.MSSqlServer
                 {
                     throw new InvalidOperationException($"SqlTableCreator is not initialized!");
                 }
-                sinkDependencies.SqlTableCreator.CreateTable(sinkOptions.SchemaName, sinkOptions.TableName, _eventTable, columnOptions);
+                sinkDependencies.SqlTableCreator.CreateTable(_eventTable);
             }
         }
 

@@ -27,7 +27,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer
         {
             _dataTable = new DataTable(_tableName);
             _dataTableCreatorMock = new Mock<IDataTableCreator>();
-            _dataTableCreatorMock.Setup(d => d.CreateDataTable(It.IsAny<string>(), It.IsAny<Serilog.Sinks.MSSqlServer.ColumnOptions>()))
+            _dataTableCreatorMock.Setup(d => d.CreateDataTable())
                 .Returns(_dataTable);
 
             _sqlTableCreatorMock = new Mock<ISqlTableCreator>();
@@ -51,7 +51,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer
             SetupSut(options, autoCreateSqlTable: true);
 
             // Assert
-            _dataTableCreatorMock.Verify(c => c.CreateDataTable(_tableName, options), Times.Once);
+            _dataTableCreatorMock.Verify(c => c.CreateDataTable(), Times.Once);
         }
 
         [Fact]
@@ -64,22 +64,19 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer
             SetupSut(options, autoCreateSqlTable: false);
 
             // Assert
-            _dataTableCreatorMock.Verify(c => c.CreateDataTable(It.IsAny<string>(),
-                It.IsAny<Serilog.Sinks.MSSqlServer.ColumnOptions>()), Times.Never);
+            _dataTableCreatorMock.Verify(c => c.CreateDataTable(), Times.Never);
         }
 
         [Fact]
         public void InitializeWithAutoCreateSqlTableCallsSqlTableCreator()
         {
-            // Arrange
             var options = new Serilog.Sinks.MSSqlServer.ColumnOptions();
 
             // Act
             SetupSut(options, autoCreateSqlTable: true);
 
             // Assert
-            _sqlTableCreatorMock.Verify(c => c.CreateTable(_schemaName, _tableName, _dataTable, options),
-                Times.Once);
+            _sqlTableCreatorMock.Verify(c => c.CreateTable(_dataTable), Times.Once);
         }
 
         [Fact]
@@ -92,9 +89,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer
             SetupSut(options, autoCreateSqlTable: false);
 
             // Assert
-            _sqlTableCreatorMock.Verify(c => c.CreateTable(It.IsAny<string>(), It.IsAny<string>(),
-                It.IsAny<DataTable>(), It.IsAny<Serilog.Sinks.MSSqlServer.ColumnOptions>()),
-                Times.Never);
+            _sqlTableCreatorMock.Verify(c => c.CreateTable(It.IsAny<DataTable>()), Times.Never);
         }
 
         private void SetupSut(

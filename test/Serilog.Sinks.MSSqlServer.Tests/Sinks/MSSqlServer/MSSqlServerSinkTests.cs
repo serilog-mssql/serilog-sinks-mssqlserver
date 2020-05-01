@@ -27,7 +27,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer
         {
             _dataTable = new DataTable(_tableName);
             _dataTableCreatorMock = new Mock<IDataTableCreator>();
-            _dataTableCreatorMock.Setup(d => d.CreateDataTable(It.IsAny<string>(), It.IsAny<Serilog.Sinks.MSSqlServer.ColumnOptions>()))
+            _dataTableCreatorMock.Setup(d => d.CreateDataTable())
                 .Returns(_dataTable);
 
             _sqlTableCreatorMock = new Mock<ISqlTableCreator>();
@@ -48,10 +48,10 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer
             var options = new Serilog.Sinks.MSSqlServer.ColumnOptions();
 
             // Act
-            SetupSut(options, autoCreateSqlTable: false);
+            SetupSut(autoCreateSqlTable: false);
 
             // Assert
-            _dataTableCreatorMock.Verify(c => c.CreateDataTable(_tableName, options), Times.Once);
+            _dataTableCreatorMock.Verify(c => c.CreateDataTable(), Times.Once);
         }
 
         [Fact]
@@ -61,11 +61,10 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer
             var options = new Serilog.Sinks.MSSqlServer.ColumnOptions();
 
             // Act
-            SetupSut(options, autoCreateSqlTable: true);
+            SetupSut(autoCreateSqlTable: true);
 
             // Assert
-            _sqlTableCreatorMock.Verify(c => c.CreateTable(_schemaName, _tableName, _dataTable, options),
-                Times.Once);
+            _sqlTableCreatorMock.Verify(c => c.CreateTable(_dataTable), Times.Once);
         }
 
         [Fact]
@@ -75,17 +74,13 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer
             var options = new Serilog.Sinks.MSSqlServer.ColumnOptions();
 
             // Act
-            SetupSut(options, autoCreateSqlTable: false);
+            SetupSut(autoCreateSqlTable: false);
 
             // Assert
-            _sqlTableCreatorMock.Verify(c => c.CreateTable(It.IsAny<string>(), It.IsAny<string>(),
-                It.IsAny<DataTable>(), It.IsAny<Serilog.Sinks.MSSqlServer.ColumnOptions>()),
-                Times.Never);
+            _sqlTableCreatorMock.Verify(c => c.CreateTable(It.IsAny<DataTable>()), Times.Never);
         }
 
-        private void SetupSut(
-            Serilog.Sinks.MSSqlServer.ColumnOptions options,
-            bool autoCreateSqlTable = false)
+        private void SetupSut(bool autoCreateSqlTable = false)
         {
             var sinkOptions = new SinkOptions
             {
@@ -93,7 +88,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer
                 SchemaName = _schemaName,
                 AutoCreateSqlTable = autoCreateSqlTable
             };
-            _sut = new MSSqlServerSink(sinkOptions, options, _sinkDependencies);
+            _sut = new MSSqlServerSink(sinkOptions, _sinkDependencies);
         }
 
         protected virtual void Dispose(bool disposing)
