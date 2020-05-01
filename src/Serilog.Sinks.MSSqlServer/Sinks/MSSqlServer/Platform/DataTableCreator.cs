@@ -1,29 +1,39 @@
+using System;
 using System.Data;
 
 namespace Serilog.Sinks.MSSqlServer.Platform
 {
     internal class DataTableCreator : IDataTableCreator
     {
-        public DataTable CreateDataTable(string tableName, ColumnOptions columnOptions)
-        {
-            var eventsTable = new DataTable(tableName);
+        private readonly string _tableName;
+        private readonly ColumnOptions _columnOptions;
 
-            foreach (var standardColumn in columnOptions.Store)
+        public DataTableCreator(string tableName, ColumnOptions columnOptions)
+        {
+            _tableName = tableName ?? throw new ArgumentNullException(nameof(tableName));
+            _columnOptions = columnOptions ?? throw new ArgumentNullException(nameof(columnOptions));
+        }
+
+        public DataTable CreateDataTable()
+        {
+            var eventsTable = new DataTable(_tableName);
+
+            foreach (var standardColumn in _columnOptions.Store)
             {
-                var standardOpts = columnOptions.GetStandardColumnOptions(standardColumn);
+                var standardOpts = _columnOptions.GetStandardColumnOptions(standardColumn);
                 var dataColumn = standardOpts.AsDataColumn();
                 eventsTable.Columns.Add(dataColumn);
-                if (standardOpts == columnOptions.PrimaryKey)
+                if (standardOpts == _columnOptions.PrimaryKey)
                     eventsTable.PrimaryKey = new DataColumn[] { dataColumn };
             }
 
-            if (columnOptions.AdditionalColumns != null)
+            if (_columnOptions.AdditionalColumns != null)
             {
-                foreach (var addCol in columnOptions.AdditionalColumns)
+                foreach (var addCol in _columnOptions.AdditionalColumns)
                 {
                     var dataColumn = addCol.AsDataColumn();
                     eventsTable.Columns.Add(dataColumn);
-                    if (addCol == columnOptions.PrimaryKey)
+                    if (addCol == _columnOptions.PrimaryKey)
                         eventsTable.PrimaryKey = new DataColumn[] { dataColumn };
                 }
             }

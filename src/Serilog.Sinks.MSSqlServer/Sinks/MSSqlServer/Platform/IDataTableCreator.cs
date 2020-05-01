@@ -4,6 +4,6 @@ namespace Serilog.Sinks.MSSqlServer.Platform
 {
     internal interface IDataTableCreator
     {
-        DataTable CreateDataTable(string tableName, ColumnOptions columnOptions);
+        DataTable CreateDataTable();
     }
 }

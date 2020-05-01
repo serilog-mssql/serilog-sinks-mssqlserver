@@ -26,7 +26,7 @@ using Serilog.Sinks.PeriodicBatching;
 namespace Serilog.Sinks.MSSqlServer
 {
     /// <summary>
-    ///     Writes log events as rows in a table of MSSqlServer database.
+    /// Writes log events as rows in a table of MSSqlServer database.
     /// </summary>
     public class MSSqlServerSink : PeriodicBatchingSink
     {
@@ -94,63 +94,37 @@ namespace Serilog.Sinks.MSSqlServer
             IFormatProvider formatProvider = null,
             ColumnOptions columnOptions = null,
             ITextFormatter logEventFormatter = null)
-            : this(sinkOptions, columnOptions,
-                  SinkDependenciesFactory.Create(connectionString, sinkOptions, formatProvider, columnOptions, logEventFormatter))
+            : this(sinkOptions, SinkDependenciesFactory.Create(connectionString, sinkOptions, formatProvider, columnOptions, logEventFormatter))
         {
         }
 
         // Internal constructor with injectable dependencies for better testability
         internal MSSqlServerSink(
             SinkOptions sinkOptions,
-            ColumnOptions columnOptions,
             SinkDependencies sinkDependencies)
             : base(sinkOptions?.BatchPostingLimit ?? DefaultBatchPostingLimit, sinkOptions?.BatchPeriod ?? DefaultPeriod)
         {
-            if (sinkOptions?.TableName == null)
-            {
-                throw new InvalidOperationException("Table name must be specified!");
-            }
+            ValidateParameters(sinkOptions);
+            CheckSinkDependencies(sinkDependencies);
 
-            columnOptions = columnOptions ?? new ColumnOptions();
-            columnOptions.FinalizeConfigurationForSinkConstructor();
+            _sqlBulkBatchWriter = sinkDependencies.SqlBulkBatchWriter;
+            _eventTable = sinkDependencies.DataTableCreator.CreateDataTable();
 
-            if (sinkDependencies == null)
-            {
-                throw new ArgumentNullException(nameof(sinkDependencies));
-            }
-
-            _sqlBulkBatchWriter = sinkDependencies?.SqlBulkBatchWriter ?? throw new InvalidOperationException($"SqlBulkBatchWriter is not initialized!");
-
-            if (sinkDependencies?.DataTableCreator == null)
-            {
-                throw new InvalidOperationException($"DataTableCreator is not initialized!");
-            }
-            _eventTable = sinkDependencies.DataTableCreator.CreateDataTable(sinkOptions.TableName, columnOptions);
-
-            if (sinkOptions.AutoCreateSqlTable)
-            {
-                if (sinkDependencies?.SqlBulkBatchWriter == null)
-                {
-                    throw new InvalidOperationException($"SqlTableCreator is not initialized!");
-                }
-                sinkDependencies.SqlTableCreator.CreateTable(sinkOptions.SchemaName, sinkOptions.TableName, _eventTable, columnOptions);
-            }
+            CreateTable(sinkOptions, sinkDependencies);
         }
 
         /// <summary>
-        ///     Emit a batch of log events, running asynchronously.
+        /// Emit a batch of log events, running asynchronously.
         /// </summary>
         /// <param name="events">The events to emit.</param>
         /// <remarks>
-        ///     Override either <see cref="PeriodicBatchingSink.EmitBatch" /> or <see cref="PeriodicBatchingSink.EmitBatchAsync" />
-        ///     ,
-        ///     not both.
+        /// Override either <see cref="PeriodicBatchingSink.EmitBatch" /> or <see cref="PeriodicBatchingSink.EmitBatchAsync" />, not both.
         /// </remarks>
         protected override Task EmitBatchAsync(IEnumerable<LogEvent> events) =>
             _sqlBulkBatchWriter.WriteBatch(events, _eventTable);
 
         /// <summary>
-        ///     Disposes the connection
+        /// Disposes the connection
         /// </summary>
         /// <param name="disposing"></param>
         protected override void Dispose(bool disposing)
@@ -159,6 +133,45 @@ namespace Serilog.Sinks.MSSqlServer
             if (disposing)
             {
                 _eventTable.Dispose();
+            }
+        }
+
+        private static void ValidateParameters(SinkOptions sinkOptions)
+        {
+            if (sinkOptions?.TableName == null)
+            {
+                throw new InvalidOperationException("Table name must be specified!");
+            }
+        }
+
+        private static void CheckSinkDependencies(SinkDependencies sinkDependencies)
+        {
+            if (sinkDependencies == null)
+            {
+                throw new ArgumentNullException(nameof(sinkDependencies));
+            }
+
+            if (sinkDependencies.DataTableCreator == null)
+            {
+                throw new InvalidOperationException($"DataTableCreator is not initialized!");
+            }
+
+            if (sinkDependencies.SqlTableCreator == null)
+            {
+                throw new InvalidOperationException($"SqlTableCreator is not initialized!");
+            }
+
+            if (sinkDependencies.SqlBulkBatchWriter == null)
+            {
+                throw new InvalidOperationException($"SqlBulkBatchWriter is not initialized!");
+            }
+        }
+
+        private void CreateTable(SinkOptions sinkOptions, SinkDependencies sinkDependencies)
+        {
+            if (sinkOptions.AutoCreateSqlTable)
+            {
+                sinkDependencies.SqlTableCreator.CreateTable(_eventTable);
             }
         }
     }

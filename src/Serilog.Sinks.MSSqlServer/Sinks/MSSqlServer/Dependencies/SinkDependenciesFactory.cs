@@ -31,8 +31,10 @@ namespace Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Dependencies
 
             var sinkDependencies = new SinkDependencies
             {
-                SqlTableCreator = new SqlTableCreator(new SqlCreateTableWriter(), sqlConnectionFactory),
-                DataTableCreator = new DataTableCreator(),
+                SqlTableCreator = new SqlTableCreator(
+                    sinkOptions.TableName, sinkOptions.SchemaName, columnOptions,
+                    new SqlCreateTableWriter(), sqlConnectionFactory),
+                DataTableCreator = new DataTableCreator(sinkOptions.TableName, columnOptions),
                 SqlBulkBatchWriter = new SqlBulkBatchWriter(
                     sinkOptions.TableName, sinkOptions.SchemaName,
                     columnOptions.DisableTriggers, sqlConnectionFactory, logEventDataGenerator),
