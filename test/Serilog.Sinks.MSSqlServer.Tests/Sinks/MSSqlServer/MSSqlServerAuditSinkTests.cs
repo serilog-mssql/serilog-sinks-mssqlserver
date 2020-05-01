@@ -13,6 +13,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer
     [Trait(TestCategory.TraitName, TestCategory.Unit)]
     public class MSSqlServerAuditSinkTests : IDisposable
     {
+        private readonly SinkOptions _sinkOptions;
+        private readonly Serilog.Sinks.MSSqlServer.ColumnOptions _columnOptions;
         private readonly SinkDependencies _sinkDependencies;
         private readonly Mock<IDataTableCreator> _dataTableCreatorMock;
         private readonly Mock<ISqlTableCreator> _sqlTableCreatorMock;
@@ -25,6 +27,14 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer
 
         public MSSqlServerAuditSinkTests()
         {
+            _sinkOptions = new SinkOptions
+            {
+                TableName = _tableName,
+                SchemaName = _schemaName
+            };
+
+            _columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions();
+
             _dataTable = new DataTable(_tableName);
             _dataTableCreatorMock = new Mock<IDataTableCreator>();
             _dataTableCreatorMock.Setup(d => d.CreateDataTable())
@@ -42,13 +52,72 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer
         }
 
         [Fact]
-        public void InitializeWithAutoCreateSqlTableCallsDataTableCreator()
+        public void InitializeWithoutTableNameThrows()
+        {
+            Assert.Throws<InvalidOperationException>(() =>
+                new MSSqlServerAuditSink(
+                    new SinkOptions(),
+                    new Serilog.Sinks.MSSqlServer.ColumnOptions(),
+                    _sinkDependencies));
+        }
+
+        [Fact]
+        public void InitializeWithoutSinkDependenciesThrows()
+        {
+            Assert.Throws<ArgumentNullException>(() =>
+                new MSSqlServerSink(_sinkOptions, null));
+        }
+
+        [Fact]
+        public void InitializeWithoutDataTableCreatorThrows()
         {
             // Arrange
-            var options = new Serilog.Sinks.MSSqlServer.ColumnOptions();
+            _sinkDependencies.DataTableCreator = null;
 
+            // Act + assert
+            Assert.Throws<InvalidOperationException>(() =>
+                new MSSqlServerSink(_sinkOptions, _sinkDependencies));
+        }
+
+        [Fact]
+        public void InitializeWithoutSqlTableCreatorThrows()
+        {
+            // Arrange
+            _sinkDependencies.SqlTableCreator = null;
+
+            // Act + assert
+            Assert.Throws<InvalidOperationException>(() =>
+                new MSSqlServerSink(_sinkOptions, _sinkDependencies));
+        }
+
+        [Fact]
+        public void InitializeWithoutSqlLogEventWriterThrows()
+        {
+            // Arrange
+            _sinkDependencies.SqlLogEventWriter = null;
+
+            // Act + assert
+            Assert.Throws<InvalidOperationException>(() =>
+                new MSSqlServerSink(_sinkOptions, _sinkDependencies));
+        }
+
+        [Fact]
+        public void InitializeWithDisableTriggersThrows()
+        {
+            // Arrange
+            var sinkOptions = new SinkOptions { TableName = "TestTableName" };
+            var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions { DisableTriggers = true };
+
+            // Act + assert
+            Assert.Throws<NotSupportedException>(() =>
+                new MSSqlServerAuditSink(sinkOptions, columnOptions, _sinkDependencies));
+        }
+
+        [Fact]
+        public void InitializeWithAutoCreateSqlTableCallsDataTableCreator()
+        {
             // Act
-            SetupSut(options, autoCreateSqlTable: true);
+            SetupSut(autoCreateSqlTable: true);
 
             // Assert
             _dataTableCreatorMock.Verify(c => c.CreateDataTable(), Times.Once);
@@ -57,11 +126,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer
         [Fact]
         public void InitializeWithoutAutoCreateSqlTableDoesNotCallDataTableCreator()
         {
-            // Arrange
-            var options = new Serilog.Sinks.MSSqlServer.ColumnOptions();
-
             // Act
-            SetupSut(options, autoCreateSqlTable: false);
+            SetupSut(autoCreateSqlTable: false);
 
             // Assert
             _dataTableCreatorMock.Verify(c => c.CreateDataTable(), Times.Never);
@@ -70,10 +136,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer
         [Fact]
         public void InitializeWithAutoCreateSqlTableCallsSqlTableCreator()
         {
-            var options = new Serilog.Sinks.MSSqlServer.ColumnOptions();
-
             // Act
-            SetupSut(options, autoCreateSqlTable: true);
+            SetupSut(autoCreateSqlTable: true);
 
             // Assert
             _sqlTableCreatorMock.Verify(c => c.CreateTable(_dataTable), Times.Once);
@@ -82,35 +146,25 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer
         [Fact]
         public void InitializeWithoutAutoCreateSqlTableDoesNotCallSqlTableCreator()
         {
-            // Arrange
-            var options = new Serilog.Sinks.MSSqlServer.ColumnOptions();
-
             // Act
-            SetupSut(options, autoCreateSqlTable: false);
+            SetupSut(autoCreateSqlTable: false);
 
             // Assert
             _sqlTableCreatorMock.Verify(c => c.CreateTable(It.IsAny<DataTable>()), Times.Never);
         }
 
-        private void SetupSut(
-            Serilog.Sinks.MSSqlServer.ColumnOptions options,
-            bool autoCreateSqlTable = false)
+        private void SetupSut(bool autoCreateSqlTable = false)
         {
-            var sinkOptions = new SinkOptions
-            {
-                TableName = _tableName,
-                SchemaName = _schemaName,
-                AutoCreateSqlTable = autoCreateSqlTable
-            };
-            _sut = new MSSqlServerAuditSink(sinkOptions, options, _sinkDependencies);
+            _sinkOptions.AutoCreateSqlTable = autoCreateSqlTable;
+            _sut = new MSSqlServerAuditSink(_sinkOptions, _columnOptions, _sinkDependencies);
         }
 
         protected virtual void Dispose(bool disposing)
         {
             if (!_disposedValue)
             {
-                _sut.Dispose();
-                _dataTable.Dispose();
+                _sut?.Dispose();
+                _dataTable?.Dispose();
                 _disposedValue = true;
             }
         }
