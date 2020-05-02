@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using Moq;
+using Serilog.Events;
+using Serilog.Parsing;
 using Serilog.Sinks.MSSqlServer.Platform;
 using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Dependencies;
 using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
@@ -151,6 +154,25 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer
 
             // Assert
             _sqlTableCreatorMock.Verify(c => c.CreateTable(It.IsAny<DataTable>()), Times.Never);
+        }
+
+        [Fact]
+        public void EmitCallsSqlLogEventWriter()
+        {
+            // Arrange
+            SetupSut();
+            var logEvent = new Events.LogEvent(
+                new DateTimeOffset(2020, 1, 1, 0, 0, 0, TimeSpan.Zero),
+                Events.LogEventLevel.Information,
+                null,
+                new Events.MessageTemplate("", new List<MessageTemplateToken>()),
+                new List<LogEventProperty>());
+
+            // Act
+            _sut.Emit(logEvent);
+
+            // Assert
+            _sqlLogEventWriter.Verify(w => w.WriteEvent(logEvent), Times.Once);
         }
 
         private void SetupSut(bool autoCreateSqlTable = false)
