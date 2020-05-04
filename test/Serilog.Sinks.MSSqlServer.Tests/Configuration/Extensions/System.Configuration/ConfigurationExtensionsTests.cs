@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Serilog.Sinks.MSSqlServer.Configuration.Factories;
 using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
@@ -22,6 +23,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.System.Config
         }
 
         [Fact]
+        [Obsolete("Testing an inteface marked as obsolete", error: false)]
         public void ConnectionStringByNameFromConfigLegacyInterface()
         {
             var ConnectionStringName = "NamedConnection";

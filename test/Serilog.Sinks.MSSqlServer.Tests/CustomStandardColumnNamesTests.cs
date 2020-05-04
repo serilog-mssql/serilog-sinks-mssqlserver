@@ -19,6 +19,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         }
 
         [Fact]
+        [Obsolete("Testing an inteface marked as obsolete", error: false)]
         public void CustomIdColumnLegacyInterface()
         {
             // Arrange
@@ -59,6 +60,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         }
 
         [Fact]
+        [Obsolete("Testing an inteface marked as obsolete", error: false)]
         public void DefaultIdColumnLegacyInterface()
         {
             // Arrange
@@ -95,6 +97,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         }
 
         [Fact]
+        [Obsolete("Testing an inteface marked as obsolete", error: false)]
         public void TableCreatedWithCustomNamesLegacyInterface()
         {
             // Arrange
@@ -147,6 +150,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         }
 
         [Fact]
+        [Obsolete("Testing an inteface marked as obsolete", error: false)]
         public void TableCreatedWithDefaultNamesLegacyInterface()
         {
             // Arrange
@@ -185,6 +189,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         }
 
         [Fact]
+        [Obsolete("Testing an inteface marked as obsolete", error: false)]
         public void WriteEventToCustomStandardColumnsLegacyInterface()
         {
             // Arrange
@@ -258,6 +263,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         }
 
         [Fact]
+        [Obsolete("Testing an inteface marked as obsolete", error: false)]
         public void WriteEventToDefaultStandardColumnsLegacyInterface()
         {
             // Arrange
@@ -317,6 +323,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         }
 
         [Fact]
+        [Obsolete("Testing an inteface marked as obsolete", error: false)]
         public void AuditEventToCustomStandardColumnsLegacyInterface()
         {
             // Arrange
@@ -396,8 +403,11 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             var loggerConfiguration = new LoggerConfiguration();
             Log.Logger = loggerConfiguration.AuditTo.MSSqlServer(
                 connectionString: DatabaseFixture.LogEventsConnectionString,
-                tableName: DatabaseFixture.LogTableName,
-                autoCreateSqlTable: true,
+                new SinkOptions
+                {
+                    TableName = DatabaseFixture.LogTableName,
+                    AutoCreateSqlTable = true
+                },
                 columnOptions: new ColumnOptions())
                 .CreateLogger();
 

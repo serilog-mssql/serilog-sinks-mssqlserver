@@ -3,6 +3,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using Dapper;
 using FluentAssertions;
+using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
 using Xunit.Abstractions;
@@ -27,11 +28,14 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 .WriteTo.MSSqlServer
                 (
                     connectionString: DatabaseFixture.LogEventsConnectionString,
-                    tableName: DatabaseFixture.LogTableName,
-                    columnOptions: columnOptions,
-                    autoCreateSqlTable: true,
-                    batchPostingLimit: 1,
-                    period: TimeSpan.FromSeconds(10)
+                    new SinkOptions
+                    {
+                        TableName = DatabaseFixture.LogTableName,
+                        AutoCreateSqlTable = true,
+                        BatchPostingLimit = 1,
+                        BatchPeriod = TimeSpan.FromSeconds(10)
+                    },
+                    columnOptions: columnOptions
                 )
                 .CreateLogger();
             Log.CloseAndFlush();
@@ -59,11 +63,14 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 .WriteTo.MSSqlServer
                 (
                     connectionString: DatabaseFixture.LogEventsConnectionString,
-                    tableName: DatabaseFixture.LogTableName,
-                    columnOptions: columnOptions,
-                    autoCreateSqlTable: true,
-                    batchPostingLimit: 1,
-                    period: TimeSpan.FromSeconds(10)
+                    new SinkOptions
+                    {
+                        TableName = DatabaseFixture.LogTableName,
+                        AutoCreateSqlTable = true,
+                        BatchPostingLimit = 1,
+                        BatchPeriod = TimeSpan.FromSeconds(10)
+                    },
+                    columnOptions: columnOptions
                 )
                 .CreateLogger();
             Log.CloseAndFlush();
@@ -97,11 +104,14 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 .WriteTo.MSSqlServer
                 (
                     connectionString: DatabaseFixture.LogEventsConnectionString,
-                    tableName: DatabaseFixture.LogTableName,
-                    columnOptions: columnOptions,
-                    autoCreateSqlTable: true,
-                    batchPostingLimit: 1,
-                    period: TimeSpan.FromSeconds(10)
+                    new SinkOptions
+                    {
+                        TableName = DatabaseFixture.LogTableName,
+                        AutoCreateSqlTable = true,
+                        BatchPostingLimit = 1,
+                        BatchPeriod = TimeSpan.FromSeconds(10)
+                    },
+                    columnOptions: columnOptions
                 )
                 .CreateLogger();
             Log.CloseAndFlush();
