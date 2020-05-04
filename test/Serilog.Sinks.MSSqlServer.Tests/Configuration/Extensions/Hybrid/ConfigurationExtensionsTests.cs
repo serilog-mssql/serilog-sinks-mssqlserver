@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Microsoft.Extensions.Configuration;
 using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
@@ -21,6 +22,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.Hybrid
         }
 
         [Fact]
+        [Obsolete("Testing an inteface marked as obsolete", error: false)]
         public void ConnectionStringByNameFromConfigLegacyInterface()
         {
             var appConfig = TestConfiguration();
@@ -60,6 +62,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.Hybrid
         }
 
         [Fact]
+        [Obsolete("Testing an inteface marked as obsolete", error: false)]
         public void ColumnOptionsFromConfigSectionLegacyInterface()
         {
             // Arrange

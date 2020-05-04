@@ -42,11 +42,14 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 .WriteTo.MSSqlServer
                 (
                     connectionString: DatabaseFixture.LogEventsConnectionString,
-                    tableName: DatabaseFixture.LogTableName,
-                    columnOptions: columnOptions,
-                    autoCreateSqlTable: true,
-                    batchPostingLimit: 1,
-                    period: TimeSpan.FromSeconds(10)
+                    new SinkOptions
+                    {
+                        TableName = DatabaseFixture.LogTableName,
+                        AutoCreateSqlTable = true,
+                        BatchPostingLimit = 1,
+                        BatchPeriod = TimeSpan.FromSeconds(10)
+                    },
+                    columnOptions: columnOptions
                 )
                 .CreateLogger();
 
@@ -82,11 +85,14 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 .WriteTo.MSSqlServer
                 (
                     connectionString: DatabaseFixture.LogEventsConnectionString,
-                    tableName: DatabaseFixture.LogTableName,
-                    columnOptions: columnOptions,
-                    autoCreateSqlTable: true,
-                    batchPostingLimit: 1,
-                    period: TimeSpan.FromSeconds(10)
+                    new SinkOptions
+                    {
+                        TableName = DatabaseFixture.LogTableName,
+                        AutoCreateSqlTable = true,
+                        BatchPostingLimit = 1,
+                        BatchPeriod = TimeSpan.FromSeconds(10)
+                    },
+                    columnOptions: columnOptions
                 )
                 .CreateLogger();
 
@@ -118,11 +124,14 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 .WriteTo.MSSqlServer
                 (
                     connectionString: DatabaseFixture.LogEventsConnectionString,
-                    tableName: DatabaseFixture.LogTableName,
-                    columnOptions: columnOptions,
-                    autoCreateSqlTable: true,
-                    batchPostingLimit: 1,
-                    period: TimeSpan.FromSeconds(10)
+                    new SinkOptions
+                    {
+                        TableName = DatabaseFixture.LogTableName,
+                        AutoCreateSqlTable = true,
+                        BatchPostingLimit = 1,
+                        BatchPeriod = TimeSpan.FromSeconds(10)
+                    },
+                    columnOptions: columnOptions
                 )
                 .CreateLogger();
             Log.CloseAndFlush();
@@ -150,11 +159,14 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 .WriteTo.MSSqlServer
                 (
                     connectionString: DatabaseFixture.LogEventsConnectionString,
-                    tableName: DatabaseFixture.LogTableName,
-                    columnOptions: columnOptions,
-                    autoCreateSqlTable: true,
-                    batchPostingLimit: 1,
-                    period: TimeSpan.FromSeconds(10)
+                    new SinkOptions
+                    {
+                        TableName = DatabaseFixture.LogTableName,
+                        AutoCreateSqlTable = true,
+                        BatchPostingLimit = 1,
+                        BatchPeriod = TimeSpan.FromSeconds(10)
+                    },
+                    columnOptions: columnOptions
                 )
                 .CreateLogger();
             Log.CloseAndFlush();
@@ -181,11 +193,14 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 .WriteTo.MSSqlServer
                 (
                     connectionString: DatabaseFixture.LogEventsConnectionString,
-                    tableName: DatabaseFixture.LogTableName,
-                    columnOptions: columnOptions,
-                    autoCreateSqlTable: true,
-                    batchPostingLimit: 1,
-                    period: TimeSpan.FromSeconds(10)
+                    new SinkOptions
+                    {
+                        TableName = DatabaseFixture.LogTableName,
+                        AutoCreateSqlTable = true,
+                        BatchPostingLimit = 1,
+                        BatchPeriod = TimeSpan.FromSeconds(10)
+                    },
+                    columnOptions: columnOptions
                 )
                 .CreateLogger();
             Log.CloseAndFlush();
@@ -202,6 +217,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
 
         [Trait("Bugfix", "#107")]
         [Fact]
+        [Obsolete("Testing an inteface marked as obsolete", error: false)]
         public void AutoCreateSchemaLegacyInterface()
         {
             // Use a custom table name because DROP SCHEMA can
@@ -292,9 +308,12 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 .WriteTo.MSSqlServer
                 (
                     connectionString: DatabaseFixture.LogEventsConnectionString,
-                    tableName: DatabaseFixture.LogTableName,
-                    columnOptions: columnOptions,
-                    autoCreateSqlTable: true
+                    new SinkOptions
+                    {
+                        TableName = DatabaseFixture.LogTableName,
+                        AutoCreateSqlTable = true
+                    },
+                    columnOptions: columnOptions
                 )
                 .CreateLogger();
 

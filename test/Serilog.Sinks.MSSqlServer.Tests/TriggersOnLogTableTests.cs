@@ -2,6 +2,7 @@
 using System.Data.SqlClient;
 using Dapper;
 using FluentAssertions;
+using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
 using Xunit.Abstractions;
@@ -24,10 +25,13 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             var loggerConfiguration = new LoggerConfiguration();
             Log.Logger = loggerConfiguration.WriteTo.MSSqlServer(
                 connectionString: DatabaseFixture.LogEventsConnectionString,
-                tableName: DatabaseFixture.LogTableName,
-                autoCreateSqlTable: true,
-                batchPostingLimit: 1,
-                period: TimeSpan.FromSeconds(10),
+                new SinkOptions
+                {
+                    TableName = DatabaseFixture.LogTableName,
+                    AutoCreateSqlTable = true,
+                    BatchPostingLimit = 1,
+                    BatchPeriod = TimeSpan.FromSeconds(10)
+                },
                 columnOptions: new ColumnOptions())
                 .CreateLogger();
 
@@ -56,10 +60,13 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             var loggerConfiguration = new LoggerConfiguration();
             Log.Logger = loggerConfiguration.WriteTo.MSSqlServer(
                 connectionString: DatabaseFixture.LogEventsConnectionString,
-                tableName: DatabaseFixture.LogTableName,
-                autoCreateSqlTable: true,
-                batchPostingLimit: 1,
-                period: TimeSpan.FromSeconds(10),
+                new SinkOptions
+                {
+                    TableName = DatabaseFixture.LogTableName,
+                    AutoCreateSqlTable = true,
+                    BatchPostingLimit = 1,
+                    BatchPeriod = TimeSpan.FromSeconds(10)
+                },
                 columnOptions: options)
                 .CreateLogger();
 
@@ -87,8 +94,11 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             var loggerConfiguration = new LoggerConfiguration();
             Log.Logger = loggerConfiguration.AuditTo.MSSqlServer(
                 connectionString: DatabaseFixture.LogEventsConnectionString,
-                tableName: DatabaseFixture.LogTableName,
-                autoCreateSqlTable: true,
+                new SinkOptions
+                {
+                    TableName = DatabaseFixture.LogTableName,
+                    AutoCreateSqlTable = true
+                },
                 columnOptions: new ColumnOptions())
                 .CreateLogger();
 
@@ -117,8 +127,11 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             var loggerConfiguration = new LoggerConfiguration();
             Assert.Throws<NotSupportedException>(() => loggerConfiguration.AuditTo.MSSqlServer(
                 connectionString: DatabaseFixture.LogEventsConnectionString,
-                tableName: DatabaseFixture.LogTableName,
-                autoCreateSqlTable: true,
+                new SinkOptions
+                {
+                    TableName = DatabaseFixture.LogTableName,
+                    AutoCreateSqlTable = true
+                },
                 columnOptions: options)
                 .CreateLogger());
 

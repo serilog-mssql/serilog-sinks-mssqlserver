@@ -63,6 +63,7 @@ namespace Serilog.Sinks.MSSqlServer
         /// <param name="autoCreateSqlTable">Create log table with the provided name on destination sql server.</param>
         /// <param name="columnOptions">Options that pertain to columns</param>
         /// <param name="logEventFormatter">Supplies custom formatter for the LogEvent column, or null</param>
+        [Obsolete("Use the new interface accepting a SinkOptions parameter instead. This will be removed in a future release.", error: false)]
         public MSSqlServerSink(
             string connectionString,
             string tableName,
