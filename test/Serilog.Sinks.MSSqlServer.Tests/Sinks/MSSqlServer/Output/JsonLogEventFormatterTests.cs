@@ -2,37 +2,42 @@
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
-using Moq;
 using Serilog.Events;
 using Serilog.Parsing;
 using Serilog.Sinks.MSSqlServer.Output;
-using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform;
+using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
 
 namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Output
 {
-    public class JsonLogEventFormatterTests : IDisposable
+    [Trait(TestCategory.TraitName, TestCategory.Unit)]
+    public class JsonLogEventFormatterTests
     {
-        private Serilog.Sinks.MSSqlServer.ColumnOptions _testColumnOptions;
-        private MSSqlServerSinkTraits _testTraits;
-        private JsonLogEventFormatter _sut;
-        private bool _disposedValue;
+        private readonly Serilog.Sinks.MSSqlServer.ColumnOptions _testColumnOptions;
+        private readonly IStandardColumnDataGenerator _testStandardColumnDataGenerator;
+        private readonly JsonLogEventFormatter _sut;
 
         public JsonLogEventFormatterTests()
         {
-            SetupTest();
+            _testColumnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions();
+            _testColumnOptions.Store.Add(StandardColumn.LogEvent);
+
+            // TODO use mock for _testColumnsDataGenerator
+            _testStandardColumnDataGenerator = new StandardColumnDataGenerator(_testColumnOptions, formatProvider: null, logEventFormatter: null);
+
+            _sut = new JsonLogEventFormatter(_testColumnOptions, _testStandardColumnDataGenerator);
         }
 
         [Fact]
         [Trait("Bugfix", "#187")]
         public void FormatTimeStampColumnTypeDateTimeOffsetUtcRendersCorrectTimeStamp()
         {
-            // arrange
+            // Arrange
             const string expectedResult = "{\"TimeStamp\":\"2020-03-27T14:17:00.0000000+00:00\",\"Level\":\"Information\",\"Message\":\"\",\"MessageTemplate\":\"Test message template\"}";
-            _testTraits.ColumnOptions.TimeStamp.DataType = SqlDbType.DateTimeOffset;
+            _testColumnOptions.TimeStamp.DataType = SqlDbType.DateTimeOffset;
             var testLogEvent = CreateTestLogEvent(new DateTimeOffset(2020, 3, 27, 14, 17, 0, TimeSpan.Zero));
 
-            // act
+            // Act
             string renderResult;
             using (var outputWriter = new StringWriter())
             {
@@ -40,7 +45,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Output
                 renderResult = outputWriter.ToString();
             }
 
-            // assert
+            // Assert
             Assert.Equal(expectedResult, renderResult);
         }
 
@@ -48,12 +53,12 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Output
         [Trait("Bugfix", "#187")]
         public void FormatTimeStampColumnTypeDateTimeOffsetLocalRendersCorrectTimeStamp()
         {
-            // arrange
+            // Arrange
             const string expectedResult = "{\"TimeStamp\":\"2020-03-27T13:17:00.0000000+01:00\",\"Level\":\"Information\",\"Message\":\"\",\"MessageTemplate\":\"Test message template\"}";
-            _testTraits.ColumnOptions.TimeStamp.DataType = SqlDbType.DateTimeOffset;
+            _testColumnOptions.TimeStamp.DataType = SqlDbType.DateTimeOffset;
             var testLogEvent = CreateTestLogEvent(new DateTimeOffset(2020, 3, 27, 13, 17, 0, new TimeSpan(1, 0, 0)));
 
-            // act
+            // Act
             string renderResult;
             using (var outputWriter = new StringWriter())
             {
@@ -61,7 +66,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Output
                 renderResult = outputWriter.ToString();
             }
 
-            // assert
+            // Assert
             Assert.Equal(expectedResult, renderResult);
         }
 
@@ -69,11 +74,11 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Output
         [Trait("Bugfix", "#187")]
         public void FormatTimeStampColumnTypeDateTimeRendersCorrectTimeStamp()
         {
-            // arrange
+            // Arrange
             const string expectedResult = "{\"TimeStamp\":\"2020-03-27T14:17:00.0000000\",\"Level\":\"Information\",\"Message\":\"\",\"MessageTemplate\":\"Test message template\"}";
             var testLogEvent = CreateTestLogEvent(new DateTimeOffset(2020, 3, 27, 14, 17, 0, TimeSpan.Zero));
 
-            // act
+            // Act
             string renderResult;
             using (var outputWriter = new StringWriter())
             {
@@ -81,14 +86,14 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Output
                 renderResult = outputWriter.ToString();
             }
 
-            // assert
+            // Assert
             Assert.Equal(expectedResult, renderResult);
         }
 
         [Fact]
         public void FormatWithPropertiesRendersCorrectProperties()
         {
-            // arrange
+            // Arrange
             const string expectedResult = "{\"TimeStamp\":\"2020-03-27T14:17:00.0000000\",\"Level\":\"Information\",\"Message\":\"\",\"MessageTemplate\":\"Test message template\",\"Properties\":{\"TestProperty1\":\"TestValue1\",\"TestProperty2\":2}}";
             var properties = new List<LogEventProperty>
             {
@@ -97,7 +102,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Output
             };
             var testLogEvent = CreateTestLogEvent(new DateTimeOffset(2020, 3, 27, 14, 17, 0, TimeSpan.Zero), properties);
 
-            // act
+            // Act
             string renderResult;
             using (var outputWriter = new StringWriter())
             {
@@ -105,16 +110,16 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Output
                 renderResult = outputWriter.ToString();
             }
 
-            // assert
+            // Assert
             Assert.Equal(expectedResult, renderResult);
         }
 
         [Fact]
         public void FormatWithExcludeStandardColumnsWithPropertiesRendersCorrectProperties()
         {
-            // arrange
+            // Arrange
             const string expectedResult = "{\"Properties\":{\"TestProperty1\":\"TestValue1\",\"TestProperty2\":2}}";
-            _testTraits.ColumnOptions.LogEvent.ExcludeStandardColumns = true;
+            _testColumnOptions.LogEvent.ExcludeStandardColumns = true;
             var properties = new List<LogEventProperty>
             {
                 new LogEventProperty("TestProperty1", new ScalarValue("TestValue1")),
@@ -122,7 +127,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Output
             };
             var testLogEvent = CreateTestLogEvent(new DateTimeOffset(2020, 3, 27, 14, 17, 0, TimeSpan.Zero), properties);
 
-            // act
+            // Act
             string renderResult;
             using (var outputWriter = new StringWriter())
             {
@@ -130,17 +135,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Output
                 renderResult = outputWriter.ToString();
             }
 
-            // assert
+            // Assert
             Assert.Equal(expectedResult, renderResult);
-        }
-
-        private void SetupTest()
-        {
-            _testColumnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions();
-            _testColumnOptions.Store.Add(StandardColumn.LogEvent);
-            _testTraits = new MSSqlServerSinkTraits(new Mock<ISqlConnectionFactory>().Object, "TableName", "SchemaName", _testColumnOptions,
-                formatProvider: null, autoCreateSqlTable: false, logEventFormatter: null);
-            _sut = new JsonLogEventFormatter(_testTraits);
         }
 
         private static LogEvent CreateTestLogEvent(DateTimeOffset testTimeStamp, List<LogEventProperty> properties = null)
@@ -152,21 +148,6 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Output
 
             var testMessageTemplate = new MessageTemplate("Test message template", new List<MessageTemplateToken>());
             return new LogEvent(testTimeStamp, LogEventLevel.Information, null, testMessageTemplate, properties);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!_disposedValue)
-            {
-                _testTraits.Dispose();
-                _disposedValue = true;
-            }
-        }
-
-        public void Dispose()
-        {
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
         }
     }
 }

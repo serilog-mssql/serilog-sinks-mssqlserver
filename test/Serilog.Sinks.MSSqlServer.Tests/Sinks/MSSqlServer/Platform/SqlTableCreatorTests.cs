@@ -13,6 +13,9 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Platform
 {
     public class SqlTableCreatorTests : DatabaseTestsBase
     {
+        private const string _tableName = "TestTableName";
+        private const string _schemaName = "TestSchemaName";
+        private readonly Serilog.Sinks.MSSqlServer.ColumnOptions _columnOptions;
         private readonly Mock<ISqlCreateTableWriter> _sqlWriterMock;
         private readonly SqlConnection _sqlConnection;
         private readonly Mock<ISqlConnectionFactory> _sqlConnectionFactoryMock;
@@ -29,34 +32,33 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Platform
             _sqlConnection = new SqlConnection(DatabaseFixture.LogEventsConnectionString);
             _sqlConnectionFactoryMock.Setup(f => f.Create()).Returns(_sqlConnection);
 
-            _sut = new SqlTableCreator(_sqlWriterMock.Object, _sqlConnectionFactoryMock.Object);
+            _columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions();
+            _sut = new SqlTableCreator(_tableName, _schemaName, _columnOptions,
+                _sqlWriterMock.Object, _sqlConnectionFactoryMock.Object);
         }
 
         [Fact]
+        [Trait(TestCategory.TraitName, TestCategory.Unit)]
         public void CreateTableCallsSqlCreateTableWriterWithPassedValues()
         {
-            // Arrange
-            const string schemaName = "TestSchemaName";
-            const string tableName = "TestTableName";
-            var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions();
-
-            // Act
             using (var dataTable = new DataTable())
             {
-                _sut.CreateTable(schemaName, tableName, dataTable, columnOptions);
+                // Act
+                _sut.CreateTable(dataTable);
 
                 // Assert
-                _sqlWriterMock.Verify(w => w.GetSqlFromDataTable(schemaName, tableName, dataTable, columnOptions), Times.Once());
+                _sqlWriterMock.Verify(w => w.GetSqlFromDataTable(_schemaName, _tableName, dataTable, _columnOptions), Times.Once());
             }
         }
 
         [Fact]
+        [Trait(TestCategory.TraitName, TestCategory.Unit)]
         public void CreateTableCallsSqlConnectionFactory()
         {
             // Act
             using (var dataTable = new DataTable())
             {
-                _sut.CreateTable("TestSchemaName", "TestTableName", dataTable, new Serilog.Sinks.MSSqlServer.ColumnOptions());
+                _sut.CreateTable(dataTable);
             }
 
             // Assert
@@ -64,6 +66,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Platform
         }
 
         [Fact]
+        [Trait(TestCategory.TraitName, TestCategory.Integration)]
         public void CreateTableExecutesCommandReturnedBySqlCreateTableWriter()
         {
             // Arrange
@@ -76,7 +79,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Platform
             // Act
             using (var dataTable = new DataTable())
             {
-                _sut.CreateTable("TestSchemaName", "TestTableName", dataTable, new Serilog.Sinks.MSSqlServer.ColumnOptions());
+                _sut.CreateTable(dataTable);
             }
 
             // Assert

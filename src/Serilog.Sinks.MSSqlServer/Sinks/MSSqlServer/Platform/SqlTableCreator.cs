@@ -1,32 +1,50 @@
 ﻿using System;
 using System.Data;
 using System.Data.SqlClient;
+using Serilog.Debugging;
 using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform;
 
 namespace Serilog.Sinks.MSSqlServer.Platform
 {
     internal class SqlTableCreator : ISqlTableCreator
     {
+        private readonly string _tableName;
+        private readonly string _schemaName;
+        private readonly ColumnOptions _columnOptions;
         private readonly ISqlCreateTableWriter _sqlCreateTableWriter;
         private readonly ISqlConnectionFactory _sqlConnectionFactory;
 
-        public SqlTableCreator(ISqlCreateTableWriter sqlCreateTableWriter, ISqlConnectionFactory sqlConnectionFactory)
+        public SqlTableCreator(
+            string tableName,
+            string schemaName,
+            ColumnOptions columnOptions,
+            ISqlCreateTableWriter sqlCreateTableWriter,
+            ISqlConnectionFactory sqlConnectionFactory)
         {
+            _tableName = tableName ?? throw new ArgumentNullException(nameof(tableName));
+            _schemaName = schemaName ?? throw new ArgumentNullException(nameof(schemaName));
+            _columnOptions = columnOptions ?? throw new ArgumentNullException(nameof(columnOptions));
             _sqlCreateTableWriter = sqlCreateTableWriter ?? throw new ArgumentNullException(nameof(sqlCreateTableWriter));
             _sqlConnectionFactory = sqlConnectionFactory ?? throw new ArgumentNullException(nameof(sqlConnectionFactory));
         }
 
-        public int CreateTable(string schemaName, string tableName, DataTable dataTable, ColumnOptions columnOptions)
+        public void CreateTable(DataTable dataTable)
         {
-            using (var conn = _sqlConnectionFactory.Create())
+            try
             {
-                var sql = _sqlCreateTableWriter.GetSqlFromDataTable(schemaName, tableName, dataTable, columnOptions);
-                using (var cmd = new SqlCommand(sql, conn))
+                using (var conn = _sqlConnectionFactory.Create())
                 {
-                    conn.Open();
-                    return cmd.ExecuteNonQuery();
+                    var sql = _sqlCreateTableWriter.GetSqlFromDataTable(_schemaName, _tableName, dataTable, _columnOptions);
+                    using (var cmd = new SqlCommand(sql, conn))
+                    {
+                        conn.Open();
+                        cmd.ExecuteNonQuery();
+                    }
                 }
-
+            }
+            catch (Exception ex)
+            {
+                SelfLog.WriteLine($"Exception creating table {_tableName}:\n{ex}");
             }
         }
     }

@@ -2,15 +2,16 @@
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.IO;
-using System.Linq;
 using Dapper;
 using FluentAssertions;
+using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace Serilog.Sinks.MSSqlServer.Tests
 {
+    [Trait(TestCategory.TraitName, TestCategory.Integration)]
     public class CustomStandardColumnNamesTests : DatabaseTestsBase
     {
         public CustomStandardColumnNamesTests(ITestOutputHelper output) : base(output)
@@ -18,66 +19,88 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         }
 
         [Fact]
-        public void CustomIdColumn()
+        [Obsolete("Testing an inteface marked as obsolete", error: false)]
+        public void CustomIdColumnLegacyInterface()
         {
-            // arrange
+            // Arrange
             var options = new ColumnOptions();
             var customIdName = "CustomIdName";
             options.Id.ColumnName = customIdName;
 
-            // act
+            // Act
             using (var sink = new MSSqlServerSink(DatabaseFixture.LogEventsConnectionString, DatabaseFixture.LogTableName, 1, TimeSpan.FromSeconds(1), null, true, options, "dbo", null))
             { }
 
-            // assert
-            using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
-            {
-                var logEvents = conn.Query<InfoSchema>($@"SELECT COLUMN_NAME AS ColumnName FROM {DatabaseFixture.Database}.INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{DatabaseFixture.LogTableName}'");
-                var infoSchema = logEvents as InfoSchema[] ?? logEvents.ToArray();
-
-                infoSchema.Should().Contain(columns => columns.ColumnName == customIdName);
-            }
-
-            // verify Id column has identity property
-            using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
-            {
-                var isIdentity = conn.Query<IdentityQuery>($"SELECT COLUMNPROPERTY(object_id('{DatabaseFixture.LogTableName}'), '{customIdName}', 'IsIdentity') AS IsIdentity");
-                isIdentity.Should().Contain(i => i.IsIdentity == 1);
-            }
+            // Assert
+            VerifyIdColumnWasCreatedAndHasIdentity(customIdName);
         }
 
         [Fact]
-        public void DefaultIdColumn()
+        public void CustomIdColumnSinkOptionsInterface()
         {
-            // arrange
+            // Arrange
+            var columnOptions = new ColumnOptions();
+            var customIdName = "CustomIdName";
+            columnOptions.Id.ColumnName = customIdName;
+
+            // Act
+            using (var sink = new MSSqlServerSink(DatabaseFixture.LogEventsConnectionString,
+                new SinkOptions
+                {
+                    TableName = DatabaseFixture.LogTableName,
+                    BatchPostingLimit = 1,
+                    BatchPeriod = TimeSpan.FromSeconds(1),
+                    AutoCreateSqlTable = true
+                },
+                null, columnOptions, null))
+            { }
+
+            // Assert
+            VerifyIdColumnWasCreatedAndHasIdentity(customIdName);
+        }
+
+        [Fact]
+        [Obsolete("Testing an inteface marked as obsolete", error: false)]
+        public void DefaultIdColumnLegacyInterface()
+        {
+            // Arrange
             var options = new ColumnOptions();
 
-            // act
+            // Act
             using (var sink = new MSSqlServerSink(DatabaseFixture.LogEventsConnectionString, DatabaseFixture.LogTableName, 1, TimeSpan.FromSeconds(1), null, true, options, "dbo", null))
             { }
 
-            // assert
-            var idColumnName = "Id";
-            using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
-            {
-                var logEvents = conn.Query<InfoSchema>($@"SELECT COLUMN_NAME AS ColumnName FROM {DatabaseFixture.Database}.INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{DatabaseFixture.LogTableName}'");
-                var infoSchema = logEvents as InfoSchema[] ?? logEvents.ToArray();
-
-                infoSchema.Should().Contain(columns => columns.ColumnName == idColumnName);
-            }
-
-            // verify Id column has identity property
-            using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
-            {
-                var isIdentity = conn.Query<IdentityQuery>($"SELECT COLUMNPROPERTY(object_id('{DatabaseFixture.LogTableName}'), '{idColumnName}', 'IsIdentity') AS IsIdentity");
-                isIdentity.Should().Contain(i => i.IsIdentity == 1);
-            }
+            // Assert
+            VerifyIdColumnWasCreatedAndHasIdentity();
         }
 
         [Fact]
-        public void TableCreatedWithCustomNames()
+        public void DefaultIdColumnSinkOptionsInterface()
         {
-            // arrange
+            // Arrange
+            var columnOptions = new ColumnOptions();
+
+            // Act
+            using (var sink = new MSSqlServerSink(DatabaseFixture.LogEventsConnectionString,
+                new SinkOptions
+                {
+                    TableName = DatabaseFixture.LogTableName,
+                    BatchPostingLimit = 1,
+                    BatchPeriod = TimeSpan.FromSeconds(1),
+                    AutoCreateSqlTable = true
+                },
+                null, columnOptions, null))
+            { }
+
+            // Assert
+            VerifyIdColumnWasCreatedAndHasIdentity();
+        }
+
+        [Fact]
+        [Obsolete("Testing an inteface marked as obsolete", error: false)]
+        public void TableCreatedWithCustomNamesLegacyInterface()
+        {
+            // Arrange
             var options = new ColumnOptions();
             var standardNames = new List<string> { "CustomMessage", "CustomMessageTemplate", "CustomLevel", "CustomTimeStamp", "CustomException", "CustomProperties" };
 
@@ -88,53 +111,88 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             options.Exception.ColumnName = "CustomException";
             options.Properties.ColumnName = "CustomProperties";
 
-            // act
+            // Act
             using (var sink = new MSSqlServerSink(DatabaseFixture.LogEventsConnectionString, DatabaseFixture.LogTableName, 1, TimeSpan.FromSeconds(1), null, true, options, "dbo", null))
             { }
 
-            // assert
-            using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
-            {
-                var logEvents = conn.Query<InfoSchema>($@"SELECT COLUMN_NAME AS ColumnName FROM {DatabaseFixture.Database}.INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{DatabaseFixture.LogTableName}'");
-                var infoSchema = logEvents as InfoSchema[] ?? logEvents.ToArray();
-
-                foreach (var column in standardNames)
-                {
-                    infoSchema.Should().Contain(columns => columns.ColumnName == column);
-                }
-
-                infoSchema.Should().Contain(columns => columns.ColumnName == "Id");
-            }
+            // Assert
+            VerifyDatabaseColumnsWereCreated(standardNames);
         }
 
         [Fact]
-        public void TableCreatedWithDefaultNames()
+        public void TableCreatedWithCustomNamesSinkOptionsInterface()
         {
-            // arrange
+            // Arrange
+            var columnOptions = new ColumnOptions();
+            var standardNames = new List<string> { "CustomMessage", "CustomMessageTemplate", "CustomLevel", "CustomTimeStamp", "CustomException", "CustomProperties" };
+
+            columnOptions.Message.ColumnName = "CustomMessage";
+            columnOptions.MessageTemplate.ColumnName = "CustomMessageTemplate";
+            columnOptions.Level.ColumnName = "CustomLevel";
+            columnOptions.TimeStamp.ColumnName = "CustomTimeStamp";
+            columnOptions.Exception.ColumnName = "CustomException";
+            columnOptions.Properties.ColumnName = "CustomProperties";
+
+            // Act
+            using (var sink = new MSSqlServerSink(DatabaseFixture.LogEventsConnectionString,
+                new SinkOptions
+                {
+                    TableName = DatabaseFixture.LogTableName,
+                    BatchPostingLimit = 1,
+                    BatchPeriod = TimeSpan.FromSeconds(1),
+                    AutoCreateSqlTable = true
+                },
+                null, columnOptions, null))
+            { }
+
+            // Assert
+            VerifyDatabaseColumnsWereCreated(standardNames);
+        }
+
+        [Fact]
+        [Obsolete("Testing an inteface marked as obsolete", error: false)]
+        public void TableCreatedWithDefaultNamesLegacyInterface()
+        {
+            // Arrange
             var options = new ColumnOptions();
             var standardNames = new List<string> { "Message", "MessageTemplate", "Level", "TimeStamp", "Exception", "Properties" };
 
-            // act
+            // Act
             using (var sink = new MSSqlServerSink(DatabaseFixture.LogEventsConnectionString, DatabaseFixture.LogTableName, 1, TimeSpan.FromSeconds(1), null, true, options, "dbo", null))
             { }
 
-            // assert
-            using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
-            {
-                var logEvents = conn.Query<InfoSchema>($@"SELECT COLUMN_NAME AS ColumnName FROM {DatabaseFixture.Database}.INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{DatabaseFixture.LogTableName}'");
-                var infoSchema = logEvents as InfoSchema[] ?? logEvents.ToArray();
-
-                foreach (var column in standardNames)
-                {
-                    infoSchema.Should().Contain(columns => columns.ColumnName == column);
-                }
-            }
+            // Assert
+            VerifyDatabaseColumnsWereCreated(standardNames);
         }
 
         [Fact]
-        public void WriteEventToCustomStandardColumns()
+        public void TableCreatedWithDefaultNamesSinkOptionsInterface()
         {
-            // arrange
+            // Arrange
+            var columnOptions = new ColumnOptions();
+            var standardNames = new List<string> { "Message", "MessageTemplate", "Level", "TimeStamp", "Exception", "Properties" };
+
+            // Act
+            using (var sink = new MSSqlServerSink(DatabaseFixture.LogEventsConnectionString,
+                new SinkOptions
+                {
+                    TableName = DatabaseFixture.LogTableName,
+                    BatchPostingLimit = 1,
+                    BatchPeriod = TimeSpan.FromSeconds(1),
+                    AutoCreateSqlTable = true
+                },
+                null, columnOptions, null))
+            { }
+
+            // Assert
+            VerifyDatabaseColumnsWereCreated(standardNames);
+        }
+
+        [Fact]
+        [Obsolete("Testing an inteface marked as obsolete", error: false)]
+        public void WriteEventToCustomStandardColumnsLegacyInterface()
+        {
+            // Arrange
             var options = new ColumnOptions();
 
             options.Message.ColumnName = "CustomMessage";
@@ -153,8 +211,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 columnOptions: options)
                 .CreateLogger();
 
-
-            // act
+            // Act
             const string loggingInformationMessage = "Logging Information message";
             using (var file = File.CreateText("CustomColumnsEvent.Self.log"))
             {
@@ -163,19 +220,53 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 Log.CloseAndFlush();
             }
 
-            // assert
-            using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
-            {
-                var logEvents = conn.Query<CustomStandardLogColumns>($"SELECT * FROM {DatabaseFixture.LogTableName}");
-
-                logEvents.Should().Contain(e => e.CustomMessage.Contains(loggingInformationMessage));
-            }
+            // Assert
+            VerifyCustomLogMessageWasWritten(loggingInformationMessage);
         }
 
         [Fact]
-        public void WriteEventToDefaultStandardColumns()
+        public void WriteEventToCustomStandardColumnsSinkOptionsInterface()
         {
-            // arrange
+            // Arrange
+            var options = new ColumnOptions();
+
+            options.Message.ColumnName = "CustomMessage";
+            options.MessageTemplate.ColumnName = "CustomMessageTemplate";
+            options.Level.ColumnName = "CustomLevel";
+            options.TimeStamp.ColumnName = "CustomTimeStamp";
+            options.Exception.ColumnName = "CustomException";
+            options.Properties.ColumnName = "CustomProperties";
+            options.Id.ColumnName = "CustomId";
+
+            var loggerConfiguration = new LoggerConfiguration();
+            Log.Logger = loggerConfiguration.WriteTo.MSSqlServer(
+                connectionString: DatabaseFixture.LogEventsConnectionString,
+                sinkOptions: new SinkOptions
+                {
+                    TableName = DatabaseFixture.LogTableName,
+                    AutoCreateSqlTable = true
+                },
+                columnOptions: options)
+                .CreateLogger();
+
+            // Act
+            const string loggingInformationMessage = "Logging Information message";
+            using (var file = File.CreateText("CustomColumnsEvent.Self.log"))
+            {
+                Serilog.Debugging.SelfLog.Enable(TextWriter.Synchronized(file));
+                Log.Information(loggingInformationMessage);
+                Log.CloseAndFlush();
+            }
+
+            // Assert
+            VerifyCustomLogMessageWasWritten(loggingInformationMessage);
+        }
+
+        [Fact]
+        [Obsolete("Testing an inteface marked as obsolete", error: false)]
+        public void WriteEventToDefaultStandardColumnsLegacyInterface()
+        {
+            // Arrange
             var loggerConfiguration = new LoggerConfiguration();
             Log.Logger = loggerConfiguration.WriteTo.MSSqlServer(
                 connectionString: DatabaseFixture.LogEventsConnectionString,
@@ -187,7 +278,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 .CreateLogger();
 
 
-            // act
+            // Act
             const string loggingInformationMessage = "Logging Information message";
             using (var file = File.CreateText("StandardColumns.Self.log"))
             {
@@ -196,19 +287,46 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 Log.CloseAndFlush();
             }
 
-            // assert
-            using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
-            {
-                var logEvents = conn.Query<DefaultStandardLogColumns>($"SELECT Message, Level FROM {DatabaseFixture.LogTableName}");
-
-                logEvents.Should().Contain(e => e.Message.Contains(loggingInformationMessage));
-            }
+            // Assert
+            VerifyLogMessageWasWritten(loggingInformationMessage);
         }
 
         [Fact]
-        public void AuditEventToCustomStandardColumns()
+        public void WriteEventToDefaultStandardColumnsSinkOptionsInterface()
         {
-            // arrange
+            // Arrange
+            var loggerConfiguration = new LoggerConfiguration();
+            Log.Logger = loggerConfiguration.WriteTo.MSSqlServer(
+                connectionString: DatabaseFixture.LogEventsConnectionString,
+                sinkOptions: new SinkOptions
+                {
+                    TableName = DatabaseFixture.LogTableName,
+                    AutoCreateSqlTable = true,
+                    BatchPostingLimit = 1,
+                    BatchPeriod = TimeSpan.FromSeconds(10)
+                },
+                columnOptions: new ColumnOptions())
+                .CreateLogger();
+
+
+            // Act
+            const string loggingInformationMessage = "Logging Information message";
+            using (var file = File.CreateText("StandardColumns.Self.log"))
+            {
+                Serilog.Debugging.SelfLog.Enable(TextWriter.Synchronized(file));
+                Log.Information(loggingInformationMessage);
+                Log.CloseAndFlush();
+            }
+
+            // Assert
+            VerifyLogMessageWasWritten(loggingInformationMessage);
+        }
+
+        [Fact]
+        [Obsolete("Testing an inteface marked as obsolete", error: false)]
+        public void AuditEventToCustomStandardColumnsLegacyInterface()
+        {
+            // Arrange
             var options = new ColumnOptions();
 
             options.Message.ColumnName = "CustomMessage";
@@ -227,8 +345,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 columnOptions: options)
                 .CreateLogger();
 
-
-            // act
+            // Act
             const string loggingInformationMessage = "Logging Information message";
             using (var file = File.CreateText("CustomColumnsAuditEvent.Self.log"))
             {
@@ -237,28 +354,64 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 Log.CloseAndFlush();
             }
 
-            // assert
-            using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
-            {
-                var logEvents = conn.Query<CustomStandardLogColumns>($"SELECT * FROM {DatabaseFixture.LogTableName}");
+            // Assert
+            VerifyCustomLogMessageWasWritten(loggingInformationMessage);
+        }
 
-                logEvents.Should().Contain(e => e.CustomMessage.Contains(loggingInformationMessage));
+        [Fact]
+        public void AuditEventToCustomStandardColumnsSinkOptionsInterface()
+        {
+            // Arrange
+            var options = new ColumnOptions();
+
+            options.Message.ColumnName = "CustomMessage";
+            options.MessageTemplate.ColumnName = "CustomMessageTemplate";
+            options.Level.ColumnName = "CustomLevel";
+            options.TimeStamp.ColumnName = "CustomTimeStamp";
+            options.Exception.ColumnName = "CustomException";
+            options.Properties.ColumnName = "CustomProperties";
+            options.Id.ColumnName = "CustomId";
+
+            var loggerConfiguration = new LoggerConfiguration();
+            Log.Logger = loggerConfiguration.AuditTo.MSSqlServer(
+                connectionString: DatabaseFixture.LogEventsConnectionString,
+                sinkOptions: new SinkOptions
+                {
+                    TableName = DatabaseFixture.LogTableName,
+                    AutoCreateSqlTable = true
+                },
+                columnOptions: options)
+                .CreateLogger();
+
+            // Act
+            const string loggingInformationMessage = "Logging Information message";
+            using (var file = File.CreateText("CustomColumnsAuditEvent.Self.log"))
+            {
+                Serilog.Debugging.SelfLog.Enable(TextWriter.Synchronized(file));
+                Log.Information(loggingInformationMessage);
+                Log.CloseAndFlush();
             }
+
+            // Assert
+            VerifyCustomLogMessageWasWritten(loggingInformationMessage);
         }
 
         [Fact]
         public void AuditEventToDefaultStandardColumns()
         {
-            // arrange
+            // Arrange
             var loggerConfiguration = new LoggerConfiguration();
             Log.Logger = loggerConfiguration.AuditTo.MSSqlServer(
                 connectionString: DatabaseFixture.LogEventsConnectionString,
-                tableName: DatabaseFixture.LogTableName,
-                autoCreateSqlTable: true,
+                new SinkOptions
+                {
+                    TableName = DatabaseFixture.LogTableName,
+                    AutoCreateSqlTable = true
+                },
                 columnOptions: new ColumnOptions())
                 .CreateLogger();
 
-            // act
+            // Act
             const string loggingInformationMessage = "Logging Information message";
             using (var file = File.CreateText("StandardColumns.Audit.Self.log"))
             {
@@ -268,11 +421,17 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 Log.CloseAndFlush();
             }
 
-            // assert
+            // Assert
+            VerifyLogMessageWasWritten(loggingInformationMessage);
+        }
+
+        private static void VerifyCustomLogMessageWasWritten(string message)
+        {
             using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
             {
-                var logEvents = conn.Query<DefaultStandardLogColumns>($"SELECT Message, Level FROM {DatabaseFixture.LogTableName}");
-                logEvents.Should().Contain(e => e.Message.Contains(loggingInformationMessage));
+                var logEvents = conn.Query<CustomStandardLogColumns>($"SELECT CustomMessage FROM {DatabaseFixture.LogTableName}");
+
+                logEvents.Should().Contain(e => e.CustomMessage.Contains(message));
             }
         }
     }

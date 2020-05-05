@@ -3,12 +3,14 @@ using System.Data;
 using System.Data.SqlClient;
 using Dapper;
 using FluentAssertions;
+using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace Serilog.Sinks.MSSqlServer.Tests
 {
+    [Trait(TestCategory.TraitName, TestCategory.Integration)]
     public class TimeStampTests : DatabaseTestsBase
     {
         public TimeStampTests(ITestOutputHelper output) : base(output)
@@ -19,23 +21,26 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         [Fact]
         public void CanCreateDatabaseWithDateTimeByDefault()
         {
-            // arrange
+            // Arrange
             var loggerConfiguration = new LoggerConfiguration();
             Log.Logger = loggerConfiguration.WriteTo.MSSqlServer(
                 connectionString: DatabaseFixture.LogEventsConnectionString,
-                tableName: DatabaseFixture.LogTableName,
-                autoCreateSqlTable: true,
-                batchPostingLimit: 1,
-                period: TimeSpan.FromSeconds(10),
+                new SinkOptions
+                {
+                    TableName = DatabaseFixture.LogTableName,
+                    AutoCreateSqlTable = true,
+                    BatchPostingLimit = 1,
+                    BatchPeriod = TimeSpan.FromSeconds(10)
+                },
                 columnOptions: new ColumnOptions())
                 .CreateLogger();
 
-            // act
+            // Act
             const string loggingInformationMessage = "Logging Information message";
             Log.Information(loggingInformationMessage);
             Log.CloseAndFlush();
 
-            // assert
+            // Assert
             using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
             {
                 var logEvents = conn.Query<TestTimeStampDateTimeEntry>($"SELECT TimeStamp FROM {DatabaseFixture.LogTableName}");
@@ -47,24 +52,27 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         [Fact]
         public void CanStoreDateTimeOffsetWithCorrectLocalTimeZone()
         {
-            // arrange
+            // Arrange
             var loggerConfiguration = new LoggerConfiguration();
             Log.Logger = loggerConfiguration.WriteTo.MSSqlServer(
                 connectionString: DatabaseFixture.LogEventsConnectionString,
-                tableName: DatabaseFixture.LogTableName,
-                autoCreateSqlTable: true,
-                batchPostingLimit: 1,
-                period: TimeSpan.FromSeconds(10),
+                new SinkOptions
+                {
+                    TableName = DatabaseFixture.LogTableName,
+                    AutoCreateSqlTable = true,
+                    BatchPostingLimit = 1,
+                    BatchPeriod = TimeSpan.FromSeconds(10)
+                },
                 columnOptions: new ColumnOptions { TimeStamp = { DataType = SqlDbType.DateTimeOffset, ConvertToUtc = false } })
                 .CreateLogger();
             var dateTimeOffsetNow = DateTimeOffset.Now;
 
-            // act
+            // Act
             const string loggingInformationMessage = "Logging Information message";
             Log.Information(loggingInformationMessage);
             Log.CloseAndFlush();
 
-            // assert
+            // Assert
             using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
             {
                 var logEvents = conn.Query<TestTimeStampDateTimeOffsetEntry>($"SELECT TimeStamp FROM {DatabaseFixture.LogTableName}");
@@ -76,23 +84,26 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         [Fact]
         public void CanStoreDateTimeOffsetWithUtcTimeZone()
         {
-            // arrange
+            // Arrange
             var loggerConfiguration = new LoggerConfiguration();
             Log.Logger = loggerConfiguration.WriteTo.MSSqlServer(
                 connectionString: DatabaseFixture.LogEventsConnectionString,
-                tableName: DatabaseFixture.LogTableName,
-                autoCreateSqlTable: true,
-                batchPostingLimit: 1,
-                period: TimeSpan.FromSeconds(10),
+                new SinkOptions
+                {
+                    TableName = DatabaseFixture.LogTableName,
+                    AutoCreateSqlTable = true,
+                    BatchPostingLimit = 1,
+                    BatchPeriod = TimeSpan.FromSeconds(10)
+                },
                 columnOptions: new ColumnOptions { TimeStamp = { DataType = SqlDbType.DateTimeOffset, ConvertToUtc = true } })
                 .CreateLogger();
 
-            // act
+            // Act
             const string loggingInformationMessage = "Logging Information message";
             Log.Information(loggingInformationMessage);
             Log.CloseAndFlush();
 
-            // assert
+            // Assert
             using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
             {
                 var logEvents = conn.Query<TestTimeStampDateTimeOffsetEntry>($"SELECT TimeStamp FROM {DatabaseFixture.LogTableName}");

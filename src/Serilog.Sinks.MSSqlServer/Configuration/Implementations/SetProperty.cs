@@ -26,7 +26,7 @@ namespace Serilog.Sinks.MSSqlServer
             if (value == null || setter == null) return;
             try
             {
-                T setting = (T)Convert.ChangeType(value, typeof(T), CultureInfo.InvariantCulture);
+                var setting = (T)Convert.ChangeType(value, typeof(T), CultureInfo.InvariantCulture);
                 setter(setting);
             }
             // don't change the property if the conversion fails 

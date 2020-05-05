@@ -3,12 +3,14 @@ using System.Data.SqlClient;
 using System.Linq;
 using Dapper;
 using FluentAssertions;
+using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace Serilog.Sinks.MSSqlServer.Tests
 {
+    [Trait(TestCategory.TraitName, TestCategory.Integration)]
     public class IndexingFeaturesTests : DatabaseTestsBase
     {
         public IndexingFeaturesTests(ITestOutputHelper output) : base(output)
@@ -18,7 +20,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         [Fact]
         public void NonClusteredDefaultIdPrimaryKey()
         {
-            // arrange
+            // Arrange
             var columnOptions = new ColumnOptions();
             columnOptions.Id.NonClusteredIndex = true;
 
@@ -26,16 +28,19 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 .WriteTo.MSSqlServer
                 (
                     connectionString: DatabaseFixture.LogEventsConnectionString,
-                    tableName: DatabaseFixture.LogTableName,
-                    columnOptions: columnOptions,
-                    autoCreateSqlTable: true,
-                    batchPostingLimit: 1,
-                    period: TimeSpan.FromSeconds(10)
+                    new SinkOptions
+                    {
+                        TableName = DatabaseFixture.LogTableName,
+                        AutoCreateSqlTable = true,
+                        BatchPostingLimit = 1,
+                        BatchPeriod = TimeSpan.FromSeconds(10)
+                    },
+                    columnOptions: columnOptions
                 )
                 .CreateLogger();
             Log.CloseAndFlush();
 
-            // assert
+            // Assert
             using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
             {
                 conn.Execute($"use {DatabaseFixture.Database}");
@@ -50,7 +55,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         [Fact]
         public void AlternatePrimaryKey()
         {
-            // arrange
+            // Arrange
             var columnOptions = new ColumnOptions();
             columnOptions.PrimaryKey = columnOptions.TimeStamp;
 
@@ -58,16 +63,19 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 .WriteTo.MSSqlServer
                 (
                     connectionString: DatabaseFixture.LogEventsConnectionString,
-                    tableName: DatabaseFixture.LogTableName,
-                    columnOptions: columnOptions,
-                    autoCreateSqlTable: true,
-                    batchPostingLimit: 1,
-                    period: TimeSpan.FromSeconds(10)
+                    new SinkOptions
+                    {
+                        TableName = DatabaseFixture.LogTableName,
+                        AutoCreateSqlTable = true,
+                        BatchPostingLimit = 1,
+                        BatchPeriod = TimeSpan.FromSeconds(10)
+                    },
+                    columnOptions: columnOptions
                 )
                 .CreateLogger();
             Log.CloseAndFlush();
 
-            // assert
+            // Assert
             using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
             {
                 conn.Execute($"use {DatabaseFixture.Database}");
@@ -82,7 +90,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         [Fact]
         public void ColumnstoreIndex()
         {
-            // arrange
+            // Arrange
             var columnOptions = new ColumnOptions();
             // char MAX not supported prior to SQL2017
             columnOptions.Exception.DataLength = 512;
@@ -96,16 +104,19 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 .WriteTo.MSSqlServer
                 (
                     connectionString: DatabaseFixture.LogEventsConnectionString,
-                    tableName: DatabaseFixture.LogTableName,
-                    columnOptions: columnOptions,
-                    autoCreateSqlTable: true,
-                    batchPostingLimit: 1,
-                    period: TimeSpan.FromSeconds(10)
+                    new SinkOptions
+                    {
+                        TableName = DatabaseFixture.LogTableName,
+                        AutoCreateSqlTable = true,
+                        BatchPostingLimit = 1,
+                        BatchPeriod = TimeSpan.FromSeconds(10)
+                    },
+                    columnOptions: columnOptions
                 )
                 .CreateLogger();
             Log.CloseAndFlush();
 
-            // assert
+            // Assert
             using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
             {
                 conn.Execute($"use {DatabaseFixture.Database}");

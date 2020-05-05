@@ -5,10 +5,12 @@ using System.Globalization;
 using Microsoft.Extensions.Configuration;
 using Moq;
 using Serilog.Sinks.MSSqlServer.Configuration;
+using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
 
 namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsoft.Extensions.Configuration
 {
+    [Trait(TestCategory.TraitName, TestCategory.Unit)]
     public class MicrosoftExtensionsColumnOptionsProviderTests
     {
         private Mock<IConfigurationSection> _configurationSectionMock;
@@ -648,8 +650,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
         public void ConfigureColumnOptionsThrowsWhenSettingPrimaryKeyColumnNameToUndefinedColumnNameAndPrimaryKeyRemainsNull()
         {
             // Arrange
-            var columnOptions = new ColumnOptions();
-            columnOptions.PrimaryKey = null;
+            var columnOptions = new ColumnOptions { PrimaryKey = null };
             SetupConfigurationSectionMocks();
             _configurationSectionMock.Setup(s => s["primaryKeyColumnName"]).Returns("TestUndefinedPrimaryKeyColumnName");
             var sut = new MicrosoftExtensionsColumnOptionsProvider();

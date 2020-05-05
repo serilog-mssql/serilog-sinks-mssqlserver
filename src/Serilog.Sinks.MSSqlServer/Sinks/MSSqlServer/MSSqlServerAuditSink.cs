@@ -13,28 +13,28 @@
 // limitations under the License.
 
 using System;
-using System.Data;
-using System.Data.SqlClient;
-using System.Text;
 using Serilog.Core;
-using Serilog.Debugging;
 using Serilog.Events;
 using Serilog.Formatting;
+using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Dependencies;
+using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
 using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform;
 
 namespace Serilog.Sinks.MSSqlServer
 {
     /// <summary>
-    ///  Writes log events as rows in a table of MSSqlServer database using Audit logic, meaning that each row is synchronously committed
-    ///  and any errors that occur are propagated to the caller.
+    /// Writes log events as rows in a table of MSSqlServer database using Audit logic, meaning that each row is synchronously committed
+    /// and any errors that occur are propagated to the caller.
     /// </summary>
     public class MSSqlServerAuditSink : ILogEventSink, IDisposable
     {
-        private readonly ISqlConnectionFactory _sqlConnectionFactory;
-        private readonly MSSqlServerSinkTraits _traits;
+        private readonly ISqlLogEventWriter _sqlLogEventWriter;
 
         /// <summary>
-        ///     Construct a sink posting to the specified database.
+        /// Construct a sink posting to the specified database.
+        ///
+        /// Note: this is the legacy version of the extension method. Please use the new one using SinkOptions instead.
+        /// 
         /// </summary>
         /// <param name="connectionString">Connection string to access the database.</param>
         /// <param name="tableName">Name of the table to store the data in.</param>
@@ -43,99 +43,59 @@ namespace Serilog.Sinks.MSSqlServer
         /// <param name="autoCreateSqlTable">Create log table with the provided name on destination sql server.</param>
         /// <param name="columnOptions">Options that pertain to columns</param>
         /// <param name="logEventFormatter">Supplies custom formatter for the LogEvent column, or null</param>
+        [Obsolete("Use the new interface accepting a SinkOptions parameter instead. This will be removed in a future release.", error: false)]
         public MSSqlServerAuditSink(
             string connectionString,
             string tableName,
             IFormatProvider formatProvider,
             bool autoCreateSqlTable = false,
             ColumnOptions columnOptions = null,
-            string schemaName = "dbo",
+            string schemaName = MSSqlServerSink.DefaultSchemaName,
             ITextFormatter logEventFormatter = null)
+            : this(connectionString, new SinkOptions(tableName, null, null, autoCreateSqlTable, schemaName),
+                  formatProvider, columnOptions, logEventFormatter)
         {
-            columnOptions?.FinalizeConfigurationForSinkConstructor();
+            // Do not add new parameters here. This interface is considered legacy and will be deprecated in the future.
+            // For adding new input parameters use the SinkOptions class and the method overload that accepts SinkOptions.
+        }
 
-            if (columnOptions != null)
-            {
-                if (columnOptions.DisableTriggers)
-                    throw new NotSupportedException($"The {nameof(ColumnOptions.DisableTriggers)} option is not supported for auditing.");
-            }
+        /// <summary>
+        /// Construct a sink posting to the specified database.
+        /// </summary>
+        /// <param name="connectionString">Connection string to access the database.</param>
+        /// <param name="sinkOptions">Supplies additional options for the sink</param>
+        /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
+        /// <param name="columnOptions">Options that pertain to columns</param>
+        /// <param name="logEventFormatter">Supplies custom formatter for the LogEvent column, or null</param>
+        public MSSqlServerAuditSink(
+            string connectionString,
+            SinkOptions sinkOptions,
+            IFormatProvider formatProvider = null,
+            ColumnOptions columnOptions = null,
+            ITextFormatter logEventFormatter = null)
+            : this(sinkOptions, columnOptions,
+                  SinkDependenciesFactory.Create(connectionString, sinkOptions, formatProvider, columnOptions, logEventFormatter))
+        {
+        }
 
-            _sqlConnectionFactory = new SqlConnectionFactory(connectionString);
-            _traits = new MSSqlServerSinkTraits(_sqlConnectionFactory, tableName, schemaName, columnOptions, formatProvider, autoCreateSqlTable, logEventFormatter);
+        // Internal constructor with injectable dependencies for better testability
+        internal MSSqlServerAuditSink(
+            SinkOptions sinkOptions,
+            ColumnOptions columnOptions,
+            SinkDependencies sinkDependencies)
+        {
+            ValidateParameters(sinkOptions, columnOptions);
+            CheckSinkDependencies(sinkDependencies);
+
+            _sqlLogEventWriter = sinkDependencies.SqlLogEventWriter;
+
+            CreateTable(sinkOptions, sinkDependencies);
         }
 
         /// <summary>Emit the provided log event to the sink.</summary>
         /// <param name="logEvent">The log event to write.</param>
-        public void Emit(LogEvent logEvent)
-        {
-            try
-            {
-                using (var connection = _sqlConnectionFactory.Create())
-                {
-                    connection.Open();
-                    using (SqlCommand command = connection.CreateCommand())
-                    {
-                        command.CommandType = CommandType.Text;
-
-                        var fieldList = new StringBuilder($"INSERT INTO [{_traits.SchemaName}].[{_traits.TableName}] (");
-                        var parameterList = new StringBuilder(") VALUES (");
-
-                        var index = 0;
-                        foreach (var field in _traits.GetColumnsAndValues(logEvent))
-                        {
-                            if (index != 0)
-                            {
-                                fieldList.Append(',');
-                                parameterList.Append(',');
-                            }
-
-                            fieldList.Append(field.Key);
-                            parameterList.Append("@P");
-                            parameterList.Append(index);
-
-                            var parameter = new SqlParameter($"@P{index}", field.Value ?? DBNull.Value);
-
-                            // The default is SqlDbType.DateTime, which will truncate the DateTime value if the actual
-                            // type in the database table is datetime2. So we explicitly set it to DateTime2, which will
-                            // work both if the field in the table is datetime and datetime2, which is also consistent with 
-                            // the behavior of the non-audit sink.
-                            if (field.Value is DateTime)
-                                parameter.SqlDbType = SqlDbType.DateTime2;
-
-                            command.Parameters.Add(parameter);
-
-                            index++;
-                        }
-
-                        parameterList.Append(')');
-                        fieldList.Append(parameterList.ToString());
-
-                        command.CommandText = fieldList.ToString();
-
-                        command.ExecuteNonQuery();
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                SelfLog.WriteLine("Unable to write log event to the database due to following error: {1}", ex.Message);
-                throw;
-            }
-        }
-
-        /// <summary>
-        /// Releases the unmanaged resources used by the Serilog.Sinks.MSSqlServer.MSSqlServerAuditSink and optionally
-        /// releases the managed resources.
-        /// </summary>
-        /// <param name="disposing">True to release both managed and unmanaged resources; false to release only unmanaged
-        ///                         resources.</param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                _traits.Dispose();
-            }
-        }
+        public void Emit(LogEvent logEvent) =>
+            _sqlLogEventWriter.WriteEvent(logEvent);
 
         /// <summary>
         /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
@@ -144,6 +104,61 @@ namespace Serilog.Sinks.MSSqlServer
         {
             Dispose(true);
             GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Releases the unmanaged resources used by the Serilog.Sinks.MSSqlServer.MSSqlServerAuditSink and optionally
+        /// releases the managed resources.
+        /// </summary>
+        /// <param name="disposing">True to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            // This class needn't to dispose anything. This is just here for sink interface compatibility.
+        }
+
+        private static void ValidateParameters(SinkOptions sinkOptions, ColumnOptions columnOptions)
+        {
+            if (sinkOptions?.TableName == null)
+            {
+                throw new InvalidOperationException("Table name must be specified!");
+            }
+
+            if (columnOptions.DisableTriggers)
+                throw new NotSupportedException($"The {nameof(ColumnOptions.DisableTriggers)} option is not supported for auditing.");
+        }
+
+        private static void CheckSinkDependencies(SinkDependencies sinkDependencies)
+        {
+            if (sinkDependencies == null)
+            {
+                throw new ArgumentNullException(nameof(sinkDependencies));
+            }
+
+            if (sinkDependencies.DataTableCreator == null)
+            {
+                throw new InvalidOperationException($"DataTableCreator is not initialized!");
+            }
+
+            if (sinkDependencies.SqlTableCreator == null)
+            {
+                throw new InvalidOperationException($"SqlTableCreator is not initialized!");
+            }
+
+            if (sinkDependencies.SqlLogEventWriter == null)
+            {
+                throw new InvalidOperationException($"SqlLogEventWriter is not initialized!");
+            }
+        }
+
+        private static void CreateTable(SinkOptions sinkOptions, SinkDependencies sinkDependencies)
+        {
+            if (sinkOptions.AutoCreateSqlTable)
+            {
+                using (var eventTable = sinkDependencies.DataTableCreator.CreateDataTable())
+                {
+                    sinkDependencies.SqlTableCreator.CreateTable(eventTable);
+                }
+            }
         }
     }
 }

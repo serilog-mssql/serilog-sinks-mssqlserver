@@ -2,12 +2,14 @@
 using System.Data.SqlClient;
 using Dapper;
 using FluentAssertions;
+using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace Serilog.Sinks.MSSqlServer.Tests
 {
+    [Trait(TestCategory.TraitName, TestCategory.Integration)]
     public class TriggersOnLogTableTests : DatabaseTestsBase
     {
         private bool _disposedValue;
@@ -19,26 +21,29 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         [Fact]
         public void TestTriggerOnLogTableFire()
         {
-            // arrange
+            // Arrange
             var loggerConfiguration = new LoggerConfiguration();
             Log.Logger = loggerConfiguration.WriteTo.MSSqlServer(
                 connectionString: DatabaseFixture.LogEventsConnectionString,
-                tableName: DatabaseFixture.LogTableName,
-                autoCreateSqlTable: true,
-                batchPostingLimit: 1,
-                period: TimeSpan.FromSeconds(10),
+                new SinkOptions
+                {
+                    TableName = DatabaseFixture.LogTableName,
+                    AutoCreateSqlTable = true,
+                    BatchPostingLimit = 1,
+                    BatchPeriod = TimeSpan.FromSeconds(10)
+                },
                 columnOptions: new ColumnOptions())
                 .CreateLogger();
 
             CreateTrigger();
 
-            // act
+            // Act
             const string loggingInformationMessage = "Logging Information message";
             Log.Information(loggingInformationMessage);
 
             Log.CloseAndFlush();
 
-            // assert
+            // Assert
             using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
             {
                 var logTriggerEvents = conn.Query<TestTriggerEntry>($"SELECT * FROM {LogTriggerTableName}");
@@ -50,27 +55,30 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         [Fact]
         public void TestOptionsDisableTriggersOnLogTable()
         {
-            // arrange
+            // Arrange
             var options = new ColumnOptions { DisableTriggers = true };
             var loggerConfiguration = new LoggerConfiguration();
             Log.Logger = loggerConfiguration.WriteTo.MSSqlServer(
                 connectionString: DatabaseFixture.LogEventsConnectionString,
-                tableName: DatabaseFixture.LogTableName,
-                autoCreateSqlTable: true,
-                batchPostingLimit: 1,
-                period: TimeSpan.FromSeconds(10),
+                new SinkOptions
+                {
+                    TableName = DatabaseFixture.LogTableName,
+                    AutoCreateSqlTable = true,
+                    BatchPostingLimit = 1,
+                    BatchPeriod = TimeSpan.FromSeconds(10)
+                },
                 columnOptions: options)
                 .CreateLogger();
 
             CreateTrigger();
 
-            // act
+            // Act
             const string loggingInformationMessage = "Logging Information message";
             Log.Information(loggingInformationMessage);
 
             Log.CloseAndFlush();
 
-            // assert
+            // Assert
             using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
             {
                 var logTriggerEvents = conn.Query<TestTriggerEntry>($"SELECT * FROM {LogTriggerTableName}");
@@ -82,24 +90,27 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         [Fact]
         public void TestAuditTriggerOnLogTableFire()
         {
-            // arrange
+            // Arrange
             var loggerConfiguration = new LoggerConfiguration();
             Log.Logger = loggerConfiguration.AuditTo.MSSqlServer(
                 connectionString: DatabaseFixture.LogEventsConnectionString,
-                tableName: DatabaseFixture.LogTableName,
-                autoCreateSqlTable: true,
+                new SinkOptions
+                {
+                    TableName = DatabaseFixture.LogTableName,
+                    AutoCreateSqlTable = true
+                },
                 columnOptions: new ColumnOptions())
                 .CreateLogger();
 
             CreateTrigger();
 
-            // act
+            // Act
             const string loggingInformationMessage = "Logging Information message";
             Log.Information(loggingInformationMessage);
 
             Log.CloseAndFlush();
 
-            // assert
+            // Assert
             using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
             {
                 var logTriggerEvents = conn.Query<TestTriggerEntry>($"SELECT * FROM {LogTriggerTableName}");
@@ -111,13 +122,16 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         [Fact]
         public void TestAuditOptionsDisableTriggersOnLogTableThrowsNotSupportedException()
         {
-            // arrange
+            // Arrange
             var options = new ColumnOptions { DisableTriggers = true };
             var loggerConfiguration = new LoggerConfiguration();
             Assert.Throws<NotSupportedException>(() => loggerConfiguration.AuditTo.MSSqlServer(
                 connectionString: DatabaseFixture.LogEventsConnectionString,
-                tableName: DatabaseFixture.LogTableName,
-                autoCreateSqlTable: true,
+                new SinkOptions
+                {
+                    TableName = DatabaseFixture.LogTableName,
+                    AutoCreateSqlTable = true
+                },
                 columnOptions: options)
                 .CreateLogger());
 

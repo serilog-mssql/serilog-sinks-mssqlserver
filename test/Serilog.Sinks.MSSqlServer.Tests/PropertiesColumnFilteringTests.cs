@@ -1,12 +1,14 @@
 ﻿using System.Data.SqlClient;
 using Dapper;
 using FluentAssertions;
+using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace Serilog.Sinks.MSSqlServer.Tests
 {
+    [Trait(TestCategory.TraitName, TestCategory.Integration)]
     public class PropertiesColumnFilteringTests : DatabaseTestsBase
     {
         public PropertiesColumnFilteringTests(ITestOutputHelper output) : base(output)
@@ -16,7 +18,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         [Fact]
         public void FilteredProperties()
         {
-            // arrange
+            // Arrange
             var columnOptions = new ColumnOptions();
             columnOptions.Properties.PropertiesFilter = (propName) => propName == "A";
 
@@ -24,13 +26,16 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 .WriteTo.MSSqlServer
                 (
                     connectionString: DatabaseFixture.LogEventsConnectionString,
-                    tableName: DatabaseFixture.LogTableName,
-                    columnOptions: columnOptions,
-                    autoCreateSqlTable: true
+                    new SinkOptions
+                    {
+                        TableName = DatabaseFixture.LogTableName,
+                        AutoCreateSqlTable = true,
+                    },
+                    columnOptions: columnOptions
                 )
                 .CreateLogger();
 
-            // act
+            // Act
             Log.Logger
                 .ForContext("A", "AValue")
                 .ForContext("B", "BValue")
@@ -38,7 +43,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
 
             Log.CloseAndFlush();
 
-            // assert
+            // Assert
             using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
             {
                 var logEvents = conn.Query<PropertiesColumns>($"SELECT Properties from {DatabaseFixture.LogTableName}");
@@ -51,7 +56,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         [Fact]
         public void FilteredPropertiesWhenAuditing()
         {
-            // arrange
+            // Arrange
             var columnOptions = new ColumnOptions();
             columnOptions.Properties.PropertiesFilter = (propName) => propName == "A";
 
@@ -59,13 +64,16 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 .AuditTo.MSSqlServer
                 (
                     connectionString: DatabaseFixture.LogEventsConnectionString,
-                    tableName: DatabaseFixture.LogTableName,
-                    columnOptions: columnOptions,
-                    autoCreateSqlTable: true
+                    new SinkOptions
+                    {
+                        TableName = DatabaseFixture.LogTableName,
+                        AutoCreateSqlTable = true
+                    },
+                    columnOptions: columnOptions
                 )
                 .CreateLogger();
 
-            // act
+            // Act
             Log.Logger
                 .ForContext("A", "AValue")
                 .ForContext("B", "BValue")
@@ -73,7 +81,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
 
             Log.CloseAndFlush();
 
-            // assert
+            // Assert
             using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
             {
                 var logEvents = conn.Query<PropertiesColumns>($"SELECT Properties from {DatabaseFixture.LogTableName}");

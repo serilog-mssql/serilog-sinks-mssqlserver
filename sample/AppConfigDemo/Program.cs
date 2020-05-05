@@ -2,7 +2,7 @@
 using System.Threading;
 using Serilog;
 using Serilog.Events;
-using Serilog.Sinks.MSSqlServer;
+using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
 
 namespace AppConfigDemo
 {
@@ -14,17 +14,34 @@ namespace AppConfigDemo
 
         public static void Main()
         {
+            // Legacy interace - do not use this anymore
+            //Log.Logger = new LoggerConfiguration().WriteTo
+            //    .MSSqlServer(
+            //        connectionString: _connectionString,
+            //        tableName: _tableName,
+            //        restrictedToMinimumLevel: LogEventLevel.Debug,
+            //        batchPostingLimit: MSSqlServerSink.DefaultBatchPostingLimit,
+            //        period: null,
+            //        formatProvider: null,
+            //        autoCreateSqlTable: true,
+            //        columnOptions: null,
+            //        schemaName: _schemaName,
+            //        logEventFormatter: null)
+            //    .CreateLogger();
+
+            // New SinkOptions based interface
             Log.Logger = new LoggerConfiguration().WriteTo
                 .MSSqlServer(
                     connectionString: _connectionString,
-                    tableName: _tableName,
+                    sinkOptions: new SinkOptions
+                    {
+                        TableName = _tableName,
+                        SchemaName = _schemaName,
+                        AutoCreateSqlTable = true
+                    },
                     restrictedToMinimumLevel: LogEventLevel.Debug,
-                    batchPostingLimit: MSSqlServerSink.DefaultBatchPostingLimit,
-                    period: null,
                     formatProvider: null,
-                    autoCreateSqlTable: true,
                     columnOptions: null,
-                    schemaName: _schemaName,
                     logEventFormatter: null)
                 .CreateLogger();
 

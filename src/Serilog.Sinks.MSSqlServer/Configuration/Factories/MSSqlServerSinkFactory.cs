@@ -1,5 +1,6 @@
 ﻿using System;
 using Serilog.Formatting;
+using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
 
 namespace Serilog.Sinks.MSSqlServer.Configuration.Factories
 {
@@ -7,23 +8,15 @@ namespace Serilog.Sinks.MSSqlServer.Configuration.Factories
     {
         public MSSqlServerSink Create(
             string connectionString,
-            string tableName,
-            int batchPostingLimit,
-            TimeSpan defaultedPeriod,
+            SinkOptions sinkOptions,
             IFormatProvider formatProvider,
-            bool autoCreateSqlTable,
             ColumnOptions columnOptions,
-            string schemaName,
             ITextFormatter logEventFormatter) =>
             new MSSqlServerSink(
                 connectionString,
-                tableName,
-                batchPostingLimit,
-                defaultedPeriod,
+                sinkOptions,
                 formatProvider,
-                autoCreateSqlTable,
                 columnOptions,
-                schemaName,
                 logEventFormatter);
     }
 }

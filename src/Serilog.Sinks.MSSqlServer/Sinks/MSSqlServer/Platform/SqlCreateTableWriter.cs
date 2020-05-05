@@ -10,7 +10,7 @@ namespace Serilog.Sinks.MSSqlServer.Platform
         {
             var sql = new StringBuilder();
             var ix = new StringBuilder();
-            int indexCount = 1;
+            var indexCount = 1;
 
             // start schema check and DDL (wrap in EXEC to make a separate batch)
             sql.AppendLine($"IF(NOT EXISTS(SELECT * FROM sys.schemas WHERE name = '{schemaName}'))");
@@ -24,7 +24,7 @@ namespace Serilog.Sinks.MSSqlServer.Platform
             sql.AppendLine($"CREATE TABLE [{schemaName}].[{tableName}] ( ");
 
             // build column list
-            int i = 1;
+            var i = 1;
             foreach (DataColumn column in dataTable.Columns)
             {
                 var common = (SqlColumn)column.ExtendedProperties["SqlColumn"];
