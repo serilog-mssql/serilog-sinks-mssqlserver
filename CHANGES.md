@@ -1,3 +1,9 @@
+# 5.4.0
+* Added support for Azure Managed Identities for Resources authentication (thanks to @darrenschwarz for the contribution).
+* New interface using `SinkOptions` parameter. Marked old interfaces obsolete.
+* Implemented Enhancement #182: configurable property names for custom columns (thanks to  @rocknet for the contribution).
+* Lots of refactoring and new unit tests.
+
 # 5.3.0  
 Code quality release.
  * Added code analysis and editorconfig rules based on Microsoft standards.
