@@ -16,7 +16,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Output
         private readonly Serilog.Sinks.MSSqlServer.ColumnOptions _columnOptions;
         private readonly Mock<IStandardColumnDataGenerator> _standardColumnDataGeneratorMock;
         private readonly Mock<IPropertiesColumnDataGenerator> _propertiesColumnDataGenerator;
-        private LogEventDataGenerator _sut;
+        private readonly LogEventDataGenerator _sut;
 
         public LogEventDataGeneratorTests()
         {
