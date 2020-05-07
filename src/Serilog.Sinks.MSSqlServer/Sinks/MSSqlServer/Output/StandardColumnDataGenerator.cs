@@ -70,15 +70,21 @@ namespace Serilog.Sinks.MSSqlServer.Output
 
         private string RenderLogEventColumn(LogEvent logEvent)
         {
+            LogEvent preparedLogEvent;
             if (_columnOptions.LogEvent.ExcludeAdditionalProperties)
             {
                 var filteredProperties = logEvent.Properties.Where(p => !_additionalColumnPropertyNames.Contains(p.Key));
-                logEvent = new LogEvent(logEvent.Timestamp, logEvent.Level, logEvent.Exception, logEvent.MessageTemplate, filteredProperties.Select(x => new LogEventProperty(x.Key, x.Value)));
+                preparedLogEvent = new LogEvent(logEvent.Timestamp, logEvent.Level, logEvent.Exception, logEvent.MessageTemplate,
+                    filteredProperties.Select(x => new LogEventProperty(x.Key, x.Value)));
+            }
+            else
+            {
+                preparedLogEvent = logEvent;
             }
 
             var sb = new StringBuilder();
             using (var writer = new System.IO.StringWriter(sb))
-                _logEventFormatter.Format(logEvent, writer);
+                _logEventFormatter.Format(preparedLogEvent, writer);
             return sb.ToString();
         }
 

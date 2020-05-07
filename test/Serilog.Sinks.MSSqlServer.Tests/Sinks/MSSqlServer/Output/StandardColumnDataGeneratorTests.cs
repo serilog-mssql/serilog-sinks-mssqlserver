@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
 using System.IO;
 using Moq;
 using Serilog.Events;
@@ -17,9 +18,145 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Output
     {
         private StandardColumnDataGenerator _sut;
 
+        [Fact]
+        public void GetStandardColumnNameAndValueWhenCalledWithoutFormatterRendersLogEventPropertyUsingInternalJsonFormatter()
+        {
+            // Arrange
+            const string expectedLogEventContent =
+                "{\"TimeStamp\":\"2020-01-01T09:00:00.0000000\",\"Level\":\"Information\",\"Message\":\"\",\"MessageTemplate\":\"\"}";
+            var options = new Serilog.Sinks.MSSqlServer.ColumnOptions();
+            options.Store.Add(StandardColumn.LogEvent);
+            var testDateTimeOffset = new DateTimeOffset(2020, 1, 1, 9, 0, 0, TimeSpan.Zero);
+            var logEvent = CreateLogEvent(testDateTimeOffset);
+            SetupSut(options);
+
+            // Act
+            var column = _sut.GetStandardColumnNameAndValue(StandardColumn.LogEvent, logEvent);
+
+            // Assert
+            Assert.Equal(expectedLogEventContent, column.Value);
+        }
+
+        [Fact]
+        public void GetStandardColumnNameAndValueForMessageReturnsSimpleTextMessageKeyValue()
+        {
+            // Arrange
+            const string messageText = "Test message";
+            var logEvent = new LogEvent(
+                new DateTimeOffset(2020, 1, 1, 0, 0, 0, 0, TimeSpan.Zero),
+                LogEventLevel.Debug, null, new MessageTemplate(new List<MessageTemplateToken>() { new TextToken(messageText) }),
+                new List<LogEventProperty>());
+            SetupSut(new Serilog.Sinks.MSSqlServer.ColumnOptions());
+
+            // Act
+            var result = _sut.GetStandardColumnNameAndValue(StandardColumn.Message, logEvent);
+
+            // Assert
+            Assert.Equal("Message", result.Key);
+            Assert.Equal(messageText, result.Value);
+        }
+
+        [Fact]
+        public void GetStandardColumnNameAndValueForMessageReturnsMessageKeyValueWithDefaultFormatting()
+        {
+            // Arrange
+            const string expectedText = "2.4";
+            var logEvent = new LogEvent(
+                new DateTimeOffset(2020, 1, 1, 0, 0, 0, 0, TimeSpan.Zero),
+                LogEventLevel.Debug, null, new MessageTemplate(new List<MessageTemplateToken>() { new PropertyToken("NumberProperty", "{NumberProperty}") }),
+                new List<LogEventProperty> { new LogEventProperty("NumberProperty", new ScalarValue(2.4)) });
+            SetupSut(new Serilog.Sinks.MSSqlServer.ColumnOptions(), CultureInfo.InvariantCulture);
+
+            // Act
+            var result = _sut.GetStandardColumnNameAndValue(StandardColumn.Message, logEvent);
+
+            // Assert
+            Assert.Equal("Message", result.Key);
+            Assert.Equal(expectedText, result.Value);
+        }
+
+        [Fact]
+        public void GetStandardColumnNameAndValueForMessageReturnsMessageKeyValueWithCustomFormatting()
+        {
+            // Arrange
+            const string expectedText = "2,4";
+            var logEvent = new LogEvent(
+                new DateTimeOffset(2020, 1, 1, 0, 0, 0, 0, TimeSpan.Zero),
+                LogEventLevel.Debug, null, new MessageTemplate(new List<MessageTemplateToken>() { new PropertyToken("NumberProperty", "{NumberProperty}") }),
+                new List<LogEventProperty> { new LogEventProperty("NumberProperty", new ScalarValue(2.4)) });
+            SetupSut(new Serilog.Sinks.MSSqlServer.ColumnOptions(), new CultureInfo("de-AT"));
+
+            // Act
+            var result = _sut.GetStandardColumnNameAndValue(StandardColumn.Message, logEvent);
+
+            // Assert
+            Assert.Equal("Message", result.Key);
+            Assert.Equal(expectedText, result.Value);
+        }
+
+        [Fact]
+        public void GetStandardColumnNameAndValueForMessageTemplateReturnsMessageTemplateKeyValue()
+        {
+            // Arrange
+            var messageTemplate = new MessageTemplate(new List<MessageTemplateToken>() { new PropertyToken("NumberProperty", "{NumberProperty}") });
+            var logEvent = new LogEvent(
+                new DateTimeOffset(2020, 1, 1, 0, 0, 0, 0, TimeSpan.Zero),
+                LogEventLevel.Debug, null, messageTemplate,
+                new List<LogEventProperty> { new LogEventProperty("NumberProperty", new ScalarValue(2.4)) });
+            SetupSut(new Serilog.Sinks.MSSqlServer.ColumnOptions(), CultureInfo.InvariantCulture);
+
+            // Act
+            var result = _sut.GetStandardColumnNameAndValue(StandardColumn.MessageTemplate, logEvent);
+
+            // Assert
+            Assert.Equal("MessageTemplate", result.Key);
+            Assert.Equal(messageTemplate.Text, result.Value);
+        }
+
+        [Fact]
+        public void GetStandardColumnNameAndValueForLogLevelReturnsLogLevelKeyValue()
+        {
+            // Arrange
+            var logLevel = LogEventLevel.Debug;
+            var expectedValue = logLevel.ToString();
+            var logEvent = new LogEvent(
+                new DateTimeOffset(2020, 1, 1, 0, 0, 0, 0, TimeSpan.Zero),
+                logLevel, null, new MessageTemplate(new List<MessageTemplateToken>() { new TextToken("Test message") }),
+                new List<LogEventProperty>());
+            SetupSut(new Serilog.Sinks.MSSqlServer.ColumnOptions());
+
+            // Act
+            var result = _sut.GetStandardColumnNameAndValue(StandardColumn.Level, logEvent);
+
+            // Assert
+            Assert.Equal("Level", result.Key);
+            Assert.Equal(expectedValue, result.Value);
+        }
+
+        [Fact]
+        public void GetStandardColumnNameAndValueForLogLevelReturnsLogLevelKeyValueAsEnum()
+        {
+            // Arrange
+            var logLevel = LogEventLevel.Debug;
+            var logEvent = new LogEvent(
+                new DateTimeOffset(2020, 1, 1, 0, 0, 0, 0, TimeSpan.Zero),
+                logLevel, null, new MessageTemplate(new List<MessageTemplateToken>() { new TextToken("Test message") }),
+                new List<LogEventProperty>());
+            var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions();
+            columnOptions.Level.StoreAsEnum = true;
+            SetupSut(columnOptions);
+
+            // Act
+            var result = _sut.GetStandardColumnNameAndValue(StandardColumn.Level, logEvent);
+
+            // Assert
+            Assert.Equal("Level", result.Key);
+            Assert.Equal(logLevel, result.Value);
+        }
+
         [Trait("Bugfix", "#187")]
         [Fact]
-        public void GetStandardColumnNameAndValueCreatesTimeStampOfTypeDateTimeAccordingToColumnOptions()
+        public void GetStandardColumnNameAndValueForTimeStampCreatesTimeStampOfTypeDateTimeAccordingToColumnOptions()
         {
             // Arrange
             var options = new Serilog.Sinks.MSSqlServer.ColumnOptions();
@@ -37,7 +174,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Output
 
         [Trait("Bugfix", "#187")]
         [Fact]
-        public void GetStandardColumnNameAndValueCreatesUtcConvertedTimeStampOfTypeDateTimeAccordingToColumnOptions()
+        public void GetStandardColumnNameAndValueForTimeStampCreatesUtcConvertedTimeStampOfTypeDateTimeAccordingToColumnOptions()
         {
             // Arrange
             var options = new Serilog.Sinks.MSSqlServer.ColumnOptions
@@ -58,7 +195,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Output
 
         [Trait("Bugfix", "#187")]
         [Fact]
-        public void GetStandardColumnNameAndValueCreatesTimeStampOfTypeDateTimeOffsetAccordingToColumnOptions()
+        public void GetStandardColumnNameAndValueForTimeStampCreatesTimeStampOfTypeDateTimeOffsetAccordingToColumnOptions()
         {
             // Arrange
             var options = new Serilog.Sinks.MSSqlServer.ColumnOptions
@@ -81,7 +218,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Output
 
         [Trait("Bugfix", "#187")]
         [Fact]
-        public void GetStandardColumnNameAndValueCreatesUtcConvertedTimeStampOfTypeDateTimeOffsetAccordingToColumnOptions()
+        public void GetStandardColumnNameAndValueForTimeStampCreatesUtcConvertedTimeStampOfTypeDateTimeOffsetAccordingToColumnOptions()
         {
             // Arrange
             var options = new Serilog.Sinks.MSSqlServer.ColumnOptions
@@ -103,7 +240,49 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Output
         }
 
         [Fact]
-        public void GetStandardColumnNameAndValueWhenCalledWithCustomFormatterRendersLogEventPropertyUsingCustomFormatter()
+        public void GetStandardColumnNameAndValueForExceptionReturnsExceptionKeyValue()
+        {
+            // Arrange
+            var exception = new InvalidOperationException("Something went wrong");
+            var expectedValue = exception.ToString();
+            var logEvent = new LogEvent(
+                new DateTimeOffset(2020, 1, 1, 0, 0, 0, 0, TimeSpan.Zero),
+                LogEventLevel.Debug, exception, new MessageTemplate(new List<MessageTemplateToken>() { new TextToken("Test message") }),
+                new List<LogEventProperty>());
+            var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions();
+            columnOptions.Level.StoreAsEnum = true;
+            SetupSut(columnOptions);
+
+            // Act
+            var result = _sut.GetStandardColumnNameAndValue(StandardColumn.Exception, logEvent);
+
+            // Assert
+            Assert.Equal("Exception", result.Key);
+            Assert.Equal(expectedValue, result.Value);
+        }
+
+        [Fact]
+        public void GetStandardColumnNameAndValueForExceptionWhenCalledWithoutExceptionReturnsNullValue()
+        {
+            // Arrange
+            var logEvent = new LogEvent(
+                new DateTimeOffset(2020, 1, 1, 0, 0, 0, 0, TimeSpan.Zero),
+                LogEventLevel.Debug, null, new MessageTemplate(new List<MessageTemplateToken>() { new TextToken("Test message") }),
+                new List<LogEventProperty>());
+            var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions();
+            columnOptions.Level.StoreAsEnum = true;
+            SetupSut(columnOptions);
+
+            // Act
+            var result = _sut.GetStandardColumnNameAndValue(StandardColumn.Exception, logEvent);
+
+            // Assert
+            Assert.Equal("Exception", result.Key);
+            Assert.Null(result.Value);
+        }
+
+        [Fact]
+        public void GetStandardColumnNameAndValueForLogEventRendersLogEventPropertyUsingCustomFormatter()
         {
             // Arrange
             const string testLogEventContent = "Content of LogEvent";
@@ -116,29 +295,74 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Output
             SetupSut(options, logEventFormatter: logEventFormatterMock.Object);
 
             // Act
-            var column = _sut.GetStandardColumnNameAndValue(StandardColumn.LogEvent, logEvent);
+            var result = _sut.GetStandardColumnNameAndValue(StandardColumn.LogEvent, logEvent);
 
             // Assert
-            Assert.Equal(testLogEventContent, column.Value);
+            Assert.Equal(testLogEventContent, result.Value);
         }
 
         [Fact]
-        public void GetStandardColumnNameAndValueWhenCalledWithoutFormatterRendersLogEventPropertyUsingInternalJsonFormatter()
+        public void GetStandardColumnNameAndValueForLogEventHandlesExcludeAdditionalPropertiesTrue()
         {
             // Arrange
-            const string expectedLogEventContent =
-                "{\"TimeStamp\":\"2020-01-01T09:00:00.0000000\",\"Level\":\"Information\",\"Message\":\"\",\"MessageTemplate\":\"\"}";
-            var options = new Serilog.Sinks.MSSqlServer.ColumnOptions();
+            const string additionalColumnName = "AdditionalColumn1";
+            var options = new Serilog.Sinks.MSSqlServer.ColumnOptions
+            {
+                AdditionalColumns = new List<SqlColumn> { new SqlColumn(additionalColumnName, SqlDbType.NVarChar) }
+            };
+            options.LogEvent.ExcludeAdditionalProperties = true;
             options.Store.Add(StandardColumn.LogEvent);
-            var testDateTimeOffset = new DateTimeOffset(2020, 1, 1, 9, 0, 0, TimeSpan.Zero);
-            var logEvent = CreateLogEvent(testDateTimeOffset);
-            SetupSut(options);
+            var logEventFormatterMock = new Mock<ITextFormatter>();
+            var logEvent = new LogEvent(
+                new DateTimeOffset(2020, 1, 1, 0, 0, 0, 0, TimeSpan.Zero),
+                LogEventLevel.Debug, null, new MessageTemplate(new List<MessageTemplateToken>()),
+                new List<LogEventProperty> { new LogEventProperty(additionalColumnName, new ScalarValue("1234")) });
+            SetupSut(options, logEventFormatter: logEventFormatterMock.Object);
 
             // Act
-            var column = _sut.GetStandardColumnNameAndValue(StandardColumn.LogEvent, logEvent);
+            _sut.GetStandardColumnNameAndValue(StandardColumn.LogEvent, logEvent);
 
             // Assert
-            Assert.Equal(expectedLogEventContent, column.Value);
+            logEventFormatterMock.Verify(f => f.Format(
+                It.Is<LogEvent>(e => !e.Properties.ContainsKey(additionalColumnName)),
+                It.IsAny<StringWriter>()));
+        }
+
+        [Fact]
+        public void GetStandardColumnNameAndValueForLogEventHandlesExcludeAdditionalPropertiesFalse()
+        {
+            // Arrange
+            const string additionalColumnName = "AdditionalColumn1";
+            var options = new Serilog.Sinks.MSSqlServer.ColumnOptions
+            {
+                AdditionalColumns = new List<SqlColumn> { new SqlColumn(additionalColumnName, SqlDbType.NVarChar) }
+            };
+            options.Store.Add(StandardColumn.LogEvent);
+            var logEventFormatterMock = new Mock<ITextFormatter>();
+            var logEvent = new LogEvent(
+                new DateTimeOffset(2020, 1, 1, 0, 0, 0, 0, TimeSpan.Zero),
+                LogEventLevel.Debug, null, new MessageTemplate(new List<MessageTemplateToken>()),
+                new List<LogEventProperty> { new LogEventProperty(additionalColumnName, new ScalarValue("1234")) });
+            SetupSut(options, logEventFormatter: logEventFormatterMock.Object);
+
+            // Act
+            _sut.GetStandardColumnNameAndValue(StandardColumn.LogEvent, logEvent);
+
+            // Assert
+            logEventFormatterMock.Verify(f => f.Format(
+                It.Is<LogEvent>(e => e.Properties.ContainsKey(additionalColumnName)),
+                It.IsAny<StringWriter>()));
+        }
+
+        [Fact]
+        public void GetStandardColumnNameAndValueForUnsupportedColumnThrows()
+        {
+            // Arrange
+            var logEvent = CreateLogEvent(new DateTimeOffset(2020, 1, 1, 0, 0, 0, 0, TimeSpan.Zero));
+            SetupSut(new Serilog.Sinks.MSSqlServer.ColumnOptions());
+
+            // Act + assert
+            Assert.Throws<ArgumentOutOfRangeException>(() => _sut.GetStandardColumnNameAndValue(StandardColumn.Id, logEvent));
         }
 
         private static LogEvent CreateLogEvent(DateTimeOffset testDateTimeOffset)
@@ -149,9 +373,10 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Output
 
         private void SetupSut(
             Serilog.Sinks.MSSqlServer.ColumnOptions options,
+            IFormatProvider formatProvider = null,
             ITextFormatter logEventFormatter = null)
         {
-            _sut = new StandardColumnDataGenerator(options, null, logEventFormatter);
+            _sut = new StandardColumnDataGenerator(options, formatProvider, logEventFormatter);
         }
     }
 }
