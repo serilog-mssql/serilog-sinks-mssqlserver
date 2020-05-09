@@ -21,27 +21,13 @@ using Serilog.Events;
 
 namespace Serilog.Sinks.MSSqlServer.Output
 {
-    /// <summary>
-    ///     Converts <see cref="LogEventProperty" /> values into simple scalars,
-    ///     dictionaries and lists so that they can be persisted in MSSqlServer.
-    /// </summary>
-    internal static class XmlPropertyFormatter
+    internal class XmlPropertyFormatter : IXmlPropertyFormatter
     {
-        /// <summary>
-        /// Regex to trasnform any non-xml char into ?, acoiding any exceptions on inserting the xml properties into the database
-        /// </summary>
         private static readonly Regex _invalidXMLChars = new Regex(
             @"(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F\uFEFF\uFFFE\uFFFF]",
             RegexOptions.Compiled);
 
-        /// <summary>
-        ///     Simplify the object so as to make handling the serialized
-        ///     representation easier.
-        /// </summary>
-        /// <param name="value">The value to simplify (possibly null).</param>
-        /// <param name="options">Options to use during formatting</param>
-        /// <returns>A simplified representation.</returns>
-        public static string Simplify(LogEventPropertyValue value, ColumnOptions.PropertiesColumnOptions options)
+        public string Simplify(LogEventPropertyValue value, ColumnOptions.PropertiesColumnOptions options)
         {
             if (value is ScalarValue scalar)
                 return SimplifyScalar(scalar.Value);
@@ -183,7 +169,7 @@ namespace Serilog.Sinks.MSSqlServer.Output
             return null;
         }
 
-        public static string GetValidElementName(string name)
+        public string GetValidElementName(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
             {

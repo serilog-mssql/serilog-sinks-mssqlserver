@@ -10,13 +10,20 @@ using Serilog.Parsing;
 using Serilog.Sinks.MSSqlServer.Output;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
+using static Serilog.Sinks.MSSqlServer.ColumnOptions;
 
 namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Output
 {
     [Trait(TestCategory.TraitName, TestCategory.Unit)]
     public class StandardColumnDataGeneratorTests
     {
+        private readonly Mock<IXmlPropertyFormatter> _xmlPropertyFormatterMock;
         private StandardColumnDataGenerator _sut;
+
+        public StandardColumnDataGeneratorTests()
+        {
+            _xmlPropertyFormatterMock = new Mock<IXmlPropertyFormatter>();
+        }
 
         [Fact]
         public void GetStandardColumnNameAndValueWhenCalledWithoutFormatterRendersLogEventPropertyUsingInternalJsonFormatter()
@@ -282,6 +289,322 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Output
         }
 
         [Fact]
+        public void GetStandardColumnNameAndValueForPropertiesUsesRootElementName()
+        {
+            // Arrange
+            const string rootElementName = "TestRootElement";
+            var logEvent = new LogEvent(
+                new DateTimeOffset(2020, 1, 1, 0, 0, 0, 0, TimeSpan.Zero),
+                LogEventLevel.Debug, null, new MessageTemplate(new List<MessageTemplateToken>() { new TextToken("Test message") }),
+                new List<LogEventProperty>());
+            var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions();
+            columnOptions.Properties.RootElementName = rootElementName;
+            SetupSut(columnOptions, CultureInfo.InvariantCulture);
+
+            // Act
+            var result = _sut.GetStandardColumnNameAndValue(StandardColumn.Properties, logEvent);
+
+            // Assert
+            Assert.Equal($"<{rootElementName}></{rootElementName}>", result.Value);
+        }
+
+        [Fact]
+        public void GetStandardColumnNameAndValueForPropertiesCallsXmlPropertyFormatterSimplifyForEachProperty()
+        {
+            // Arrange
+            var property1Value = new ScalarValue("1");
+            var property2Value = new ScalarValue(2);
+            var property3Value = new ScalarValue("Three");
+            var logEvent = new LogEvent(
+                new DateTimeOffset(2020, 1, 1, 0, 0, 0, 0, TimeSpan.Zero),
+                LogEventLevel.Debug, null, new MessageTemplate(new List<MessageTemplateToken>() { new TextToken("Test message") }),
+                new List<LogEventProperty>
+                {
+                    new LogEventProperty("Property1", property1Value),
+                    new LogEventProperty("Property2", property2Value),
+                    new LogEventProperty("Property3", property3Value)
+                });
+            var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions();
+            SetupSut(columnOptions, CultureInfo.InvariantCulture);
+
+            // Act
+            _sut.GetStandardColumnNameAndValue(StandardColumn.Properties, logEvent);
+
+            // Assert
+            _xmlPropertyFormatterMock.Verify(x => x.Simplify(property1Value, columnOptions.Properties), Times.Once);
+            _xmlPropertyFormatterMock.Verify(x => x.Simplify(property2Value, columnOptions.Properties), Times.Once);
+            _xmlPropertyFormatterMock.Verify(x => x.Simplify(property3Value, columnOptions.Properties), Times.Once);
+        }
+
+        [Fact]
+        public void GetStandardColumnNameAndValueForPropertiesCallsXmlPropertyFormatterSimplifyForEachNonAdditionalProperty()
+        {
+            // Arrange
+            const string additionalColumnName = "AdditionalColumn1";
+            var property1Value = new ScalarValue("1");
+            var property2Value = new ScalarValue(2);
+            var property3Value = new ScalarValue("Three");
+            var logEvent = new LogEvent(
+                new DateTimeOffset(2020, 1, 1, 0, 0, 0, 0, TimeSpan.Zero),
+                LogEventLevel.Debug, null, new MessageTemplate(new List<MessageTemplateToken>() { new TextToken("Test message") }),
+                new List<LogEventProperty>
+                {
+                    new LogEventProperty("Property1", property1Value),
+                    new LogEventProperty("Property2", property2Value),
+                    new LogEventProperty(additionalColumnName, property3Value)
+                });
+            var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions
+            {
+                AdditionalColumns = new List<SqlColumn> { new SqlColumn { PropertyName = additionalColumnName, DataType = SqlDbType.NVarChar } }
+            };
+            columnOptions.Properties.ExcludeAdditionalProperties = true;
+            SetupSut(columnOptions, CultureInfo.InvariantCulture);
+
+            // Act
+            _sut.GetStandardColumnNameAndValue(StandardColumn.Properties, logEvent);
+
+            // Assert
+            _xmlPropertyFormatterMock.Verify(x => x.Simplify(property1Value, columnOptions.Properties), Times.Once);
+            _xmlPropertyFormatterMock.Verify(x => x.Simplify(property2Value, columnOptions.Properties), Times.Once);
+            _xmlPropertyFormatterMock.Verify(x => x.Simplify(property3Value, columnOptions.Properties), Times.Never);
+        }
+
+        [Fact]
+        public void GetStandardColumnNameAndValueForPropertiesCallsXmlPropertyFormatterSimplifyForAlsoForAdditionalProperties()
+        {
+            // Arrange
+            const string additionalColumnName = "AdditionalColumn1";
+            var property1Value = new ScalarValue("1");
+            var property2Value = new ScalarValue(2);
+            var property3Value = new ScalarValue("Three");
+            var logEvent = new LogEvent(
+                new DateTimeOffset(2020, 1, 1, 0, 0, 0, 0, TimeSpan.Zero),
+                LogEventLevel.Debug, null, new MessageTemplate(new List<MessageTemplateToken>() { new TextToken("Test message") }),
+                new List<LogEventProperty>
+                {
+                    new LogEventProperty("Property1", property1Value),
+                    new LogEventProperty("Property2", property2Value),
+                    new LogEventProperty(additionalColumnName, property3Value)
+                });
+            var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions
+            {
+                AdditionalColumns = new List<SqlColumn> { new SqlColumn { PropertyName = additionalColumnName, DataType = SqlDbType.NVarChar } }
+            };
+            SetupSut(columnOptions, CultureInfo.InvariantCulture);
+
+            // Act
+            _sut.GetStandardColumnNameAndValue(StandardColumn.Properties, logEvent);
+
+            // Assert
+            _xmlPropertyFormatterMock.Verify(x => x.Simplify(property1Value, columnOptions.Properties), Times.Once);
+            _xmlPropertyFormatterMock.Verify(x => x.Simplify(property2Value, columnOptions.Properties), Times.Once);
+            _xmlPropertyFormatterMock.Verify(x => x.Simplify(property3Value, columnOptions.Properties), Times.Once);
+        }
+
+        [Fact]
+        public void GetStandardColumnNameAndValueForPropertiesCallsXmlPropertyFormatterSimplifyUnfilteredProperties()
+        {
+            // Arrange
+            var property1Value = new ScalarValue("1");
+            var property2Value = new ScalarValue(2);
+            var property3Value = new ScalarValue("Three");
+            var logEvent = new LogEvent(
+                new DateTimeOffset(2020, 1, 1, 0, 0, 0, 0, TimeSpan.Zero),
+                LogEventLevel.Debug, null, new MessageTemplate(new List<MessageTemplateToken>() { new TextToken("Test message") }),
+                new List<LogEventProperty>
+                {
+                    new LogEventProperty("Property1", property1Value),
+                    new LogEventProperty("Property2", property2Value),
+                    new LogEventProperty("Property3", property3Value)
+                });
+            var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions();
+            columnOptions.Properties.PropertiesFilter = k => k != "Property2";
+            SetupSut(columnOptions, CultureInfo.InvariantCulture);
+
+            // Act
+            _sut.GetStandardColumnNameAndValue(StandardColumn.Properties, logEvent);
+
+            // Assert
+            _xmlPropertyFormatterMock.Verify(x => x.Simplify(property1Value, columnOptions.Properties), Times.Once);
+            _xmlPropertyFormatterMock.Verify(x => x.Simplify(property2Value, columnOptions.Properties), Times.Never);
+            _xmlPropertyFormatterMock.Verify(x => x.Simplify(property3Value, columnOptions.Properties), Times.Once);
+        }
+
+        [Fact]
+        public void GetStandardColumnNameAndValueForPropertiesDoesNotCallXmlPropertyFormatterGetValidElementNameIfUsePropertyKeyAsElementNameFalse()
+        {
+            // Arrange
+            var logEvent = new LogEvent(
+                new DateTimeOffset(2020, 1, 1, 0, 0, 0, 0, TimeSpan.Zero),
+                LogEventLevel.Debug, null, new MessageTemplate(new List<MessageTemplateToken>() { new TextToken("Test message") }),
+                new List<LogEventProperty>
+                {
+                    new LogEventProperty("Property1", new ScalarValue("1")),
+                    new LogEventProperty("Property2", new ScalarValue(2)),
+                    new LogEventProperty("Property3", new ScalarValue("Three"))
+                });
+            var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions();
+            SetupSut(columnOptions, CultureInfo.InvariantCulture);
+            _xmlPropertyFormatterMock.Setup(x => x.Simplify(It.IsAny<LogEventPropertyValue>(), It.IsAny<PropertiesColumnOptions>())).Returns("Somevalue");
+
+            // Act
+            _sut.GetStandardColumnNameAndValue(StandardColumn.Properties, logEvent);
+
+            // Assert
+            _xmlPropertyFormatterMock.Verify(x => x.GetValidElementName(It.IsAny<string>()), Times.Never);
+        }
+
+        [Fact]
+        public void GetStandardColumnNameAndValueForPropertiesCallsXmlPropertyFormatterGetValidElementNameForEachPropertyIfUsePropertyKeyAsElementNameTrue()
+        {
+            // Arrange
+            var property1Value = new ScalarValue("1");
+            var property2Value = new ScalarValue(2);
+            var property3Value = new ScalarValue("Three");
+            var logEvent = new LogEvent(
+                new DateTimeOffset(2020, 1, 1, 0, 0, 0, 0, TimeSpan.Zero),
+                LogEventLevel.Debug, null, new MessageTemplate(new List<MessageTemplateToken>() { new TextToken("Test message") }),
+                new List<LogEventProperty>
+                {
+                    new LogEventProperty("Property1", property1Value),
+                    new LogEventProperty("Property2", property2Value),
+                    new LogEventProperty("Property3", property3Value)
+                });
+            var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions();
+            columnOptions.Properties.UsePropertyKeyAsElementName = true;
+            SetupSut(columnOptions, CultureInfo.InvariantCulture);
+            _xmlPropertyFormatterMock.Setup(x => x.Simplify(It.IsAny<LogEventPropertyValue>(), It.IsAny<PropertiesColumnOptions>())).Returns("Somevalue");
+
+            // Act
+            _sut.GetStandardColumnNameAndValue(StandardColumn.Properties, logEvent);
+
+            // Assert
+            _xmlPropertyFormatterMock.Verify(x => x.GetValidElementName("Property1"), Times.Once);
+            _xmlPropertyFormatterMock.Verify(x => x.GetValidElementName("Property2"), Times.Once);
+            _xmlPropertyFormatterMock.Verify(x => x.GetValidElementName("Property3"), Times.Once);
+        }
+
+        [Fact]
+        public void GetStandardColumnNameAndValueForPropertiesCallsXmlPropertyFormatterGetValidElementNameAlsoForEmptyPropertyIfOmitEmptyFalse()
+        {
+            // Arrange
+            var property1Value = new ScalarValue("1");
+            var property2Value = new ScalarValue(2);
+            var property3Value = new ScalarValue("Three");
+            var logEvent = new LogEvent(
+                new DateTimeOffset(2020, 1, 1, 0, 0, 0, 0, TimeSpan.Zero),
+                LogEventLevel.Debug, null, new MessageTemplate(new List<MessageTemplateToken>() { new TextToken("Test message") }),
+                new List<LogEventProperty>
+                {
+                    new LogEventProperty("Property1", property1Value),
+                    new LogEventProperty("Property2", property2Value),
+                    new LogEventProperty("Property3", property3Value)
+                });
+            var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions();
+            columnOptions.Properties.UsePropertyKeyAsElementName = true;
+            SetupSut(columnOptions, CultureInfo.InvariantCulture);
+            _xmlPropertyFormatterMock.Setup(x => x.Simplify(property1Value, It.IsAny<PropertiesColumnOptions>())).Returns("Value1");
+            _xmlPropertyFormatterMock.Setup(x => x.Simplify(property2Value, It.IsAny<PropertiesColumnOptions>())).Returns(string.Empty);
+
+            // Act
+            _sut.GetStandardColumnNameAndValue(StandardColumn.Properties, logEvent);
+
+            // Assert
+            _xmlPropertyFormatterMock.Verify(x => x.GetValidElementName("Property1"), Times.Once);
+            _xmlPropertyFormatterMock.Verify(x => x.GetValidElementName("Property2"), Times.Once);
+            _xmlPropertyFormatterMock.Verify(x => x.GetValidElementName("Property3"), Times.Once);
+        }
+
+        [Fact]
+        public void GetStandardColumnNameAndValueForPropertiesCallsXmlPropertyFormatterGetValidElementNameForOnlyNonEmptyPropertiesIfOmitEmptyTrue()
+        {
+            // Arrange
+            var property1Value = new ScalarValue("1");
+            var property2Value = new ScalarValue(2);
+            var property3Value = new ScalarValue("Three");
+            var logEvent = new LogEvent(
+                new DateTimeOffset(2020, 1, 1, 0, 0, 0, 0, TimeSpan.Zero),
+                LogEventLevel.Debug, null, new MessageTemplate(new List<MessageTemplateToken>() { new TextToken("Test message") }),
+                new List<LogEventProperty>
+                {
+                    new LogEventProperty("Property1", property1Value),
+                    new LogEventProperty("Property2", property2Value),
+                    new LogEventProperty("Property3", property3Value)
+                });
+            var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions();
+            columnOptions.Properties.UsePropertyKeyAsElementName = true;
+            columnOptions.Properties.OmitElementIfEmpty = true;
+            SetupSut(columnOptions, CultureInfo.InvariantCulture);
+            _xmlPropertyFormatterMock.Setup(x => x.Simplify(property1Value, It.IsAny<PropertiesColumnOptions>())).Returns("Value1");
+            _xmlPropertyFormatterMock.Setup(x => x.Simplify(property2Value, It.IsAny<PropertiesColumnOptions>())).Returns(string.Empty);
+
+            // Act
+            _sut.GetStandardColumnNameAndValue(StandardColumn.Properties, logEvent);
+
+            // Assert
+            _xmlPropertyFormatterMock.Verify(x => x.GetValidElementName("Property1"), Times.Once);
+            _xmlPropertyFormatterMock.Verify(x => x.GetValidElementName("Property2"), Times.Never);
+            _xmlPropertyFormatterMock.Verify(x => x.GetValidElementName("Property3"), Times.Never);
+        }
+
+        [Fact]
+        public void GetStandardColumnNameAndValueForPropertiesGeneratesCorrectXmlIfUsePropertyKeyAsElementNameTrue()
+        {
+            // Arrange
+            var logEvent = new LogEvent(
+                new DateTimeOffset(2020, 1, 1, 0, 0, 0, 0, TimeSpan.Zero),
+                LogEventLevel.Debug, null, new MessageTemplate(new List<MessageTemplateToken>() { new TextToken("Test message") }),
+                new List<LogEventProperty>
+                {
+                    new LogEventProperty("Property1", new ScalarValue("1")),
+                    new LogEventProperty("Property2", new ScalarValue("2")),
+                    new LogEventProperty("Property3", new ScalarValue("3"))
+                });
+            var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions();
+            columnOptions.Properties.RootElementName = "Root";
+            columnOptions.Properties.UsePropertyKeyAsElementName = true;
+            SetupSut(columnOptions, CultureInfo.InvariantCulture);
+            _xmlPropertyFormatterMock.Setup(x => x.Simplify(It.IsAny<LogEventPropertyValue>(), It.IsAny<PropertiesColumnOptions>())).Returns("x");
+            _xmlPropertyFormatterMock.Setup(x => x.GetValidElementName("Property1")).Returns("Element1");
+            _xmlPropertyFormatterMock.Setup(x => x.GetValidElementName("Property2")).Returns("Element2");
+            _xmlPropertyFormatterMock.Setup(x => x.GetValidElementName("Property3")).Returns("Element3");
+
+            // Act
+            var result = _sut.GetStandardColumnNameAndValue(StandardColumn.Properties, logEvent);
+
+            // Assert
+            Assert.Equal("Properties", result.Key);
+            Assert.Equal("<Root><Element1>x</Element1><Element2>x</Element2><Element3>x</Element3></Root>", result.Value);
+        }
+
+        [Fact]
+        public void GetStandardColumnNameAndValueForPropertiesGeneratesCorrectXmlIfUsePropertyKeyAsElementNameFalse()
+        {
+            // Arrange
+            var logEvent = new LogEvent(
+                new DateTimeOffset(2020, 1, 1, 0, 0, 0, 0, TimeSpan.Zero),
+                LogEventLevel.Debug, null, new MessageTemplate(new List<MessageTemplateToken>() { new TextToken("Test message") }),
+                new List<LogEventProperty>
+                {
+                    new LogEventProperty("Property1", new ScalarValue("1")),
+                    new LogEventProperty("Property2", new ScalarValue("2")),
+                    new LogEventProperty("Property3", new ScalarValue("3"))
+                });
+            var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions();
+            columnOptions.Properties.RootElementName = "Root";
+            columnOptions.Properties.PropertyElementName = "P";
+            SetupSut(columnOptions, CultureInfo.InvariantCulture);
+            _xmlPropertyFormatterMock.Setup(x => x.Simplify(It.IsAny<LogEventPropertyValue>(), It.IsAny<PropertiesColumnOptions>())).Returns("x");
+
+            // Act
+            var result = _sut.GetStandardColumnNameAndValue(StandardColumn.Properties, logEvent);
+
+            // Assert
+            Assert.Equal("Properties", result.Key);
+            Assert.Equal("<Root><P key=\'Property1\'>x</P><P key=\'Property2\'>x</P><P key=\'Property3\'>x</P></Root>", result.Value);
+        }
+
+        [Fact]
         public void GetStandardColumnNameAndValueForLogEventRendersLogEventPropertyUsingCustomFormatter()
         {
             // Arrange
@@ -376,7 +699,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Output
             IFormatProvider formatProvider = null,
             ITextFormatter logEventFormatter = null)
         {
-            _sut = new StandardColumnDataGenerator(options, formatProvider, logEventFormatter);
+            _sut = new StandardColumnDataGenerator(options, formatProvider, _xmlPropertyFormatterMock.Object, logEventFormatter);
         }
     }
 }
