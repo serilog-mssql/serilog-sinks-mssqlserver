@@ -23,7 +23,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Output
             _testColumnOptions.Store.Add(StandardColumn.LogEvent);
 
             // TODO use mock for _testColumnsDataGenerator
-            _testStandardColumnDataGenerator = new StandardColumnDataGenerator(_testColumnOptions, formatProvider: null, logEventFormatter: null);
+            _testStandardColumnDataGenerator = new StandardColumnDataGenerator(_testColumnOptions, formatProvider: null, new XmlPropertyFormatter(), logEventFormatter: null);
 
             _sut = new JsonLogEventFormatter(_testColumnOptions, _testStandardColumnDataGenerator);
         }

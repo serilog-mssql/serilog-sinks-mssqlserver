@@ -26,7 +26,9 @@ namespace Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Dependencies
                         sinkOptions.AzureServiceTokenProviderResource));
             var logEventDataGenerator =
                 new LogEventDataGenerator(columnOptions,
-                    new StandardColumnDataGenerator(columnOptions, formatProvider, logEventFormatter),
+                    new StandardColumnDataGenerator(columnOptions, formatProvider,
+                        new XmlPropertyFormatter(),
+                        logEventFormatter),
                     new PropertiesColumnDataGenerator(columnOptions));
 
             var sinkDependencies = new SinkDependencies

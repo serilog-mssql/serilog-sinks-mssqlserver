@@ -14,17 +14,21 @@ namespace Serilog.Sinks.MSSqlServer.Output
     {
         private readonly ColumnOptions _columnOptions;
         private readonly IFormatProvider _formatProvider;
+        private readonly IXmlPropertyFormatter _xmlPropertyFormatter;
         private readonly ITextFormatter _logEventFormatter;
         private readonly ISet<string> _additionalColumnPropertyNames;
 
         public StandardColumnDataGenerator(
             ColumnOptions columnOptions,
             IFormatProvider formatProvider,
+            IXmlPropertyFormatter xmlPropertyFormatter,
             ITextFormatter logEventFormatter)
         {
             _columnOptions = columnOptions ?? throw new ArgumentNullException(nameof(columnOptions));
 
             _formatProvider = formatProvider;
+
+            _xmlPropertyFormatter = xmlPropertyFormatter ?? throw new ArgumentNullException(nameof(xmlPropertyFormatter));
 
             if (_columnOptions.Store.Contains(StandardColumn.LogEvent))
                 _logEventFormatter = logEventFormatter ?? new JsonLogEventFormatter(_columnOptions, this);
@@ -113,7 +117,7 @@ namespace Serilog.Sinks.MSSqlServer.Output
 
             foreach (var property in properties)
             {
-                var value = XmlPropertyFormatter.Simplify(property.Value, options);
+                var value = _xmlPropertyFormatter.Simplify(property.Value, options);
                 if (options.OmitElementIfEmpty && string.IsNullOrEmpty(value))
                 {
                     continue;
@@ -121,7 +125,7 @@ namespace Serilog.Sinks.MSSqlServer.Output
 
                 if (options.UsePropertyKeyAsElementName)
                 {
-                    sb.AppendFormat(CultureInfo.InvariantCulture, "<{0}>{1}</{0}>", XmlPropertyFormatter.GetValidElementName(property.Key), value);
+                    sb.AppendFormat(CultureInfo.InvariantCulture, "<{0}>{1}</{0}>", _xmlPropertyFormatter.GetValidElementName(property.Key), value);
                 }
                 else
                 {
