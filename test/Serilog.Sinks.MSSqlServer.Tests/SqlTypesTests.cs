@@ -134,7 +134,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             Log.CloseAndFlush();
         }
 
-        private void Arrange(ICollection<SqlColumn> customColumns)
+        private static void Arrange(ICollection<SqlColumn> customColumns)
         {
             var columnOptions = new ColumnOptions
             {

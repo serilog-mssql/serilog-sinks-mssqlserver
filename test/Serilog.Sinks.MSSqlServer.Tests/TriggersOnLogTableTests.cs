@@ -142,7 +142,17 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         private static string LogTriggerTableName => $"{DatabaseFixture.LogTableName}Trigger";
         private static string LogTriggerName => $"{LogTriggerTableName}Trigger";
 
-        private void CreateTrigger()
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+            if (!_disposedValue)
+            {
+                DatabaseFixture.DropTable(LogTriggerTableName);
+                _disposedValue = true;
+            }
+        }
+
+        private static void CreateTrigger()
         {
             using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
             {
@@ -154,16 +164,6 @@ AS
 BEGIN 
 INSERT INTO {LogTriggerTableName} VALUES (NEWID(), 'Data') 
 END");
-            }
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            base.Dispose(disposing);
-            if (!_disposedValue)
-            {
-                DatabaseFixture.DropTable(LogTriggerTableName);
-                _disposedValue = true;
             }
         }
     }
