@@ -180,7 +180,7 @@ namespace Serilog.Sinks.MSSqlServer.Output
 
             if (!char.IsLetter(validName[0]) || validName.StartsWith("xml", true, CultureInfo.CurrentCulture))
             {
-                validName = "x" + name;
+                validName = "x" + validName;
             }
 
             validName = Regex.Replace(validName, @"\s", "_");
