@@ -106,6 +106,40 @@ namespace Serilog.Sinks.MSSqlServer.Output
             return sb.ToString();
         }
 
+        private string SimplifySequence(ColumnOptions.PropertiesColumnOptions options, SequenceValue seq)
+        {
+            var sb = new StringBuilder();
+
+            var isEmpty = true;
+
+            foreach (var element in seq.Elements)
+            {
+                var itemValue = Simplify(element, options);
+                if (options.OmitElementIfEmpty && string.IsNullOrEmpty(itemValue))
+                {
+                    continue;
+                }
+
+                if (isEmpty)
+                {
+                    isEmpty = false;
+                    if (!options.OmitSequenceContainerElement)
+                    {
+                        sb.AppendFormat(CultureInfo.InvariantCulture, "<{0}>", options.SequenceElementName);
+                    }
+                }
+
+                sb.AppendFormat(CultureInfo.InvariantCulture, "<{0}>{1}</{0}>", options.ItemElementName, itemValue);
+            }
+
+            if (!isEmpty && !options.OmitSequenceContainerElement)
+            {
+                sb.AppendFormat(CultureInfo.InvariantCulture, "</{0}>", options.SequenceElementName);
+            }
+
+            return sb.ToString();
+        }
+
         private string SimplifyStructure(ColumnOptions.PropertiesColumnOptions options, StructureValue str)
         {
             var props = str.Properties.ToDictionary(p => p.Name, p => Simplify(p.Value, options));
@@ -159,40 +193,6 @@ namespace Serilog.Sinks.MSSqlServer.Output
                 {
                     sb.AppendFormat(CultureInfo.InvariantCulture, "</{0}>", options.StructureElementName);
                 }
-            }
-
-            return sb.ToString();
-        }
-
-        private string SimplifySequence(ColumnOptions.PropertiesColumnOptions options, SequenceValue seq)
-        {
-            var sb = new StringBuilder();
-
-            var isEmpty = true;
-
-            foreach (var element in seq.Elements)
-            {
-                var itemValue = Simplify(element, options);
-                if (options.OmitElementIfEmpty && string.IsNullOrEmpty(itemValue))
-                {
-                    continue;
-                }
-
-                if (isEmpty)
-                {
-                    isEmpty = false;
-                    if (!options.OmitSequenceContainerElement)
-                    {
-                        sb.AppendFormat(CultureInfo.InvariantCulture, "<{0}>", options.SequenceElementName);
-                    }
-                }
-
-                sb.AppendFormat(CultureInfo.InvariantCulture, "<{0}>{1}</{0}>", options.ItemElementName, itemValue);
-            }
-
-            if (!isEmpty && !options.OmitSequenceContainerElement)
-            {
-                sb.AppendFormat(CultureInfo.InvariantCulture, "</{0}>", options.SequenceElementName);
             }
 
             return sb.ToString();
