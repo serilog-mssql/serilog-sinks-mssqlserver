@@ -34,7 +34,7 @@ namespace Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform
                 using (var connection = _sqlConnectionFactory.Create())
                 {
                     connection.Open();
-                    using (SqlCommand command = connection.CreateCommand())
+                    using (ISqlCommandWrapper command = connection.CreateCommand())
                     {
                         command.CommandType = CommandType.Text;
 

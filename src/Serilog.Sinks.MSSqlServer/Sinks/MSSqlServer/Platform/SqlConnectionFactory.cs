@@ -20,13 +20,13 @@ namespace Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform
                 ?? throw new ArgumentNullException(nameof(azureManagedServiceAuthenticator));
         }
 
-        public SqlConnection Create()
+        public ISqlConnectionWrapper Create()
         {
             var sqlConnection = new SqlConnection(_connectionString);
-
             _azureManagedServiceAuthenticator.SetAuthenticationToken(sqlConnection);
 
-            return sqlConnection;
+            var sqlConnectionWrapper = new SqlConnectionWrapper(sqlConnection);
+            return sqlConnectionWrapper;
         }
     }
 }

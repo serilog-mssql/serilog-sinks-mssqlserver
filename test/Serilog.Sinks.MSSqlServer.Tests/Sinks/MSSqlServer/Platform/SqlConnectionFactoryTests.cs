@@ -51,7 +51,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Platform
             using (var connection = sut.Create())
             {
                 // Assert
-                Assert.Equal(DatabaseFixture.LogEventsConnectionString, connection.ConnectionString);
+                Assert.Equal(DatabaseFixture.LogEventsConnectionString, connection.SqlConnection.ConnectionString);
             }
         }
 
@@ -65,7 +65,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Platform
             using (var connection = sut.Create())
             {
                 // Assert
-                _azureManagedServiceAuthenticatorMock.Verify(a => a.SetAuthenticationToken(connection), Times.Once);
+                _azureManagedServiceAuthenticatorMock.Verify(a => a.SetAuthenticationToken(connection.SqlConnection), Times.Once);
             }
         }
     }

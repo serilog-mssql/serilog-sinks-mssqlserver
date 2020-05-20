@@ -44,8 +44,8 @@ namespace Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform
                 {
                     await cn.OpenAsync().ConfigureAwait(false);
                     using (var copy = _disableTriggers
-                            ? new SqlBulkCopy(cn)
-                            : new SqlBulkCopy(cn, SqlBulkCopyOptions.CheckConstraints | SqlBulkCopyOptions.FireTriggers, null)
+                            ? new SqlBulkCopy(cn.SqlConnection)
+                            : new SqlBulkCopy(cn.SqlConnection, SqlBulkCopyOptions.CheckConstraints | SqlBulkCopyOptions.FireTriggers, null)
                     )
                     {
                         copy.DestinationTableName = string.Format(CultureInfo.InvariantCulture, "[{0}].[{1}]", _schemaName, _tableName);

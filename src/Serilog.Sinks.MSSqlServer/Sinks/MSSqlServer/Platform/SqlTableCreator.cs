@@ -35,7 +35,7 @@ namespace Serilog.Sinks.MSSqlServer.Platform
                 using (var conn = _sqlConnectionFactory.Create())
                 {
                     var sql = _sqlCreateTableWriter.GetSqlFromDataTable(_schemaName, _tableName, dataTable, _columnOptions);
-                    using (var cmd = new SqlCommand(sql, conn))
+                    using (var cmd = new SqlCommand(sql, conn.SqlConnection))
                     {
                         conn.Open();
                         cmd.ExecuteNonQuery();

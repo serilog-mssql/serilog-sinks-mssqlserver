@@ -17,10 +17,9 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Platform
         private const string _schemaName = "TestSchemaName";
         private readonly Serilog.Sinks.MSSqlServer.ColumnOptions _columnOptions;
         private readonly Mock<ISqlCreateTableWriter> _sqlWriterMock;
-        private readonly SqlConnection _sqlConnection;
+        private readonly Mock<ISqlConnectionWrapper> _sqlConnectionWrapperMock;
         private readonly Mock<ISqlConnectionFactory> _sqlConnectionFactoryMock;
         private readonly SqlTableCreator _sut;
-        private bool _disposedValue;
 
         public SqlTableCreatorTests(ITestOutputHelper output) : base(output)
         {
@@ -29,8 +28,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Platform
                 It.IsAny<Serilog.Sinks.MSSqlServer.ColumnOptions>())).Returns($"USE {DatabaseFixture.Database}");
 
             _sqlConnectionFactoryMock = new Mock<ISqlConnectionFactory>();
-            _sqlConnection = new SqlConnection(DatabaseFixture.LogEventsConnectionString);
-            _sqlConnectionFactoryMock.Setup(f => f.Create()).Returns(_sqlConnection);
+            _sqlConnectionWrapperMock = new Mock<ISqlConnectionWrapper>();
+            _sqlConnectionFactoryMock.Setup(f => f.Create()).Returns(_sqlConnectionWrapperMock.Object);
 
             _columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions();
             _sut = new SqlTableCreator(_tableName, _schemaName, _columnOptions,
@@ -74,7 +73,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Platform
                 It.IsAny<Serilog.Sinks.MSSqlServer.ColumnOptions>())).Returns(
                 $"CREATE TABLE {DatabaseFixture.LogTableName} ( Id INT IDENTITY )");
             var sqlConnection = new SqlConnection(DatabaseFixture.LogEventsConnectionString);
-            _sqlConnectionFactoryMock.Setup(f => f.Create()).Returns(sqlConnection);
+            _sqlConnectionWrapperMock.Setup(c => c.SqlConnection).Returns(sqlConnection);
+            _sqlConnectionWrapperMock.Setup(c => c.Open()).Callback(() => sqlConnection.Open());
 
             // Act
             using (var dataTable = new DataTable())
@@ -89,17 +89,6 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Platform
                 isIdentity.Should().Contain(i => i.IsIdentity == 1);
             }
             sqlConnection.Dispose();
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            base.Dispose(disposing);
-
-            if (!_disposedValue)
-            {
-                _sqlConnection.Dispose();
-                _disposedValue = true;
-            }
         }
     }
 }
