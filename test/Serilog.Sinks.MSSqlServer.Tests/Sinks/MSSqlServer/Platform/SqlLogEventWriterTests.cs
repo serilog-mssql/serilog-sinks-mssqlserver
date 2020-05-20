@@ -60,16 +60,128 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Platform
         public void WriteEventCallsSqlConnectionFactoryCreate()
         {
             // Arrange
-            var logEvent = new LogEvent(
-                new DateTimeOffset(2020, 1, 1, 0, 0, 0, 0, TimeSpan.Zero),
-                LogEventLevel.Debug, null, new MessageTemplate(new List<MessageTemplateToken>()),
-                new List<LogEventProperty>());
+            var logEvent = CreateLogEvent();
 
             // Act
             _sut.WriteEvent(logEvent);
 
             // Assert
             _sqlConnectionFactoryMock.Verify(f => f.Create(), Times.Once);
+        }
+
+        [Fact]
+        public void WriteEventCallsSqlConnectionWrapperOpen()
+        {
+            // Arrange
+            var logEvent = CreateLogEvent();
+
+            // Act
+            _sut.WriteEvent(logEvent);
+
+            // Assert
+            _sqlConnectionWrapperMock.Verify(c => c.Open(), Times.Once);
+        }
+
+        [Fact]
+        public void WriteEventCallsSqlConnectionWrappeCreateCommand()
+        {
+            // Arrange
+            var logEvent = CreateLogEvent();
+
+            // Act
+            _sut.WriteEvent(logEvent);
+
+            // Assert
+            _sqlConnectionWrapperMock.Verify(c => c.CreateCommand(), Times.Once);
+        }
+
+        [Fact]
+        public void WriteEventCallsSqlConnectionWrapperDispose()
+        {
+            // Arrange
+            var logEvent = CreateLogEvent();
+
+            // Act
+            _sut.WriteEvent(logEvent);
+
+            // Assert
+            _sqlConnectionWrapperMock.Verify(c => c.Dispose(), Times.Once);
+        }
+
+        [Fact]
+        public void WriteEventSetsSqlCommandWrapperCommandTypeText()
+        {
+            // Arrange
+            var logEvent = CreateLogEvent();
+
+            // Act
+            _sut.WriteEvent(logEvent);
+
+            // Assert
+            _sqlCommandWrapperMock.VerifySet(c => c.CommandType = System.Data.CommandType.Text);
+        }
+
+        [Fact]
+        public void WriteEventSetsSqlCommandWrapperCommandTextToSqlInsertWithFields()
+        {
+            // TODO finish test
+
+            // Arrange
+            var logEvent = CreateLogEvent();
+            //_logEventDataGeneratorMock.Setup(...)
+
+            // Act
+            _sut.WriteEvent(logEvent);
+
+            // Assert
+            //_sqlCommandWrapperMock.VerifySet(c => c.CommandText = expectedCommandText);
+        }
+
+        [Fact]
+        public void WriteEventCallsSqlCommandWrapperExecuteNonQuery()
+        {
+            // Arrange
+            var logEvent = CreateLogEvent();
+
+            // Act
+            _sut.WriteEvent(logEvent);
+
+            // Assert
+            _sqlCommandWrapperMock.Verify(c => c.ExecuteNonQuery(), Times.Once);
+        }
+
+        [Fact]
+        public void WriteEventCallsSqlCommandWrapperDispose()
+        {
+            // Arrange
+            var logEvent = CreateLogEvent();
+
+            // Act
+            _sut.WriteEvent(logEvent);
+
+            // Assert
+            _sqlCommandWrapperMock.Verify(c => c.Dispose(), Times.Once);
+        }
+
+        [Fact]
+        public void WriteEventCallsLogEventDataGeneratorGetColumnsAndValuesWithLogEvent()
+        {
+            // Arrange
+            var logEvent = CreateLogEvent();
+
+            // Act
+            _sut.WriteEvent(logEvent);
+
+            // Assert
+            _logEventDataGeneratorMock.Verify(d => d.GetColumnsAndValues(logEvent), Times.Once);
+        }
+
+        private static LogEvent CreateLogEvent()
+        {
+            return new LogEvent(
+                new DateTimeOffset(2020, 1, 1, 0, 0, 0, 0, TimeSpan.Zero),
+                LogEventLevel.Debug, null, new MessageTemplate(new List<MessageTemplateToken>()),
+                new List<LogEventProperty>());
         }
     }
 }
