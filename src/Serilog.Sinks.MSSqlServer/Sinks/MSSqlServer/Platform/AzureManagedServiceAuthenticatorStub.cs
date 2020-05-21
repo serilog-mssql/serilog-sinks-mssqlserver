@@ -1,5 +1,10 @@
 ﻿using System;
+#if NET452
 using System.Data.SqlClient;
+#else
+using Microsoft.Data.SqlClient;
+#endif
+
 using System.Diagnostics.CodeAnalysis;
 
 // This is an empty stub implementaion of IAzureManagedServiceAuthenticator for the target frameworks

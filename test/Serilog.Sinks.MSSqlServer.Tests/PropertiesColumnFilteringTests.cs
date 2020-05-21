@@ -1,4 +1,8 @@
-﻿using System.Data.SqlClient;
+﻿#if NET452
+using System.Data.SqlClient;
+#else
+using Microsoft.Data.SqlClient;
+#endif
 using Dapper;
 using FluentAssertions;
 using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;

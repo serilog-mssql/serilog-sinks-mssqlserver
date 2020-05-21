@@ -1,5 +1,9 @@
 ﻿using System;
+#if NET452
 using System.Data.SqlClient;
+#else
+using Microsoft.Data.SqlClient;
+#endif
 using System.IO;
 using Dapper;
 using FluentAssertions;
