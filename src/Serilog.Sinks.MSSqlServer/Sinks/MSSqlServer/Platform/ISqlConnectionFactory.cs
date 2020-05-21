@@ -1,6 +1,4 @@
-﻿using System.Data.SqlClient;
-
-namespace Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform
+﻿namespace Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform
 {
     internal interface ISqlConnectionFactory
     {
