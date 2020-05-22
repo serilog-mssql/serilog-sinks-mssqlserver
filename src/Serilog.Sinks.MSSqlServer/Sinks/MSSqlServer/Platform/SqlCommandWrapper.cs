@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 #if NET452
@@ -25,12 +26,24 @@ namespace Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform
             set => _sqlCommand.CommandType = value;
         }
 
-        public DbParameterCollection Parameters => _sqlCommand.Parameters;
-
         public string CommandText
         {
             get => _sqlCommand.CommandText;
             set => _sqlCommand.CommandText = value;
+        }
+
+        public void AddParameter(string parameterName, object value)
+        {
+            var parameter = new SqlParameter(parameterName, value ?? DBNull.Value);
+
+            // The default is SqlDbType.DateTime, which will truncate the DateTime value if the actual
+            // type in the database table is datetime2. So we explicitly set it to DateTime2, which will
+            // work both if the field in the table is datetime and datetime2, which is also consistent with 
+            // the behavior of the non-audit sink.
+            if (value is DateTime)
+                parameter.SqlDbType = SqlDbType.DateTime2;
+
+            _sqlCommand.Parameters.Add(parameter);
         }
 
         public int ExecuteNonQuery() =>

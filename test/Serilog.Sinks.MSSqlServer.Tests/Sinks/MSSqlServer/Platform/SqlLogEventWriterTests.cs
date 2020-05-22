@@ -122,19 +122,51 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Platform
         }
 
         [Fact]
-        public void WriteEventSetsSqlCommandWrapperCommandTextToSqlInsertWithFields()
+        public void WriteEventCallsSqlCommandWrapperAddParameterForEachField()
         {
-            // TODO finish test
-
             // Arrange
             var logEvent = CreateLogEvent();
-            //_logEventDataGeneratorMock.Setup(...)
+            var field1Value = "FieldValue1";
+            var field2Value = 2;
+            var field3Value = new DateTimeOffset(2020, 1, 1, 0, 0, 0, TimeSpan.Zero);
+            var fieldsAndValues = new List<KeyValuePair<string, object>>
+            {
+                new KeyValuePair<string, object>("FieldName1", field1Value),
+                new KeyValuePair<string, object>("FieldName2", field2Value),
+                new KeyValuePair<string, object>("FieldNameThree", field3Value)
+            };
+            _logEventDataGeneratorMock.Setup(d => d.GetColumnsAndValues(It.IsAny<LogEvent>()))
+                .Returns(fieldsAndValues);
 
             // Act
             _sut.WriteEvent(logEvent);
 
             // Assert
-            //_sqlCommandWrapperMock.VerifySet(c => c.CommandText = expectedCommandText);
+            _sqlCommandWrapperMock.Verify(c => c.AddParameter("@P0", field1Value), Times.Once);
+            _sqlCommandWrapperMock.Verify(c => c.AddParameter("@P1", field2Value), Times.Once);
+            _sqlCommandWrapperMock.Verify(c => c.AddParameter("@P2", field3Value), Times.Once);
+        }
+
+        [Fact]
+        public void WriteEventSetsSqlCommandWrapperCommandTextToSqlInsertWithCorrectFieldsAndValues()
+        {
+            // Arrange
+            var expectedSqlCommandText = $"INSERT INTO [{_schemaName}].[{_tableName}] (FieldName1,FieldName2,FieldNameThree) VALUES (@P0,@P1,@P2)";
+            var logEvent = CreateLogEvent();
+            var fieldsAndValues = new List<KeyValuePair<string, object>>
+            {
+                new KeyValuePair<string, object>("FieldName1", "FieldValue1"),
+                new KeyValuePair<string, object>("FieldName2", 2),
+                new KeyValuePair<string, object>("FieldNameThree", new DateTimeOffset(2020, 1, 1, 0, 0, 0, TimeSpan.Zero))
+            };
+            _logEventDataGeneratorMock.Setup(d => d.GetColumnsAndValues(It.IsAny<LogEvent>()))
+                .Returns(fieldsAndValues);
+
+            // Act
+            _sut.WriteEvent(logEvent);
+
+            // Assert
+            _sqlCommandWrapperMock.VerifySet(c => c.CommandText = expectedSqlCommandText);
         }
 
         [Fact]
