@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using Moq;
 using Serilog.Debugging;
 using Serilog.Events;
-using Serilog.Parsing;
 using Serilog.Sinks.MSSqlServer.Output;
 using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform;
 using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform.SqlClient;
+using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
 
 namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Platform
@@ -62,7 +62,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Platform
         public void WriteEventCallsSqlConnectionFactoryCreate()
         {
             // Arrange
-            var logEvent = CreateLogEvent();
+            var logEvent = TestLogEventHelper.CreateLogEvent();
 
             // Act
             _sut.WriteEvent(logEvent);
@@ -75,7 +75,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Platform
         public void WriteEventCallsSqlConnectionWrapperOpen()
         {
             // Arrange
-            var logEvent = CreateLogEvent();
+            var logEvent = TestLogEventHelper.CreateLogEvent();
 
             // Act
             _sut.WriteEvent(logEvent);
@@ -88,7 +88,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Platform
         public void WriteEventCallsSqlConnectionWrappeCreateCommand()
         {
             // Arrange
-            var logEvent = CreateLogEvent();
+            var logEvent = TestLogEventHelper.CreateLogEvent();
 
             // Act
             _sut.WriteEvent(logEvent);
@@ -98,23 +98,10 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Platform
         }
 
         [Fact]
-        public void WriteEventCallsSqlConnectionWrapperDispose()
-        {
-            // Arrange
-            var logEvent = CreateLogEvent();
-
-            // Act
-            _sut.WriteEvent(logEvent);
-
-            // Assert
-            _sqlConnectionWrapperMock.Verify(c => c.Dispose(), Times.Once);
-        }
-
-        [Fact]
         public void WriteEventSetsSqlCommandWrapperCommandTypeText()
         {
             // Arrange
-            var logEvent = CreateLogEvent();
+            var logEvent = TestLogEventHelper.CreateLogEvent();
 
             // Act
             _sut.WriteEvent(logEvent);
@@ -127,7 +114,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Platform
         public void WriteEventCallsSqlCommandWrapperAddParameterForEachField()
         {
             // Arrange
-            var logEvent = CreateLogEvent();
+            var logEvent = TestLogEventHelper.CreateLogEvent();
             var field1Value = "FieldValue1";
             var field2Value = 2;
             var field3Value = new DateTimeOffset(2020, 1, 1, 0, 0, 0, TimeSpan.Zero);
@@ -154,7 +141,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Platform
         {
             // Arrange
             var expectedSqlCommandText = $"INSERT INTO [{_schemaName}].[{_tableName}] (FieldName1,FieldName2,FieldNameThree) VALUES (@P0,@P1,@P2)";
-            var logEvent = CreateLogEvent();
+            var logEvent = TestLogEventHelper.CreateLogEvent();
             var fieldsAndValues = new List<KeyValuePair<string, object>>
             {
                 new KeyValuePair<string, object>("FieldName1", "FieldValue1"),
@@ -175,7 +162,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Platform
         public void WriteEventCallsSqlCommandWrapperExecuteNonQuery()
         {
             // Arrange
-            var logEvent = CreateLogEvent();
+            var logEvent = TestLogEventHelper.CreateLogEvent();
 
             // Act
             _sut.WriteEvent(logEvent);
@@ -188,7 +175,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Platform
         public void WriteEventCallsSqlCommandWrapperDispose()
         {
             // Arrange
-            var logEvent = CreateLogEvent();
+            var logEvent = TestLogEventHelper.CreateLogEvent();
 
             // Act
             _sut.WriteEvent(logEvent);
@@ -201,7 +188,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Platform
         public void WriteEventCallsLogEventDataGeneratorGetColumnsAndValuesWithLogEvent()
         {
             // Arrange
-            var logEvent = CreateLogEvent();
+            var logEvent = TestLogEventHelper.CreateLogEvent();
 
             // Act
             _sut.WriteEvent(logEvent);
@@ -217,7 +204,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Platform
             var selfLogWritten = false;
             SelfLog.Enable(w => selfLogWritten = true);
             _sqlConnectionFactoryMock.Setup(f => f.Create()).Callback(() => throw new Exception());
-            var logEvent = CreateLogEvent();
+            var logEvent = TestLogEventHelper.CreateLogEvent();
 
             // Act + assert
             Assert.Throws<Exception>(() => _sut.WriteEvent(logEvent));
@@ -231,7 +218,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Platform
             var selfLogWritten = false;
             SelfLog.Enable(w => selfLogWritten = true);
             _sqlConnectionWrapperMock.Setup(c => c.CreateCommand()).Callback(() => throw new Exception());
-            var logEvent = CreateLogEvent();
+            var logEvent = TestLogEventHelper.CreateLogEvent();
 
             // Act + assert
             Assert.Throws<Exception>(() => _sut.WriteEvent(logEvent));
@@ -245,7 +232,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Platform
             var selfLogWritten = false;
             SelfLog.Enable(w => selfLogWritten = true);
             _logEventDataGeneratorMock.Setup(d => d.GetColumnsAndValues(It.IsAny<LogEvent>())).Callback(() => throw new Exception());
-            var logEvent = CreateLogEvent();
+            var logEvent = TestLogEventHelper.CreateLogEvent();
 
             // Act + assert
             Assert.Throws<Exception>(() => _sut.WriteEvent(logEvent));
@@ -262,7 +249,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Platform
             var fieldsAndValues = new List<KeyValuePair<string, object>> { new KeyValuePair<string, object>("FieldName1", "FieldValue1") };
             _logEventDataGeneratorMock.Setup(d => d.GetColumnsAndValues(It.IsAny<LogEvent>()))
                 .Returns(fieldsAndValues);
-            var logEvent = CreateLogEvent();
+            var logEvent = TestLogEventHelper.CreateLogEvent();
 
             // Act + assert
             Assert.Throws<Exception>(() => _sut.WriteEvent(logEvent));
@@ -276,19 +263,11 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Platform
             var selfLogWritten = false;
             SelfLog.Enable(w => selfLogWritten = true);
             _sqlCommandWrapperMock.Setup(c => c.ExecuteNonQuery()).Callback(() => throw new Exception());
-            var logEvent = CreateLogEvent();
+            var logEvent = TestLogEventHelper.CreateLogEvent();
 
             // Act + assert
             Assert.Throws<Exception>(() => _sut.WriteEvent(logEvent));
             Assert.True(selfLogWritten);
-        }
-
-        private static LogEvent CreateLogEvent()
-        {
-            return new LogEvent(
-                new DateTimeOffset(2020, 1, 1, 0, 0, 0, 0, TimeSpan.Zero),
-                LogEventLevel.Debug, null, new MessageTemplate(new List<MessageTemplateToken>()),
-                new List<LogEventProperty>());
         }
     }
 }
