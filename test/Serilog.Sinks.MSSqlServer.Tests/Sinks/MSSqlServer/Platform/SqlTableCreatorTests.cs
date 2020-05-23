@@ -1,40 +1,37 @@
 ﻿using System.Data;
-#if NET452
-using System.Data.SqlClient;
-#else
-using Microsoft.Data.SqlClient;
-#endif
-using Dapper;
-using FluentAssertions;
 using Moq;
 using Serilog.Sinks.MSSqlServer.Platform;
 using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform;
+using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform.SqlClient;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Platform
 {
-    public class SqlTableCreatorTests : DatabaseTestsBase
+    [Trait(TestCategory.TraitName, TestCategory.Unit)]
+    public class SqlTableCreatorTests
     {
         private const string _tableName = "TestTableName";
         private const string _schemaName = "TestSchemaName";
         private readonly Serilog.Sinks.MSSqlServer.ColumnOptions _columnOptions;
         private readonly Mock<ISqlCreateTableWriter> _sqlWriterMock;
-        private readonly SqlConnection _sqlConnection;
+        private readonly Mock<ISqlConnectionWrapper> _sqlConnectionWrapperMock;
+        private readonly Mock<ISqlCommandWrapper> _sqlCommandWrapperMock;
         private readonly Mock<ISqlConnectionFactory> _sqlConnectionFactoryMock;
         private readonly SqlTableCreator _sut;
-        private bool _disposedValue;
 
-        public SqlTableCreatorTests(ITestOutputHelper output) : base(output)
+        public SqlTableCreatorTests()
         {
             _sqlWriterMock = new Mock<ISqlCreateTableWriter>();
             _sqlWriterMock.Setup(w => w.GetSqlFromDataTable(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<DataTable>(),
                 It.IsAny<Serilog.Sinks.MSSqlServer.ColumnOptions>())).Returns($"USE {DatabaseFixture.Database}");
 
             _sqlConnectionFactoryMock = new Mock<ISqlConnectionFactory>();
-            _sqlConnection = new SqlConnection(DatabaseFixture.LogEventsConnectionString);
-            _sqlConnectionFactoryMock.Setup(f => f.Create()).Returns(_sqlConnection);
+            _sqlConnectionWrapperMock = new Mock<ISqlConnectionWrapper>();
+            _sqlCommandWrapperMock = new Mock<ISqlCommandWrapper>();
+
+            _sqlConnectionFactoryMock.Setup(f => f.Create()).Returns(_sqlConnectionWrapperMock.Object);
+            _sqlConnectionWrapperMock.Setup(c => c.CreateCommand(It.IsAny<string>())).Returns(_sqlCommandWrapperMock.Object);
 
             _columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions();
             _sut = new SqlTableCreator(_tableName, _schemaName, _columnOptions,
@@ -42,7 +39,6 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Platform
         }
 
         [Fact]
-        [Trait(TestCategory.TraitName, TestCategory.Unit)]
         public void CreateTableCallsSqlCreateTableWriterWithPassedValues()
         {
             using (var dataTable = new DataTable())
@@ -56,7 +52,6 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Platform
         }
 
         [Fact]
-        [Trait(TestCategory.TraitName, TestCategory.Unit)]
         public void CreateTableCallsSqlConnectionFactory()
         {
             // Act
@@ -70,15 +65,12 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Platform
         }
 
         [Fact]
-        [Trait(TestCategory.TraitName, TestCategory.Integration)]
         public void CreateTableExecutesCommandReturnedBySqlCreateTableWriter()
         {
             // Arrange
+            var expectedSqlCommandText = $"CREATE TABLE {DatabaseFixture.LogTableName} ( Id INT IDENTITY )";
             _sqlWriterMock.Setup(w => w.GetSqlFromDataTable(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<DataTable>(),
-                It.IsAny<Serilog.Sinks.MSSqlServer.ColumnOptions>())).Returns(
-                $"CREATE TABLE {DatabaseFixture.LogTableName} ( Id INT IDENTITY )");
-            var sqlConnection = new SqlConnection(DatabaseFixture.LogEventsConnectionString);
-            _sqlConnectionFactoryMock.Setup(f => f.Create()).Returns(sqlConnection);
+                It.IsAny<Serilog.Sinks.MSSqlServer.ColumnOptions>())).Returns(expectedSqlCommandText);
 
             // Act
             using (var dataTable = new DataTable())
@@ -87,23 +79,33 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Platform
             }
 
             // Assert
-            using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
-            {
-                var isIdentity = conn.Query<IdentityQuery>($"SELECT COLUMNPROPERTY(object_id('{DatabaseFixture.LogTableName}'), 'Id', 'IsIdentity') AS IsIdentity");
-                isIdentity.Should().Contain(i => i.IsIdentity == 1);
-            }
-            sqlConnection.Dispose();
+            _sqlConnectionWrapperMock.Verify(c => c.CreateCommand(expectedSqlCommandText), Times.Once);
         }
 
-        protected override void Dispose(bool disposing)
+        [Fact]
+        public void CreateTableCallsSqlConnectionOpen()
         {
-            base.Dispose(disposing);
-
-            if (!_disposedValue)
+            // Act
+            using (var dataTable = new DataTable())
             {
-                _sqlConnection.Dispose();
-                _disposedValue = true;
+                _sut.CreateTable(dataTable);
             }
+
+            // Assert
+            _sqlConnectionWrapperMock.Verify(c => c.Open(), Times.Once());
+        }
+
+        [Fact]
+        public void CreateTableCallsSqlCommandExecuteNonQuery()
+        {
+            // Act
+            using (var dataTable = new DataTable())
+            {
+                _sut.CreateTable(dataTable);
+            }
+
+            // Assert
+            _sqlCommandWrapperMock.Verify(c => c.ExecuteNonQuery(), Times.Once);
         }
     }
 }

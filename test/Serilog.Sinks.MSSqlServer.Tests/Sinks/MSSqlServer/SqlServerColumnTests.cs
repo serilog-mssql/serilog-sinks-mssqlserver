@@ -23,10 +23,12 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer
         {
             // Arrange
             const string propertyName = "TestPropertyName";
-            var sut = new SqlColumn("TestColumnName", SqlDbType.Int);
 
             // Act
-            sut.PropertyName = propertyName;
+            var sut = new SqlColumn("TestColumnName", SqlDbType.Int)
+            {
+                PropertyName = propertyName
+            };
 
             // Assert
             Assert.Equal(propertyName, sut.PropertyName);

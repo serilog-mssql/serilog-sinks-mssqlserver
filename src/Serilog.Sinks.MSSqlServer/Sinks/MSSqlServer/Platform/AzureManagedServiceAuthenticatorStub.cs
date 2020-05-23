@@ -1,11 +1,6 @@
 ﻿using System;
-#if NET452
-using System.Data.SqlClient;
-#else
-using Microsoft.Data.SqlClient;
-#endif
-
 using System.Diagnostics.CodeAnalysis;
+using System.Threading.Tasks;
 
 // This is an empty stub implementaion of IAzureManagedServiceAuthenticator for the target frameworks
 // that don't support Azure Managed Identities (net452, net461, netstandard2.0, netcoreapp2.0).
@@ -29,8 +24,6 @@ namespace Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform
             _azureServiceTokenProviderResource = azureServiceTokenProviderResource;
         }
 
-        public void SetAuthenticationToken(SqlConnection sqlConnection)
-        {
-        }
+        public Task<string> GetAuthenticationToken() => Task.FromResult((string)null);
     }
 }

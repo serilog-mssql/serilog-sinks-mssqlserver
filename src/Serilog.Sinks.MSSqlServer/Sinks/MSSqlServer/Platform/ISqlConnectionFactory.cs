@@ -1,13 +1,9 @@
-﻿#if NET452
-using System.Data.SqlClient;
-#else
-using Microsoft.Data.SqlClient;
-#endif
+﻿using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform.SqlClient;
 
 namespace Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform
 {
     internal interface ISqlConnectionFactory
     {
-        SqlConnection Create();
+        ISqlConnectionWrapper Create();
     }
 }
