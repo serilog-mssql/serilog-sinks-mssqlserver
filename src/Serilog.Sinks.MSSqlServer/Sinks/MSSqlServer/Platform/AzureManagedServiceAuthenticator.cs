@@ -1,9 +1,5 @@
 ﻿using System;
-#if NET452
-using System.Data.SqlClient;
-#else
-using Microsoft.Data.SqlClient;
-#endif
+using System.Threading.Tasks;
 using Microsoft.Azure.Services.AppAuthentication;
 
 namespace Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform
@@ -26,15 +22,14 @@ namespace Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform
             _azureServiceTokenProvider = new AzureServiceTokenProvider();
         }
 
-        public void SetAuthenticationToken(SqlConnection sqlConnection)
+        public Task<string> GetAuthenticationToken()
         {
             if (!_useAzureManagedIdentity)
             {
-                return;
+                return Task.FromResult((string)null);
             }
 
-            sqlConnection.AccessToken = _azureServiceTokenProvider.GetAccessTokenAsync(
-                _azureServiceTokenProviderResource).GetAwaiter().GetResult();
+            return _azureServiceTokenProvider.GetAccessTokenAsync(_azureServiceTokenProviderResource);
         }
     }
 }

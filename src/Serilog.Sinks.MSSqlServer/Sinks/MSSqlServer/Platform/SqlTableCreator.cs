@@ -1,10 +1,5 @@
 ﻿using System;
 using System.Data;
-#if NET452
-using System.Data.SqlClient;
-#else
-using Microsoft.Data.SqlClient;
-#endif
 using Serilog.Debugging;
 using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform;
 
@@ -39,7 +34,7 @@ namespace Serilog.Sinks.MSSqlServer.Platform
                 using (var conn = _sqlConnectionFactory.Create())
                 {
                     var sql = _sqlCreateTableWriter.GetSqlFromDataTable(_schemaName, _tableName, dataTable, _columnOptions);
-                    using (var cmd = new SqlCommand(sql, conn.SqlConnection))
+                    using (var cmd = conn.CreateCommand(sql))
                     {
                         conn.Open();
                         cmd.ExecuteNonQuery();

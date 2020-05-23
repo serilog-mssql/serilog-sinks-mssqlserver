@@ -21,6 +21,7 @@ namespace Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Dependencies
 
             var sqlConnectionFactory =
                 new SqlConnectionFactory(connectionString,
+                    sinkOptions?.UseAzureManagedIdentity ?? default,
                     new AzureManagedServiceAuthenticator(
                         sinkOptions?.UseAzureManagedIdentity ?? default,
                         sinkOptions.AzureServiceTokenProviderResource));

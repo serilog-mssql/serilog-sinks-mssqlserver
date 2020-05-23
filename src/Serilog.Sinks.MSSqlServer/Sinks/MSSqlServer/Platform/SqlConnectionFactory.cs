@@ -1,18 +1,15 @@
 ﻿using System;
-#if NET452
-using System.Data.SqlClient;
-#else
-using Microsoft.Data.SqlClient;
-#endif
+using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform.SqlClient;
 
 namespace Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform
 {
     internal class SqlConnectionFactory : ISqlConnectionFactory
     {
         private readonly string _connectionString;
+        private readonly bool _useAzureManagedIdentity;
         private readonly IAzureManagedServiceAuthenticator _azureManagedServiceAuthenticator;
 
-        public SqlConnectionFactory(string connectionString, IAzureManagedServiceAuthenticator azureManagedServiceAuthenticator)
+        public SqlConnectionFactory(string connectionString, bool useAzureManagedIdentity, IAzureManagedServiceAuthenticator azureManagedServiceAuthenticator)
         {
             if (string.IsNullOrWhiteSpace(connectionString))
             {
@@ -20,17 +17,18 @@ namespace Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform
             }
 
             _connectionString = connectionString;
+            _useAzureManagedIdentity = useAzureManagedIdentity;
             _azureManagedServiceAuthenticator = azureManagedServiceAuthenticator
                 ?? throw new ArgumentNullException(nameof(azureManagedServiceAuthenticator));
         }
 
         public ISqlConnectionWrapper Create()
         {
-            var sqlConnection = new SqlConnection(_connectionString);
-            _azureManagedServiceAuthenticator.SetAuthenticationToken(sqlConnection);
+            var accessToken = _useAzureManagedIdentity
+                ? _azureManagedServiceAuthenticator.GetAuthenticationToken().GetAwaiter().GetResult()
+                : default;
 
-            var sqlConnectionWrapper = new SqlConnectionWrapper(sqlConnection);
-            return sqlConnectionWrapper;
+            return new SqlConnectionWrapper(_connectionString, accessToken);
         }
     }
 }

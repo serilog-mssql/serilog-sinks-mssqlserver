@@ -4,6 +4,7 @@ using System.Text;
 using Serilog.Debugging;
 using Serilog.Events;
 using Serilog.Sinks.MSSqlServer.Output;
+using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform.SqlClient;
 
 namespace Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform
 {
@@ -33,7 +34,7 @@ namespace Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform
                 using (var connection = _sqlConnectionFactory.Create())
                 {
                     connection.Open();
-                    using (ISqlCommandWrapper command = connection.CreateCommand())
+                    using (var command = connection.CreateCommand())
                     {
                         command.CommandType = CommandType.Text;
 

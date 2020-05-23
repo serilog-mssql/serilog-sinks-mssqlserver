@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
 
-namespace Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform
+namespace Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform.SqlClient
 {
     internal interface ISqlCommandWrapper : IDisposable
     {

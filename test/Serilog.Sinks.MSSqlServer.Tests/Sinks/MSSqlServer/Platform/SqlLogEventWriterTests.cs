@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using Moq;
+using Serilog.Debugging;
 using Serilog.Events;
 using Serilog.Parsing;
 using Serilog.Sinks.MSSqlServer.Output;
 using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform;
+using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform.SqlClient;
 using Xunit;
 
 namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Platform
@@ -206,6 +208,79 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Platform
 
             // Assert
             _logEventDataGeneratorMock.Verify(d => d.GetColumnsAndValues(logEvent), Times.Once);
+        }
+
+        [Fact]
+        public void WriteEventWritesSelfLogAndRethrowsIfSqlConnectionFactoryCreateThrows()
+        {
+            // Arrange
+            var selfLogWritten = false;
+            SelfLog.Enable(w => selfLogWritten = true);
+            _sqlConnectionFactoryMock.Setup(f => f.Create()).Callback(() => throw new Exception());
+            var logEvent = CreateLogEvent();
+
+            // Act + assert
+            Assert.Throws<Exception>(() => _sut.WriteEvent(logEvent));
+            Assert.True(selfLogWritten);
+        }
+
+        [Fact]
+        public void WriteEventWritesSelfLogAndRethrowsIfSqlConnectionCreateCommandThrows()
+        {
+            // Arrange
+            var selfLogWritten = false;
+            SelfLog.Enable(w => selfLogWritten = true);
+            _sqlConnectionWrapperMock.Setup(c => c.CreateCommand()).Callback(() => throw new Exception());
+            var logEvent = CreateLogEvent();
+
+            // Act + assert
+            Assert.Throws<Exception>(() => _sut.WriteEvent(logEvent));
+            Assert.True(selfLogWritten);
+        }
+
+        [Fact]
+        public void WriteEventWritesSelfLogAndRethrowsIfLogEventDataGeneratorGetColumnsAndValuesThrows()
+        {
+            // Arrange
+            var selfLogWritten = false;
+            SelfLog.Enable(w => selfLogWritten = true);
+            _logEventDataGeneratorMock.Setup(d => d.GetColumnsAndValues(It.IsAny<LogEvent>())).Callback(() => throw new Exception());
+            var logEvent = CreateLogEvent();
+
+            // Act + assert
+            Assert.Throws<Exception>(() => _sut.WriteEvent(logEvent));
+            Assert.True(selfLogWritten);
+        }
+
+        [Fact]
+        public void WriteEventWritesSelfLogAndRethrowsIfSqlCommandAddParameterThrows()
+        {
+            // Arrange
+            var selfLogWritten = false;
+            SelfLog.Enable(w => selfLogWritten = true);
+            _sqlCommandWrapperMock.Setup(c => c.AddParameter(It.IsAny<string>(), It.IsAny<object>())).Callback(() => throw new Exception());
+            var fieldsAndValues = new List<KeyValuePair<string, object>> { new KeyValuePair<string, object>("FieldName1", "FieldValue1") };
+            _logEventDataGeneratorMock.Setup(d => d.GetColumnsAndValues(It.IsAny<LogEvent>()))
+                .Returns(fieldsAndValues);
+            var logEvent = CreateLogEvent();
+
+            // Act + assert
+            Assert.Throws<Exception>(() => _sut.WriteEvent(logEvent));
+            Assert.True(selfLogWritten);
+        }
+
+        [Fact]
+        public void WriteEventWritesSelfLogAndRethrowsIfSqlCommandExecuteNonQueryThrows()
+        {
+            // Arrange
+            var selfLogWritten = false;
+            SelfLog.Enable(w => selfLogWritten = true);
+            _sqlCommandWrapperMock.Setup(c => c.ExecuteNonQuery()).Callback(() => throw new Exception());
+            var logEvent = CreateLogEvent();
+
+            // Act + assert
+            Assert.Throws<Exception>(() => _sut.WriteEvent(logEvent));
+            Assert.True(selfLogWritten);
         }
 
         private static LogEvent CreateLogEvent()

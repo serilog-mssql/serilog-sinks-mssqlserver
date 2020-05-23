@@ -1,11 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-#if NET452
-using System.Data.SqlClient;
-#else
-using Microsoft.Data.SqlClient;
-#endif
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
@@ -47,17 +42,13 @@ namespace Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform
                 using (var cn = _sqlConnectionFactory.Create())
                 {
                     await cn.OpenAsync().ConfigureAwait(false);
-                    using (var copy = _disableTriggers
-                            ? new SqlBulkCopy(cn.SqlConnection)
-                            : new SqlBulkCopy(cn.SqlConnection, SqlBulkCopyOptions.CheckConstraints | SqlBulkCopyOptions.FireTriggers, null)
-                    )
+                    using (var copy = cn.CreateSqlBulkCopy(_disableTriggers,
+                        string.Format(CultureInfo.InvariantCulture, "[{0}].[{1}]", _schemaName, _tableName)))
                     {
-                        copy.DestinationTableName = string.Format(CultureInfo.InvariantCulture, "[{0}].[{1}]", _schemaName, _tableName);
                         foreach (var column in dataTable.Columns)
                         {
                             var columnName = ((DataColumn)column).ColumnName;
-                            var mapping = new SqlBulkCopyColumnMapping(columnName, columnName);
-                            copy.ColumnMappings.Add(mapping);
+                            copy.AddSqlBulkCopyColumnMapping(columnName, columnName);
                         }
 
                         await copy.WriteToServerAsync(dataTable).ConfigureAwait(false);

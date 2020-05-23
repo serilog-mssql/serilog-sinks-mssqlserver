@@ -1,14 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Data.Common;
 #if NET452
 using System.Data.SqlClient;
 #else
 using Microsoft.Data.SqlClient;
 #endif
 
-namespace Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform
+namespace Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform.SqlClient
 {
     internal class SqlCommandWrapper : ISqlCommandWrapper
     {
