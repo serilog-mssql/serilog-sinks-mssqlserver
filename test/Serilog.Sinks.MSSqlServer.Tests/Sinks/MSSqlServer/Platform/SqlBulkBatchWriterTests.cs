@@ -178,39 +178,31 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Platform
         }
 
         [Fact]
-        public void WriteBatchWritesSelfLogAndRethrowsIfSqlConnectionFactoryCreateThrows()
+        public void WriteBatchRethrowsIfSqlConnectionFactoryCreateThrows()
         {
             // Arrange
-            var selfLogWritten = false;
-            SelfLog.Enable(w => selfLogWritten = true);
             _sqlConnectionFactoryMock.Setup(f => f.Create()).Callback(() => throw new Exception());
             var logEvents = CreateLogEvents();
 
             // Act + assert
             Assert.ThrowsAsync<Exception>(() => _sut.WriteBatch(logEvents, _dataTable));
-            Assert.True(selfLogWritten);
         }
 
         [Fact]
-        public void WriteBatchWritesSelfLogAndRethrowsIfSqlConnectionOpenAsyncThrows()
+        public void WriteBatchRethrowsIfSqlConnectionOpenAsyncThrows()
         {
             // Arrange
-            var selfLogWritten = false;
-            SelfLog.Enable(w => selfLogWritten = true);
             _sqlConnectionWrapperMock.Setup(c => c.OpenAsync()).Callback(() => throw new Exception());
             var logEvents = CreateLogEvents();
 
             // Act + assert
             Assert.ThrowsAsync<Exception>(() => _sut.WriteBatch(logEvents, _dataTable));
-            Assert.True(selfLogWritten);
         }
 
         [Fact]
-        public void WriteBatchWritesSelfLogAndRethrowsIfSqlBulkCopyWriterAddSqlBulkCopyColumnMappingThrows()
+        public void WriteBatchRethrowsIfSqlBulkCopyWriterAddSqlBulkCopyColumnMappingThrows()
         {
             // Arrange
-            var selfLogWritten = false;
-            SelfLog.Enable(w => selfLogWritten = true);
             _sqlBulkCopyWrapper.Setup(c => c.AddSqlBulkCopyColumnMapping(It.IsAny<string>(), It.IsAny<string>()))
                 .Callback(() => throw new Exception());
             var logEvents = CreateLogEvents();
@@ -218,22 +210,18 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Platform
 
             // Act + assert
             Assert.ThrowsAsync<Exception>(() => _sut.WriteBatch(logEvents, _dataTable));
-            Assert.True(selfLogWritten);
         }
 
         [Fact]
-        public void WriteBatchWritesSelfLogAndRethrowsIfSqlBulkCopyWriterWriteToServerAsyncThrows()
+        public void WriteBatchRethrowsIfSqlBulkCopyWriterWriteToServerAsyncThrows()
         {
             // Arrange
-            var selfLogWritten = false;
-            SelfLog.Enable(w => selfLogWritten = true);
             _sqlBulkCopyWrapper.Setup(c => c.WriteToServerAsync(It.IsAny<DataTable>()))
                 .Callback(() => throw new Exception());
             var logEvents = CreateLogEvents();
 
             // Act + assert
             Assert.ThrowsAsync<Exception>(() => _sut.WriteBatch(logEvents, _dataTable));
-            Assert.True(selfLogWritten);
         }
 
         private static List<LogEvent> CreateLogEvents()
