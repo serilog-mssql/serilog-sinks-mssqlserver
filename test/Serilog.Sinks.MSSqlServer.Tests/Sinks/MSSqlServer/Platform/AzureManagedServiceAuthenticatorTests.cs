@@ -1,9 +1,9 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Microsoft.Azure.Services.AppAuthentication;
 using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
-using System.Threading.Tasks;
 
 namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Platform
 {

@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Threading.Tasks;
 using System.Diagnostics.CodeAnalysis;
+using System.Threading.Tasks;
 
 // This is an empty stub implementaion of IAzureManagedServiceAuthenticator for the target frameworks
 // that don't support Azure Managed Identities (net452, net461, netstandard2.0, netcoreapp2.0).

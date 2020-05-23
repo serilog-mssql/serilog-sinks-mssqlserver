@@ -4,7 +4,6 @@ using System.Data;
 using System.Globalization;
 using System.Threading.Tasks;
 using Moq;
-using Serilog.Debugging;
 using Serilog.Events;
 using Serilog.Sinks.MSSqlServer.Output;
 using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform;

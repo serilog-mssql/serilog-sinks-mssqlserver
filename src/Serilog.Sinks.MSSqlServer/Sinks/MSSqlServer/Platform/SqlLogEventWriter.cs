@@ -4,7 +4,6 @@ using System.Text;
 using Serilog.Debugging;
 using Serilog.Events;
 using Serilog.Sinks.MSSqlServer.Output;
-using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform.SqlClient;
 
 namespace Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform
 {
