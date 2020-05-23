@@ -178,6 +178,18 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Platform
         }
 
         [Fact]
+        public void WriteBatchRethrowsIfLogEventDataGeneratorMockGetColumnsAndValuesThrows()
+        {
+            // Arrange
+            _logEventDataGeneratorMock.Setup(d => d.GetColumnsAndValues(It.IsAny<LogEvent>()))
+                .Callback(() => throw new Exception());
+            var logEvents = CreateLogEvents();
+
+            // Act + assert
+            Assert.ThrowsAsync<Exception>(() => _sut.WriteBatch(logEvents, _dataTable));
+        }
+
+        [Fact]
         public void WriteBatchRethrowsIfSqlConnectionFactoryCreateThrows()
         {
             // Arrange

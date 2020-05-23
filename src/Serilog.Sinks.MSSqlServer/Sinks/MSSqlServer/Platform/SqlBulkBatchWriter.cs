@@ -34,11 +34,10 @@ namespace Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform
 
         public async Task WriteBatch(IEnumerable<LogEvent> events, DataTable dataTable)
         {
-            // Copy the events to the data table
-            FillDataTable(events, dataTable);
-
             try
             {
+                FillDataTable(events, dataTable);
+
                 using (var cn = _sqlConnectionFactory.Create())
                 {
                     await cn.OpenAsync().ConfigureAwait(false);
@@ -61,7 +60,6 @@ namespace Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform
             }
             finally
             {
-                // Processed the items, clear for the next run
                 dataTable.Clear();
             }
         }
