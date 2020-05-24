@@ -1,11 +1,4 @@
 ﻿using System;
-#if NET452
-using System.Data.SqlClient;
-#else
-using Microsoft.Data.SqlClient;
-#endif
-using System.Linq;
-using Dapper;
 using FluentAssertions;
 using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
@@ -45,15 +38,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             Log.CloseAndFlush();
 
             // Assert
-            using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
-            {
-                conn.Execute($"use {DatabaseFixture.Database}");
-                var query = conn.Query<SysObjectQuery>($@"SELECT P.OBJECT_ID AS IndexType FROM SYS.OBJECTS O INNER JOIN SYS.PARTITIONS P ON P.OBJECT_ID = O.OBJECT_ID WHERE NAME = '{DatabaseFixture.LogTableName}'");
-                var results = query as SysObjectQuery[] ?? query.ToArray();
-
-                // type > 1 indicates b-tree (clustered index)
-                results.Should().Contain(x => x.IndexType > 1);
-            }
+            VerifyCustomQuery<SysObjectQuery>($@"SELECT P.OBJECT_ID AS IndexType FROM SYS.OBJECTS O INNER JOIN SYS.PARTITIONS P ON P.OBJECT_ID = O.OBJECT_ID WHERE NAME = '{DatabaseFixture.LogTableName}'",
+                e => e.Should().Contain(x => x.IndexType > 1));
         }
 
         [Fact]
@@ -80,15 +66,10 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             Log.CloseAndFlush();
 
             // Assert
-            using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
-            {
-                conn.Execute($"use {DatabaseFixture.Database}");
-                var query = conn.Query<sp_pkey>($@"exec sp_pkeys '{DatabaseFixture.LogTableName}'");
-                var results = query as sp_pkey[] ?? query.ToArray();
-
-                results.Should().Contain(x => x.COLUMN_NAME == "TimeStamp");
-                results.Should().Contain(x => x.PK_NAME == $"PK_{DatabaseFixture.LogTableName}");
-            }
+            VerifyCustomQuery<sp_pkey>($@"exec sp_pkeys '{DatabaseFixture.LogTableName}'",
+                e => e.Should().Contain(x => x.COLUMN_NAME == "TimeStamp"));
+            VerifyCustomQuery<sp_pkey>($@"exec sp_pkeys '{DatabaseFixture.LogTableName}'",
+                e => e.Should().Contain(x => x.PK_NAME == $"PK_{DatabaseFixture.LogTableName}"));
         }
 
         [Fact]
@@ -121,14 +102,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             Log.CloseAndFlush();
 
             // Assert
-            using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
-            {
-                conn.Execute($"use {DatabaseFixture.Database}");
-                var query = conn.Query<SysIndex_CCI>("select name from sys.indexes where type = 5");
-                var results = query as SysIndex_CCI[] ?? query.ToArray();
-
-                results.Should().Contain(x => x.name == $"CCI_{DatabaseFixture.LogTableName}");
-            }
+            VerifyCustomQuery<SysIndex_CCI>("select name from sys.indexes where type = 5",
+                e => e.Should().Contain(x => x.name == $"CCI_{DatabaseFixture.LogTableName}"));
         }
     }
 }

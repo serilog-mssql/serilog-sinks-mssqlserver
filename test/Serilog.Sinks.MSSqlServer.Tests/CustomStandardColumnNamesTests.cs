@@ -1,13 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-#if NET452
-using System.Data.SqlClient;
-#else
-using Microsoft.Data.SqlClient;
-#endif
 using System.IO;
-using Dapper;
-using FluentAssertions;
 using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
@@ -427,16 +420,6 @@ namespace Serilog.Sinks.MSSqlServer.Tests
 
             // Assert
             VerifyLogMessageWasWritten(loggingInformationMessage);
-        }
-
-        private static void VerifyCustomLogMessageWasWritten(string message)
-        {
-            using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
-            {
-                var logEvents = conn.Query<CustomStandardLogColumns>($"SELECT CustomMessage FROM {DatabaseFixture.LogTableName}");
-
-                logEvents.Should().Contain(e => e.CustomMessage.Contains(message));
-            }
         }
     }
 }

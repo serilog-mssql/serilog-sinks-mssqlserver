@@ -1,10 +1,4 @@
-﻿#if NET452
-using System.Data.SqlClient;
-#else
-using Microsoft.Data.SqlClient;
-#endif
-using Dapper;
-using FluentAssertions;
+﻿using FluentAssertions;
 using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
@@ -48,13 +42,10 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             Log.CloseAndFlush();
 
             // Assert
-            using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
-            {
-                var logEvents = conn.Query<PropertiesColumns>($"SELECT Properties from {DatabaseFixture.LogTableName}");
-
-                logEvents.Should().Contain(e => e.Properties.Contains("AValue"));
-                logEvents.Should().NotContain(e => e.Properties.Contains("BValue"));
-            }
+            VerifyCustomQuery<PropertiesColumns>($"SELECT Properties from {DatabaseFixture.LogTableName}",
+                e => e.Should().Contain(l => l.Properties.Contains("AValue")));
+            VerifyCustomQuery<PropertiesColumns>($"SELECT Properties from {DatabaseFixture.LogTableName}",
+                e => e.Should().NotContain(l => l.Properties.Contains("BValue")));
         }
 
         [Fact]
@@ -86,13 +77,10 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             Log.CloseAndFlush();
 
             // Assert
-            using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
-            {
-                var logEvents = conn.Query<PropertiesColumns>($"SELECT Properties from {DatabaseFixture.LogTableName}");
-
-                logEvents.Should().Contain(e => e.Properties.Contains("AValue"));
-                logEvents.Should().NotContain(e => e.Properties.Contains("BValue"));
-            }
+            VerifyCustomQuery<PropertiesColumns>($"SELECT Properties from {DatabaseFixture.LogTableName}",
+                e => e.Should().Contain(l => l.Properties.Contains("AValue")));
+            VerifyCustomQuery<PropertiesColumns>($"SELECT Properties from {DatabaseFixture.LogTableName}",
+                e => e.Should().NotContain(l => l.Properties.Contains("BValue")));
         }
     }
 }
