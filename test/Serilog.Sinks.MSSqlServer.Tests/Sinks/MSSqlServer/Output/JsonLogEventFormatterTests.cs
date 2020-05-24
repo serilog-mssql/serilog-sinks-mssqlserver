@@ -8,7 +8,7 @@ using Serilog.Sinks.MSSqlServer.Output;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
 
-namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Output
+namespace Serilog.Sinks.MSSqlServer.Tests.Output
 {
     [Trait(TestCategory.TraitName, TestCategory.Unit)]
     public class JsonLogEventFormatterTests

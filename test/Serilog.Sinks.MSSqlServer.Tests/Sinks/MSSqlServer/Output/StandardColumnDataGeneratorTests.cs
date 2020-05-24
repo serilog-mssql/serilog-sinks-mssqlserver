@@ -12,7 +12,7 @@ using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
 using static Serilog.Sinks.MSSqlServer.ColumnOptions;
 
-namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Output
+namespace Serilog.Sinks.MSSqlServer.Tests.Output
 {
     [Trait(TestCategory.TraitName, TestCategory.Unit)]
     public class StandardColumnDataGeneratorTests

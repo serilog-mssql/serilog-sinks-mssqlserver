@@ -33,10 +33,10 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.System.C
         {
             // Arrange
             var inputConfigSection = new MSSqlServerConfigurationSection();
-            var inputColumnOptions = new ColumnOptions();
-            var expectedResult = new ColumnOptions();
+            var inputColumnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions();
+            var expectedResult = new Serilog.Sinks.MSSqlServer.ColumnOptions();
             var columnOptionsProviderMock = new Mock<ISystemConfigurationColumnOptionsProvider>();
-            columnOptionsProviderMock.Setup(p => p.ConfigureColumnOptions(It.IsAny<MSSqlServerConfigurationSection>(), It.IsAny<ColumnOptions>()))
+            columnOptionsProviderMock.Setup(p => p.ConfigureColumnOptions(It.IsAny<MSSqlServerConfigurationSection>(), It.IsAny<Serilog.Sinks.MSSqlServer.ColumnOptions>()))
                 .Returns(expectedResult);
             var sut = new ApplySystemConfiguration(null, columnOptionsProviderMock.Object, null);
 

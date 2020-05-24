@@ -36,7 +36,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                     BatchPostingLimit = 1,
                     BatchPeriod = TimeSpan.FromSeconds(10)
                 },
-                columnOptions: new ColumnOptions { Level = { StoreAsEnum = true } })
+                columnOptions: new Serilog.Sinks.MSSqlServer.ColumnOptions { Level = { StoreAsEnum = true } })
                 .CreateLogger();
 
             // Act
@@ -71,7 +71,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                     BatchPostingLimit = 1,
                     BatchPeriod = TimeSpan.FromSeconds(10)
                 },
-                columnOptions: new ColumnOptions { Level = { StoreAsEnum = false } })
+                columnOptions: new Serilog.Sinks.MSSqlServer.ColumnOptions { Level = { StoreAsEnum = false } })
                 .CreateLogger();
 
             // Act
@@ -104,7 +104,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                     TableName = DatabaseFixture.LogTableName,
                     AutoCreateSqlTable = true
                 },
-                columnOptions: new ColumnOptions { Level = { StoreAsEnum = true } })
+                columnOptions: new Serilog.Sinks.MSSqlServer.ColumnOptions { Level = { StoreAsEnum = true } })
                 .CreateLogger();
 
             // Act
@@ -137,7 +137,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                     TableName = DatabaseFixture.LogTableName,
                     AutoCreateSqlTable = true
                 },
-                columnOptions: new ColumnOptions { Level = { StoreAsEnum = false } })
+                columnOptions: new Serilog.Sinks.MSSqlServer.ColumnOptions { Level = { StoreAsEnum = false } })
                 .CreateLogger();
 
             // Act

@@ -23,7 +23,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         public void FilteredProperties()
         {
             // Arrange
-            var columnOptions = new ColumnOptions();
+            var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions();
             columnOptions.Properties.PropertiesFilter = (propName) => propName == "A";
 
             Log.Logger = new LoggerConfiguration()
@@ -61,7 +61,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         public void FilteredPropertiesWhenAuditing()
         {
             // Arrange
-            var columnOptions = new ColumnOptions();
+            var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions();
             columnOptions.Properties.PropertiesFilter = (propName) => propName == "A";
 
             Log.Logger = new LoggerConfiguration()

@@ -2,7 +2,7 @@
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
 
-namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer
+namespace Serilog.Sinks.MSSqlServer.Tests
 {
     [Trait(TestCategory.TraitName, TestCategory.Unit)]
     public class SqlServerColumnTests

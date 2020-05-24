@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 using Moq;
 using Serilog.Events;
 using Serilog.Sinks.MSSqlServer.Output;
-using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform;
-using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform.SqlClient;
+using Serilog.Sinks.MSSqlServer.Platform;
+using Serilog.Sinks.MSSqlServer.Platform.SqlClient;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
 
-namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Platform
+namespace Serilog.Sinks.MSSqlServer.Tests.Platform
 {
     public class SqlBulkBatchWriterTests : IDisposable
     {

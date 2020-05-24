@@ -4,14 +4,13 @@ using System.Data;
 using Moq;
 using Serilog.Events;
 using Serilog.Parsing;
+using Serilog.Sinks.MSSqlServer.Dependencies;
 using Serilog.Sinks.MSSqlServer.Platform;
-using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Dependencies;
 using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
-using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
 
-namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer
+namespace Serilog.Sinks.MSSqlServer.Tests
 {
     [Trait(TestCategory.TraitName, TestCategory.Unit)]
     public class MSSqlServerAuditSinkTests : IDisposable

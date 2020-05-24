@@ -25,7 +25,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         public void NonClusteredDefaultIdPrimaryKey()
         {
             // Arrange
-            var columnOptions = new ColumnOptions();
+            var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions();
             columnOptions.Id.NonClusteredIndex = true;
 
             Log.Logger = new LoggerConfiguration()
@@ -60,7 +60,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         public void AlternatePrimaryKey()
         {
             // Arrange
-            var columnOptions = new ColumnOptions();
+            var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions();
             columnOptions.PrimaryKey = columnOptions.TimeStamp;
 
             Log.Logger = new LoggerConfiguration()
@@ -95,7 +95,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         public void ColumnstoreIndex()
         {
             // Arrange
-            var columnOptions = new ColumnOptions();
+            var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions();
             // char MAX not supported prior to SQL2017
             columnOptions.Exception.DataLength = 512;
             columnOptions.Level.DataLength = 16;

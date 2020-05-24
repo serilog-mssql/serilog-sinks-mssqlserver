@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.Azure.Services.AppAuthentication;
 
-namespace Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform
+namespace Serilog.Sinks.MSSqlServer.Platform
 {
     internal class AzureManagedServiceAuthenticator : IAzureManagedServiceAuthenticator
     {

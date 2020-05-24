@@ -8,7 +8,7 @@ using Serilog.Debugging;
 using Serilog.Events;
 using Serilog.Sinks.MSSqlServer.Output;
 
-namespace Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform
+namespace Serilog.Sinks.MSSqlServer.Platform
 {
     internal class SqlBulkBatchWriter : ISqlBulkBatchWriter
     {

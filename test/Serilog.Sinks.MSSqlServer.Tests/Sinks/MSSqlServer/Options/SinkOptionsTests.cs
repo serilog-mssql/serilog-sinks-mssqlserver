@@ -3,7 +3,7 @@ using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
 
-namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Options
+namespace Serilog.Sinks.MSSqlServer.Tests.Options
 {
     [Trait(TestCategory.TraitName, TestCategory.Unit)]
     public class SinkOptionsTests

@@ -6,7 +6,7 @@ using Serilog.Sinks.MSSqlServer.Platform;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
 
-namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Platform
+namespace Serilog.Sinks.MSSqlServer.Tests.Platform
 {
     [Trait(TestCategory.TraitName, TestCategory.Unit)]
     public class DataTableCreatorTests

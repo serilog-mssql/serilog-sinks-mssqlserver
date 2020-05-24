@@ -36,7 +36,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                     BatchPostingLimit = 1,
                     BatchPeriod = TimeSpan.FromSeconds(10)
                 },
-                columnOptions: new ColumnOptions())
+                columnOptions: new Serilog.Sinks.MSSqlServer.ColumnOptions())
                 .CreateLogger();
 
             CreateTrigger();
@@ -60,7 +60,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         public void TestOptionsDisableTriggersOnLogTable()
         {
             // Arrange
-            var options = new ColumnOptions { DisableTriggers = true };
+            var options = new Serilog.Sinks.MSSqlServer.ColumnOptions { DisableTriggers = true };
             var loggerConfiguration = new LoggerConfiguration();
             Log.Logger = loggerConfiguration.WriteTo.MSSqlServer(
                 connectionString: DatabaseFixture.LogEventsConnectionString,
@@ -103,7 +103,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                     TableName = DatabaseFixture.LogTableName,
                     AutoCreateSqlTable = true
                 },
-                columnOptions: new ColumnOptions())
+                columnOptions: new Serilog.Sinks.MSSqlServer.ColumnOptions())
                 .CreateLogger();
 
             CreateTrigger();
@@ -127,7 +127,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         public void TestAuditOptionsDisableTriggersOnLogTableThrowsNotSupportedException()
         {
             // Arrange
-            var options = new ColumnOptions { DisableTriggers = true };
+            var options = new Serilog.Sinks.MSSqlServer.ColumnOptions { DisableTriggers = true };
             var loggerConfiguration = new LoggerConfiguration();
             Assert.Throws<NotSupportedException>(() => loggerConfiguration.AuditTo.MSSqlServer(
                 connectionString: DatabaseFixture.LogEventsConnectionString,

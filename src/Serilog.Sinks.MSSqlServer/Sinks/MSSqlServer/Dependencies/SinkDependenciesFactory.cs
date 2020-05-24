@@ -3,9 +3,8 @@ using Serilog.Formatting;
 using Serilog.Sinks.MSSqlServer.Output;
 using Serilog.Sinks.MSSqlServer.Platform;
 using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
-using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform;
 
-namespace Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Dependencies
+namespace Serilog.Sinks.MSSqlServer.Dependencies
 {
     internal static class SinkDependenciesFactory
     {

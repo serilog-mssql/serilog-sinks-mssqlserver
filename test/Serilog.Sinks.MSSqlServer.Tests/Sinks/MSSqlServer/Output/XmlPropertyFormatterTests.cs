@@ -3,7 +3,7 @@ using Serilog.Events;
 using Serilog.Sinks.MSSqlServer.Output;
 using Xunit;
 
-namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Output
+namespace Serilog.Sinks.MSSqlServer.Tests.Output
 {
     public class XmlPropertyFormatterTests
     {

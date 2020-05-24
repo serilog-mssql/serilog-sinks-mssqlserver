@@ -31,7 +31,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             // meaning of the flag. Contrast with LogEventExcludeStandardProperties below.
 
             // Arrange
-            var columnOptions = new ColumnOptions()
+            var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions()
             {
                 AdditionalColumns = new List<SqlColumn>
                 {
@@ -80,7 +80,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         public void LogEventExcludeStandardColumns()
         {
             // Arrange
-            var columnOptions = new ColumnOptions();
+            var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions();
             columnOptions.Store.Remove(StandardColumn.Properties);
             columnOptions.Store.Add(StandardColumn.LogEvent);
             columnOptions.LogEvent.ExcludeStandardColumns = true;
@@ -121,7 +121,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         public void ExcludeIdColumn()
         {
             // Arrange
-            var columnOptions = new ColumnOptions();
+            var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions();
             columnOptions.Store.Remove(StandardColumn.Id);
 
             Log.Logger = new LoggerConfiguration()
@@ -156,7 +156,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         public void BigIntIdColumn()
         {
             // Arrange
-            var columnOptions = new ColumnOptions();
+            var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions();
             columnOptions.Id.DataType = SqlDbType.BigInt;
 
             Log.Logger = new LoggerConfiguration()
@@ -190,7 +190,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         public void XmlPropertyColumn()
         {
             // Arrange
-            var columnOptions = new ColumnOptions();
+            var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions();
             columnOptions.Properties.DataType = SqlDbType.Xml;
 
             Log.Logger = new LoggerConfiguration()
@@ -232,7 +232,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             // Arrange
             var schemaName = "CustomTestSchema";
             var tableName = "CustomSchemaLogTable";
-            var columnOptions = new ColumnOptions();
+            var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions();
 
             Log.Logger = new LoggerConfiguration()
                 .WriteTo.MSSqlServer
@@ -270,7 +270,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             // Arrange
             var schemaName = "CustomTestSchema";
             var tableName = "CustomSchemaLogTable";
-            var columnOptions = new ColumnOptions();
+            var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions();
 
             Log.Logger = new LoggerConfiguration()
                 .WriteTo.MSSqlServer
@@ -304,7 +304,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         public void LogEventStoreAsEnum()
         {
             // Arrange
-            var columnOptions = new ColumnOptions();
+            var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions();
             columnOptions.Level.StoreAsEnum = true;
             columnOptions.Store.Add(StandardColumn.LogEvent);
 

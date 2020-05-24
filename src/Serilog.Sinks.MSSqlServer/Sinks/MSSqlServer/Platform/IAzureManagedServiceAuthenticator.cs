@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform
+namespace Serilog.Sinks.MSSqlServer.Platform
 {
     internal interface IAzureManagedServiceAuthenticator
     {
