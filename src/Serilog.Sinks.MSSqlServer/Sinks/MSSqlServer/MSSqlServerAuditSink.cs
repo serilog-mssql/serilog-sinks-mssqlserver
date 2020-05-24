@@ -16,9 +16,9 @@ using System;
 using Serilog.Core;
 using Serilog.Events;
 using Serilog.Formatting;
-using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Dependencies;
+using Serilog.Sinks.MSSqlServer.Dependencies;
+using Serilog.Sinks.MSSqlServer.Platform;
 using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
-using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform;
 
 namespace Serilog.Sinks.MSSqlServer
 {

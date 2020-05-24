@@ -103,6 +103,16 @@ namespace Serilog.Sinks.MSSqlServer.Tests.TestUtils
             VerifyStringColumnWritten(messageColumnName, expectedMessage);
         }
 
+        protected static void VerifyCustomLogMessageWasWritten(string expectedMessage)
+        {
+            using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
+            {
+                var logEvents = conn.Query<CustomStandardLogColumns>($"SELECT CustomMessage FROM {DatabaseFixture.LogTableName}");
+
+                logEvents.Should().Contain(e => e.CustomMessage.Contains(expectedMessage));
+            }
+        }
+
         protected static void VerifyStringColumnWritten(string columnName, string expectedValue)
         {
             using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
@@ -120,6 +130,42 @@ namespace Serilog.Sinks.MSSqlServer.Tests.TestUtils
                 var logEvents = conn.Query<int>($"SELECT {columnName} FROM {DatabaseFixture.LogTableName}");
 
                 logEvents.Should().Contain(c => c == expectedValue);
+            }
+        }
+
+        protected static void VerifyColumnStoreIndex()
+        {
+            using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
+            {
+                conn.Execute($"use {DatabaseFixture.Database}");
+                var query = conn.Query<SysIndex_CCI>("select name from sys.indexes where type = 5");
+                var results = query as SysIndex_CCI[] ?? query.ToArray();
+
+                results.Should().Contain(x => x.name == $"CCI_{DatabaseFixture.LogTableName}");
+            }
+        }
+
+        protected static void VerifyCustomQuery<TColumnDefinition>(string query, Action<IEnumerable<TColumnDefinition>> validationAction)
+        {
+            using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
+            {
+                var logEvents = conn.Query<TColumnDefinition>(query);
+                validationAction?.Invoke(logEvents);
+            }
+        }
+
+        protected static void CreateTrigger(string logTriggerTableName, string logTriggerName)
+        {
+            using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
+            {
+                conn.Execute($"CREATE TABLE {logTriggerTableName} ([Id] [UNIQUEIDENTIFIER] NOT NULL, [Data] [NVARCHAR](50) NOT NULL)");
+                conn.Execute($@"
+CREATE TRIGGER {logTriggerName} ON {DatabaseFixture.LogTableName} 
+AFTER INSERT 
+AS
+BEGIN 
+INSERT INTO {logTriggerTableName} VALUES (NEWID(), 'Data') 
+END");
             }
         }
 

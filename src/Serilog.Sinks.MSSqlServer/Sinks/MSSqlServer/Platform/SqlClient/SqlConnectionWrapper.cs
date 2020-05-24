@@ -6,7 +6,7 @@ using Microsoft.Data.SqlClient;
 #endif
 using System.Threading.Tasks;
 
-namespace Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform.SqlClient
+namespace Serilog.Sinks.MSSqlServer.Platform.SqlClient
 {
     internal class SqlConnectionWrapper : ISqlConnectionWrapper
     {

@@ -1,13 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-#if NET452
-using System.Data.SqlClient;
-#else
-using Microsoft.Data.SqlClient;
-#endif
 using System.IO;
-using Dapper;
-using FluentAssertions;
 using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
@@ -27,7 +20,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         public void CustomIdColumnLegacyInterface()
         {
             // Arrange
-            var options = new ColumnOptions();
+            var options = new Serilog.Sinks.MSSqlServer.ColumnOptions();
             var customIdName = "CustomIdName";
             options.Id.ColumnName = customIdName;
 
@@ -43,7 +36,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         public void CustomIdColumnSinkOptionsInterface()
         {
             // Arrange
-            var columnOptions = new ColumnOptions();
+            var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions();
             var customIdName = "CustomIdName";
             columnOptions.Id.ColumnName = customIdName;
 
@@ -68,7 +61,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         public void DefaultIdColumnLegacyInterface()
         {
             // Arrange
-            var options = new ColumnOptions();
+            var options = new Serilog.Sinks.MSSqlServer.ColumnOptions();
 
             // Act
             using (var sink = new MSSqlServerSink(DatabaseFixture.LogEventsConnectionString, DatabaseFixture.LogTableName, 1, TimeSpan.FromSeconds(1), null, true, options, "dbo", null))
@@ -82,7 +75,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         public void DefaultIdColumnSinkOptionsInterface()
         {
             // Arrange
-            var columnOptions = new ColumnOptions();
+            var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions();
 
             // Act
             using (var sink = new MSSqlServerSink(DatabaseFixture.LogEventsConnectionString,
@@ -105,7 +98,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         public void TableCreatedWithCustomNamesLegacyInterface()
         {
             // Arrange
-            var options = new ColumnOptions();
+            var options = new Serilog.Sinks.MSSqlServer.ColumnOptions();
             var standardNames = new List<string> { "CustomMessage", "CustomMessageTemplate", "CustomLevel", "CustomTimeStamp", "CustomException", "CustomProperties" };
 
             options.Message.ColumnName = "CustomMessage";
@@ -127,7 +120,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         public void TableCreatedWithCustomNamesSinkOptionsInterface()
         {
             // Arrange
-            var columnOptions = new ColumnOptions();
+            var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions();
             var standardNames = new List<string> { "CustomMessage", "CustomMessageTemplate", "CustomLevel", "CustomTimeStamp", "CustomException", "CustomProperties" };
 
             columnOptions.Message.ColumnName = "CustomMessage";
@@ -158,7 +151,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         public void TableCreatedWithDefaultNamesLegacyInterface()
         {
             // Arrange
-            var options = new ColumnOptions();
+            var options = new Serilog.Sinks.MSSqlServer.ColumnOptions();
             var standardNames = new List<string> { "Message", "MessageTemplate", "Level", "TimeStamp", "Exception", "Properties" };
 
             // Act
@@ -173,7 +166,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         public void TableCreatedWithDefaultNamesSinkOptionsInterface()
         {
             // Arrange
-            var columnOptions = new ColumnOptions();
+            var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions();
             var standardNames = new List<string> { "Message", "MessageTemplate", "Level", "TimeStamp", "Exception", "Properties" };
 
             // Act
@@ -197,7 +190,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         public void WriteEventToCustomStandardColumnsLegacyInterface()
         {
             // Arrange
-            var options = new ColumnOptions();
+            var options = new Serilog.Sinks.MSSqlServer.ColumnOptions();
 
             options.Message.ColumnName = "CustomMessage";
             options.MessageTemplate.ColumnName = "CustomMessageTemplate";
@@ -232,7 +225,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         public void WriteEventToCustomStandardColumnsSinkOptionsInterface()
         {
             // Arrange
-            var options = new ColumnOptions();
+            var options = new Serilog.Sinks.MSSqlServer.ColumnOptions();
 
             options.Message.ColumnName = "CustomMessage";
             options.MessageTemplate.ColumnName = "CustomMessageTemplate";
@@ -278,7 +271,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 autoCreateSqlTable: true,
                 batchPostingLimit: 1,
                 period: TimeSpan.FromSeconds(10),
-                columnOptions: new ColumnOptions())
+                columnOptions: new Serilog.Sinks.MSSqlServer.ColumnOptions())
                 .CreateLogger();
 
 
@@ -309,7 +302,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                     BatchPostingLimit = 1,
                     BatchPeriod = TimeSpan.FromSeconds(10)
                 },
-                columnOptions: new ColumnOptions())
+                columnOptions: new Serilog.Sinks.MSSqlServer.ColumnOptions())
                 .CreateLogger();
 
 
@@ -331,7 +324,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         public void AuditEventToCustomStandardColumnsLegacyInterface()
         {
             // Arrange
-            var options = new ColumnOptions();
+            var options = new Serilog.Sinks.MSSqlServer.ColumnOptions();
 
             options.Message.ColumnName = "CustomMessage";
             options.MessageTemplate.ColumnName = "CustomMessageTemplate";
@@ -366,7 +359,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         public void AuditEventToCustomStandardColumnsSinkOptionsInterface()
         {
             // Arrange
-            var options = new ColumnOptions();
+            var options = new Serilog.Sinks.MSSqlServer.ColumnOptions();
 
             options.Message.ColumnName = "CustomMessage";
             options.MessageTemplate.ColumnName = "CustomMessageTemplate";
@@ -412,7 +405,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                     TableName = DatabaseFixture.LogTableName,
                     AutoCreateSqlTable = true
                 },
-                columnOptions: new ColumnOptions())
+                columnOptions: new Serilog.Sinks.MSSqlServer.ColumnOptions())
                 .CreateLogger();
 
             // Act
@@ -427,16 +420,6 @@ namespace Serilog.Sinks.MSSqlServer.Tests
 
             // Assert
             VerifyLogMessageWasWritten(loggingInformationMessage);
-        }
-
-        private static void VerifyCustomLogMessageWasWritten(string message)
-        {
-            using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
-            {
-                var logEvents = conn.Query<CustomStandardLogColumns>($"SELECT CustomMessage FROM {DatabaseFixture.LogTableName}");
-
-                logEvents.Should().Contain(e => e.CustomMessage.Contains(message));
-            }
         }
     }
 }

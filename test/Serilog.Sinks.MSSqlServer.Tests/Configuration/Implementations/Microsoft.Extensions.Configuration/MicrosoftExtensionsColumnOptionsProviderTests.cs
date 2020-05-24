@@ -22,7 +22,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
         public void ConfigureColumnOptionsCalledWithConfigSectionNullReturnsUnchangedColumnOptions()
         {
             // Arrange
-            var columnOptions = new ColumnOptions();
+            var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions();
             columnOptions.Store.Clear();
             columnOptions.Store.Add(StandardColumn.LogEvent);
             var sut = new MicrosoftExtensionsColumnOptionsProvider();
@@ -39,7 +39,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
         public void ConfigureColumnOptionsCalledWithEmptyConfigSectionReturnsUnchangedColumnOptions()
         {
             // Arrange
-            var columnOptions = new ColumnOptions();
+            var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions();
             columnOptions.Store.Clear();
             columnOptions.Store.Add(StandardColumn.LogEvent);
             var configurationSectionMock = new Mock<IConfigurationSection>();
@@ -68,7 +68,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
             var sut = new MicrosoftExtensionsColumnOptionsProvider();
 
             // Act
-            var result = sut.ConfigureColumnOptions(new ColumnOptions(), _configurationSectionMock.Object);
+            var result = sut.ConfigureColumnOptions(new Serilog.Sinks.MSSqlServer.ColumnOptions(), _configurationSectionMock.Object);
 
             // Assert
             Assert.True(result.Store.Contains(StandardColumn.LogEvent));
@@ -90,7 +90,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
             var sut = new MicrosoftExtensionsColumnOptionsProvider();
 
             // Act
-            var result = sut.ConfigureColumnOptions(new ColumnOptions(), _configurationSectionMock.Object);
+            var result = sut.ConfigureColumnOptions(new Serilog.Sinks.MSSqlServer.ColumnOptions(), _configurationSectionMock.Object);
 
             // Assert
             Assert.False(result.Store.Contains(StandardColumn.Message));
@@ -110,7 +110,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
             var sut = new MicrosoftExtensionsColumnOptionsProvider();
 
             // Act
-            var result = sut.ConfigureColumnOptions(new ColumnOptions(), _configurationSectionMock.Object);
+            var result = sut.ConfigureColumnOptions(new Serilog.Sinks.MSSqlServer.ColumnOptions(), _configurationSectionMock.Object);
 
             // Assert
             AssertColumnSqlOptions(columnName, dataType, allowNull, nonClusteredIndex, result.Id);
@@ -125,7 +125,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
             var sut = new MicrosoftExtensionsColumnOptionsProvider();
 
             // Act
-            var result = sut.ConfigureColumnOptions(new ColumnOptions(), _configurationSectionMock.Object);
+            var result = sut.ConfigureColumnOptions(new Serilog.Sinks.MSSqlServer.ColumnOptions(), _configurationSectionMock.Object);
 
             // Assert
             Assert.False(result.Id.AllowNull);
@@ -141,7 +141,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
             var sut = new MicrosoftExtensionsColumnOptionsProvider();
 
             // Act
-            var result = sut.ConfigureColumnOptions(new ColumnOptions(), _configurationSectionMock.Object);
+            var result = sut.ConfigureColumnOptions(new Serilog.Sinks.MSSqlServer.ColumnOptions(), _configurationSectionMock.Object);
 
             // Assert
 #pragma warning disable 618 // deprecated: BigInt property
@@ -162,7 +162,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
             var sut = new MicrosoftExtensionsColumnOptionsProvider();
 
             // Act
-            var result = sut.ConfigureColumnOptions(new ColumnOptions(), _configurationSectionMock.Object);
+            var result = sut.ConfigureColumnOptions(new Serilog.Sinks.MSSqlServer.ColumnOptions(), _configurationSectionMock.Object);
 
             // Assert
             AssertColumnSqlOptions(columnName, dataType, allowNull, nonClusteredIndex, result.Level);
@@ -178,7 +178,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
             var sut = new MicrosoftExtensionsColumnOptionsProvider();
 
             // Act
-            var result = sut.ConfigureColumnOptions(new ColumnOptions(), _configurationSectionMock.Object);
+            var result = sut.ConfigureColumnOptions(new Serilog.Sinks.MSSqlServer.ColumnOptions(), _configurationSectionMock.Object);
 
             // Assert
             Assert.True(result.Level.StoreAsEnum);
@@ -197,7 +197,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
             var sut = new MicrosoftExtensionsColumnOptionsProvider();
 
             // Act
-            var result = sut.ConfigureColumnOptions(new ColumnOptions(), _configurationSectionMock.Object);
+            var result = sut.ConfigureColumnOptions(new Serilog.Sinks.MSSqlServer.ColumnOptions(), _configurationSectionMock.Object);
 
             // Assert
             AssertColumnSqlOptions(columnName, dataType, allowNull, nonClusteredIndex, result.Properties);
@@ -210,11 +210,11 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
             SetupConfigurationSectionMocks();
             var columnSectionMock = SetupColumnSectionMock("properties");
             columnSectionMock.Setup(s => s["excludeAdditionalProperties"]).Returns("true");
-            var columnOptions = new ColumnOptions();
+            var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions();
             var sut = new MicrosoftExtensionsColumnOptionsProvider();
 
             // Act
-            var result = sut.ConfigureColumnOptions(new ColumnOptions(), _configurationSectionMock.Object);
+            var result = sut.ConfigureColumnOptions(new Serilog.Sinks.MSSqlServer.ColumnOptions(), _configurationSectionMock.Object);
 
             // Assert
             Assert.True(result.Properties.ExcludeAdditionalProperties);
@@ -231,7 +231,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
             var sut = new MicrosoftExtensionsColumnOptionsProvider();
 
             // Act
-            var result = sut.ConfigureColumnOptions(new ColumnOptions(), _configurationSectionMock.Object);
+            var result = sut.ConfigureColumnOptions(new Serilog.Sinks.MSSqlServer.ColumnOptions(), _configurationSectionMock.Object);
 
             // Assert
             Assert.Equal(dictionaryElementName, result.Properties.DictionaryElementName);
@@ -248,7 +248,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
             var sut = new MicrosoftExtensionsColumnOptionsProvider();
 
             // Act
-            var result = sut.ConfigureColumnOptions(new ColumnOptions(), _configurationSectionMock.Object);
+            var result = sut.ConfigureColumnOptions(new Serilog.Sinks.MSSqlServer.ColumnOptions(), _configurationSectionMock.Object);
 
             // Assert
             Assert.Equal(itemElementName, result.Properties.ItemElementName);
@@ -264,7 +264,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
             var sut = new MicrosoftExtensionsColumnOptionsProvider();
 
             // Act
-            var result = sut.ConfigureColumnOptions(new ColumnOptions(), _configurationSectionMock.Object);
+            var result = sut.ConfigureColumnOptions(new Serilog.Sinks.MSSqlServer.ColumnOptions(), _configurationSectionMock.Object);
 
             // Assert
             Assert.True(result.Properties.OmitDictionaryContainerElement);
@@ -280,7 +280,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
             var sut = new MicrosoftExtensionsColumnOptionsProvider();
 
             // Act
-            var result = sut.ConfigureColumnOptions(new ColumnOptions(), _configurationSectionMock.Object);
+            var result = sut.ConfigureColumnOptions(new Serilog.Sinks.MSSqlServer.ColumnOptions(), _configurationSectionMock.Object);
 
             // Assert
             Assert.True(result.Properties.OmitSequenceContainerElement);
@@ -296,7 +296,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
             var sut = new MicrosoftExtensionsColumnOptionsProvider();
 
             // Act
-            var result = sut.ConfigureColumnOptions(new ColumnOptions(), _configurationSectionMock.Object);
+            var result = sut.ConfigureColumnOptions(new Serilog.Sinks.MSSqlServer.ColumnOptions(), _configurationSectionMock.Object);
 
             // Assert
             Assert.True(result.Properties.OmitStructureContainerElement);
@@ -312,7 +312,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
             var sut = new MicrosoftExtensionsColumnOptionsProvider();
 
             // Act
-            var result = sut.ConfigureColumnOptions(new ColumnOptions(), _configurationSectionMock.Object);
+            var result = sut.ConfigureColumnOptions(new Serilog.Sinks.MSSqlServer.ColumnOptions(), _configurationSectionMock.Object);
 
             // Assert
             Assert.True(result.Properties.OmitElementIfEmpty);
@@ -329,7 +329,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
             var sut = new MicrosoftExtensionsColumnOptionsProvider();
 
             // Act
-            var result = sut.ConfigureColumnOptions(new ColumnOptions(), _configurationSectionMock.Object);
+            var result = sut.ConfigureColumnOptions(new Serilog.Sinks.MSSqlServer.ColumnOptions(), _configurationSectionMock.Object);
 
             // Assert
             Assert.Equal(propertyElementName, result.Properties.PropertyElementName);
@@ -346,7 +346,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
             var sut = new MicrosoftExtensionsColumnOptionsProvider();
 
             // Act
-            var result = sut.ConfigureColumnOptions(new ColumnOptions(), _configurationSectionMock.Object);
+            var result = sut.ConfigureColumnOptions(new Serilog.Sinks.MSSqlServer.ColumnOptions(), _configurationSectionMock.Object);
 
             // Assert
             Assert.Equal(rootElementName, result.Properties.RootElementName);
@@ -363,7 +363,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
             var sut = new MicrosoftExtensionsColumnOptionsProvider();
 
             // Act
-            var result = sut.ConfigureColumnOptions(new ColumnOptions(), _configurationSectionMock.Object);
+            var result = sut.ConfigureColumnOptions(new Serilog.Sinks.MSSqlServer.ColumnOptions(), _configurationSectionMock.Object);
 
             // Assert
             Assert.Equal(sequenceElementName, result.Properties.SequenceElementName);
@@ -380,7 +380,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
             var sut = new MicrosoftExtensionsColumnOptionsProvider();
 
             // Act
-            var result = sut.ConfigureColumnOptions(new ColumnOptions(), _configurationSectionMock.Object);
+            var result = sut.ConfigureColumnOptions(new Serilog.Sinks.MSSqlServer.ColumnOptions(), _configurationSectionMock.Object);
 
             // Assert
             Assert.Equal(structureElementName, result.Properties.StructureElementName);
@@ -396,7 +396,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
             var sut = new MicrosoftExtensionsColumnOptionsProvider();
 
             // Act
-            var result = sut.ConfigureColumnOptions(new ColumnOptions(), _configurationSectionMock.Object);
+            var result = sut.ConfigureColumnOptions(new Serilog.Sinks.MSSqlServer.ColumnOptions(), _configurationSectionMock.Object);
 
             // Assert
             Assert.True(result.Properties.UsePropertyKeyAsElementName);
@@ -415,7 +415,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
             var sut = new MicrosoftExtensionsColumnOptionsProvider();
 
             // Act
-            var result = sut.ConfigureColumnOptions(new ColumnOptions(), _configurationSectionMock.Object);
+            var result = sut.ConfigureColumnOptions(new Serilog.Sinks.MSSqlServer.ColumnOptions(), _configurationSectionMock.Object);
 
             // Assert
             AssertColumnSqlOptions(columnName, dataType, allowNull, nonClusteredIndex, result.TimeStamp);
@@ -431,7 +431,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
             var sut = new MicrosoftExtensionsColumnOptionsProvider();
 
             // Act
-            var result = sut.ConfigureColumnOptions(new ColumnOptions(), _configurationSectionMock.Object);
+            var result = sut.ConfigureColumnOptions(new Serilog.Sinks.MSSqlServer.ColumnOptions(), _configurationSectionMock.Object);
 
             // Assert
             Assert.True(result.TimeStamp.ConvertToUtc);
@@ -450,7 +450,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
             var sut = new MicrosoftExtensionsColumnOptionsProvider();
 
             // Act
-            var result = sut.ConfigureColumnOptions(new ColumnOptions(), _configurationSectionMock.Object);
+            var result = sut.ConfigureColumnOptions(new Serilog.Sinks.MSSqlServer.ColumnOptions(), _configurationSectionMock.Object);
 
             // Assert
             AssertColumnSqlOptions(columnName, dataType, allowNull, nonClusteredIndex, result.LogEvent);
@@ -466,7 +466,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
             var sut = new MicrosoftExtensionsColumnOptionsProvider();
 
             // Act
-            var result = sut.ConfigureColumnOptions(new ColumnOptions(), _configurationSectionMock.Object);
+            var result = sut.ConfigureColumnOptions(new Serilog.Sinks.MSSqlServer.ColumnOptions(), _configurationSectionMock.Object);
 
             // Assert
             Assert.True(result.LogEvent.ExcludeAdditionalProperties);
@@ -482,7 +482,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
             var sut = new MicrosoftExtensionsColumnOptionsProvider();
 
             // Act
-            var result = sut.ConfigureColumnOptions(new ColumnOptions(), _configurationSectionMock.Object);
+            var result = sut.ConfigureColumnOptions(new Serilog.Sinks.MSSqlServer.ColumnOptions(), _configurationSectionMock.Object);
 
             // Assert
             Assert.True(result.LogEvent.ExcludeStandardColumns);
@@ -501,7 +501,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
             var sut = new MicrosoftExtensionsColumnOptionsProvider();
 
             // Act
-            var result = sut.ConfigureColumnOptions(new ColumnOptions(), _configurationSectionMock.Object);
+            var result = sut.ConfigureColumnOptions(new Serilog.Sinks.MSSqlServer.ColumnOptions(), _configurationSectionMock.Object);
 
             // Assert
             AssertColumnSqlOptions(columnName, dataType, allowNull, nonClusteredIndex, result.Message);
@@ -520,7 +520,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
             var sut = new MicrosoftExtensionsColumnOptionsProvider();
 
             // Act
-            var result = sut.ConfigureColumnOptions(new ColumnOptions(), _configurationSectionMock.Object);
+            var result = sut.ConfigureColumnOptions(new Serilog.Sinks.MSSqlServer.ColumnOptions(), _configurationSectionMock.Object);
 
             // Assert
             AssertColumnSqlOptions(columnName, dataType, allowNull, nonClusteredIndex, result.Exception);
@@ -539,7 +539,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
             var sut = new MicrosoftExtensionsColumnOptionsProvider();
 
             // Act
-            var result = sut.ConfigureColumnOptions(new ColumnOptions(), _configurationSectionMock.Object);
+            var result = sut.ConfigureColumnOptions(new Serilog.Sinks.MSSqlServer.ColumnOptions(), _configurationSectionMock.Object);
 
             // Assert
             AssertColumnSqlOptions(columnName, dataType, allowNull, nonClusteredIndex, result.MessageTemplate);
@@ -554,7 +554,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
             var sut = new MicrosoftExtensionsColumnOptionsProvider();
 
             // Act
-            var result = sut.ConfigureColumnOptions(new ColumnOptions(), _configurationSectionMock.Object);
+            var result = sut.ConfigureColumnOptions(new Serilog.Sinks.MSSqlServer.ColumnOptions(), _configurationSectionMock.Object);
 
             // Assert
             Assert.True(result.DisableTriggers);
@@ -569,7 +569,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
             var sut = new MicrosoftExtensionsColumnOptionsProvider();
 
             // Act
-            var result = sut.ConfigureColumnOptions(new ColumnOptions(), _configurationSectionMock.Object);
+            var result = sut.ConfigureColumnOptions(new Serilog.Sinks.MSSqlServer.ColumnOptions(), _configurationSectionMock.Object);
 
             // Assert
             Assert.True(result.ClusteredColumnstoreIndex);
@@ -585,7 +585,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
             var sut = new MicrosoftExtensionsColumnOptionsProvider();
 
             // Act + assert
-            Assert.Throws<ArgumentException>(() => sut.ConfigureColumnOptions(new ColumnOptions(), _configurationSectionMock.Object));
+            Assert.Throws<ArgumentException>(() => sut.ConfigureColumnOptions(new Serilog.Sinks.MSSqlServer.ColumnOptions(), _configurationSectionMock.Object));
         }
 
         [Fact]
@@ -597,7 +597,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
             var sut = new MicrosoftExtensionsColumnOptionsProvider();
 
             // Act
-            var result = sut.ConfigureColumnOptions(new ColumnOptions(), _configurationSectionMock.Object);
+            var result = sut.ConfigureColumnOptions(new Serilog.Sinks.MSSqlServer.ColumnOptions(), _configurationSectionMock.Object);
 
             // Assert
             Assert.Equal(result.Message, result.PrimaryKey);
@@ -609,7 +609,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
             // Arrange
             const string customColumnName = "TestCustomColumn";
             var customColumn = new SqlColumn { ColumnName = customColumnName };
-            var columnOptions = new ColumnOptions
+            var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions
             {
                 PrimaryKey = null,
                 AdditionalColumns = new List<SqlColumn> { customColumn }
@@ -630,7 +630,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
         {
             // Arrange
             var customColumn = new SqlColumn { ColumnName = "TestCustomColumn" };
-            var columnOptions = new ColumnOptions
+            var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions
             {
                 PrimaryKey = null,
                 AdditionalColumns = new List<SqlColumn> { customColumn }
@@ -650,7 +650,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
         public void ConfigureColumnOptionsThrowsWhenSettingPrimaryKeyColumnNameToUndefinedColumnNameAndPrimaryKeyRemainsNull()
         {
             // Arrange
-            var columnOptions = new ColumnOptions { PrimaryKey = null };
+            var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions { PrimaryKey = null };
             SetupConfigurationSectionMocks();
             _configurationSectionMock.Setup(s => s["primaryKeyColumnName"]).Returns("TestUndefinedPrimaryKeyColumnName");
             var sut = new MicrosoftExtensionsColumnOptionsProvider();

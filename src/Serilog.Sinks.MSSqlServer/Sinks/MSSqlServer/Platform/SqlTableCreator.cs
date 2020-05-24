@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Data;
 using Serilog.Debugging;
-using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform;
 
 namespace Serilog.Sinks.MSSqlServer.Platform
 {

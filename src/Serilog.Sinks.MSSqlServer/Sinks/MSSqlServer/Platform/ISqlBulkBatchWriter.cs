@@ -3,7 +3,7 @@ using System.Data;
 using System.Threading.Tasks;
 using Serilog.Events;
 
-namespace Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform
+namespace Serilog.Sinks.MSSqlServer.Platform
 {
     internal interface ISqlBulkBatchWriter
     {

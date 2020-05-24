@@ -136,7 +136,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
 
         private static void Arrange(ICollection<SqlColumn> customColumns)
         {
-            var columnOptions = new ColumnOptions
+            var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions
             {
                 AdditionalColumns = customColumns
             };

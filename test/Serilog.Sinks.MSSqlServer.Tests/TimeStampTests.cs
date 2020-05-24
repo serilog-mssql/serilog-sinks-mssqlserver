@@ -1,11 +1,5 @@
 ﻿using System;
 using System.Data;
-#if NET452
-using System.Data.SqlClient;
-#else
-using Microsoft.Data.SqlClient;
-#endif
-using Dapper;
 using FluentAssertions;
 using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
@@ -36,7 +30,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                     BatchPostingLimit = 1,
                     BatchPeriod = TimeSpan.FromSeconds(10)
                 },
-                columnOptions: new ColumnOptions())
+                columnOptions: new Serilog.Sinks.MSSqlServer.ColumnOptions())
                 .CreateLogger();
 
             // Act
@@ -45,11 +39,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             Log.CloseAndFlush();
 
             // Assert
-            using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
-            {
-                var logEvents = conn.Query<TestTimeStampDateTimeEntry>($"SELECT TimeStamp FROM {DatabaseFixture.LogTableName}");
-                logEvents.Should().NotBeEmpty();
-            }
+            VerifyCustomQuery<TestTimeStampDateTimeEntry>($"SELECT TimeStamp FROM {DatabaseFixture.LogTableName}",
+                e => e.Should().NotBeEmpty());
         }
 
         [Trait("Bugfix", "#187")]
@@ -67,7 +58,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                     BatchPostingLimit = 1,
                     BatchPeriod = TimeSpan.FromSeconds(10)
                 },
-                columnOptions: new ColumnOptions { TimeStamp = { DataType = SqlDbType.DateTimeOffset, ConvertToUtc = false } })
+                columnOptions: new Serilog.Sinks.MSSqlServer.ColumnOptions { TimeStamp = { DataType = SqlDbType.DateTimeOffset, ConvertToUtc = false } })
                 .CreateLogger();
             var dateTimeOffsetNow = DateTimeOffset.Now;
 
@@ -77,11 +68,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             Log.CloseAndFlush();
 
             // Assert
-            using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
-            {
-                var logEvents = conn.Query<TestTimeStampDateTimeOffsetEntry>($"SELECT TimeStamp FROM {DatabaseFixture.LogTableName}");
-                logEvents.Should().Contain(e => e.TimeStamp.Offset == dateTimeOffsetNow.Offset);
-            }
+            VerifyCustomQuery<TestTimeStampDateTimeOffsetEntry>($"SELECT TimeStamp FROM {DatabaseFixture.LogTableName}",
+                e => e.Should().Contain(l => l.TimeStamp.Offset == dateTimeOffsetNow.Offset));
         }
 
         [Trait("Bugfix", "#187")]
@@ -99,7 +87,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                     BatchPostingLimit = 1,
                     BatchPeriod = TimeSpan.FromSeconds(10)
                 },
-                columnOptions: new ColumnOptions { TimeStamp = { DataType = SqlDbType.DateTimeOffset, ConvertToUtc = true } })
+                columnOptions: new Serilog.Sinks.MSSqlServer.ColumnOptions { TimeStamp = { DataType = SqlDbType.DateTimeOffset, ConvertToUtc = true } })
                 .CreateLogger();
 
             // Act
@@ -108,11 +96,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             Log.CloseAndFlush();
 
             // Assert
-            using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
-            {
-                var logEvents = conn.Query<TestTimeStampDateTimeOffsetEntry>($"SELECT TimeStamp FROM {DatabaseFixture.LogTableName}");
-                logEvents.Should().Contain(e => e.TimeStamp.Offset == new TimeSpan(0));
-            }
+            VerifyCustomQuery<TestTimeStampDateTimeOffsetEntry>($"SELECT TimeStamp FROM {DatabaseFixture.LogTableName}",
+                e => e.Should().Contain(l => l.TimeStamp.Offset == TimeSpan.Zero));
         }
     }
 }

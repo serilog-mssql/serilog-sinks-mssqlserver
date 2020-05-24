@@ -1,13 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-#if NET452
-using System.Data.SqlClient;
-#else
-using Microsoft.Data.SqlClient;
-#endif
-using System.Linq;
-using Dapper;
 using FluentAssertions;
 using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
@@ -31,7 +24,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             // meaning of the flag. Contrast with LogEventExcludeStandardProperties below.
 
             // Arrange
-            var columnOptions = new ColumnOptions()
+            var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions()
             {
                 AdditionalColumns = new List<SqlColumn>
                 {
@@ -66,13 +59,10 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             Log.CloseAndFlush();
 
             // Assert
-            using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
-            {
-                var logEvents = conn.Query<LogEventColumn>($"SELECT LogEvent from {DatabaseFixture.LogTableName}");
-
-                logEvents.Should().Contain(e => e.LogEvent.Contains("AValue"));
-                logEvents.Should().NotContain(e => e.LogEvent.Contains("BValue"));
-            }
+            VerifyCustomQuery<LogEventColumn>($"SELECT LogEvent from {DatabaseFixture.LogTableName}",
+                e => e.Should().Contain(l => l.LogEvent.Contains("AValue")));
+            VerifyCustomQuery<LogEventColumn>($"SELECT LogEvent from {DatabaseFixture.LogTableName}",
+                e => e.Should().NotContain(l => l.LogEvent.Contains("BValue")));
         }
 
         [Trait("Bugfix", "#90")]
@@ -80,7 +70,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         public void LogEventExcludeStandardColumns()
         {
             // Arrange
-            var columnOptions = new ColumnOptions();
+            var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions();
             columnOptions.Store.Remove(StandardColumn.Properties);
             columnOptions.Store.Add(StandardColumn.LogEvent);
             columnOptions.LogEvent.ExcludeStandardColumns = true;
@@ -108,20 +98,17 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             Log.CloseAndFlush();
 
             // Assert
-            using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
-            {
-                var logEvents = conn.Query<LogEventColumn>($"SELECT LogEvent from {DatabaseFixture.LogTableName}");
-
-                logEvents.Should().Contain(e => e.LogEvent.Contains("AValue"));
-                logEvents.Should().NotContain(e => e.LogEvent.Contains("TimeStamp"));
-            }
+            VerifyCustomQuery<LogEventColumn>($"SELECT LogEvent from {DatabaseFixture.LogTableName}",
+                e => e.Should().Contain(l => l.LogEvent.Contains("AValue")));
+            VerifyCustomQuery<LogEventColumn>($"SELECT LogEvent from {DatabaseFixture.LogTableName}",
+                e => e.Should().NotContain(l => l.LogEvent.Contains("TimeStamp")));
         }
 
         [Fact]
         public void ExcludeIdColumn()
         {
             // Arrange
-            var columnOptions = new ColumnOptions();
+            var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions();
             columnOptions.Store.Remove(StandardColumn.Id);
 
             Log.Logger = new LoggerConfiguration()
@@ -141,22 +128,16 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             Log.CloseAndFlush();
 
             // Assert
-            using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
-            {
-                conn.Execute($"use {DatabaseFixture.Database}");
-                var query = conn.Query<InfoSchema>($@"SELECT COLUMN_NAME AS ColumnName FROM {DatabaseFixture.Database}.INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{DatabaseFixture.LogTableName}'");
-                var results = query as InfoSchema[] ?? query.ToArray();
-
-                results.Should().Contain(x => x.ColumnName == columnOptions.Properties.ColumnName);
-                results.Should().NotContain(x => x.ColumnName == columnOptions.Id.ColumnName);
-            }
+            var query = $@"SELECT COLUMN_NAME AS ColumnName FROM {DatabaseFixture.Database}.INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{DatabaseFixture.LogTableName}'";
+            VerifyCustomQuery<InfoSchema>(query, e => e.Should().Contain(x => x.ColumnName == columnOptions.Properties.ColumnName));
+            VerifyCustomQuery<InfoSchema>(query, e => e.Should().NotContain(x => x.ColumnName == columnOptions.Id.ColumnName));
         }
 
         [Fact]
         public void BigIntIdColumn()
         {
             // Arrange
-            var columnOptions = new ColumnOptions();
+            var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions();
             columnOptions.Id.DataType = SqlDbType.BigInt;
 
             Log.Logger = new LoggerConfiguration()
@@ -176,13 +157,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             Log.CloseAndFlush();
 
             // Assert
-            using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
-            {
-                var query = conn.Query<InfoSchema>($@"SELECT DATA_TYPE AS DataType FROM {DatabaseFixture.Database}.INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{DatabaseFixture.LogTableName}' AND COLUMN_NAME = '{columnOptions.Id.ColumnName}'");
-                var results = query as InfoSchema[] ?? query.ToArray();
-
-                results.Should().Contain(x => x.DataType == "bigint");
-            }
+            VerifyCustomQuery<InfoSchema>($@"SELECT DATA_TYPE AS DataType FROM {DatabaseFixture.Database}.INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{DatabaseFixture.LogTableName}' AND COLUMN_NAME = '{columnOptions.Id.ColumnName}'",
+                e => e.Should().Contain(x => x.DataType == "bigint"));
         }
 
         [Trait("Bugfix", "#130")]
@@ -190,7 +166,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         public void XmlPropertyColumn()
         {
             // Arrange
-            var columnOptions = new ColumnOptions();
+            var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions();
             columnOptions.Properties.DataType = SqlDbType.Xml;
 
             Log.Logger = new LoggerConfiguration()
@@ -210,13 +186,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             Log.CloseAndFlush();
 
             // Assert
-            using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
-            {
-                var query = conn.Query<InfoSchema>($@"SELECT DATA_TYPE AS DataType FROM {DatabaseFixture.Database}.INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{DatabaseFixture.LogTableName}' AND COLUMN_NAME = '{columnOptions.Properties.ColumnName}'");
-                var results = query as InfoSchema[] ?? query.ToArray();
-
-                results.Should().Contain(x => x.DataType == "xml");
-            }
+            VerifyCustomQuery<InfoSchema>($@"SELECT DATA_TYPE AS DataType FROM {DatabaseFixture.Database}.INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{DatabaseFixture.LogTableName}' AND COLUMN_NAME = '{columnOptions.Properties.ColumnName}'",
+                e => e.Should().Contain(x => x.DataType == "xml"));
         }
 
         [Trait("Bugfix", "#107")]
@@ -232,7 +203,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             // Arrange
             var schemaName = "CustomTestSchema";
             var tableName = "CustomSchemaLogTable";
-            var columnOptions = new ColumnOptions();
+            var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions();
 
             Log.Logger = new LoggerConfiguration()
                 .WriteTo.MSSqlServer
@@ -249,13 +220,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             Log.CloseAndFlush();
 
             // Assert
-            using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
-            {
-                var query = conn.Query<InfoSchema>("SELECT SCHEMA_NAME AS SchemaName FROM INFORMATION_SCHEMA.SCHEMATA");
-                var results = query as InfoSchema[] ?? query.ToArray();
-
-                results.Should().Contain(x => x.SchemaName == schemaName);
-            }
+            VerifyCustomQuery<InfoSchema>("SELECT SCHEMA_NAME AS SchemaName FROM INFORMATION_SCHEMA.SCHEMATA",
+                e => e.Should().Contain(x => x.SchemaName == schemaName));
         }
 
         [Trait("Bugfix", "#107")]
@@ -270,7 +236,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             // Arrange
             var schemaName = "CustomTestSchema";
             var tableName = "CustomSchemaLogTable";
-            var columnOptions = new ColumnOptions();
+            var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions();
 
             Log.Logger = new LoggerConfiguration()
                 .WriteTo.MSSqlServer
@@ -290,13 +256,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             Log.CloseAndFlush();
 
             // Assert
-            using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
-            {
-                var query = conn.Query<InfoSchema>("SELECT SCHEMA_NAME AS SchemaName FROM INFORMATION_SCHEMA.SCHEMATA");
-                var results = query as InfoSchema[] ?? query.ToArray();
-
-                results.Should().Contain(x => x.SchemaName == schemaName);
-            }
+            VerifyCustomQuery<InfoSchema>("SELECT SCHEMA_NAME AS SchemaName FROM INFORMATION_SCHEMA.SCHEMATA",
+                e => e.Should().Contain(x => x.SchemaName == schemaName));
         }
 
         [Trait("Bugfix", "#171")]
@@ -304,7 +265,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         public void LogEventStoreAsEnum()
         {
             // Arrange
-            var columnOptions = new ColumnOptions();
+            var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions();
             columnOptions.Level.StoreAsEnum = true;
             columnOptions.Store.Add(StandardColumn.LogEvent);
 
@@ -328,12 +289,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             Log.CloseAndFlush();
 
             // Assert
-            using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
-            {
-                var logEventCount = conn.Query<LogEventColumn>($"SELECT Id from {DatabaseFixture.LogTableName}");
-
-                logEventCount.Should().HaveCount(1);
-            }
+            VerifyCustomQuery<LogEventColumn>($"SELECT Id from {DatabaseFixture.LogTableName}",
+                e => e.Should().HaveCount(1));
         }
     }
 }

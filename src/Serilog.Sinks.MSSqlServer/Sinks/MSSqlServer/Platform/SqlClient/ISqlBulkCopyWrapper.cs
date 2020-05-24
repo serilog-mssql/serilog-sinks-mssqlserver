@@ -2,7 +2,7 @@
 using System.Data;
 using System.Threading.Tasks;
 
-namespace Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform.SqlClient
+namespace Serilog.Sinks.MSSqlServer.Platform.SqlClient
 {
     internal interface ISqlBulkCopyWrapper : IDisposable
     {

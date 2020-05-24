@@ -6,7 +6,7 @@ using System.Data.SqlClient;
 using Microsoft.Data.SqlClient;
 #endif
 
-namespace Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform.SqlClient
+namespace Serilog.Sinks.MSSqlServer.Platform.SqlClient
 {
     internal class SqlCommandWrapper : ISqlCommandWrapper
     {
