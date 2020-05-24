@@ -20,7 +20,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Platform.SqlClient
             Assert.Throws<InvalidOperationException>(() => new SqlConnectionWrapper(DatabaseFixture.LogEventsConnectionString, "AuthenticationToken"));
 #else
             // Should not throw
-            new SqlConnectionWrapper(@"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=Master", "AuthenticationToken");
+            using (_ = new SqlConnectionWrapper(@"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=Master", "AuthenticationToken"))
+            { }
 #endif
         }
 
