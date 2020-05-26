@@ -42,7 +42,7 @@ namespace Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options
         public string SchemaName { get; set; }
 
         /// <summary>
-        /// Flag to automatically create the log events tabke if it does not exist (default: false)
+        /// Flag to automatically create the log events table if it does not exist (default: false)
         /// </summary>
         public bool AutoCreateSqlTable { get; set; }
 
