@@ -78,13 +78,13 @@ namespace Serilog
             return loggerConfiguration.MSSqlServer(
                 connectionString: connectionString,
                 sinkOptions: sinkOptions,
+                sinkOptionsSection: null,
                 appConfiguration: appConfiguration,
                 restrictedToMinimumLevel: restrictedToMinimumLevel,
                 formatProvider: formatProvider,
                 columnOptions: columnOptions,
                 columnOptionsSection: columnOptionsSection,
-                logEventFormatter: logEventFormatter,
-                sinkOptionsSection: null);
+                logEventFormatter: logEventFormatter);
         }
 
         /// <summary>
@@ -96,26 +96,26 @@ namespace Serilog
         /// <param name="loggerConfiguration">The logger configuration.</param>
         /// <param name="connectionString">The connection string to the database where to store the events.</param>
         /// <param name="sinkOptions">Supplies additional settings for the sink</param>
+        /// <param name="sinkOptionsSection">A config section defining additional settings for the sink</param>
         /// <param name="appConfiguration">Additional application-level configuration. Required if connectionString is a name.</param>
         /// <param name="restrictedToMinimumLevel">The minimum log event level required in order to write an event to the sink.</param>
         /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
         /// <param name="columnOptions">An externally-modified group of column settings</param>
         /// <param name="columnOptionsSection">A config section defining various column settings</param>
         /// <param name="logEventFormatter">Supplies custom formatter for the LogEvent column, or null</param>
-        /// <param name="sinkOptionsSection">A config section defining additional settings for the sink</param>
         /// <returns>Logger configuration, allowing configuration to continue.</returns>
         /// <exception cref="ArgumentNullException">A required parameter is null.</exception>
         public static LoggerConfiguration MSSqlServer(
             this LoggerSinkConfiguration loggerConfiguration,
             string connectionString,
             SinkOptions sinkOptions = null,
+            IConfigurationSection sinkOptionsSection = null,
             IConfiguration appConfiguration = null,
             LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
             IFormatProvider formatProvider = null,
             ColumnOptions columnOptions = null,
             IConfigurationSection columnOptionsSection = null,
-            ITextFormatter logEventFormatter = null,
-            IConfigurationSection sinkOptionsSection = null)
+            ITextFormatter logEventFormatter = null)
         {
             if (loggerConfiguration == null)
                 throw new ArgumentNullException(nameof(loggerConfiguration));
@@ -170,13 +170,13 @@ namespace Serilog
             return loggerAuditSinkConfiguration.MSSqlServer(
                 connectionString: connectionString,
                 sinkOptions: sinkOptions,
+                sinkOptionsSection: null,
                 appConfiguration: appConfiguration,
                 restrictedToMinimumLevel: restrictedToMinimumLevel,
                 formatProvider: formatProvider,
                 columnOptions: columnOptions,
                 columnOptionsSection: columnOptionsSection,
-                logEventFormatter: logEventFormatter,
-                sinkOptionsSection: null);
+                logEventFormatter: logEventFormatter);
         }
 
         /// <summary>
@@ -185,26 +185,26 @@ namespace Serilog
         /// <param name="loggerAuditSinkConfiguration">The logger configuration.</param>
         /// <param name="connectionString">The connection string to the database where to store the events.</param>
         /// <param name="sinkOptions">Supplies additional settings for the sink</param>
+        /// <param name="sinkOptionsSection">A config section defining additional settings for the sink</param>
         /// <param name="appConfiguration">Additional application-level configuration. Required if connectionString is a name.</param>
         /// <param name="restrictedToMinimumLevel">The minimum log event level required in order to write an event to the sink.</param>
         /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
         /// <param name="columnOptions">An externally-modified group of column settings</param>
         /// <param name="columnOptionsSection">A config section defining various column settings</param>
         /// <param name="logEventFormatter">Supplies custom formatter for the LogEvent column, or null</param>
-        /// <param name="sinkOptionsSection">A config section defining additional settings for the sink</param>
         /// <returns>Logger configuration, allowing configuration to continue.</returns>
         /// <exception cref="ArgumentNullException">A required parameter is null.</exception>
         public static LoggerConfiguration MSSqlServer(
             this LoggerAuditSinkConfiguration loggerAuditSinkConfiguration,
             string connectionString,
             SinkOptions sinkOptions = null,
+            IConfigurationSection sinkOptionsSection = null,
             IConfiguration appConfiguration = null,
             LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
             IFormatProvider formatProvider = null,
             ColumnOptions columnOptions = null,
             IConfigurationSection columnOptionsSection = null,
-            ITextFormatter logEventFormatter = null,
-            IConfigurationSection sinkOptionsSection = null)
+            ITextFormatter logEventFormatter = null)
         {
             if (loggerAuditSinkConfiguration == null)
                 throw new ArgumentNullException(nameof(loggerAuditSinkConfiguration));
