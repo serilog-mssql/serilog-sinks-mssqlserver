@@ -109,7 +109,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.TestUtils
             {
                 var logEvents = conn.Query<CustomStandardLogColumns>($"SELECT CustomMessage FROM {DatabaseFixture.LogTableName}");
 
-                logEvents.Should().Contain(e => e.CustomMessage.Contains(expectedMessage));
+                logEvents.Should().Contain(e => e.CustomMessage == expectedMessage);
             }
         }
 
