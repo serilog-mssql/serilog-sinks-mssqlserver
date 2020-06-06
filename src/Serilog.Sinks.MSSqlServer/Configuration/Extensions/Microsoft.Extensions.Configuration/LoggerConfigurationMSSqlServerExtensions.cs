@@ -78,8 +78,8 @@ namespace Serilog
             return loggerConfiguration.MSSqlServer(
                 connectionString: connectionString,
                 sinkOptions: sinkOptions,
-                appConfiguration: appConfiguration,
                 sinkOptionsSection: null,
+                appConfiguration: appConfiguration,
                 restrictedToMinimumLevel: restrictedToMinimumLevel,
                 formatProvider: formatProvider,
                 columnOptions: columnOptions,
@@ -96,8 +96,8 @@ namespace Serilog
         /// <param name="loggerConfiguration">The logger configuration.</param>
         /// <param name="connectionString">The connection string to the database where to store the events.</param>
         /// <param name="sinkOptions">Supplies additional settings for the sink</param>
-        /// <param name="appConfiguration">Additional application-level configuration. Required if connectionString is a name.</param>
         /// <param name="sinkOptionsSection">A config section defining additional settings for the sink</param>
+        /// <param name="appConfiguration">Additional application-level configuration. Required if connectionString is a name.</param>
         /// <param name="restrictedToMinimumLevel">The minimum log event level required in order to write an event to the sink.</param>
         /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
         /// <param name="columnOptions">An externally-modified group of column settings</param>
@@ -109,8 +109,8 @@ namespace Serilog
             this LoggerSinkConfiguration loggerConfiguration,
             string connectionString,
             SinkOptions sinkOptions = null,
-            IConfiguration appConfiguration = null,
             IConfigurationSection sinkOptionsSection = null,
+            IConfiguration appConfiguration = null,
             LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
             IFormatProvider formatProvider = null,
             ColumnOptions columnOptions = null,
@@ -170,8 +170,8 @@ namespace Serilog
             return loggerAuditSinkConfiguration.MSSqlServer(
                 connectionString: connectionString,
                 sinkOptions: sinkOptions,
-                appConfiguration: appConfiguration,
                 sinkOptionsSection: null,
+                appConfiguration: appConfiguration,
                 restrictedToMinimumLevel: restrictedToMinimumLevel,
                 formatProvider: formatProvider,
                 columnOptions: columnOptions,
@@ -185,8 +185,8 @@ namespace Serilog
         /// <param name="loggerAuditSinkConfiguration">The logger configuration.</param>
         /// <param name="connectionString">The connection string to the database where to store the events.</param>
         /// <param name="sinkOptions">Supplies additional settings for the sink</param>
-        /// <param name="appConfiguration">Additional application-level configuration. Required if connectionString is a name.</param>
         /// <param name="sinkOptionsSection">A config section defining additional settings for the sink</param>
+        /// <param name="appConfiguration">Additional application-level configuration. Required if connectionString is a name.</param>
         /// <param name="restrictedToMinimumLevel">The minimum log event level required in order to write an event to the sink.</param>
         /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
         /// <param name="columnOptions">An externally-modified group of column settings</param>
@@ -198,8 +198,8 @@ namespace Serilog
             this LoggerAuditSinkConfiguration loggerAuditSinkConfiguration,
             string connectionString,
             SinkOptions sinkOptions = null,
-            IConfiguration appConfiguration = null,
             IConfigurationSection sinkOptionsSection = null,
+            IConfiguration appConfiguration = null,
             LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
             IFormatProvider formatProvider = null,
             ColumnOptions columnOptions = null,

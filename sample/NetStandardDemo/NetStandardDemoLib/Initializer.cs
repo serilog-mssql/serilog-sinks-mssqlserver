@@ -14,7 +14,6 @@ namespace NetStandardDemoLib
 
         public static LoggerConfiguration CreateLoggerConfiguration()
         {
-            // Error MissingMethodException
             return new LoggerConfiguration()
                 .Enrich.FromLogContext()
                 .WriteTo.MSSqlServer(
@@ -24,30 +23,14 @@ namespace NetStandardDemoLib
                         TableName = _tableName,
                         AutoCreateSqlTable = true
                     },
-                    appConfiguration: null,
                     sinkOptionsSection: null,
+                    appConfiguration: null,
                     restrictedToMinimumLevel: LevelAlias.Minimum,
                     formatProvider: null,
                     columnOptions: BuildColumnOptions(),
                     columnOptionsSection: null,
                     logEventFormatter: null);
 
-            // Works
-            //return new LoggerConfiguration()
-            //    .Enrich.FromLogContext()
-            //    .WriteTo.MSSqlServer(
-            //        _connectionString,
-            //        tableName: _tableName,
-            //        appConfiguration: null,
-            //        restrictedToMinimumLevel: LevelAlias.Minimum,
-            //        batchPostingLimit: MSSqlServerSink.DefaultBatchPostingLimit,
-            //        period: null,
-            //        formatProvider: null,
-            //        autoCreateSqlTable: true,
-            //        columnOptions: BuildColumnOptions(),
-            //        columnOptionsSection: null,
-            //        schemaName: MSSqlServerSink.DefaultSchemaName,
-            //        logEventFormatter: null);
         }
 
         private static ColumnOptions BuildColumnOptions()
@@ -62,12 +45,12 @@ namespace NetStandardDemoLib
 
                 AdditionalColumns = new Collection<SqlColumn>
                 {
-                    new SqlColumn { DataType = SqlDbType.NChar, ColumnName = "MachineName" },
-                    new SqlColumn { DataType = SqlDbType.NChar, ColumnName = "ProcessName" },
-                    new SqlColumn { DataType = SqlDbType.NChar, ColumnName = "ThreadId" },
-                    new SqlColumn { DataType = SqlDbType.NChar, ColumnName = "CallerName" },
-                    new SqlColumn { DataType = SqlDbType.NChar, ColumnName = "SourceFile" },
-                    new SqlColumn { DataType = SqlDbType.NChar, ColumnName = "LineNumber" }
+                    new SqlColumn { DataType = SqlDbType.NVarChar, ColumnName = "MachineName" },
+                    new SqlColumn { DataType = SqlDbType.NVarChar, ColumnName = "ProcessName" },
+                    new SqlColumn { DataType = SqlDbType.NVarChar, ColumnName = "ThreadId" },
+                    new SqlColumn { DataType = SqlDbType.NVarChar, ColumnName = "CallerName" },
+                    new SqlColumn { DataType = SqlDbType.NVarChar, ColumnName = "SourceFile" },
+                    new SqlColumn { DataType = SqlDbType.NVarChar, ColumnName = "LineNumber" }
                 }
             };
 
