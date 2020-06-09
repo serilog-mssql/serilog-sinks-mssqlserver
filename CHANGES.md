@@ -1,3 +1,10 @@
+# 5.5.0
+* Implemented enhancement #208: use Microsoft.Data.SqliClient for all platforms except net452 to enable Column Encryption (thanks to @mungk for the contribution).
+* Fixed issue #290 MissingMethodException with .NET Standard 2.0.
+* Added .NET Standard 2.0 sample program.
+* Minor bug fixes.
+* Completed overall refactoring and added unit tests for all refactored code.
+
 # 5.4.0
 * Added support for Azure Managed Identities for Resources authentication (thanks to @darrenschwarz for the contribution).
 * New interface using `SinkOptions` parameter. Marked old interfaces obsolete.
