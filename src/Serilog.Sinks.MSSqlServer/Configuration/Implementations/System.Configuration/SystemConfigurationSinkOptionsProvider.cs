@@ -16,7 +16,7 @@ namespace Serilog.Sinks.MSSqlServer.Configuration
             return sinkOptions;
         }
 
-        private void ReadTableOptions(MSSqlServerConfigurationSection config, SinkOptions sinkOptions)
+        private static void ReadTableOptions(MSSqlServerConfigurationSection config, SinkOptions sinkOptions)
         {
             SetProperty.IfProvided<string>(config.TableName, nameof(config.TableName.Value), value => sinkOptions.TableName = value);
             SetProperty.IfProvided<string>(config.SchemaName, nameof(config.SchemaName.Value), value => sinkOptions.SchemaName = value);
@@ -24,13 +24,13 @@ namespace Serilog.Sinks.MSSqlServer.Configuration
                 value => sinkOptions.AutoCreateSqlTable = value);
         }
 
-        private void ReadBatchSettings(MSSqlServerConfigurationSection config, SinkOptions sinkOptions)
+        private static void ReadBatchSettings(MSSqlServerConfigurationSection config, SinkOptions sinkOptions)
         {
             SetProperty.IfProvided<int>(config.BatchPostingLimit, nameof(config.BatchPostingLimit.Value), val => sinkOptions.BatchPostingLimit = val);
             SetProperty.IfProvided<string>(config.BatchPeriod, nameof(config.BatchPeriod.Value), val => sinkOptions.BatchPeriod = TimeSpan.Parse(val, CultureInfo.InvariantCulture));
         }
 
-        private void ReadAzureManagedIdentitiesOptions(MSSqlServerConfigurationSection config, SinkOptions sinkOptions)
+        private static void ReadAzureManagedIdentitiesOptions(MSSqlServerConfigurationSection config, SinkOptions sinkOptions)
         {
             SetProperty.IfProvided<bool>(config.UseAzureManagedIdentity, nameof(config.UseAzureManagedIdentity.Value),
                 value => sinkOptions.UseAzureManagedIdentity = value);

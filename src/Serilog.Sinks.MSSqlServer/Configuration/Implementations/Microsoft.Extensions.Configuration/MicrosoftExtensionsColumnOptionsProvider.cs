@@ -35,7 +35,7 @@ namespace Serilog.Sinks.MSSqlServer.Configuration
             SetProperty.IfNotNull<bool>(section["nonClusteredIndex"], (val) => target.NonClusteredIndex = val);
         }
 
-        private void AddRemoveStandardColumns(IConfigurationSection config, ColumnOptions columnOptions)
+        private static void AddRemoveStandardColumns(IConfigurationSection config, ColumnOptions columnOptions)
         {
             // add standard columns
             var addStd = config.GetSection("addStandardColumns");
@@ -62,7 +62,7 @@ namespace Serilog.Sinks.MSSqlServer.Configuration
             }
         }
 
-        private void AddAdditionalColumns(IConfigurationSection config, ColumnOptions columnOptions)
+        private static void AddAdditionalColumns(IConfigurationSection config, ColumnOptions columnOptions)
         {
             var newcols =
                 config.GetSection("additionalColumns").Get<List<SqlColumn>>()
@@ -83,7 +83,7 @@ namespace Serilog.Sinks.MSSqlServer.Configuration
             }
         }
 
-        private void ReadStandardColumns(IConfigurationSection config, ColumnOptions columnOptions)
+        private static void ReadStandardColumns(IConfigurationSection config, ColumnOptions columnOptions)
         {
             var section = config.GetSection("id");
             if (section != null)
@@ -148,7 +148,7 @@ namespace Serilog.Sinks.MSSqlServer.Configuration
                 SetCommonColumnOptions(section, columnOptions.MessageTemplate);
         }
 
-        private void ReadMiscColumnOptions(IConfigurationSection config, ColumnOptions columnOptions)
+        private static void ReadMiscColumnOptions(IConfigurationSection config, ColumnOptions columnOptions)
         {
             SetProperty.IfNotNull<bool>(config["disableTriggers"], (val) => columnOptions.DisableTriggers = val);
             SetProperty.IfNotNull<bool>(config["clusteredColumnstoreIndex"], (val) => columnOptions.ClusteredColumnstoreIndex = val);

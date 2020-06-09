@@ -1,9 +1,9 @@
-﻿using System.Data.SqlClient;
+﻿using Serilog.Sinks.MSSqlServer.Platform.SqlClient;
 
-namespace Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform
+namespace Serilog.Sinks.MSSqlServer.Platform
 {
     internal interface ISqlConnectionFactory
     {
-        SqlConnection Create();
+        ISqlConnectionWrapper Create();
     }
 }

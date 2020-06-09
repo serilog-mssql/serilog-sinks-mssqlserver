@@ -64,7 +64,7 @@ namespace Serilog.Sinks.MSSqlServer.Platform
         // Examples of possible output:
         // [Id] BIGINT IDENTITY(1,1) NOT NULL
         // [Message] VARCHAR(1024) NULL
-        private string GetColumnDDL(SqlColumn column)
+        private static string GetColumnDDL(SqlColumn column)
         {
             var sb = new StringBuilder();
 

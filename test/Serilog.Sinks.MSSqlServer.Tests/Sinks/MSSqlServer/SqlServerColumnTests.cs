@@ -2,7 +2,7 @@
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
 
-namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer
+namespace Serilog.Sinks.MSSqlServer.Tests
 {
     [Trait(TestCategory.TraitName, TestCategory.Unit)]
     public class SqlServerColumnTests
@@ -23,10 +23,12 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer
         {
             // Arrange
             const string propertyName = "TestPropertyName";
-            var sut = new SqlColumn("TestColumnName", SqlDbType.Int);
 
             // Act
-            sut.PropertyName = propertyName;
+            var sut = new SqlColumn("TestColumnName", SqlDbType.Int)
+            {
+                PropertyName = propertyName
+            };
 
             // Assert
             Assert.Equal(propertyName, sut.PropertyName);

@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Data;
-using System.Data.SqlClient;
 using System.Text;
 using Serilog.Debugging;
 using Serilog.Events;
 using Serilog.Sinks.MSSqlServer.Output;
 
-namespace Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform
+namespace Serilog.Sinks.MSSqlServer.Platform
 {
     internal class SqlLogEventWriter : ISqlLogEventWriter
     {
@@ -34,7 +33,7 @@ namespace Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform
                 using (var connection = _sqlConnectionFactory.Create())
                 {
                     connection.Open();
-                    using (SqlCommand command = connection.CreateCommand())
+                    using (var command = connection.CreateCommand())
                     {
                         command.CommandType = CommandType.Text;
 
@@ -54,16 +53,7 @@ namespace Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform
                             parameterList.Append("@P");
                             parameterList.Append(index);
 
-                            var parameter = new SqlParameter($"@P{index}", field.Value ?? DBNull.Value);
-
-                            // The default is SqlDbType.DateTime, which will truncate the DateTime value if the actual
-                            // type in the database table is datetime2. So we explicitly set it to DateTime2, which will
-                            // work both if the field in the table is datetime and datetime2, which is also consistent with 
-                            // the behavior of the non-audit sink.
-                            if (field.Value is DateTime)
-                                parameter.SqlDbType = SqlDbType.DateTime2;
-
-                            command.Parameters.Add(parameter);
+                            command.AddParameter($"@P{index}", field.Value);
 
                             index++;
                         }

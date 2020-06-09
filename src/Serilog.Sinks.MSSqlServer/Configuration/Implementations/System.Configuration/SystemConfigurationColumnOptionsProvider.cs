@@ -10,7 +10,7 @@ namespace Serilog.Sinks.MSSqlServer.Configuration
         {
             columnOptions = columnOptions ?? new ColumnOptions();
 
-            AddRmoveStandardColumns(config, columnOptions);
+            AddRemoveStandardColumns(config, columnOptions);
             AddAdditionalColumns(config, columnOptions);
             ReadStandardColumns(config, columnOptions);
             ReadMiscColumnOptions(config, columnOptions);
@@ -55,7 +55,7 @@ namespace Serilog.Sinks.MSSqlServer.Configuration
                 value => columnOptions.Properties.UsePropertyKeyAsElementName = value);
         }
 
-        private void AddRmoveStandardColumns(MSSqlServerConfigurationSection config, ColumnOptions columnOptions)
+        private static void AddRemoveStandardColumns(MSSqlServerConfigurationSection config, ColumnOptions columnOptions)
         {
             // add standard columns
             if (config.AddStandardColumns.Count > 0)
@@ -80,7 +80,7 @@ namespace Serilog.Sinks.MSSqlServer.Configuration
             }
         }
 
-        private void AddAdditionalColumns(MSSqlServerConfigurationSection config, ColumnOptions columnOptions)
+        private static void AddAdditionalColumns(MSSqlServerConfigurationSection config, ColumnOptions columnOptions)
         {
             if (config.Columns.Count > 0)
             {
@@ -98,7 +98,7 @@ namespace Serilog.Sinks.MSSqlServer.Configuration
             }
         }
 
-        private void ReadStandardColumns(MSSqlServerConfigurationSection config, ColumnOptions columnOptions)
+        private static void ReadStandardColumns(MSSqlServerConfigurationSection config, ColumnOptions columnOptions)
         {
             SetCommonColumnOptions(config.Exception, columnOptions.Exception);
             SetCommonColumnOptions(config.Id, columnOptions.Id);
@@ -123,7 +123,7 @@ namespace Serilog.Sinks.MSSqlServer.Configuration
                 value => columnOptions.TimeStamp.ConvertToUtc = value);
         }
 
-        private void ReadMiscColumnOptions(MSSqlServerConfigurationSection config, ColumnOptions columnOptions)
+        private static void ReadMiscColumnOptions(MSSqlServerConfigurationSection config, ColumnOptions columnOptions)
         {
             SetProperty.IfProvided<bool>(config, nameof(columnOptions.DisableTriggers), value => columnOptions.DisableTriggers = value);
             SetProperty.IfProvided<bool>(config, nameof(columnOptions.ClusteredColumnstoreIndex), value => columnOptions.ClusteredColumnstoreIndex = value);

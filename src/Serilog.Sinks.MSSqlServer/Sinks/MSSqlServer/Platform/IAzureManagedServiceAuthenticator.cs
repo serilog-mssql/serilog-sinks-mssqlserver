@@ -1,9 +1,9 @@
-﻿using System.Data.SqlClient;
+﻿using System.Threading.Tasks;
 
-namespace Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform
+namespace Serilog.Sinks.MSSqlServer.Platform
 {
     internal interface IAzureManagedServiceAuthenticator
     {
-        void SetAuthenticationToken(SqlConnection sqlConnection);
+        Task<string> GetAuthenticationToken();
     }
 }

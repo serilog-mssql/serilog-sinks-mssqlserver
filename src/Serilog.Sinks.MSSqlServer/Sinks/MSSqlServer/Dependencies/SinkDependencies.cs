@@ -1,7 +1,6 @@
 ﻿using Serilog.Sinks.MSSqlServer.Platform;
-using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform;
 
-namespace Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Dependencies
+namespace Serilog.Sinks.MSSqlServer.Dependencies
 {
     internal class SinkDependencies
     {

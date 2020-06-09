@@ -142,7 +142,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.Hybrid
             VerifyDatabaseColumnsWereCreated(standardNames);
         }
 
-        private IConfiguration TestConfiguration() =>
+        private static IConfiguration TestConfiguration() =>
             new ConfigurationBuilder()
                 .AddInMemoryCollection(new Dictionary<string, string>
                 {

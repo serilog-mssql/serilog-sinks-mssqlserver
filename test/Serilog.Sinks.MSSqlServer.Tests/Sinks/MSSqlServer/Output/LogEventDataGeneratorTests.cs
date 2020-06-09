@@ -8,7 +8,7 @@ using Serilog.Sinks.MSSqlServer.Output;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
 
-namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Output
+namespace Serilog.Sinks.MSSqlServer.Tests.Output
 {
     [Trait(TestCategory.TraitName, TestCategory.Unit)]
     public class LogEventDataGeneratorTests
@@ -16,7 +16,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Output
         private readonly Serilog.Sinks.MSSqlServer.ColumnOptions _columnOptions;
         private readonly Mock<IStandardColumnDataGenerator> _standardColumnDataGeneratorMock;
         private readonly Mock<IPropertiesColumnDataGenerator> _propertiesColumnDataGenerator;
-        private LogEventDataGenerator _sut;
+        private readonly LogEventDataGenerator _sut;
 
         public LogEventDataGeneratorTests()
         {

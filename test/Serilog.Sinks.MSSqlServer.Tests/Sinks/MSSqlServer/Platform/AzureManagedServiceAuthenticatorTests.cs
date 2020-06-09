@@ -1,11 +1,11 @@
 ﻿using System;
-using System.Data.SqlClient;
+using System.Threading.Tasks;
 using Microsoft.Azure.Services.AppAuthentication;
-using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Platform;
+using Serilog.Sinks.MSSqlServer.Platform;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
 
-namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Platform
+namespace Serilog.Sinks.MSSqlServer.Tests.Platform
 {
     [Trait(TestCategory.TraitName, TestCategory.Unit)]
     public class AzureManagedServiceAuthenticatorTests
@@ -29,32 +29,26 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Platform
         }
 
         [Fact]
-        public void SetAuthenticationTokenDoesNotSetTokenIfUseAzureManagedIdentityIsFalse()
+        public async Task GetAuthenticationTokenReturnsNullIfUseAzureManagedIdentityIsFalse()
         {
             // Arrange
             var sut = new AzureManagedServiceAuthenticator(false, null);
 
             // Act
-            using (var sqlConnection = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
-            {
-                sut.SetAuthenticationToken(sqlConnection);
+            var result = await sut.GetAuthenticationToken().ConfigureAwait(false);
 
-                // Assert
-                Assert.Null(sqlConnection.AccessToken);
-            }
+            // Assert
+            Assert.Null(result);
         }
 
         [Fact]
-        public void SetAuthenticationTokenThrowsIfUseAzureManagedIdentityIsTrueAndTokenInvalid()
+        public async Task GetAuthenticationTokenThrowsIfUseAzureManagedIdentityIsTrueAndTokenInvalid()
         {
             // Arrange
             var sut = new AzureManagedServiceAuthenticator(true, "TestAccessToken");
 
             // Act + assert
-            using (var sqlConnection = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
-            {
-                Assert.Throws<AzureServiceTokenProviderException>(() => sut.SetAuthenticationToken(sqlConnection));
-            }
+            await Assert.ThrowsAsync<AzureServiceTokenProviderException>(() => sut.GetAuthenticationToken()).ConfigureAwait(false);
         }
     }
 }
