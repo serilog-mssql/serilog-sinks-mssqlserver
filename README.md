@@ -436,14 +436,19 @@ This column stores the event level (Error, Information, etc.). For backwards-com
 
 ### TimeStamp
 
-This column stores the time the log event was sent to Serilog as a SQL `datetime` (default) or `datetimeoffset` type. If `datetimeoffset` should be used, this can be configured as follows.
+This column stores the time the log event was sent to Serilog as a SQL `datetime` (default), `datetime2` or `datetimeoffset` type. If `datetime2` or `datetimeoffset` should be used, this can be configured as follows.
 
 ```csharp
 var columnOptions = new ColumnOptions();
 columnOptions.TimeStamp.DataType = SqlDbType.DateTimeOffset;
 ```
 
-Please be aware that you have to configure the sink for `datetimeoffset` if the used logging database table has a `TimeStamp` column of type `datetimeoffset`. On the other hand you must not configure for `datetimeoffset` if the `TimeStamp` column is of type `datetime`. Failing to configure the data type accordingly can result in log table entries with wrong timezone offsets or no log entries being created at all due to exceptions during logging.
+```csharp
+var columnOptions = new ColumnOptions();
+columnOptions.TimeStamp.DataType = SqlDbType.DateTime2;
+```
+
+Please be aware that you have to configure the sink for `datetimeoffset` if the used logging database table has a `TimeStamp` column of type `datetimeoffset`. If the underlying database uses `datetime2` for the `TimeStamp` column, the sink must be configured to use `datetime2`. On the other hand you must not configure for `datetimeoffset` if the `TimeStamp` column is of type `datetime`. Failing to configure the data type accordingly can result in log table entries with wrong timezone offsets or no log entries being created at all due to exceptions during logging.
 
 While TimeStamp may appear to be a good candidate as a clustered primary key, even relatively low-volume logging can emit identical timestamps forcing SQL Server to add a "uniqueifier" value behind the scenes (effectively an auto-incrementing identity-like integer). For frequent timestamp range-searching and sorting, a non-clustered index is better.
 
