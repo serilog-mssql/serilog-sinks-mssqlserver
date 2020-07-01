@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
@@ -77,6 +77,27 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Output
             // Arrange
             const string expectedResult = "{\"TimeStamp\":\"2020-03-27T14:17:00.0000000\",\"Level\":\"Information\",\"Message\":\"\",\"MessageTemplate\":\"Test message template\"}";
             var testLogEvent = CreateTestLogEvent(new DateTimeOffset(2020, 3, 27, 14, 17, 0, TimeSpan.Zero));
+
+            // Act
+            string renderResult;
+            using (var outputWriter = new StringWriter())
+            {
+                _sut.Format(testLogEvent, outputWriter);
+                renderResult = outputWriter.ToString();
+            }
+
+            // Assert
+            Assert.Equal(expectedResult, renderResult);
+        }
+
+        [Fact]
+        [Trait("Feature", "#300")]
+        public void FormatTimeStampColumnTypeDateTime2RendersCorrectTimeStamp()
+        {
+            // Arrange
+            const string expectedResult = "{\"TimeStamp\":\"2020-07-01T09:41:10.1230000\",\"Level\":\"Information\",\"Message\":\"\",\"MessageTemplate\":\"Test message template\"}";
+            _testColumnOptions.TimeStamp.DataType = SqlDbType.DateTime2;
+            var testLogEvent = CreateTestLogEvent(new DateTimeOffset(2020, 7, 1, 9, 41, 10, 123, TimeSpan.Zero));
 
             // Act
             string renderResult;
