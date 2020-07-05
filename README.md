@@ -704,6 +704,11 @@ Any Serilog application should _always_ call `Log.CloseAndFlush` before shutting
 AppDomain.CurrentDomain.ProcessExit += (s, e) => Log.CloseAndFlush();
 ```
 
+### Consider batched sink SqlBulkCopy behavior
+
+If you initialize the sink with `WriteTo` then it uses a batched sink semantics. This means that it does not directly issue an SQL command to the database for each log call, but it collectes log events in a buffer and later asynchronously writes a bulk of them to the database using [SqlBulkCopy](https://docs.microsoft.com/en-us/dotnet/api/system.data.sqlclient.sqlbulkcopy?view=dotnet-plat-ext-3.1). **If SqlBulkCopy fails to write a single row of the batch to the database, the whole batch will be lost.** Unfortunately it is not easily possible (and probably only with a significant performance impact) to find out what lines of the batch caused problems. Therefore the sink cannot easily retry the operation with the problem lines removed. Typical problems can be that data (like the log message) exceeds the field length in the database or fields which cannot be null are null in the log event. Keep this in mind when using the batched version of the sink and avoid log events to be created with data that is invalid according to your database schema. Use a wrapper class or Serilog Enrichers to validate and correct the log event data before it gets written to the database.
+
+
 ### Test outside of Visual Studio
 
 When you exit an application running in debug mode under Visual Studio, normal shutdown processes may be interrupted. Visual Studio issues a nearly-instant process kill command when it decides you're done debugging. This is a particularly common problem with ASP.NET and ASP.NET Core applications, in which Visual Studio instantly terminates the application as soon as the browser is closed. Even `finally` blocks usually fail to execute. If you aren't seeing your last few events written, try testing your application outside of Visual Studio.
