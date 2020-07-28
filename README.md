@@ -721,6 +721,10 @@ If you're reading about a feature that doesn't seem to work, check whether you'r
 
 Please check your NuGet references and confirm you are specifically referencing _Serilog.Sinks.MSSqlServer_. In the early days of .NET Core, there was a popular Core-specific fork of this sink, but the documentation and NuGet project URLs pointed here. Today the package is marked deprecated, but we continue to see some confusion around this.
 
+### .NET Framework apps must reference Microsoft.Data.SqlClient
+
+If you are using the sink in a .NET Framework app, make sure to add a nuget package reference to Microsoft.Data.SqlClient in your app project. This is necessary due to a bug in SqlClient which can lead to exceptions about missing Microsoft assemblies. Details can be found in [issue 283](https://github.com/serilog/serilog-sinks-mssqlserver/issues/283#issuecomment-664397489) and [issue 208](https://github.com/serilog/serilog-sinks-mssqlserver/issues/208#issuecomment-664503566).
+
 ## Querying Property Data
 
 Extracting and querying the property column directly can be helpful when looking for specific log sequences. SQL Server has query syntax supporting columns that store either XML or JSON data.
