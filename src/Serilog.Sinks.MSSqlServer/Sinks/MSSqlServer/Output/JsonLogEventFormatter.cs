@@ -124,7 +124,7 @@ namespace Serilog.Sinks.MSSqlServer.Output
             output.Write(precedingDelimiter);
             precedingDelimiter = _commaDelimiter;
             var colData = WritePropertyName(logEvent, output, StandardColumn.TimeStamp);
-            var value = _columnOptions.TimeStamp.DataType == SqlDbType.DateTime
+            var value = (_columnOptions.TimeStamp.DataType == SqlDbType.DateTime || _columnOptions.TimeStamp.DataType == SqlDbType.DateTime2)
                 ? ((DateTime)colData.Value).ToString("o", CultureInfo.InvariantCulture)
                 : ((DateTimeOffset)colData.Value).ToString("o", CultureInfo.InvariantCulture);
             JsonValueFormatter.WriteQuotedJsonString(value, output);

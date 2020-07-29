@@ -40,5 +40,16 @@ namespace Serilog.Sinks.MSSqlServer.Tests.ColumnOptions
             // Act and assert - should throw
             Assert.Throws<ArgumentException>(() => options.TimeStamp.DataType = SqlDbType.NVarChar);
         }
+
+        [Trait("Feature", "#300")]
+        [Fact]
+        public void CanSetDataTypeDateTime2()
+        {
+            // Arrange
+            var options = new Serilog.Sinks.MSSqlServer.ColumnOptions();
+
+            // Act - should not throw
+            options.TimeStamp.DataType = SqlDbType.DateTime2;
+        }
     }
 }

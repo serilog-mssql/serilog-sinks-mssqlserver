@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Description>A Serilog sink that writes events to Microsoft SQL Server</Description>
-    <VersionPrefix>5.5.0</VersionPrefix>
+    <VersionPrefix>5.5.1</VersionPrefix>
     <Authors>Michiel van Oudheusden;Christian Kadluba;Serilog Contributors</Authors>
     <TargetFrameworks>netstandard2.0;net452;net461;net472;netcoreapp2.0;netcoreapp2.2</TargetFrameworks>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -18,6 +18,10 @@
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <RepositoryUrl>https://github.com/serilog/serilog-sinks-mssqlserver</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <RuntimeIdentifiers>win</RuntimeIdentifiers>
     <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
     <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
@@ -26,6 +30,7 @@
 
   <ItemGroup>
     <!-- Whenever these are updated, also update versions in packages.config for net452 -->
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All"/>
     <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="3.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

@@ -436,14 +436,19 @@ This column stores the event level (Error, Information, etc.). For backwards-com
 
 ### TimeStamp
 
-This column stores the time the log event was sent to Serilog as a SQL `datetime` (default) or `datetimeoffset` type. If `datetimeoffset` should be used, this can be configured as follows.
+This column stores the time the log event was sent to Serilog as a SQL `datetime` (default), `datetime2` or `datetimeoffset` type. If `datetime2` or `datetimeoffset` should be used, this can be configured as follows.
 
 ```csharp
 var columnOptions = new ColumnOptions();
 columnOptions.TimeStamp.DataType = SqlDbType.DateTimeOffset;
 ```
 
-Please be aware that you have to configure the sink for `datetimeoffset` if the used logging database table has a `TimeStamp` column of type `datetimeoffset`. On the other hand you must not configure for `datetimeoffset` if the `TimeStamp` column is of type `datetime`. Failing to configure the data type accordingly can result in log table entries with wrong timezone offsets or no log entries being created at all due to exceptions during logging.
+```csharp
+var columnOptions = new ColumnOptions();
+columnOptions.TimeStamp.DataType = SqlDbType.DateTime2;
+```
+
+Please be aware that you have to configure the sink for `datetimeoffset` if the used logging database table has a `TimeStamp` column of type `datetimeoffset`. If the underlying database uses `datetime2` for the `TimeStamp` column, the sink must be configured to use `datetime2`. On the other hand you must not configure for `datetimeoffset` if the `TimeStamp` column is of type `datetime` or `datetime2`. Failing to configure the data type accordingly can result in log table entries with wrong timezone offsets or no log entries being created at all due to exceptions during logging.
 
 While TimeStamp may appear to be a good candidate as a clustered primary key, even relatively low-volume logging can emit identical timestamps forcing SQL Server to add a "uniqueifier" value behind the scenes (effectively an auto-incrementing identity-like integer). For frequent timestamp range-searching and sorting, a non-clustered index is better.
 
@@ -699,6 +704,11 @@ Any Serilog application should _always_ call `Log.CloseAndFlush` before shutting
 AppDomain.CurrentDomain.ProcessExit += (s, e) => Log.CloseAndFlush();
 ```
 
+### Consider batched sink SqlBulkCopy behavior
+
+If you initialize the sink with `WriteTo` then it uses a batched sink semantics. This means that it does not directly issue an SQL command to the database for each log call, but it collectes log events in a buffer and later asynchronously writes a bulk of them to the database using [SqlBulkCopy](https://docs.microsoft.com/en-us/dotnet/api/system.data.sqlclient.sqlbulkcopy?view=dotnet-plat-ext-3.1). **If SqlBulkCopy fails to write a single row of the batch to the database, the whole batch will be lost.** Unfortunately it is not easily possible (and probably only with a significant performance impact) to find out what lines of the batch caused problems. Therefore the sink cannot easily retry the operation with the problem lines removed. Typical problems can be that data (like the log message) exceeds the field length in the database or fields which cannot be null are null in the log event. Keep this in mind when using the batched version of the sink and avoid log events to be created with data that is invalid according to your database schema. Use a wrapper class or Serilog Enrichers to validate and correct the log event data before it gets written to the database.
+
+
 ### Test outside of Visual Studio
 
 When you exit an application running in debug mode under Visual Studio, normal shutdown processes may be interrupted. Visual Studio issues a nearly-instant process kill command when it decides you're done debugging. This is a particularly common problem with ASP.NET and ASP.NET Core applications, in which Visual Studio instantly terminates the application as soon as the browser is closed. Even `finally` blocks usually fail to execute. If you aren't seeing your last few events written, try testing your application outside of Visual Studio.
@@ -710,6 +720,10 @@ If you're reading about a feature that doesn't seem to work, check whether you'r
 ### Are you really using this sink?
 
 Please check your NuGet references and confirm you are specifically referencing _Serilog.Sinks.MSSqlServer_. In the early days of .NET Core, there was a popular Core-specific fork of this sink, but the documentation and NuGet project URLs pointed here. Today the package is marked deprecated, but we continue to see some confusion around this.
+
+### .NET Framework apps must reference Microsoft.Data.SqlClient
+
+If you are using the sink in a .NET Framework app, make sure to add a nuget package reference to Microsoft.Data.SqlClient in your app project. This is necessary due to a bug in SqlClient which can lead to exceptions about missing Microsoft assemblies. Details can be found in [issue 283](https://github.com/serilog/serilog-sinks-mssqlserver/issues/283#issuecomment-664397489) and [issue 208](https://github.com/serilog/serilog-sinks-mssqlserver/issues/208#issuecomment-664503566).
 
 ## Querying Property Data
 

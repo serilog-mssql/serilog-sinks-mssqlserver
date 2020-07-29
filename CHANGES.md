@@ -1,3 +1,9 @@
+# 5.5.1
+* Fixed issue #300 Support DateTime2 data type for TimeStamp column (thanks to @stedel for the contribution).
+* Added Sourcelink support and publish symbols to nuget.org which allows consumers of the package to debug into the sink code.
+* Added troubleshooting tip in README with workaround for SqlClient issue regarding missing Microsoft.Data.SqlClient.Sni.dll in .NET Framework apps and updated `samples\AppConfigDemo` accordingly.
+* Added information in README about batched sink SqlBulkCopy behavior according to issue #209.
+
 # 5.5.0
 * Implemented enhancement #208: use Microsoft.Data.SqliClient for all platforms except net452 to enable Column Encryption (thanks to @mungk for the contribution).
 * Fixed issue #290 MissingMethodException with .NET Standard 2.0.
