@@ -15,6 +15,7 @@ namespace Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options
             SchemaName = MSSqlServerSink.DefaultSchemaName;
             BatchPostingLimit = MSSqlServerSink.DefaultBatchPostingLimit;
             BatchPeriod = MSSqlServerSink.DefaultPeriod;
+            EagerlyEmitFirstEvent = true;
         }
 
         internal SinkOptions(
@@ -55,6 +56,11 @@ namespace Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options
         /// Time span until a batch of log events is written to the database (default: 5 seconds)
         /// </summary>
         public TimeSpan BatchPeriod { get; set; }
+
+        /// <summary>
+        /// Flag to eagerly emit a batch containing the first received event (default: true)
+        /// </summary>
+        public bool EagerlyEmitFirstEvent { get; set; }
 
         /// <summary>
         /// Flag to enable SQL authentication using Azure Managed Identities (default: false)

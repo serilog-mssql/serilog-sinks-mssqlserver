@@ -126,7 +126,10 @@ namespace Serilog
             IMSSqlServerSinkFactory sinkFactory = new MSSqlServerSinkFactory();
             var sink = sinkFactory.Create(connectionString, sinkOptions, formatProvider, columnOptions, logEventFormatter);
 
-            return loggerConfiguration.Sink(sink, restrictedToMinimumLevel);
+            IPeriodicBatchingSinkFactory periodicBatchingSinkFactory = new PeriodicBatchingSinkFactory();
+            var periodicBatchingSink = periodicBatchingSinkFactory.Create(sink, sinkOptions);
+
+            return loggerConfiguration.Sink(periodicBatchingSink, restrictedToMinimumLevel);
         }
 
         /// <summary>

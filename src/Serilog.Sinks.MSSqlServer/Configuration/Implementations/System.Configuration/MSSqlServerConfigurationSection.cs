@@ -169,6 +169,12 @@ namespace Serilog.Configuration
             get => (ValueConfigElement)base[nameof(BatchPeriod)];
         }
 
+        [ConfigurationProperty(nameof(EagerlyEmitFirstEvent))]
+        public ValueConfigElement EagerlyEmitFirstEvent
+        {
+            get => (ValueConfigElement)base[nameof(EagerlyEmitFirstEvent)];
+        }
+
         [ConfigurationProperty(nameof(UseAzureManagedIdentity))]
         public ValueConfigElement UseAzureManagedIdentity
         {

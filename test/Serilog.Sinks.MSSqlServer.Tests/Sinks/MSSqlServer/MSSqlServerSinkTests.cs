@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Threading.Tasks;
 using Moq;
 using Serilog.Events;
 using Serilog.Sinks.MSSqlServer.Dependencies;
@@ -128,25 +129,19 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         }
 
         [Fact]
-        public void EmitCallsSqlLogEventWriter()
+        public async Task EmitCallsSqlLogEventWriter()
         {
             // Arrange
-            const string messageTemplate = "Message Template";
             SetupSut();
+            var logEvents = new List<LogEvent> { TestLogEventHelper.CreateLogEvent() };
             _sqlBulkBatchWriter.Setup(w => w.WriteBatch(It.IsAny<IEnumerable<LogEvent>>(), _dataTable))
                 .Callback<IEnumerable<LogEvent>, DataTable>((e, d) =>
                  {
-                     Assert.Single(e);
-                     Assert.Equal(messageTemplate, e.First().MessageTemplate.Text);
+                     Assert.Same(logEvents, e);
                  });
-            Log.Logger = new LoggerConfiguration()
-                .WriteTo
-                .Sink(_sut, LogEventLevel.Debug)
-                .CreateLogger();
 
             // Act
-            Log.Logger.Information(messageTemplate);
-            Log.CloseAndFlush();
+            await _sut.EmitBatchAsync(logEvents).ConfigureAwait(false);
 
             // Assert
             _sqlBulkBatchWriter.Verify(w => w.WriteBatch(It.IsAny<IEnumerable<LogEvent>>(), _dataTable), Times.Once);

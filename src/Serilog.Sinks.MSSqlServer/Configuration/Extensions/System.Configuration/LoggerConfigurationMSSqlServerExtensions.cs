@@ -116,20 +116,22 @@ namespace Serilog
                 columnOptions: columnOptions,
                 logEventFormatter: logEventFormatter,
                 applySystemConfiguration: new ApplySystemConfiguration(),
-                sinkFactory: new MSSqlServerSinkFactory());
+                sinkFactory: new MSSqlServerSinkFactory(),
+                periodicBatchingSinkFactory: new PeriodicBatchingSinkFactory());
 
         // Internal overload with parameters used by tests to override the config section and inject mocks
         internal static LoggerConfiguration MSSqlServerInternal(
             this LoggerSinkConfiguration loggerConfiguration,
             string configSectionName,
             string connectionString,
-            SinkOptions sinkOptions = null,
-            LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
-            IFormatProvider formatProvider = null,
-            ColumnOptions columnOptions = null,
-            ITextFormatter logEventFormatter = null,
-            IApplySystemConfiguration applySystemConfiguration = null,
-            IMSSqlServerSinkFactory sinkFactory = null)
+            SinkOptions sinkOptions,
+            LogEventLevel restrictedToMinimumLevel,
+            IFormatProvider formatProvider,
+            ColumnOptions columnOptions,
+            ITextFormatter logEventFormatter,
+            IApplySystemConfiguration applySystemConfiguration,
+            IMSSqlServerSinkFactory sinkFactory,
+            IPeriodicBatchingSinkFactory periodicBatchingSinkFactory)
         {
             if (loggerConfiguration == null)
                 throw new ArgumentNullException(nameof(loggerConfiguration));
@@ -138,7 +140,9 @@ namespace Serilog
 
             var sink = sinkFactory.Create(connectionString, sinkOptions, formatProvider, columnOptions, logEventFormatter);
 
-            return loggerConfiguration.Sink(sink, restrictedToMinimumLevel);
+            var periodicBatchingSink = periodicBatchingSinkFactory.Create(sink, sinkOptions);
+
+            return loggerConfiguration.Sink(periodicBatchingSink, restrictedToMinimumLevel);
         }
 
         /// <summary>
@@ -226,13 +230,13 @@ namespace Serilog
             this LoggerAuditSinkConfiguration loggerAuditSinkConfiguration,
             string configSectionName,
             string connectionString,
-            SinkOptions sinkOptions = null,
-            LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
-            IFormatProvider formatProvider = null,
-            ColumnOptions columnOptions = null,
-            ITextFormatter logEventFormatter = null,
-            IApplySystemConfiguration applySystemConfiguration = null,
-            IMSSqlServerAuditSinkFactory auditSinkFactory = null)
+            SinkOptions sinkOptions,
+            LogEventLevel restrictedToMinimumLevel,
+            IFormatProvider formatProvider,
+            ColumnOptions columnOptions,
+            ITextFormatter logEventFormatter,
+            IApplySystemConfiguration applySystemConfiguration,
+            IMSSqlServerAuditSinkFactory auditSinkFactory)
         {
             if (loggerAuditSinkConfiguration == null)
                 throw new ArgumentNullException(nameof(loggerAuditSinkConfiguration));

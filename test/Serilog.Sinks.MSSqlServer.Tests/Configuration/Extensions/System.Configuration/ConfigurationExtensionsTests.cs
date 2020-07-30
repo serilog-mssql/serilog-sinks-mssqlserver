@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Serilog.Events;
 using Serilog.Sinks.MSSqlServer.Configuration.Factories;
 using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
@@ -70,8 +71,13 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.System.Config
                 configSectionName: "CustomStandardColumnNames",
                 connectionString: DatabaseFixture.LogEventsConnectionString,
                 sinkOptions: new SinkOptions { TableName = DatabaseFixture.LogTableName, AutoCreateSqlTable = true },
+                restrictedToMinimumLevel: LevelAlias.Minimum,
+                formatProvider: null,
+                columnOptions: null,
+                logEventFormatter: null,
                 applySystemConfiguration: new ApplySystemConfiguration(),
-                sinkFactory: new MSSqlServerSinkFactory())
+                sinkFactory: new MSSqlServerSinkFactory(),
+                periodicBatchingSinkFactory: new PeriodicBatchingSinkFactory())
                 .CreateLogger();
             Log.CloseAndFlush();
 
@@ -87,8 +93,14 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.System.Config
             Log.Logger = loggerConfiguration.WriteTo.MSSqlServerInternal(
                 configSectionName: "SinkOptionsConfig",
                 connectionString: DatabaseFixture.LogEventsConnectionString,
+                sinkOptions: null,
+                restrictedToMinimumLevel: LevelAlias.Minimum,
+                formatProvider: null,
+                columnOptions: null,
+                logEventFormatter: null,
                 applySystemConfiguration: new ApplySystemConfiguration(),
-                sinkFactory: new MSSqlServerSinkFactory())
+                sinkFactory: new MSSqlServerSinkFactory(),
+                periodicBatchingSinkFactory: new PeriodicBatchingSinkFactory())
                 .CreateLogger();
             Log.CloseAndFlush();
 
@@ -103,8 +115,13 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.System.Config
                 configSectionName: "CustomizedColumnList",
                 connectionString: DatabaseFixture.LogEventsConnectionString,
                 sinkOptions: new SinkOptions { TableName = DatabaseFixture.LogTableName, AutoCreateSqlTable = true },
+                restrictedToMinimumLevel: LevelAlias.Minimum,
+                formatProvider: null,
+                columnOptions: null,
+                logEventFormatter: null,
                 applySystemConfiguration: new ApplySystemConfiguration(),
-                sinkFactory: new MSSqlServerSinkFactory())
+                sinkFactory: new MSSqlServerSinkFactory(),
+                periodicBatchingSinkFactory: new PeriodicBatchingSinkFactory())
                 .CreateLogger();
             Log.CloseAndFlush();
 
@@ -128,8 +145,13 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.System.Config
                 configSectionName: "AdditionalColumnCustomPropertyList",
                 connectionString: DatabaseFixture.LogEventsConnectionString,
                 sinkOptions: new SinkOptions { TableName = DatabaseFixture.LogTableName, AutoCreateSqlTable = true },
+                restrictedToMinimumLevel: LevelAlias.Minimum,
+                formatProvider: null,
+                columnOptions: null,
+                logEventFormatter: null,
                 applySystemConfiguration: new ApplySystemConfiguration(),
-                sinkFactory: new MSSqlServerSinkFactory())
+                sinkFactory: new MSSqlServerSinkFactory(),
+                periodicBatchingSinkFactory: new PeriodicBatchingSinkFactory())
                 .CreateLogger();
             Log.Information(messageTemplate, propertyValue);
             Log.CloseAndFlush();

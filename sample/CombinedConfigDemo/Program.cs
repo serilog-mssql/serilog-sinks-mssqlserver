@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Threading;
 using Microsoft.Extensions.Configuration;
 using Serilog;
 using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
@@ -22,35 +23,37 @@ namespace CombinedConfigDemo
             var columnOptionsSection = configuration.GetSection("Serilog:ColumnOptions");
             var sinkOptionsSection = configuration.GetSection("Serilog:SinkOptions");
 
-            Serilog.Debugging.SelfLog.Enable(m => Debug.WriteLine(m));
+            // Legacy interace - do not use this anymore
+            //Log.Logger = new LoggerConfiguration()
+            //    .WriteTo.MSSqlServer(
+            //        connectionString: _connectionStringName,
+            //        tableName: _tableName,
+            //        appConfiguration: configuration,
+            //        autoCreateSqlTable: true,
+            //        columnOptionsSection: columnOptionsSection,
+            //        schemaName: _schemaName)
+            //    .CreateLogger();
 
             // New SinkOptions based interface
-            using (var logger = new LoggerConfiguration()
-                .WriteTo.Console()
+            Log.Logger = new LoggerConfiguration()
                 .WriteTo.MSSqlServer(
                     connectionString: _connectionStringName,
                     sinkOptions: new SinkOptions
                     {
                         TableName = _tableName,
                         SchemaName = _schemaName,
-                        AutoCreateSqlTable = false
+                        AutoCreateSqlTable = true
                     },
                     sinkOptionsSection: sinkOptionsSection,
                     appConfiguration: configuration,
                     columnOptionsSection: columnOptionsSection)
-                .CreateLogger())
-            {
-                logger.Information("Log 1");
-                logger.Information("Log 2");
-                logger.Information("Log 3");
-                logger.Information("Log 4");
-                logger.Information("Log 5");
-                logger.Information("Log 6");
-                logger.Information("Log 7");
-                logger.Information("Log 8");
-                logger.Information("Log 9");
-                logger.Information("Log 10");
-            }
+                .CreateLogger();
+
+            Log.Information("Hello {Name} from thread {ThreadId}", Environment.GetEnvironmentVariable("USERNAME"), Thread.CurrentThread.ManagedThreadId);
+
+            Log.Warning("No coins remain at position {@Position}", new { Lat = 25, Long = 134 });
+
+            Log.CloseAndFlush();
         }
     }
 }

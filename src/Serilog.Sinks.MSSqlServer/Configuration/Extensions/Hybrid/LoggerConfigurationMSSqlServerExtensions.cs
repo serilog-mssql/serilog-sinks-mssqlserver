@@ -136,23 +136,25 @@ namespace Serilog
                 logEventFormatter: logEventFormatter,
                 applySystemConfiguration: new ApplySystemConfiguration(),
                 applyMicrosoftExtensionsConfiguration: new ApplyMicrosoftExtensionsConfiguration(),
-                sinkFactory: new MSSqlServerSinkFactory());
+                sinkFactory: new MSSqlServerSinkFactory(),
+                batchingSinkFactory: new PeriodicBatchingSinkFactory());
 
         // Internal overload with parameters used by tests to override the config section and inject mocks
         internal static LoggerConfiguration MSSqlServerInternal(
             this LoggerSinkConfiguration loggerConfiguration,
             string connectionString,
-            SinkOptions sinkOptions = null,
-            IConfigurationSection sinkOptionsSection = null,
-            IConfiguration appConfiguration = null,
-            LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
-            IFormatProvider formatProvider = null,
-            ColumnOptions columnOptions = null,
-            IConfigurationSection columnOptionsSection = null,
-            ITextFormatter logEventFormatter = null,
-            IApplySystemConfiguration applySystemConfiguration = null,
-            IApplyMicrosoftExtensionsConfiguration applyMicrosoftExtensionsConfiguration = null,
-            IMSSqlServerSinkFactory sinkFactory = null)
+            SinkOptions sinkOptions,
+            IConfigurationSection sinkOptionsSection,
+            IConfiguration appConfiguration,
+            LogEventLevel restrictedToMinimumLevel,
+            IFormatProvider formatProvider,
+            ColumnOptions columnOptions,
+            IConfigurationSection columnOptionsSection,
+            ITextFormatter logEventFormatter,
+            IApplySystemConfiguration applySystemConfiguration,
+            IApplyMicrosoftExtensionsConfiguration applyMicrosoftExtensionsConfiguration,
+            IMSSqlServerSinkFactory sinkFactory,
+            IPeriodicBatchingSinkFactory batchingSinkFactory)
         {
             if (loggerConfiguration == null)
                 throw new ArgumentNullException(nameof(loggerConfiguration));
@@ -162,7 +164,9 @@ namespace Serilog
 
             var sink = sinkFactory.Create(connectionString, sinkOptions, formatProvider, columnOptions, logEventFormatter);
 
-            return loggerConfiguration.Sink(sink, restrictedToMinimumLevel);
+            var periodicBatchingSink = batchingSinkFactory.Create(sink, sinkOptions);
+
+            return loggerConfiguration.Sink(periodicBatchingSink, restrictedToMinimumLevel);
         }
 
         /// <summary>
@@ -259,17 +263,17 @@ namespace Serilog
         internal static LoggerConfiguration MSSqlServerInternal(
             this LoggerAuditSinkConfiguration loggerAuditSinkConfiguration,
             string connectionString,
-            SinkOptions sinkOptions = null,
-            IConfigurationSection sinkOptionsSection = null,
-            IConfiguration appConfiguration = null,
-            LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
-            IFormatProvider formatProvider = null,
-            ColumnOptions columnOptions = null,
-            IConfigurationSection columnOptionsSection = null,
-            ITextFormatter logEventFormatter = null,
-            IApplySystemConfiguration applySystemConfiguration = null,
-            IApplyMicrosoftExtensionsConfiguration applyMicrosoftExtensionsConfiguration = null,
-            IMSSqlServerAuditSinkFactory auditSinkFactory = null)
+            SinkOptions sinkOptions,
+            IConfigurationSection sinkOptionsSection,
+            IConfiguration appConfiguration,
+            LogEventLevel restrictedToMinimumLevel,
+            IFormatProvider formatProvider,
+            ColumnOptions columnOptions,
+            IConfigurationSection columnOptionsSection,
+            ITextFormatter logEventFormatter,
+            IApplySystemConfiguration applySystemConfiguration,
+            IApplyMicrosoftExtensionsConfiguration applyMicrosoftExtensionsConfiguration,
+            IMSSqlServerAuditSinkFactory auditSinkFactory)
         {
             if (loggerAuditSinkConfiguration == null)
                 throw new ArgumentNullException(nameof(loggerAuditSinkConfiguration));
