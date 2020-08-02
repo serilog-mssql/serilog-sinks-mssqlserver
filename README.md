@@ -244,6 +244,7 @@ Basic settings of the sink are configured using the properties in a `SinkOptions
 * `AutoCreateSqlTable`
 * `BatchPostingLimit`
 * `BatchPeriod`
+* `EagerlyEmitFirstEvent`
 * `UseAzureManagedIdentity`
 * `AzureServiceTokenProviderResource`
 
@@ -267,7 +268,12 @@ This setting is not used by the audit sink as it writes each event immediately a
 ### BatchPeriod
 
 Specifies the interval in which the non-audit sink writes a batch of log events to the database. It defaults to 5 seconds.  
-Just like `BatchPostingLimit`, this setting is not used by the audit sink as it is not a batch based sink.
+This setting is not used by the audit sink as it writes each event immediately and not in a batched manner.
+
+### EagerlyEmitFirstEvent
+
+A Flag to eagerly write a batch to the database containing the first received event regardless of `BatchPostingLimit` or `BatchPeriod`. It defaults to ture.  
+This setting is not used by the audit sink as it writes each event immediately and not in a batched manner.
 
 ### UseAzureManagedIdentity
 

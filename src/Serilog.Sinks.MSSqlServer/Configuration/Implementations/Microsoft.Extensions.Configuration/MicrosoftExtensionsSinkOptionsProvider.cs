@@ -32,6 +32,7 @@ namespace Serilog.Sinks.MSSqlServer.Configuration
         {
             SetProperty.IfNotNull<int>(config["batchPostingLimit"], val => sinkOptions.BatchPostingLimit = val);
             SetProperty.IfNotNull<string>(config["batchPeriod"], val => sinkOptions.BatchPeriod = TimeSpan.Parse(val, CultureInfo.InvariantCulture));
+            SetProperty.IfNotNull<bool>(config["eagerlyEmitFirstEvent"], val => sinkOptions.EagerlyEmitFirstEvent = val);
         }
 
         private static void ReadAzureManagedIdentitiesOptions(IConfigurationSection config, SinkOptions sinkOptions)

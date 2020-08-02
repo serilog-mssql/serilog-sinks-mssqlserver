@@ -110,6 +110,20 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
         }
 
         [Fact]
+        public void ConfigureSinkOptionsSetsEagerlyEmitFirstEvent()
+        {
+            // Arrange
+            _configurationSectionMock.Setup(s => s["eagerlyEmitFirstEvent"]).Returns("true");
+            var sut = new MicrosoftExtensionsSinkOptionsProvider();
+
+            // Act
+            var result = sut.ConfigureSinkOptions(new SinkOptions(), _configurationSectionMock.Object);
+
+            // Assert
+            Assert.True(result.EagerlyEmitFirstEvent);
+        }
+
+        [Fact]
         public void ConfigureSinkOptionsSetsUseAzureManagedIdentity()
         {
             // Arrange

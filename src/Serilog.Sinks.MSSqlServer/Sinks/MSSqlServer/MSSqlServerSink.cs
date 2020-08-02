@@ -28,7 +28,7 @@ namespace Serilog.Sinks.MSSqlServer
     /// <summary>
     /// Writes log events as rows in a table of MSSqlServer database.
     /// </summary>
-    public class MSSqlServerSink : PeriodicBatchingSink
+    public class MSSqlServerSink : IBatchedLogEventSink, IDisposable
     {
         private readonly ISqlBulkBatchWriter _sqlBulkBatchWriter;
         private readonly DataTable _eventTable;
@@ -47,6 +47,8 @@ namespace Serilog.Sinks.MSSqlServer
         /// A reasonable default time to wait between checking for event batches.
         /// </summary>
         public static readonly TimeSpan DefaultPeriod = TimeSpan.FromSeconds(5);
+
+        private bool _disposedValue;
 
         /// <summary>
         /// Construct a sink posting to the specified database.
@@ -103,7 +105,6 @@ namespace Serilog.Sinks.MSSqlServer
         internal MSSqlServerSink(
             SinkOptions sinkOptions,
             SinkDependencies sinkDependencies)
-            : base(sinkOptions?.BatchPostingLimit ?? DefaultBatchPostingLimit, sinkOptions?.BatchPeriod ?? DefaultPeriod)
         {
             ValidateParameters(sinkOptions);
             CheckSinkDependencies(sinkDependencies);
@@ -121,19 +122,44 @@ namespace Serilog.Sinks.MSSqlServer
         /// <remarks>
         /// Override either <see cref="PeriodicBatchingSink.EmitBatch" /> or <see cref="PeriodicBatchingSink.EmitBatchAsync" />, not both.
         /// </remarks>
-        protected override Task EmitBatchAsync(IEnumerable<LogEvent> events) =>
+        public Task EmitBatchAsync(IEnumerable<LogEvent> events) =>
             _sqlBulkBatchWriter.WriteBatch(events, _eventTable);
 
         /// <summary>
-        /// Disposes the connection
+        /// Called upon batchperiod if no data is in batch. Not used by this sink.
         /// </summary>
-        /// <param name="disposing"></param>
-        protected override void Dispose(bool disposing)
+        /// <returns>A completed task</returns>
+        public Task OnEmptyBatchAsync() =>
+#if NET452
+            Task.FromResult(false);
+#else
+            Task.CompletedTask;
+#endif
+
+        /// <summary>
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// </summary>
+        public void Dispose()
         {
-            base.Dispose(disposing);
-            if (disposing)
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Releases the unmanaged resources used by the Serilog.Sinks.MSSqlServer.MSSqlServerAuditSink and optionally
+        /// releases the managed resources.
+        /// </summary>
+        /// <param name="disposing">True to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposedValue)
             {
-                _eventTable.Dispose();
+                if (disposing)
+                {
+                    _eventTable.Dispose();
+                }
+
+                _disposedValue = true;
             }
         }
 
