@@ -129,7 +129,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         }
 
         [Fact]
-        public async Task EmitCallsSqlLogEventWriter()
+        public async Task EmitBatchAsyncCallsSqlLogEventWriter()
         {
             // Arrange
             SetupSut();
@@ -145,6 +145,34 @@ namespace Serilog.Sinks.MSSqlServer.Tests
 
             // Assert
             _sqlBulkBatchWriter.Verify(w => w.WriteBatch(It.IsAny<IEnumerable<LogEvent>>(), _dataTable), Times.Once);
+        }
+
+        [Fact]
+        public void OnEmpytBatchAsyncReturnsCompletedTask()
+        {
+            // Arrange
+            SetupSut();
+
+            // Act
+            var task = _sut.OnEmptyBatchAsync();
+
+            // Assert
+            Assert.True(task.IsCompleted);
+        }
+
+        [Fact]
+        public void DisposeCallsDisposeOnDataTable()
+        {
+            // Arrange
+            var dataTableDisposeCalled = false;
+            SetupSut();
+            _dataTable.Disposed += (s, e) => dataTableDisposeCalled = true;
+
+            // Act
+            _sut.Dispose();
+
+            // Assert
+            Assert.True(dataTableDisposeCalled);
         }
 
         private void SetupSut(bool autoCreateSqlTable = false)

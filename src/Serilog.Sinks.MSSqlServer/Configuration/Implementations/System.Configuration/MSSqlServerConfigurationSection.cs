@@ -173,6 +173,11 @@ namespace Serilog.Configuration
         public ValueConfigElement EagerlyEmitFirstEvent
         {
             get => (ValueConfigElement)base[nameof(EagerlyEmitFirstEvent)];
+            internal set
+            {
+                // Internal setter for unit testing purpose
+                base[nameof(PrimaryKeyColumnName)] = value;
+            }
         }
 
         [ConfigurationProperty(nameof(UseAzureManagedIdentity))]

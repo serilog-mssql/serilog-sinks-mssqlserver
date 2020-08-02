@@ -117,7 +117,7 @@ namespace Serilog
                 logEventFormatter: logEventFormatter,
                 applySystemConfiguration: new ApplySystemConfiguration(),
                 sinkFactory: new MSSqlServerSinkFactory(),
-                periodicBatchingSinkFactory: new PeriodicBatchingSinkFactory());
+                batchingSinkFactory: new PeriodicBatchingSinkFactory());
 
         // Internal overload with parameters used by tests to override the config section and inject mocks
         internal static LoggerConfiguration MSSqlServerInternal(
@@ -131,7 +131,7 @@ namespace Serilog
             ITextFormatter logEventFormatter,
             IApplySystemConfiguration applySystemConfiguration,
             IMSSqlServerSinkFactory sinkFactory,
-            IPeriodicBatchingSinkFactory periodicBatchingSinkFactory)
+            IPeriodicBatchingSinkFactory batchingSinkFactory)
         {
             if (loggerConfiguration == null)
                 throw new ArgumentNullException(nameof(loggerConfiguration));
@@ -140,7 +140,7 @@ namespace Serilog
 
             var sink = sinkFactory.Create(connectionString, sinkOptions, formatProvider, columnOptions, logEventFormatter);
 
-            var periodicBatchingSink = periodicBatchingSinkFactory.Create(sink, sinkOptions);
+            var periodicBatchingSink = batchingSinkFactory.Create(sink, sinkOptions);
 
             return loggerConfiguration.Sink(periodicBatchingSink, restrictedToMinimumLevel);
         }

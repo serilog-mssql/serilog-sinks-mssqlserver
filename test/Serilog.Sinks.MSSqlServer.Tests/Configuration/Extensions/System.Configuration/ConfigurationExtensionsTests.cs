@@ -77,7 +77,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.System.Config
                 logEventFormatter: null,
                 applySystemConfiguration: new ApplySystemConfiguration(),
                 sinkFactory: new MSSqlServerSinkFactory(),
-                periodicBatchingSinkFactory: new PeriodicBatchingSinkFactory())
+                batchingSinkFactory: new PeriodicBatchingSinkFactory())
                 .CreateLogger();
             Log.CloseAndFlush();
 
@@ -100,7 +100,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.System.Config
                 logEventFormatter: null,
                 applySystemConfiguration: new ApplySystemConfiguration(),
                 sinkFactory: new MSSqlServerSinkFactory(),
-                periodicBatchingSinkFactory: new PeriodicBatchingSinkFactory())
+                batchingSinkFactory: new PeriodicBatchingSinkFactory())
                 .CreateLogger();
             Log.CloseAndFlush();
 
@@ -121,7 +121,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.System.Config
                 logEventFormatter: null,
                 applySystemConfiguration: new ApplySystemConfiguration(),
                 sinkFactory: new MSSqlServerSinkFactory(),
-                periodicBatchingSinkFactory: new PeriodicBatchingSinkFactory())
+                batchingSinkFactory: new PeriodicBatchingSinkFactory())
                 .CreateLogger();
             Log.CloseAndFlush();
 
@@ -151,7 +151,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.System.Config
                 logEventFormatter: null,
                 applySystemConfiguration: new ApplySystemConfiguration(),
                 sinkFactory: new MSSqlServerSinkFactory(),
-                periodicBatchingSinkFactory: new PeriodicBatchingSinkFactory())
+                batchingSinkFactory: new PeriodicBatchingSinkFactory())
                 .CreateLogger();
             Log.Information(messageTemplate, propertyValue);
             Log.CloseAndFlush();

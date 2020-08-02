@@ -7,6 +7,7 @@ using Serilog.Formatting;
 using Serilog.Sinks.MSSqlServer.Configuration.Factories;
 using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
+using Serilog.Sinks.PeriodicBatching;
 using Xunit;
 
 namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.System.Configuration
@@ -44,7 +45,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.System.Config
                 logEventFormatter: null,
                 applySystemConfiguration: _applySystemConfigurationMock.Object,
                 sinkFactory: sinkFactoryMock.Object,
-                periodicBatchingSinkFactory: periodicBatchingSinkFactoryMock.Object);
+                batchingSinkFactory: periodicBatchingSinkFactoryMock.Object);
 
             // Assert
             _applySystemConfigurationMock.Verify(c => c.GetSinkConfigurationSection(inputSectionName),
@@ -74,7 +75,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.System.Config
                 logEventFormatter: null,
                 applySystemConfiguration: _applySystemConfigurationMock.Object,
                 sinkFactory: sinkFactoryMock.Object,
-                periodicBatchingSinkFactory: periodicBatchingSinkFactoryMock.Object);
+                batchingSinkFactory: periodicBatchingSinkFactoryMock.Object);
 
             // Assert
             _applySystemConfigurationMock.Verify(c => c.GetConnectionString(inputConnectionString),
@@ -106,7 +107,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.System.Config
                 logEventFormatter: null,
                 applySystemConfiguration: _applySystemConfigurationMock.Object,
                 sinkFactory: sinkFactoryMock.Object,
-                periodicBatchingSinkFactory: periodicBatchingSinkFactoryMock.Object);
+                batchingSinkFactory: periodicBatchingSinkFactoryMock.Object);
 
             // Assert
             sinkFactoryMock.Verify(f => f.Create(configConnectionString, It.IsAny<SinkOptions>(), It.IsAny<IFormatProvider>(),
@@ -137,7 +138,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.System.Config
                 logEventFormatter: null,
                 applySystemConfiguration: _applySystemConfigurationMock.Object,
                 sinkFactory: sinkFactoryMock.Object,
-                periodicBatchingSinkFactory: periodicBatchingSinkFactoryMock.Object);
+                batchingSinkFactory: periodicBatchingSinkFactoryMock.Object);
 
             // Assert
             _applySystemConfigurationMock.Verify(c => c.ConfigureColumnOptions(systemConfigSection, columnOptions),
@@ -169,7 +170,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.System.Config
                 logEventFormatter: null,
                 applySystemConfiguration: _applySystemConfigurationMock.Object,
                 sinkFactory: sinkFactoryMock.Object,
-                periodicBatchingSinkFactory: periodicBatchingSinkFactoryMock.Object);
+                batchingSinkFactory: periodicBatchingSinkFactoryMock.Object);
 
             // Assert
             sinkFactoryMock.Verify(f => f.Create(It.IsAny<string>(), It.IsAny<SinkOptions>(),
@@ -196,7 +197,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.System.Config
                 logEventFormatter: null,
                 applySystemConfiguration: _applySystemConfigurationMock.Object,
                 sinkFactory: sinkFactoryMock.Object,
-                periodicBatchingSinkFactory: periodicBatchingSinkFactoryMock.Object);
+                batchingSinkFactory: periodicBatchingSinkFactoryMock.Object);
 
             // Assert
             _applySystemConfigurationMock.Verify(c => c.ConfigureColumnOptions(It.IsAny<MSSqlServerConfigurationSection>(), It.IsAny<Serilog.Sinks.MSSqlServer.ColumnOptions>()),
@@ -227,7 +228,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.System.Config
                 logEventFormatter: null,
                 applySystemConfiguration: _applySystemConfigurationMock.Object,
                 sinkFactory: sinkFactoryMock.Object,
-                periodicBatchingSinkFactory: periodicBatchingSinkFactoryMock.Object);
+                batchingSinkFactory: periodicBatchingSinkFactoryMock.Object);
 
             // Assert
             _applySystemConfigurationMock.Verify(c => c.ConfigureSinkOptions(systemConfigSection, sinkOptions),
@@ -259,7 +260,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.System.Config
                 logEventFormatter: null,
                 applySystemConfiguration: _applySystemConfigurationMock.Object,
                 sinkFactory: sinkFactoryMock.Object,
-                periodicBatchingSinkFactory: periodicBatchingSinkFactoryMock.Object);
+                batchingSinkFactory: periodicBatchingSinkFactoryMock.Object);
 
             // Assert
             sinkFactoryMock.Verify(f => f.Create(It.IsAny<string>(), configSinkOptions,
@@ -286,7 +287,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.System.Config
                 logEventFormatter: null,
                 applySystemConfiguration: _applySystemConfigurationMock.Object,
                 sinkFactory: sinkFactoryMock.Object,
-                periodicBatchingSinkFactory: periodicBatchingSinkFactoryMock.Object);
+                batchingSinkFactory: periodicBatchingSinkFactoryMock.Object);
 
             // Assert
             _applySystemConfigurationMock.Verify(c => c.ConfigureSinkOptions(It.IsAny<MSSqlServerConfigurationSection>(), It.IsAny<SinkOptions>()),
@@ -319,11 +320,40 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.System.Config
                 logEventFormatter: logEventFormatterMock.Object,
                 applySystemConfiguration: _applySystemConfigurationMock.Object,
                 sinkFactory: sinkFactoryMock.Object,
-                periodicBatchingSinkFactory: periodicBatchingSinkFactoryMock.Object);
+                batchingSinkFactory: periodicBatchingSinkFactoryMock.Object);
 
             // Assert
             sinkFactoryMock.Verify(f => f.Create(It.IsAny<string>(), sinkOptions, formatProviderMock.Object,
                 columnOptions, logEventFormatterMock.Object), Times.Once);
+        }
+
+        [Fact]
+        public void MSSqlServerCallsBatchedSinkFactoryWithSinkFromSinkFactoryAndSuppliedSinkOptions()
+        {
+            // Arrange
+            var sinkOptions = new SinkOptions();
+            var sinkMock = new Mock<IBatchedLogEventSink>();
+            var sinkFactoryMock = new Mock<IMSSqlServerSinkFactory>();
+            var periodicBatchingSinkFactoryMock = new Mock<IPeriodicBatchingSinkFactory>();
+            sinkFactoryMock.Setup(f => f.Create(It.IsAny<string>(), It.IsAny<SinkOptions>(), It.IsAny<IFormatProvider>(),
+                It.IsAny<MSSqlServer.ColumnOptions>(), It.IsAny<ITextFormatter>()))
+                .Returns(sinkMock.Object);
+
+            // Act
+            _loggerConfiguration.WriteTo.MSSqlServerInternal(
+                configSectionName: "TestConfigSectionName",
+                connectionString: "TestConnectionString",
+                sinkOptions: sinkOptions,
+                restrictedToMinimumLevel: LevelAlias.Minimum,
+                formatProvider: null,
+                columnOptions: null,
+                logEventFormatter: null,
+                applySystemConfiguration: _applySystemConfigurationMock.Object,
+                sinkFactory: sinkFactoryMock.Object,
+                batchingSinkFactory: periodicBatchingSinkFactoryMock.Object);
+
+            // Assert
+            periodicBatchingSinkFactoryMock.Verify(f => f.Create(sinkMock.Object, sinkOptions), Times.Once);
         }
 
         [Fact]

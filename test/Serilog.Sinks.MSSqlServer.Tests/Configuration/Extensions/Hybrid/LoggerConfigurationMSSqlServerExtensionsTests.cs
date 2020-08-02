@@ -7,6 +7,7 @@ using Serilog.Formatting;
 using Serilog.Sinks.MSSqlServer.Configuration.Factories;
 using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
+using Serilog.Sinks.PeriodicBatching;
 using Xunit;
 
 namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.Hybrid
@@ -604,6 +605,38 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.Hybrid
             // Assert
             sinkFactoryMock.Verify(f => f.Create(connectionString, sinkOptions, formatProviderMock.Object, columnOptions,
                 logEventFormatterMock.Object), Times.Once);
+        }
+
+        [Fact]
+        public void MSSqlServerCallsBatchedSinkFactoryWithSinkFromSinkFactoryAndSuppliedSinkOptions()
+        {
+            // Arrange
+            var sinkOptions = new SinkOptions();
+            var sinkMock = new Mock<IBatchedLogEventSink>();
+            var sinkFactoryMock = new Mock<IMSSqlServerSinkFactory>();
+            var periodicBatchingSinkFactoryMock = new Mock<IPeriodicBatchingSinkFactory>();
+            sinkFactoryMock.Setup(f => f.Create(It.IsAny<string>(), It.IsAny<SinkOptions>(), It.IsAny<IFormatProvider>(),
+                It.IsAny<MSSqlServer.ColumnOptions>(), It.IsAny<ITextFormatter>()))
+                .Returns(sinkMock.Object);
+
+            // Act
+            _loggerConfiguration.WriteTo.MSSqlServerInternal(
+                connectionString: "TestConnectionString",
+                sinkOptions: sinkOptions,
+                sinkOptionsSection: null,
+                appConfiguration: null,
+                restrictedToMinimumLevel: LevelAlias.Minimum,
+                formatProvider: null,
+                columnOptions: null,
+                columnOptionsSection: null,
+                logEventFormatter: null,
+                applySystemConfiguration: _applySystemConfigurationMock.Object,
+                applyMicrosoftExtensionsConfiguration: _applyMicrosoftExtensionsConfigurationMock.Object,
+                sinkFactory: sinkFactoryMock.Object,
+                batchingSinkFactory: periodicBatchingSinkFactoryMock.Object);
+
+            // Assert
+            periodicBatchingSinkFactoryMock.Verify(f => f.Create(sinkMock.Object, sinkOptions), Times.Once);
         }
 
         [Fact]
