@@ -5,23 +5,23 @@ configuration: Release
 install:
   - ps: mkdir -Force ".\build\" | Out-Null
 build_script:
-- ps: ./Build.ps1
+  - ps: ./Build.ps1
 test: off
 artifacts:
-- path: artifacts/Serilog.*.nupkg
-- path: artifacts/Serilog.*.snupkg
+  - path: artifacts/Serilog.*.nupkg
+  - path: artifacts/Serilog.*.snupkg
 deploy:
-- provider: NuGet
-  api_key:
-    secure: K3/810hkTO6rd2AEHVkUQAadjGmDREus9k96QHu6hxrA1/wRTuAJemHMKtVVgIvf
-  on:
-    branch: /^(master|dev)$/
-- provider: GitHub
-  auth_token:
-    secure: p4LpVhBKxGS5WqucHxFQ5c7C8cP74kbNB0Z8k9Oxx/PMaDQ1+ibmoexNqVU5ZlmX
-  artifacts:
-    /Serilog.*\.nupkg/
-    /Serilog.*\.snupkg/
-  tag: v$(appveyor_build_version)
-  on:
-    branch: master
+  - provider: NuGet
+    api_key:
+      secure: K3/810hkTO6rd2AEHVkUQAadjGmDREus9k96QHu6hxrA1/wRTuAJemHMKtVVgIvf
+    on:
+      branch: /^(master|dev)$/
+  - provider: GitHub
+    auth_token:
+      secure: p4LpVhBKxGS5WqucHxFQ5c7C8cP74kbNB0Z8k9Oxx/PMaDQ1+ibmoexNqVU5ZlmX
+    artifacts:
+      /Serilog.*\.nupkg/
+      /Serilog.*\.snupkg/
+    tag: v$(appveyor_build_version)
+    on:
+      branch: master
