@@ -137,6 +137,30 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Output
             Assert.Equal("1", result[0].Value);
         }
 
+        [Fact]
+        public void ConvertPropertiesToColumnConvertsUniqueIdentifier()
+        {
+            // Arrange
+            const string propertyKey = "AdditionalProperty1";
+            const string propertyValue = "7526f485-ec2d-4ec8-bd73-12a7d1c49a5d";
+            var properties = new ReadOnlyDictionary<string, LogEventPropertyValue>(
+                new Dictionary<string, LogEventPropertyValue>
+                {
+                    { propertyKey, new ScalarValue(propertyValue) }
+                });
+            _columnOptions.AdditionalColumns.Add(new SqlColumn(propertyKey, SqlDbType.UniqueIdentifier));
+            CreateSut();
+
+            // Act
+            var result = _sut.ConvertPropertiesToColumn(properties).ToArray();
+
+            // Assert
+            var expectedResult = Guid.Parse(propertyValue);
+            Assert.Equal(propertyKey, result[0].Key);
+            Assert.IsType<Guid>(result[0].Value);
+            Assert.Equal(expectedResult, result[0].Value);
+        }
+
         private void CreateSut()
         {
             _sut = new PropertiesColumnDataGenerator(_columnOptions);
