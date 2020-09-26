@@ -272,7 +272,7 @@ This setting is not used by the audit sink as it writes each event immediately a
 
 ### EagerlyEmitFirstEvent
 
-A Flag to eagerly write a batch to the database containing the first received event regardless of `BatchPostingLimit` or `BatchPeriod`. It defaults to ture.  
+A Flag to eagerly write a batch to the database containing the first received event regardless of `BatchPostingLimit` or `BatchPeriod`. It defaults to `true`.  
 This setting is not used by the audit sink as it writes each event immediately and not in a batched manner.
 
 ### UseAzureManagedIdentity
