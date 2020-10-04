@@ -3,7 +3,6 @@ using System.Data;
 using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.MSSqlServer;
-using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
 
 namespace NetStandardDemoLib
 {
@@ -18,7 +17,7 @@ namespace NetStandardDemoLib
                 .Enrich.FromLogContext()
                 .WriteTo.MSSqlServer(
                     _connectionString,
-                    new SinkOptions
+                    new MSSqlServerSinkOptions
                     {
                         TableName = _tableName,
                         AutoCreateSqlTable = true

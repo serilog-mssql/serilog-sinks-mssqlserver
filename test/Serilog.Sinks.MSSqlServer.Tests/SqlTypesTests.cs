@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
-using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
 using Xunit.Abstractions;
@@ -145,7 +144,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 .AuditTo.MSSqlServer
                 (
                     connectionString: DatabaseFixture.LogEventsConnectionString,
-                    new SinkOptions
+                    new MSSqlServerSinkOptions
                     {
                         TableName = DatabaseFixture.LogTableName,
                         AutoCreateSqlTable = true

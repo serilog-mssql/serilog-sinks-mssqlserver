@@ -1,12 +1,11 @@
 ﻿using Serilog.Core;
-using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
 using Serilog.Sinks.PeriodicBatching;
 
 namespace Serilog.Sinks.MSSqlServer.Configuration.Factories
 {
     internal class PeriodicBatchingSinkFactory : IPeriodicBatchingSinkFactory
     {
-        public ILogEventSink Create(IBatchedLogEventSink sink, SinkOptions sinkOptions)
+        public ILogEventSink Create(IBatchedLogEventSink sink, MSSqlServerSinkOptions sinkOptions)
         {
             var periodicBatchingSinkOptions = new PeriodicBatchingSinkOptions
             {

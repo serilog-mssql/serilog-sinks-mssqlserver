@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.Extensions.Configuration;
-using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
 using Xunit.Abstractions;
@@ -48,7 +47,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.Hybrid
             var loggerConfiguration = new LoggerConfiguration();
             Log.Logger = loggerConfiguration.WriteTo.MSSqlServer(
                 connectionString: _connectionStringName,
-                sinkOptions: new SinkOptions
+                sinkOptions: new MSSqlServerSinkOptions
                 {
                     TableName = DatabaseFixture.LogTableName,
                     AutoCreateSqlTable = true
@@ -105,7 +104,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.Hybrid
             var loggerConfiguration = new LoggerConfiguration();
             Log.Logger = loggerConfiguration.WriteTo.MSSqlServer(
                 connectionString: DatabaseFixture.LogEventsConnectionString,
-                sinkOptions: new SinkOptions
+                sinkOptions: new MSSqlServerSinkOptions
                 {
                     TableName = DatabaseFixture.LogTableName,
                     AutoCreateSqlTable = true

@@ -3,7 +3,6 @@ using System.Globalization;
 using Microsoft.Extensions.Configuration;
 using Moq;
 using Serilog.Sinks.MSSqlServer.Configuration;
-using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
 
@@ -23,7 +22,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
         public void ConfigureSinkOptionsCalledWithConfigSectionNullReturnsUnchangedSinkOptions()
         {
             // Arrange
-            var sinkOptions = new SinkOptions { UseAzureManagedIdentity = true };
+            var sinkOptions = new MSSqlServerSinkOptions { UseAzureManagedIdentity = true };
             var sut = new MicrosoftExtensionsSinkOptionsProvider();
 
             // Act
@@ -42,7 +41,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
             var sut = new MicrosoftExtensionsSinkOptionsProvider();
 
             // Act
-            var result = sut.ConfigureSinkOptions(new SinkOptions(), _configurationSectionMock.Object);
+            var result = sut.ConfigureSinkOptions(new MSSqlServerSinkOptions(), _configurationSectionMock.Object);
 
             // Assert
             Assert.Equal(tableName, result.TableName);
@@ -57,7 +56,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
             var sut = new MicrosoftExtensionsSinkOptionsProvider();
 
             // Act
-            var result = sut.ConfigureSinkOptions(new SinkOptions(), _configurationSectionMock.Object);
+            var result = sut.ConfigureSinkOptions(new MSSqlServerSinkOptions(), _configurationSectionMock.Object);
 
             // Assert
             Assert.Equal(schemaName, result.SchemaName);
@@ -71,7 +70,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
             var sut = new MicrosoftExtensionsSinkOptionsProvider();
 
             // Act
-            var result = sut.ConfigureSinkOptions(new SinkOptions(), _configurationSectionMock.Object);
+            var result = sut.ConfigureSinkOptions(new MSSqlServerSinkOptions(), _configurationSectionMock.Object);
 
             // Assert
             Assert.True(result.AutoCreateSqlTable);
@@ -86,7 +85,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
             var sut = new MicrosoftExtensionsSinkOptionsProvider();
 
             // Act
-            var result = sut.ConfigureSinkOptions(new SinkOptions(), _configurationSectionMock.Object);
+            var result = sut.ConfigureSinkOptions(new MSSqlServerSinkOptions(), _configurationSectionMock.Object);
 
             // Assert
             Assert.Equal(batchPostingLimit, result.BatchPostingLimit);
@@ -103,7 +102,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
             var sut = new MicrosoftExtensionsSinkOptionsProvider();
 
             // Act
-            var result = sut.ConfigureSinkOptions(new SinkOptions(), _configurationSectionMock.Object);
+            var result = sut.ConfigureSinkOptions(new MSSqlServerSinkOptions(), _configurationSectionMock.Object);
 
             // Assert
             Assert.Equal(batchPeriod, result.BatchPeriod);
@@ -117,7 +116,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
             var sut = new MicrosoftExtensionsSinkOptionsProvider();
 
             // Act
-            var result = sut.ConfigureSinkOptions(new SinkOptions(), _configurationSectionMock.Object);
+            var result = sut.ConfigureSinkOptions(new MSSqlServerSinkOptions(), _configurationSectionMock.Object);
 
             // Assert
             Assert.True(result.EagerlyEmitFirstEvent);
@@ -131,7 +130,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
             var sut = new MicrosoftExtensionsSinkOptionsProvider();
 
             // Act
-            var result = sut.ConfigureSinkOptions(new SinkOptions(), _configurationSectionMock.Object);
+            var result = sut.ConfigureSinkOptions(new MSSqlServerSinkOptions(), _configurationSectionMock.Object);
 
             // Assert
             Assert.True(result.UseAzureManagedIdentity);
@@ -146,7 +145,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
             var sut = new MicrosoftExtensionsSinkOptionsProvider();
 
             // Act
-            var result = sut.ConfigureSinkOptions(new SinkOptions(), _configurationSectionMock.Object);
+            var result = sut.ConfigureSinkOptions(new MSSqlServerSinkOptions(), _configurationSectionMock.Object);
 
             // Assert
             Assert.Equal(azureServiceTokenProviderResource, result.AzureServiceTokenProviderResource);

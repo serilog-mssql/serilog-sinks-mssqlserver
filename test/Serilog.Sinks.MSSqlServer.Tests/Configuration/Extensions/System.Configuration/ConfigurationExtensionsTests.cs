@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using Serilog.Events;
 using Serilog.Sinks.MSSqlServer.Configuration.Factories;
-using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
 using Xunit.Abstractions;
@@ -49,7 +48,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.System.Config
             var loggerConfiguration = new LoggerConfiguration();
             Log.Logger = loggerConfiguration.WriteTo.MSSqlServer(
                 connectionString: ConnectionStringName,
-                sinkOptions: new SinkOptions
+                sinkOptions: new MSSqlServerSinkOptions
                 {
                     TableName = DatabaseFixture.LogTableName,
                     AutoCreateSqlTable = true
@@ -70,7 +69,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.System.Config
             Log.Logger = loggerConfiguration.WriteTo.MSSqlServerInternal(
                 configSectionName: "CustomStandardColumnNames",
                 connectionString: DatabaseFixture.LogEventsConnectionString,
-                sinkOptions: new SinkOptions { TableName = DatabaseFixture.LogTableName, AutoCreateSqlTable = true },
+                sinkOptions: new MSSqlServerSinkOptions { TableName = DatabaseFixture.LogTableName, AutoCreateSqlTable = true },
                 restrictedToMinimumLevel: LevelAlias.Minimum,
                 formatProvider: null,
                 columnOptions: null,
@@ -114,7 +113,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.System.Config
             Log.Logger = loggerConfiguration.WriteTo.MSSqlServerInternal(
                 configSectionName: "CustomizedColumnList",
                 connectionString: DatabaseFixture.LogEventsConnectionString,
-                sinkOptions: new SinkOptions { TableName = DatabaseFixture.LogTableName, AutoCreateSqlTable = true },
+                sinkOptions: new MSSqlServerSinkOptions { TableName = DatabaseFixture.LogTableName, AutoCreateSqlTable = true },
                 restrictedToMinimumLevel: LevelAlias.Minimum,
                 formatProvider: null,
                 columnOptions: null,
@@ -144,7 +143,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.System.Config
             Log.Logger = loggerConfiguration.WriteTo.MSSqlServerInternal(
                 configSectionName: "AdditionalColumnCustomPropertyList",
                 connectionString: DatabaseFixture.LogEventsConnectionString,
-                sinkOptions: new SinkOptions { TableName = DatabaseFixture.LogTableName, AutoCreateSqlTable = true },
+                sinkOptions: new MSSqlServerSinkOptions { TableName = DatabaseFixture.LogTableName, AutoCreateSqlTable = true },
                 restrictedToMinimumLevel: LevelAlias.Minimum,
                 formatProvider: null,
                 columnOptions: null,

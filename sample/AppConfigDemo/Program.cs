@@ -2,7 +2,7 @@
 using System.Threading;
 using Serilog;
 using Serilog.Events;
-using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
+using Serilog.Sinks.MSSqlServer;
 
 namespace AppConfigDemo
 {
@@ -29,11 +29,11 @@ namespace AppConfigDemo
             //        logEventFormatter: null)
             //    .CreateLogger();
 
-            // New SinkOptions based interface
+            // New MSSqlServerSinkOptions based interface
             Log.Logger = new LoggerConfiguration().WriteTo
                 .MSSqlServer(
                     connectionString: _connectionString,
-                    sinkOptions: new SinkOptions
+                    sinkOptions: new MSSqlServerSinkOptions
                     {
                         TableName = _tableName,
                         SchemaName = _schemaName,

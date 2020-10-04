@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Serilog.Sinks.MSSqlServer.Configuration;
-using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
 
 namespace Serilog.Sinks.MSSqlServer
 {
@@ -34,7 +33,7 @@ namespace Serilog.Sinks.MSSqlServer
         public ColumnOptions ConfigureColumnOptions(ColumnOptions columnOptions, IConfigurationSection config) =>
             _columnOptionsProvider.ConfigureColumnOptions(columnOptions, config);
 
-        public SinkOptions ConfigureSinkOptions(SinkOptions sinkOptions, IConfigurationSection config) =>
+        public MSSqlServerSinkOptions ConfigureSinkOptions(MSSqlServerSinkOptions sinkOptions, IConfigurationSection config) =>
             _sinkOptionsProvider.ConfigureSinkOptions(sinkOptions, config);
     }
 }
