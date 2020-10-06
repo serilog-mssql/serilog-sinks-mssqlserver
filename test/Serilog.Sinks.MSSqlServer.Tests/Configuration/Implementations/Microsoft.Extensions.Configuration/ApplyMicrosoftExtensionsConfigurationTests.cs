@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Moq;
 using Serilog.Sinks.MSSqlServer.Configuration;
-using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
 
@@ -53,11 +52,11 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
         public void ConfigureSinkOptionsCallsAttachedSinkOptionsProvider()
         {
             // Arrange
-            var inputSinkOptions = new SinkOptions();
-            var expectedResult = new SinkOptions();
+            var inputSinkOptions = new MSSqlServerSinkOptions();
+            var expectedResult = new MSSqlServerSinkOptions();
             var configurationSectionMock = new Mock<IConfigurationSection>();
             var sinkOptionsProviderMock = new Mock<IMicrosoftExtensionsSinkOptionsProvider>();
-            sinkOptionsProviderMock.Setup(p => p.ConfigureSinkOptions(It.IsAny<SinkOptions>(), It.IsAny<IConfigurationSection>()))
+            sinkOptionsProviderMock.Setup(p => p.ConfigureSinkOptions(It.IsAny<MSSqlServerSinkOptions>(), It.IsAny<IConfigurationSection>()))
                 .Returns(expectedResult);
             var sut = new ApplyMicrosoftExtensionsConfiguration(null, null, sinkOptionsProviderMock.Object);
 

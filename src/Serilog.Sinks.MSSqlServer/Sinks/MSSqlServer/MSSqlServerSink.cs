@@ -20,7 +20,6 @@ using Serilog.Events;
 using Serilog.Formatting;
 using Serilog.Sinks.MSSqlServer.Dependencies;
 using Serilog.Sinks.MSSqlServer.Platform;
-using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
 using Serilog.Sinks.PeriodicBatching;
 
 namespace Serilog.Sinks.MSSqlServer
@@ -53,7 +52,7 @@ namespace Serilog.Sinks.MSSqlServer
         /// <summary>
         /// Construct a sink posting to the specified database.
         ///
-        /// Note: this is the legacy version of the extension method. Please use the new one using SinkOptions instead.
+        /// Note: this is the legacy version of the extension method. Please use the new one using MSSqlServerSinkOptions instead.
         /// 
         /// </summary>
         /// <param name="connectionString">Connection string to access the database.</param>
@@ -65,7 +64,7 @@ namespace Serilog.Sinks.MSSqlServer
         /// <param name="autoCreateSqlTable">Create log table with the provided name on destination sql server.</param>
         /// <param name="columnOptions">Options that pertain to columns</param>
         /// <param name="logEventFormatter">Supplies custom formatter for the LogEvent column, or null</param>
-        [Obsolete("Use the new interface accepting a SinkOptions parameter instead. This will be removed in a future release.", error: false)]
+        [Obsolete("Use the new interface accepting a MSSqlServerSinkOptions parameter instead. This will be removed in a future release.", error: false)]
         public MSSqlServerSink(
             string connectionString,
             string tableName,
@@ -76,11 +75,11 @@ namespace Serilog.Sinks.MSSqlServer
             ColumnOptions columnOptions = null,
             string schemaName = DefaultSchemaName,
             ITextFormatter logEventFormatter = null)
-            : this(connectionString, new SinkOptions(tableName, batchPostingLimit, period, autoCreateSqlTable, schemaName),
+            : this(connectionString, new MSSqlServerSinkOptions(tableName, batchPostingLimit, period, autoCreateSqlTable, schemaName),
                   formatProvider, columnOptions, logEventFormatter)
         {
             // Do not add new parameters here. This interface is considered legacy and will be deprecated in the future.
-            // For adding new input parameters use the SinkOptions class and the method overload that accepts SinkOptions.
+            // For adding new input parameters use the MSSqlServerSinkOptions class and the method overload that accepts MSSqlServerSinkOptions.
         }
 
         /// <summary>
@@ -93,7 +92,7 @@ namespace Serilog.Sinks.MSSqlServer
         /// <param name="logEventFormatter">Supplies custom formatter for the LogEvent column, or null</param>
         public MSSqlServerSink(
             string connectionString,
-            SinkOptions sinkOptions,
+            MSSqlServerSinkOptions sinkOptions,
             IFormatProvider formatProvider = null,
             ColumnOptions columnOptions = null,
             ITextFormatter logEventFormatter = null)
@@ -103,7 +102,7 @@ namespace Serilog.Sinks.MSSqlServer
 
         // Internal constructor with injectable dependencies for better testability
         internal MSSqlServerSink(
-            SinkOptions sinkOptions,
+            MSSqlServerSinkOptions sinkOptions,
             SinkDependencies sinkDependencies)
         {
             ValidateParameters(sinkOptions);
@@ -163,7 +162,7 @@ namespace Serilog.Sinks.MSSqlServer
             }
         }
 
-        private static void ValidateParameters(SinkOptions sinkOptions)
+        private static void ValidateParameters(MSSqlServerSinkOptions sinkOptions)
         {
             if (sinkOptions?.TableName == null)
             {
@@ -194,7 +193,7 @@ namespace Serilog.Sinks.MSSqlServer
             }
         }
 
-        private void CreateTable(SinkOptions sinkOptions, SinkDependencies sinkDependencies)
+        private void CreateTable(MSSqlServerSinkOptions sinkOptions, SinkDependencies sinkDependencies)
         {
             if (sinkOptions.AutoCreateSqlTable)
             {

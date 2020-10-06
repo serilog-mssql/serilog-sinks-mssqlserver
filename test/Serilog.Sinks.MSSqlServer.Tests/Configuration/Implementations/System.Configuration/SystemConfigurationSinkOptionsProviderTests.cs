@@ -1,6 +1,5 @@
 ﻿using Serilog.Configuration;
 using Serilog.Sinks.MSSqlServer.Configuration;
-using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
 
@@ -15,7 +14,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.System.C
             // Arrange
             var configSection = new MSSqlServerConfigurationSection();
             configSection.EagerlyEmitFirstEvent.Value = "true";
-            var sinkOptions = new SinkOptions { EagerlyEmitFirstEvent = false };
+            var sinkOptions = new MSSqlServerSinkOptions { EagerlyEmitFirstEvent = false };
             var sut = new SystemConfigurationSinkOptionsProvider();
 
             // Act

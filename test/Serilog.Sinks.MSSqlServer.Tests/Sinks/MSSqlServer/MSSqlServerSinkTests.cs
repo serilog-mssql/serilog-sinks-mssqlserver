@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Linq;
 using System.Threading.Tasks;
 using Moq;
 using Serilog.Events;
 using Serilog.Sinks.MSSqlServer.Dependencies;
 using Serilog.Sinks.MSSqlServer.Platform;
-using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
 
@@ -16,7 +14,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
     [Trait(TestCategory.TraitName, TestCategory.Unit)]
     public class MSSqlServerSinkTests : IDisposable
     {
-        private readonly SinkOptions _sinkOptions;
+        private readonly MSSqlServerSinkOptions _sinkOptions;
         private readonly SinkDependencies _sinkDependencies;
         private readonly Mock<IDataTableCreator> _dataTableCreatorMock;
         private readonly Mock<ISqlTableCreator> _sqlTableCreatorMock;
@@ -29,7 +27,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
 
         public MSSqlServerSinkTests()
         {
-            _sinkOptions = new SinkOptions
+            _sinkOptions = new MSSqlServerSinkOptions
             {
                 TableName = _tableName,
                 SchemaName = _schemaName
@@ -55,7 +53,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         public void InitializeWithoutTableNameThrows()
         {
             Assert.Throws<InvalidOperationException>(() =>
-                new MSSqlServerSink(new SinkOptions(), _sinkDependencies));
+                new MSSqlServerSink(new MSSqlServerSinkOptions(), _sinkDependencies));
         }
 
         [Fact]

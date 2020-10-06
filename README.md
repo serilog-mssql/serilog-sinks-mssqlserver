@@ -11,7 +11,7 @@ A Serilog sink that writes events to Microsoft SQL Server. This sink will write 
 * [Sink Configuration](#sink-configuration)
 * [Audit Sink Configuration](#audit-sink-configuration)
 * [Table Definition](#table-definition)
-* [SinkOptions Object](#sinkoptions-object)
+* [MSSqlServerSinkOptions Object](#mssqlserversinkoptions-object)
 * [ColumnOptions Object](#columnoptions-object)
 * [SqlColumn Objects](#sqlcolumn-objects)
 * [Standard Columns](#standard-columns)
@@ -30,7 +30,7 @@ Log.Logger = new LoggerConfiguration()
     .WriteTo
     .MSSqlServer(
         connectionString: "Server=localhost;Database=LogDb;Integrated Security=SSPI;",
-        sinkOptions: new SinkOptions { TableName = "LogEvents" })
+        sinkOptions: new MSSqlServerSinkOptions { TableName = "LogEvents" })
     .CreateLogger();
 ```
 
@@ -40,7 +40,7 @@ There is a set of small and simple sample programs provided with the source code
 
 ## Sink Configuration
 
-The sink can be configured completely through code, by using configuration files (or other types of configuration providers), a combination of both, or by using the various Serilog configuration packages. There are two configuration considerations: configuring the sink itself, and configuring the table used by the sink. The sink is configured with a typical Serilog `WriteTo` configuration method (or `AuditTo`, or similar variations). Settings for the sink are configured using a `SinkOptions` object passed to the coniguration method. The table is configured with an optional `ColumnOptions` object passed to the configuration method.
+The sink can be configured completely through code, by using configuration files (or other types of configuration providers), a combination of both, or by using the various Serilog configuration packages. There are two configuration considerations: configuring the sink itself, and configuring the table used by the sink. The sink is configured with a typical Serilog `WriteTo` configuration method (or `AuditTo`, or similar variations). Settings for the sink are configured using a `MSSqlServerSinkOptions` object passed to the configuration method. The table is configured with an optional `ColumnOptions` object passed to the configuration method.
 
 All sink configuration methods accept the following arguments, though not necessarily in this order. Use of named arguments is strongly recommended. Some platform targets have additional arguments.
 
@@ -53,15 +53,15 @@ All sink configuration methods accept the following arguments, though not necess
 
 ### Basic Arguments
 
-At minimum, `connectionString` and `SinkOptions.TableName` are required. If you are using an external configuration source such as an XML file or JSON file, you can use a named connection string instead of providing the full "raw" connection string.
+At minimum, `connectionString` and `MSSqlServerSinkOptions.TableName` are required. If you are using an external configuration source such as an XML file or JSON file, you can use a named connection string instead of providing the full "raw" connection string.
 
-All properties in the `SinkOptions` object are discussed in the [SinkOptions Object](#sinkoptions-object) topic.
+All properties in the `MSSqlServerSinkOptions` object are discussed in the [MSSqlServerSinkOptions Object](#mssqlserversinkoptions-object) topic.
 
 Table configuration with the optional `ColumnOptions` object is a lengthy subject discussed in the [ColumnOptions Object](#columnoptions-object) topic and other related topics.
 
 Like other sinks, `restrictedToMinimumLevel` controls the `LogEventLevel` messages that are processed by this sink.
 
-This is a "periodic batching sink." The sink will queue a certain number of log events before they're actually written to SQL Server as a bulk insert operation. There is also a timeout period so that the batch is always written even if it has not been filled. By default, the batch size is 50 rows and the timeout is 5 seconds. You can change these through by setting the `SinkOptions.BatchPostingLimit` and `SinkOptions.BatchPeriod` arguments.
+This is a "periodic batching sink." The sink will queue a certain number of log events before they're actually written to SQL Server as a bulk insert operation. There is also a timeout period so that the batch is always written even if it has not been filled. By default, the batch size is 50 rows and the timeout is 5 seconds. You can change these through by setting the `MSSqlServerSinkOptions.BatchPostingLimit` and `MSSqlServerSinkOptions.BatchPeriod` arguments.
 
 Consider increasing the batch size in high-volume logging environments. In one test of a loop writing a single log entry, the default batch size averaged about 14,000 rows per second. Increasing the batch size to 1000 rows increased average write speed to nearly 43,000 rows per second. However, you should also consider the risk-factor. If the client or server crashes, or if the connection goes down, you may lose an entire batch of log entries. You can mitigate this by reducing the timeout. Run performance tests to find the optimal batch size for your production log table definition and log event content, network setup, and server configuration.
 
@@ -104,7 +104,7 @@ All sink features are configurable from code. Here is a typical example that wor
 
 ```csharp
 var logDB = @"Server=...";
-var sinkOpts = new SinkOptions();
+var sinkOpts = new MSSqlServerSinkOptions();
 sinkOpts.TableName = "Logs";
 var columnOpts = new ColumnOptions();
 columnOpts.Store.Remove(StandardColumn.Properties);
@@ -124,7 +124,7 @@ var log = new LoggerConfiguration()
 
 ### Code + _Microsoft.Extensions.Configuration_
 
-Projects can build (or inject) a configuration object using _Microsoft.Extensions.Configuration_ and pass it to the sink's configuration method. If provided, the settings of `SinkOptions` and `ColumnOptions` objects created in code are treated as a baseline which is then updated from the external configuration data. See the [External Configuration Syntax](#external-configuration-syntax) topic for details.
+Projects can build (or inject) a configuration object using _Microsoft.Extensions.Configuration_ and pass it to the sink's configuration method. If provided, the settings of `MSSqlServerSinkOptions` and `ColumnOptions` objects created in code are treated as a baseline which is then updated from the external configuration data. See the [External Configuration Syntax](#external-configuration-syntax) topic for details.
 
 ```csharp
 var appSettings = new ConfigurationBuilder()
@@ -133,7 +133,7 @@ var appSettings = new ConfigurationBuilder()
     .Build();
 
 var logDB = @"Server=...";
-var sinkOpts = new SinkOptions { TableName = "Logs" };
+var sinkOpts = new MSSqlServerSinkOptions { TableName = "Logs" };
 var columnOpts = new ColumnOptions();
 
 var log = new LoggerConfiguration()
@@ -147,17 +147,17 @@ var log = new LoggerConfiguration()
 
 ### Code + _System.Configuration_
 
-Projects can load `SinkOptions` and `ColumnOptions` objects from an XML configuration file such as `app.config` or `web.config`. The sink configuration method automatically checks `ConfigurationManager`, so there is no code to show, and no additional packages are required. See the [External Configuration Syntax](#external-configuration-syntax) topic for details. 
+Projects can load `MSSqlServerSinkOptions` and `ColumnOptions` objects from an XML configuration file such as `app.config` or `web.config`. The sink configuration method automatically checks `ConfigurationManager`, so there is no code to show, and no additional packages are required. See the [External Configuration Syntax](#external-configuration-syntax) topic for details. 
 
 ### External using _Serilog.Settings.Configuration_
 
 _Requires configuration package version [**3.0.0**](https://www.nuget.org/packages/Serilog.Settings.Configuration/3.0.0) or newer._
 
-.NET Standard projects can call `ReadFrom.Configuration()` to configure Serilog using the [_Serilog.Settings.Configuration_](https://github.com/serilog/serilog-settings-configuration) package. This will apply configuration arguments from all application configuration sources (not only `appsettings.json` as shown here, but any other valid `IConfiguration` source). This package can configure the sink itsef with `SinkOptions` as well as `ColumnOptions` table features. See the [External Configuration Syntax](#external-configuration-syntax) topic for details.
+.NET Standard projects can call `ReadFrom.Configuration()` to configure Serilog using the [_Serilog.Settings.Configuration_](https://github.com/serilog/serilog-settings-configuration) package. This will apply configuration arguments from all application configuration sources (not only `appsettings.json` as shown here, but any other valid `IConfiguration` source). This package can configure the sink itself with `MSSqlServerSinkOptions` as well as `ColumnOptions` table features. See the [External Configuration Syntax](#external-configuration-syntax) topic for details.
 
 ### External using _Serilog.Settings.AppSettings_
 
-Projects can configure the sink from XML configuration by calling `ReadFrom.AppSettings()` using the [_Serilog.Settings.AppSettings_](https://github.com/serilog/serilog-settings-appsettings) package. This will apply configuration arguments from the project's `app.config` or `web.config` file. This is independent of configuring `SinkOptions` or `ColumnOptions` from external XML files. See the [External Configuration Syntax](#external-configuration-syntax) topic for details.
+Projects can configure the sink from XML configuration by calling `ReadFrom.AppSettings()` using the [_Serilog.Settings.AppSettings_](https://github.com/serilog/serilog-settings-appsettings) package. This will apply configuration arguments from the project's `app.config` or `web.config` file. This is independent of configuring `MSSqlServerSinkOptions` or `ColumnOptions` from external XML files. See the [External Configuration Syntax](#external-configuration-syntax) topic for details.
 
 ## Audit Sink Configuration
 
@@ -173,7 +173,7 @@ The constructor accepts most of the same arguments, and like other Serilog audit
 
 The `restrictedToMinimumLevel` parameter is not available because all events written to an audit sink are required to succeed.
 
-The `SinkOptions.BatchPostingLimit` and `SinkOptions.BatchPeriod` parameters are ignored because the audit sink writes log events immediately.
+The `MSSqlServerSinkOptions.BatchPostingLimit` and `MSSqlServerSinkOptions.BatchPeriod` parameters are ignored because the audit sink writes log events immediately.
 
 For _M.E.C_-compatible projects, `appConfiguration`, `sinkOptionsSection` and `columnOptionsSection` arguments are also provided, just as they are with the non-audit configuration extensions.
 
@@ -235,9 +235,9 @@ GRANT INSERT ON [dbo].[SecuredLog] TO [SerilogWriter];
 
 There are many possible variations. For example, you could also create a logging-specific schema and restrict access that way.
 
-## SinkOptions Object
+## MSSqlServerSinkOptions Object
 
-Basic settings of the sink are configured using the properties in a `SinkOptions` object:
+Basic settings of the sink are configured using the properties in a `MSSqlServerSinkOptions` object:
 
 * `TableName`
 * `SchemaName`
@@ -510,7 +510,7 @@ var columnOptions = new ColumnOptions
 
 var log = new LoggerConfiguration()
     .WriteTo.MSSqlServer(@"Server=...",
-        sinkOptions: new SinkOptions { TableName = "Logs" },
+        sinkOptions: new MSSqlServerSinkOptions { TableName = "Logs" },
         columnOptions: columnOptions)
     .CreateLogger();
 ```
@@ -531,15 +531,15 @@ Standard Columns are always excluded from the XML `Properties` column  but Stand
 
 ## External Configuration Syntax
 
-Projects targeting frameworks which are compatible with _System.Configuration_ automatically have support for XML-based configuration (either `app.config` or `web.config`) of a `SinkOptions` parameters and a `ColumnOptions` table definition, and the _Serilog.Settings.AppSettings_ package adds XML-based configuration of other direct sink arguments (like `customFormatter` or `restrictedToMinimumLevel`).
+Projects targeting frameworks which are compatible with _System.Configuration_ automatically have support for XML-based configuration (either `app.config` or `web.config`) of a `MSSqlServerSinkOptions` parameters and a `ColumnOptions` table definition, and the _Serilog.Settings.AppSettings_ package adds XML-based configuration of other direct sink arguments (like `customFormatter` or `restrictedToMinimumLevel`).
 
-Projects targeting frameworks which are compatible with _Microsoft.Extensions.Configuration_ can apply configuration-driven sink setup and `SinkOptions` or `ColumnOptions` settings using the _Serilog.Settings.Configuration_ package or by supplying the appropriate arguments through code. 
+Projects targeting frameworks which are compatible with _Microsoft.Extensions.Configuration_ can apply configuration-driven sink setup and `MSSqlServerSinkOptions` or `ColumnOptions` settings using the _Serilog.Settings.Configuration_ package or by supplying the appropriate arguments through code. 
 
-All properties of the `SinkOptions` class are configurable and almost all of the `ColumnOptions` class except the `Properties.PropertyFilter` predicate expression, and all elements and lists shown are optional. In most cases configuration keynames match the class property names, but there are some exceptions. For example, because `PrimaryKey` is a `SqlColumn` object reference when configured through code, external configuration uses a `primaryKeyColumnName` setting to identify the primary key by name.
+All properties of the `MSSqlServerSinkOptions` class are configurable and almost all of the `ColumnOptions` class except the `Properties.PropertyFilter` predicate expression, and all elements and lists shown are optional. In most cases configuration key names match the class property names, but there are some exceptions. For example, because `PrimaryKey` is a `SqlColumn` object reference when configured through code, external configuration uses a `primaryKeyColumnName` setting to identify the primary key by name.
 
 Custom columns and the stand-alone Standard Column entries all support the same general column properties (`ColumnName`, `DataType`, etc) listed in the [SqlColumn Objects](#sqlcolumn-objects) topic. The following sections documenting configuration syntax omit many of these properties for brevity.
 
-If you combine external configuration with configuration through code, external configuration changes will be applied in addition to `SinkOptions` and `ColumnOptions` objects you provide through code (external configuration "overwrites" properties defined in configuration, but properties only defined through code are preserved).
+If you combine external configuration with configuration through code, external configuration changes will be applied in addition to `MSSqlServerSinkOptions` and `ColumnOptions` objects you provide through code (external configuration "overwrites" properties defined in configuration, but properties only defined through code are preserved).
 
 **IMPORTANT:** Some of the following examples do not reflect real-world configurations that can be copy-pasted as-is. Some settings or properties shown are mutually exclusive and are listed below for documentation purposes only.
 
@@ -713,7 +713,6 @@ AppDomain.CurrentDomain.ProcessExit += (s, e) => Log.CloseAndFlush();
 ### Consider batched sink SqlBulkCopy behavior
 
 If you initialize the sink with `WriteTo` then it uses a batched sink semantics. This means that it does not directly issue an SQL command to the database for each log call, but it collectes log events in a buffer and later asynchronously writes a bulk of them to the database using [SqlBulkCopy](https://docs.microsoft.com/en-us/dotnet/api/system.data.sqlclient.sqlbulkcopy?view=dotnet-plat-ext-3.1). **If SqlBulkCopy fails to write a single row of the batch to the database, the whole batch will be lost.** Unfortunately it is not easily possible (and probably only with a significant performance impact) to find out what lines of the batch caused problems. Therefore the sink cannot easily retry the operation with the problem lines removed. Typical problems can be that data (like the log message) exceeds the field length in the database or fields which cannot be null are null in the log event. Keep this in mind when using the batched version of the sink and avoid log events to be created with data that is invalid according to your database schema. Use a wrapper class or Serilog Enrichers to validate and correct the log event data before it gets written to the database.
-
 
 ### Test outside of Visual Studio
 

@@ -1,5 +1,4 @@
 ﻿using Serilog.Sinks.MSSqlServer.Configuration.Factories;
-using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
 
@@ -12,7 +11,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Factories
         public void MSSqlServerSinkFactoryCreateReturnsInstance()
         {
             // Arrange
-            var sinkOptions = new SinkOptions { TableName = "TestTableName" };
+            var sinkOptions = new MSSqlServerSinkOptions { TableName = "TestTableName" };
             var sut = new MSSqlServerSinkFactory();
 
             // Act

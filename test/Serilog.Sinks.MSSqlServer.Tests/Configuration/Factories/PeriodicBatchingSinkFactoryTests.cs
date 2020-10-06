@@ -1,6 +1,5 @@
 ﻿using Moq;
 using Serilog.Sinks.MSSqlServer.Configuration.Factories;
-using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Serilog.Sinks.PeriodicBatching;
 using Xunit;
@@ -18,7 +17,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Factories
             var sut = new PeriodicBatchingSinkFactory();
 
             // Act
-            var result = sut.Create(sinkMock.Object, new SinkOptions());
+            var result = sut.Create(sinkMock.Object, new MSSqlServerSinkOptions());
 
             // Assert
             Assert.IsType<PeriodicBatchingSink>(result);
