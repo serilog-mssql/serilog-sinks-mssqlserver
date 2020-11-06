@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net452;netcoreapp2.0;netcoreapp2.2</TargetFrameworks>
+    <TargetFrameworks>net452;netcoreapp2.0;netcoreapp2.1</TargetFrameworks>
     <TargetFrameworks Condition=" '$(OS)' != 'Windows_NT' ">netstandard2.0</TargetFrameworks>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <AssemblyName>Serilog.Sinks.MSSqlServer.Tests</AssemblyName>
@@ -29,11 +29,13 @@
 
   <ItemGroup>
     <!-- Ensure MSBuild ignores all build-target-specific files by default -->
-    <Compile Remove="Configuration\**\*.*" />
+    <Compile Remove="Configuration\Extensions\**\*.*" />
+    <Compile Remove="Configuration\Implementations\**\*.*" />
     <Compile Remove="Sinks\MSSqlServer\Platform\AzureManagedServiceAuthenticatorStubTests.cs" />
     <Compile Remove="Sinks\MSSqlServer\Platform\AzureManagedServiceAuthenticatorTests.cs" />
     <!-- Show in VStudio, but MSBuild ignores these (indicates files are not code, non-published-content, etc.) -->
-    <None Include="Configuration\**\*.*" />
+    <None Include="Configuration\Extensions\**\*.*" />
+    <None Include="Configuration\Implementations\**\*.*" />
     <None Include="Sinks\MSSqlServer\Platform\AzureManagedServiceAuthenticatorStubTests.cs" />
     <None Include="Sinks\MSSqlServer\Platform\AzureManagedServiceAuthenticatorTests.cs" />
     <!-- ItemGroups below with TFM conditions will re-include the compile targets -->
@@ -48,17 +50,6 @@
     <Compile Include="Configuration\Implementations\System.Configuration\**\*.cs" />
     <Compile Include="Sinks\MSSqlServer\Platform\AzureManagedServiceAuthenticatorStubTests.cs" />
   </ItemGroup>
-
-  <!--<ItemGroup Condition=" '$(TargetFramework)' == 'net472' ">
-    <Reference Include="System" />
-    <Reference Include="Microsoft.CSharp" />
-    <PackageReference Include="xunit" Version="2.4.1" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.1" />
-    <Compile Remove="**\*.*" />
-    <Compile Include="GlobalSuppressions.cs" />
-    <Compile Include="TestUtils\**\*.cs" />
-    <Compile Include="Sinks\MSSqlServer\Platform\AzureManagedServiceAuthenticatorTests.cs" />
-  </ItemGroup>-->
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.0' ">
     <PackageReference Include="System.Collections" Version="4.3.0" />
@@ -79,7 +70,7 @@
     <Compile Include="Sinks\MSSqlServer\Platform\AzureManagedServiceAuthenticatorStubTests.cs" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.2' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.1' ">
     <PackageReference Include="System.Collections" Version="4.3.0" />
     <PackageReference Include="System.Runtime.InteropServices" Version="4.3.0" />
     <PackageReference Include="System.Runtime.Extensions" Version="4.3.1" />

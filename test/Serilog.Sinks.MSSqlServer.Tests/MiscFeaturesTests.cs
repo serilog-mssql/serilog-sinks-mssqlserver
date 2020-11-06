@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Data;
 using FluentAssertions;
-using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
 using Xunit.Abstractions;
@@ -39,7 +38,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 .WriteTo.MSSqlServer
                 (
                     connectionString: DatabaseFixture.LogEventsConnectionString,
-                    new SinkOptions
+                    new MSSqlServerSinkOptions
                     {
                         TableName = DatabaseFixture.LogTableName,
                         AutoCreateSqlTable = true,
@@ -79,7 +78,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 .WriteTo.MSSqlServer
                 (
                     connectionString: DatabaseFixture.LogEventsConnectionString,
-                    new SinkOptions
+                    new MSSqlServerSinkOptions
                     {
                         TableName = DatabaseFixture.LogTableName,
                         AutoCreateSqlTable = true,
@@ -115,7 +114,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 .WriteTo.MSSqlServer
                 (
                     connectionString: DatabaseFixture.LogEventsConnectionString,
-                    new SinkOptions
+                    new MSSqlServerSinkOptions
                     {
                         TableName = DatabaseFixture.LogTableName,
                         AutoCreateSqlTable = true,
@@ -144,7 +143,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 .WriteTo.MSSqlServer
                 (
                     connectionString: DatabaseFixture.LogEventsConnectionString,
-                    new SinkOptions
+                    new MSSqlServerSinkOptions
                     {
                         TableName = DatabaseFixture.LogTableName,
                         AutoCreateSqlTable = true,
@@ -173,7 +172,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 .WriteTo.MSSqlServer
                 (
                     connectionString: DatabaseFixture.LogEventsConnectionString,
-                    new SinkOptions
+                    new MSSqlServerSinkOptions
                     {
                         TableName = DatabaseFixture.LogTableName,
                         AutoCreateSqlTable = true,
@@ -242,7 +241,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 .WriteTo.MSSqlServer
                 (
                     connectionString: DatabaseFixture.LogEventsConnectionString,
-                    sinkOptions: new SinkOptions
+                    sinkOptions: new MSSqlServerSinkOptions
                     {
                         SchemaName = schemaName,
                         TableName = tableName,
@@ -273,7 +272,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 .WriteTo.MSSqlServer
                 (
                     connectionString: DatabaseFixture.LogEventsConnectionString,
-                    new SinkOptions
+                    new MSSqlServerSinkOptions
                     {
                         TableName = DatabaseFixture.LogTableName,
                         AutoCreateSqlTable = true

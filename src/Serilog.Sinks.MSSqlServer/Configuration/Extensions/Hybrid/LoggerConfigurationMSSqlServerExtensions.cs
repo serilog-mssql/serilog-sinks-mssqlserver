@@ -20,7 +20,6 @@ using Serilog.Events;
 using Serilog.Formatting;
 using Serilog.Sinks.MSSqlServer;
 using Serilog.Sinks.MSSqlServer.Configuration.Factories;
-using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
 
 // The "Hybrid" configuration system supports both Microsoft.Extensions.Configuration and System.Configuration.
 // This is necessary because .NET Framework 4.6.1+ and .NET Core 2.0+ apps support both approaches, whereas the
@@ -44,7 +43,7 @@ namespace Serilog
         /// https://gist.github.com/mivano/10429656
         /// or use the autoCreateSqlTable option.
         ///
-        /// Note: this is the legacy version of the extension method. Please use the new one using SinkOptions instead.
+        /// Note: this is the legacy version of the extension method. Please use the new one using MSSqlServerSinkOptions instead.
         /// 
         /// </summary>
         /// <param name="loggerConfiguration">The logger configuration.</param>
@@ -62,7 +61,7 @@ namespace Serilog
         /// <param name="logEventFormatter">Supplies custom formatter for the LogEvent column, or null</param>
         /// <returns>Logger configuration, allowing configuration to continue.</returns>
         /// <exception cref="ArgumentNullException">A required parameter is null.</exception>
-        [Obsolete("Use the new interface accepting a SinkOptions parameter instead. This will be removed in a future release.", error: false)]
+        [Obsolete("Use the new interface accepting a MSSqlServerSinkOptions parameter instead. This will be removed in a future release.", error: false)]
         public static LoggerConfiguration MSSqlServer(
             this LoggerSinkConfiguration loggerConfiguration,
             string connectionString,
@@ -79,9 +78,9 @@ namespace Serilog
             ITextFormatter logEventFormatter = null)
         {
             // Do not add new parameters here. This interface is considered legacy and will be deprecated in the future.
-            // For adding new input parameters use the SinkOptions class and the method overload that accepts SinkOptions.
+            // For adding new input parameters use the MSSqlServerSinkOptions class and the method overload that accepts MSSqlServerSinkOptions.
 
-            var sinkOptions = new SinkOptions(tableName, batchPostingLimit, period, autoCreateSqlTable, schemaName);
+            var sinkOptions = new MSSqlServerSinkOptions(tableName, batchPostingLimit, period, autoCreateSqlTable, schemaName);
 
             return loggerConfiguration.MSSqlServer(
                 connectionString: connectionString,
@@ -116,7 +115,7 @@ namespace Serilog
         public static LoggerConfiguration MSSqlServer(
             this LoggerSinkConfiguration loggerConfiguration,
             string connectionString,
-            SinkOptions sinkOptions = null,
+            MSSqlServerSinkOptions sinkOptions = null,
             IConfigurationSection sinkOptionsSection = null,
             IConfiguration appConfiguration = null,
             LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
@@ -136,23 +135,25 @@ namespace Serilog
                 logEventFormatter: logEventFormatter,
                 applySystemConfiguration: new ApplySystemConfiguration(),
                 applyMicrosoftExtensionsConfiguration: new ApplyMicrosoftExtensionsConfiguration(),
-                sinkFactory: new MSSqlServerSinkFactory());
+                sinkFactory: new MSSqlServerSinkFactory(),
+                batchingSinkFactory: new PeriodicBatchingSinkFactory());
 
         // Internal overload with parameters used by tests to override the config section and inject mocks
         internal static LoggerConfiguration MSSqlServerInternal(
             this LoggerSinkConfiguration loggerConfiguration,
             string connectionString,
-            SinkOptions sinkOptions = null,
-            IConfigurationSection sinkOptionsSection = null,
-            IConfiguration appConfiguration = null,
-            LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
-            IFormatProvider formatProvider = null,
-            ColumnOptions columnOptions = null,
-            IConfigurationSection columnOptionsSection = null,
-            ITextFormatter logEventFormatter = null,
-            IApplySystemConfiguration applySystemConfiguration = null,
-            IApplyMicrosoftExtensionsConfiguration applyMicrosoftExtensionsConfiguration = null,
-            IMSSqlServerSinkFactory sinkFactory = null)
+            MSSqlServerSinkOptions sinkOptions,
+            IConfigurationSection sinkOptionsSection,
+            IConfiguration appConfiguration,
+            LogEventLevel restrictedToMinimumLevel,
+            IFormatProvider formatProvider,
+            ColumnOptions columnOptions,
+            IConfigurationSection columnOptionsSection,
+            ITextFormatter logEventFormatter,
+            IApplySystemConfiguration applySystemConfiguration,
+            IApplyMicrosoftExtensionsConfiguration applyMicrosoftExtensionsConfiguration,
+            IMSSqlServerSinkFactory sinkFactory,
+            IPeriodicBatchingSinkFactory batchingSinkFactory)
         {
             if (loggerConfiguration == null)
                 throw new ArgumentNullException(nameof(loggerConfiguration));
@@ -162,13 +163,15 @@ namespace Serilog
 
             var sink = sinkFactory.Create(connectionString, sinkOptions, formatProvider, columnOptions, logEventFormatter);
 
-            return loggerConfiguration.Sink(sink, restrictedToMinimumLevel);
+            var periodicBatchingSink = batchingSinkFactory.Create(sink, sinkOptions);
+
+            return loggerConfiguration.Sink(periodicBatchingSink, restrictedToMinimumLevel);
         }
 
         /// <summary>
         /// Adds a sink that writes log events to a table in a MSSqlServer database.
         ///
-        /// Note: this is the legacy version of the extension method. Please use the new one using SinkOptions instead.
+        /// Note: this is the legacy version of the extension method. Please use the new one using MSSqlServerSinkOptions instead.
         /// 
         /// </summary>
         /// <param name="loggerAuditSinkConfiguration">The logger configuration.</param>
@@ -184,7 +187,7 @@ namespace Serilog
         /// <param name="logEventFormatter">Supplies custom formatter for the LogEvent column, or null</param>
         /// <returns>Logger configuration, allowing configuration to continue.</returns>
         /// <exception cref="ArgumentNullException">A required parameter is null.</exception>
-        [Obsolete("Use the new interface accepting a SinkOptions parameter instead. This will be removed in a future release.", error: false)]
+        [Obsolete("Use the new interface accepting a MSSqlServerSinkOptions parameter instead. This will be removed in a future release.", error: false)]
         public static LoggerConfiguration MSSqlServer(
             this LoggerAuditSinkConfiguration loggerAuditSinkConfiguration,
             string connectionString,
@@ -199,9 +202,9 @@ namespace Serilog
             ITextFormatter logEventFormatter = null)
         {
             // Do not add new parameters here. This interface is considered legacy and will be deprecated in the future.
-            // For adding new input parameters use the SinkOptions class and the method overload that accepts SinkOptions.
+            // For adding new input parameters use the MSSqlServerSinkOptions class and the method overload that accepts MSSqlServerSinkOptions.
 
-            var sinkOptions = new SinkOptions(tableName, null, null, autoCreateSqlTable, schemaName);
+            var sinkOptions = new MSSqlServerSinkOptions(tableName, null, null, autoCreateSqlTable, schemaName);
 
             return loggerAuditSinkConfiguration.MSSqlServer(
                 connectionString: connectionString,
@@ -233,7 +236,7 @@ namespace Serilog
         public static LoggerConfiguration MSSqlServer(
             this LoggerAuditSinkConfiguration loggerAuditSinkConfiguration,
             string connectionString,
-            SinkOptions sinkOptions = null,
+            MSSqlServerSinkOptions sinkOptions = null,
             IConfigurationSection sinkOptionsSection = null,
             IConfiguration appConfiguration = null,
             LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
@@ -259,17 +262,17 @@ namespace Serilog
         internal static LoggerConfiguration MSSqlServerInternal(
             this LoggerAuditSinkConfiguration loggerAuditSinkConfiguration,
             string connectionString,
-            SinkOptions sinkOptions = null,
-            IConfigurationSection sinkOptionsSection = null,
-            IConfiguration appConfiguration = null,
-            LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
-            IFormatProvider formatProvider = null,
-            ColumnOptions columnOptions = null,
-            IConfigurationSection columnOptionsSection = null,
-            ITextFormatter logEventFormatter = null,
-            IApplySystemConfiguration applySystemConfiguration = null,
-            IApplyMicrosoftExtensionsConfiguration applyMicrosoftExtensionsConfiguration = null,
-            IMSSqlServerAuditSinkFactory auditSinkFactory = null)
+            MSSqlServerSinkOptions sinkOptions,
+            IConfigurationSection sinkOptionsSection,
+            IConfiguration appConfiguration,
+            LogEventLevel restrictedToMinimumLevel,
+            IFormatProvider formatProvider,
+            ColumnOptions columnOptions,
+            IConfigurationSection columnOptionsSection,
+            ITextFormatter logEventFormatter,
+            IApplySystemConfiguration applySystemConfiguration,
+            IApplyMicrosoftExtensionsConfiguration applyMicrosoftExtensionsConfiguration,
+            IMSSqlServerAuditSinkFactory auditSinkFactory)
         {
             if (loggerAuditSinkConfiguration == null)
                 throw new ArgumentNullException(nameof(loggerAuditSinkConfiguration));
@@ -284,7 +287,7 @@ namespace Serilog
 
         private static void ReadConfiguration(
             ref string connectionString,
-            ref SinkOptions sinkOptions,
+            ref MSSqlServerSinkOptions sinkOptions,
             IConfigurationSection sinkOptionsSection,
             IConfiguration appConfiguration,
             ref ColumnOptions columnOptions,
@@ -292,7 +295,7 @@ namespace Serilog
             IApplySystemConfiguration applySystemConfiguration,
             IApplyMicrosoftExtensionsConfiguration applyMicrosoftExtensionsConfiguration)
         {
-            sinkOptions = sinkOptions ?? new SinkOptions();
+            sinkOptions = sinkOptions ?? new MSSqlServerSinkOptions();
             columnOptions = columnOptions ?? new ColumnOptions();
 
             var serviceConfigSection = applySystemConfiguration.GetSinkConfigurationSection(AppConfigSectionName);

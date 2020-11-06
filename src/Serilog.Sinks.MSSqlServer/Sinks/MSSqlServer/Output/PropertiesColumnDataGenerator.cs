@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using Serilog.Events;
@@ -49,6 +50,12 @@ namespace Serilog.Sinks.MSSqlServer.Output
                     continue;
                 }
 
+                if (columnType.IsAssignableFrom(scalarValue.Value.GetType()))
+                {
+                    yield return new KeyValuePair<string, object>(columnName, scalarValue.Value);
+                    continue;
+                }
+
                 if (TryChangeType(scalarValue.Value, columnType, out var conversion))
                 {
                     yield return new KeyValuePair<string, object>(columnName, conversion);
@@ -65,7 +72,7 @@ namespace Serilog.Sinks.MSSqlServer.Output
             conversion = null;
             try
             {
-                conversion = Convert.ChangeType(obj, type, CultureInfo.InvariantCulture);
+                conversion = TypeDescriptor.GetConverter(type).ConvertFrom(obj);
                 return true;
             }
             catch

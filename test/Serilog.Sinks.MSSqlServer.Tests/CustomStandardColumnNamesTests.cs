@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
 using Xunit.Abstractions;
@@ -42,7 +41,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
 
             // Act
             using (var sink = new MSSqlServerSink(DatabaseFixture.LogEventsConnectionString,
-                new SinkOptions
+                new MSSqlServerSinkOptions
                 {
                     TableName = DatabaseFixture.LogTableName,
                     BatchPostingLimit = 1,
@@ -79,7 +78,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
 
             // Act
             using (var sink = new MSSqlServerSink(DatabaseFixture.LogEventsConnectionString,
-                new SinkOptions
+                new MSSqlServerSinkOptions
                 {
                     TableName = DatabaseFixture.LogTableName,
                     BatchPostingLimit = 1,
@@ -132,7 +131,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
 
             // Act
             using (var sink = new MSSqlServerSink(DatabaseFixture.LogEventsConnectionString,
-                new SinkOptions
+                new MSSqlServerSinkOptions
                 {
                     TableName = DatabaseFixture.LogTableName,
                     BatchPostingLimit = 1,
@@ -171,7 +170,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
 
             // Act
             using (var sink = new MSSqlServerSink(DatabaseFixture.LogEventsConnectionString,
-                new SinkOptions
+                new MSSqlServerSinkOptions
                 {
                     TableName = DatabaseFixture.LogTableName,
                     BatchPostingLimit = 1,
@@ -238,7 +237,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             var loggerConfiguration = new LoggerConfiguration();
             Log.Logger = loggerConfiguration.WriteTo.MSSqlServer(
                 connectionString: DatabaseFixture.LogEventsConnectionString,
-                sinkOptions: new SinkOptions
+                sinkOptions: new MSSqlServerSinkOptions
                 {
                     TableName = DatabaseFixture.LogTableName,
                     AutoCreateSqlTable = true
@@ -274,7 +273,6 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 columnOptions: new Serilog.Sinks.MSSqlServer.ColumnOptions())
                 .CreateLogger();
 
-
             // Act
             const string loggingInformationMessage = "Logging Information message";
             using (var file = File.CreateText("StandardColumns.Self.log"))
@@ -295,7 +293,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             var loggerConfiguration = new LoggerConfiguration();
             Log.Logger = loggerConfiguration.WriteTo.MSSqlServer(
                 connectionString: DatabaseFixture.LogEventsConnectionString,
-                sinkOptions: new SinkOptions
+                sinkOptions: new MSSqlServerSinkOptions
                 {
                     TableName = DatabaseFixture.LogTableName,
                     AutoCreateSqlTable = true,
@@ -304,7 +302,6 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 },
                 columnOptions: new Serilog.Sinks.MSSqlServer.ColumnOptions())
                 .CreateLogger();
-
 
             // Act
             const string loggingInformationMessage = "Logging Information message";
@@ -372,7 +369,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             var loggerConfiguration = new LoggerConfiguration();
             Log.Logger = loggerConfiguration.AuditTo.MSSqlServer(
                 connectionString: DatabaseFixture.LogEventsConnectionString,
-                sinkOptions: new SinkOptions
+                sinkOptions: new MSSqlServerSinkOptions
                 {
                     TableName = DatabaseFixture.LogTableName,
                     AutoCreateSqlTable = true
@@ -400,7 +397,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             var loggerConfiguration = new LoggerConfiguration();
             Log.Logger = loggerConfiguration.AuditTo.MSSqlServer(
                 connectionString: DatabaseFixture.LogEventsConnectionString,
-                new SinkOptions
+                new MSSqlServerSinkOptions
                 {
                     TableName = DatabaseFixture.LogTableName,
                     AutoCreateSqlTable = true

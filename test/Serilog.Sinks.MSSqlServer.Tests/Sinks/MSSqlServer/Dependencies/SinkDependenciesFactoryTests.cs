@@ -1,6 +1,5 @@
 ﻿using Serilog.Sinks.MSSqlServer.Dependencies;
 using Serilog.Sinks.MSSqlServer.Platform;
-using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
 
@@ -10,12 +9,12 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Dependencies
     public class SinkDependenciesFactoryTests
     {
         private const string _connectionString = "Server=localhost;Database=LogTest;Integrated Security=SSPI;";
-        private readonly SinkOptions _sinkOptions;
+        private readonly MSSqlServerSinkOptions _sinkOptions;
         private readonly Serilog.Sinks.MSSqlServer.ColumnOptions _columnOptions;
 
         public SinkDependenciesFactoryTests()
         {
-            _sinkOptions = new SinkOptions { TableName = "LogEvents" };
+            _sinkOptions = new MSSqlServerSinkOptions { TableName = "LogEvents" };
             _columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions();
         }
 

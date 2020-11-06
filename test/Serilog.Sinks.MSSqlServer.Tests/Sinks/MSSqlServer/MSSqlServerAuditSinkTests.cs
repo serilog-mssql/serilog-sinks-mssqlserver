@@ -6,7 +6,6 @@ using Serilog.Events;
 using Serilog.Parsing;
 using Serilog.Sinks.MSSqlServer.Dependencies;
 using Serilog.Sinks.MSSqlServer.Platform;
-using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
 
@@ -15,7 +14,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
     [Trait(TestCategory.TraitName, TestCategory.Unit)]
     public class MSSqlServerAuditSinkTests : IDisposable
     {
-        private readonly SinkOptions _sinkOptions;
+        private readonly MSSqlServerSinkOptions _sinkOptions;
         private readonly Serilog.Sinks.MSSqlServer.ColumnOptions _columnOptions;
         private readonly SinkDependencies _sinkDependencies;
         private readonly Mock<IDataTableCreator> _dataTableCreatorMock;
@@ -29,7 +28,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
 
         public MSSqlServerAuditSinkTests()
         {
-            _sinkOptions = new SinkOptions
+            _sinkOptions = new MSSqlServerSinkOptions
             {
                 TableName = _tableName,
                 SchemaName = _schemaName
@@ -58,7 +57,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         {
             Assert.Throws<InvalidOperationException>(() =>
                 new MSSqlServerAuditSink(
-                    new SinkOptions(),
+                    new MSSqlServerSinkOptions(),
                     new Serilog.Sinks.MSSqlServer.ColumnOptions(),
                     _sinkDependencies));
         }
@@ -107,7 +106,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         public void InitializeWithDisableTriggersThrows()
         {
             // Arrange
-            var sinkOptions = new SinkOptions { TableName = "TestTableName" };
+            var sinkOptions = new MSSqlServerSinkOptions { TableName = "TestTableName" };
             var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions { DisableTriggers = true };
 
             // Act + assert

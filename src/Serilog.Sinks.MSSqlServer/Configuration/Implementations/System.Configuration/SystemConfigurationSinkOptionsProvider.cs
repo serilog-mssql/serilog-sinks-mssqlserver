@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Globalization;
 using Serilog.Configuration;
-using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
 
 namespace Serilog.Sinks.MSSqlServer.Configuration
 {
     internal class SystemConfigurationSinkOptionsProvider : ISystemConfigurationSinkOptionsProvider
     {
-        public SinkOptions ConfigureSinkOptions(MSSqlServerConfigurationSection config, SinkOptions sinkOptions)
+        public MSSqlServerSinkOptions ConfigureSinkOptions(MSSqlServerConfigurationSection config, MSSqlServerSinkOptions sinkOptions)
         {
             ReadTableOptions(config, sinkOptions);
             ReadBatchSettings(config, sinkOptions);
@@ -16,7 +15,7 @@ namespace Serilog.Sinks.MSSqlServer.Configuration
             return sinkOptions;
         }
 
-        private static void ReadTableOptions(MSSqlServerConfigurationSection config, SinkOptions sinkOptions)
+        private static void ReadTableOptions(MSSqlServerConfigurationSection config, MSSqlServerSinkOptions sinkOptions)
         {
             SetProperty.IfProvided<string>(config.TableName, nameof(config.TableName.Value), value => sinkOptions.TableName = value);
             SetProperty.IfProvided<string>(config.SchemaName, nameof(config.SchemaName.Value), value => sinkOptions.SchemaName = value);
@@ -24,13 +23,15 @@ namespace Serilog.Sinks.MSSqlServer.Configuration
                 value => sinkOptions.AutoCreateSqlTable = value);
         }
 
-        private static void ReadBatchSettings(MSSqlServerConfigurationSection config, SinkOptions sinkOptions)
+        private static void ReadBatchSettings(MSSqlServerConfigurationSection config, MSSqlServerSinkOptions sinkOptions)
         {
-            SetProperty.IfProvided<int>(config.BatchPostingLimit, nameof(config.BatchPostingLimit.Value), val => sinkOptions.BatchPostingLimit = val);
-            SetProperty.IfProvided<string>(config.BatchPeriod, nameof(config.BatchPeriod.Value), val => sinkOptions.BatchPeriod = TimeSpan.Parse(val, CultureInfo.InvariantCulture));
+            SetProperty.IfProvided<int>(config.BatchPostingLimit, nameof(config.BatchPostingLimit.Value), value => sinkOptions.BatchPostingLimit = value);
+            SetProperty.IfProvided<string>(config.BatchPeriod, nameof(config.BatchPeriod.Value), value => sinkOptions.BatchPeriod = TimeSpan.Parse(value, CultureInfo.InvariantCulture));
+            SetProperty.IfProvided<bool>(config.EagerlyEmitFirstEvent, nameof(config.EagerlyEmitFirstEvent.Value),
+                value => sinkOptions.EagerlyEmitFirstEvent = value);
         }
 
-        private static void ReadAzureManagedIdentitiesOptions(MSSqlServerConfigurationSection config, SinkOptions sinkOptions)
+        private static void ReadAzureManagedIdentitiesOptions(MSSqlServerConfigurationSection config, MSSqlServerSinkOptions sinkOptions)
         {
             SetProperty.IfProvided<bool>(config.UseAzureManagedIdentity, nameof(config.UseAzureManagedIdentity.Value),
                 value => sinkOptions.UseAzureManagedIdentity = value);

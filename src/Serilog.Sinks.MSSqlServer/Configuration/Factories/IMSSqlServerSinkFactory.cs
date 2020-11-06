@@ -1,14 +1,14 @@
 ﻿using System;
 using Serilog.Formatting;
-using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
+using Serilog.Sinks.PeriodicBatching;
 
 namespace Serilog.Sinks.MSSqlServer.Configuration.Factories
 {
     internal interface IMSSqlServerSinkFactory
     {
-        MSSqlServerSink Create(
+        IBatchedLogEventSink Create(
             string connectionString,
-            SinkOptions sinkOptions,
+            MSSqlServerSinkOptions sinkOptions,
             IFormatProvider formatProvider,
             ColumnOptions columnOptions,
             ITextFormatter logEventFormatter);

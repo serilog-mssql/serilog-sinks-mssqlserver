@@ -2,7 +2,6 @@
 using Serilog.Formatting;
 using Serilog.Sinks.MSSqlServer.Output;
 using Serilog.Sinks.MSSqlServer.Platform;
-using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
 
 namespace Serilog.Sinks.MSSqlServer.Dependencies
 {
@@ -10,7 +9,7 @@ namespace Serilog.Sinks.MSSqlServer.Dependencies
     {
         internal static SinkDependencies Create(
             string connectionString,
-            SinkOptions sinkOptions,
+            MSSqlServerSinkOptions sinkOptions,
             IFormatProvider formatProvider,
             ColumnOptions columnOptions,
             ITextFormatter logEventFormatter)

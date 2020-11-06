@@ -2,7 +2,7 @@
 using System.Threading;
 using Microsoft.Extensions.Configuration;
 using Serilog;
-using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
+using Serilog.Sinks.MSSqlServer;
 
 namespace CombinedConfigDemo
 {
@@ -38,7 +38,7 @@ namespace CombinedConfigDemo
             Log.Logger = new LoggerConfiguration()
                 .WriteTo.MSSqlServer(
                     connectionString: _connectionStringName,
-                    sinkOptions: new SinkOptions
+                    sinkOptions: new MSSqlServerSinkOptions
                     {
                         TableName = _tableName,
                         SchemaName = _schemaName,

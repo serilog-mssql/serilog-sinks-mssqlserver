@@ -20,7 +20,6 @@ using Serilog.Events;
 using Serilog.Formatting;
 using Serilog.Sinks.MSSqlServer.Dependencies;
 using Serilog.Sinks.MSSqlServer.Platform;
-using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
 using Serilog.Sinks.PeriodicBatching;
 
 namespace Serilog.Sinks.MSSqlServer
@@ -28,7 +27,7 @@ namespace Serilog.Sinks.MSSqlServer
     /// <summary>
     /// Writes log events as rows in a table of MSSqlServer database.
     /// </summary>
-    public class MSSqlServerSink : PeriodicBatchingSink
+    public class MSSqlServerSink : IBatchedLogEventSink, IDisposable
     {
         private readonly ISqlBulkBatchWriter _sqlBulkBatchWriter;
         private readonly DataTable _eventTable;
@@ -48,10 +47,12 @@ namespace Serilog.Sinks.MSSqlServer
         /// </summary>
         public static readonly TimeSpan DefaultPeriod = TimeSpan.FromSeconds(5);
 
+        private bool _disposedValue;
+
         /// <summary>
         /// Construct a sink posting to the specified database.
         ///
-        /// Note: this is the legacy version of the extension method. Please use the new one using SinkOptions instead.
+        /// Note: this is the legacy version of the extension method. Please use the new one using MSSqlServerSinkOptions instead.
         /// 
         /// </summary>
         /// <param name="connectionString">Connection string to access the database.</param>
@@ -63,7 +64,7 @@ namespace Serilog.Sinks.MSSqlServer
         /// <param name="autoCreateSqlTable">Create log table with the provided name on destination sql server.</param>
         /// <param name="columnOptions">Options that pertain to columns</param>
         /// <param name="logEventFormatter">Supplies custom formatter for the LogEvent column, or null</param>
-        [Obsolete("Use the new interface accepting a SinkOptions parameter instead. This will be removed in a future release.", error: false)]
+        [Obsolete("Use the new interface accepting a MSSqlServerSinkOptions parameter instead. This will be removed in a future release.", error: false)]
         public MSSqlServerSink(
             string connectionString,
             string tableName,
@@ -74,11 +75,11 @@ namespace Serilog.Sinks.MSSqlServer
             ColumnOptions columnOptions = null,
             string schemaName = DefaultSchemaName,
             ITextFormatter logEventFormatter = null)
-            : this(connectionString, new SinkOptions(tableName, batchPostingLimit, period, autoCreateSqlTable, schemaName),
+            : this(connectionString, new MSSqlServerSinkOptions(tableName, batchPostingLimit, period, autoCreateSqlTable, schemaName),
                   formatProvider, columnOptions, logEventFormatter)
         {
             // Do not add new parameters here. This interface is considered legacy and will be deprecated in the future.
-            // For adding new input parameters use the SinkOptions class and the method overload that accepts SinkOptions.
+            // For adding new input parameters use the MSSqlServerSinkOptions class and the method overload that accepts MSSqlServerSinkOptions.
         }
 
         /// <summary>
@@ -91,7 +92,7 @@ namespace Serilog.Sinks.MSSqlServer
         /// <param name="logEventFormatter">Supplies custom formatter for the LogEvent column, or null</param>
         public MSSqlServerSink(
             string connectionString,
-            SinkOptions sinkOptions,
+            MSSqlServerSinkOptions sinkOptions,
             IFormatProvider formatProvider = null,
             ColumnOptions columnOptions = null,
             ITextFormatter logEventFormatter = null)
@@ -101,9 +102,8 @@ namespace Serilog.Sinks.MSSqlServer
 
         // Internal constructor with injectable dependencies for better testability
         internal MSSqlServerSink(
-            SinkOptions sinkOptions,
+            MSSqlServerSinkOptions sinkOptions,
             SinkDependencies sinkDependencies)
-            : base(sinkOptions?.BatchPostingLimit ?? DefaultBatchPostingLimit, sinkOptions?.BatchPeriod ?? DefaultPeriod)
         {
             ValidateParameters(sinkOptions);
             CheckSinkDependencies(sinkDependencies);
@@ -121,23 +121,48 @@ namespace Serilog.Sinks.MSSqlServer
         /// <remarks>
         /// Override either <see cref="PeriodicBatchingSink.EmitBatch" /> or <see cref="PeriodicBatchingSink.EmitBatchAsync" />, not both.
         /// </remarks>
-        protected override Task EmitBatchAsync(IEnumerable<LogEvent> events) =>
+        public Task EmitBatchAsync(IEnumerable<LogEvent> events) =>
             _sqlBulkBatchWriter.WriteBatch(events, _eventTable);
 
         /// <summary>
-        /// Disposes the connection
+        /// Called upon batchperiod if no data is in batch. Not used by this sink.
         /// </summary>
-        /// <param name="disposing"></param>
-        protected override void Dispose(bool disposing)
+        /// <returns>A completed task</returns>
+        public Task OnEmptyBatchAsync() =>
+#if NET452
+            Task.FromResult(false);
+#else
+            Task.CompletedTask;
+#endif
+
+        /// <summary>
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// </summary>
+        public void Dispose()
         {
-            base.Dispose(disposing);
-            if (disposing)
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Releases the unmanaged resources used by the Serilog.Sinks.MSSqlServer.MSSqlServerAuditSink and optionally
+        /// releases the managed resources.
+        /// </summary>
+        /// <param name="disposing">True to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposedValue)
             {
-                _eventTable.Dispose();
+                if (disposing)
+                {
+                    _eventTable.Dispose();
+                }
+
+                _disposedValue = true;
             }
         }
 
-        private static void ValidateParameters(SinkOptions sinkOptions)
+        private static void ValidateParameters(MSSqlServerSinkOptions sinkOptions)
         {
             if (sinkOptions?.TableName == null)
             {
@@ -168,7 +193,7 @@ namespace Serilog.Sinks.MSSqlServer
             }
         }
 
-        private void CreateTable(SinkOptions sinkOptions, SinkDependencies sinkDependencies)
+        private void CreateTable(MSSqlServerSinkOptions sinkOptions, SinkDependencies sinkDependencies)
         {
             if (sinkOptions.AutoCreateSqlTable)
             {
