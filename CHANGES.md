@@ -1,3 +1,9 @@
+# 5.6.0
+* Fixed issue #191: Added option `EagerlyEmitFirstEvent` by implementing new PeriodicBatchingSink API.
+* Replaced `SinkOptions` with `MSSqlServerSinkOptions` and cleaned up namespaced (thanks to @jonorossi for the contribution).
+* Target .NET Core 2.1 (LTS) instead of 2.2
+* Fixed issue #312: Data conversion issue causes logging to silently fail.
+
 # 5.5.1
 * Fixed issue #300 Support DateTime2 data type for TimeStamp column (thanks to @stedel for the contribution).
 * Added Sourcelink support and publish symbols to nuget.org which allows consumers of the package to debug into the sink code.
