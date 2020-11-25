@@ -49,7 +49,7 @@ namespace Serilog.Sinks.MSSqlServer.Platform
                                 parameterList.Append(',');
                             }
 
-                            fieldList.Append(field.Key);
+                            fieldList.Append($"[{field.Key}]");
                             parameterList.Append("@P");
                             parameterList.Append(index);
 
