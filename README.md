@@ -486,7 +486,7 @@ This column stores log event property values as JSON. Typically you will use eit
 
 The `ExcludeAddtionalProperties` and `ExcludeStandardColumns` properties are described in the [Custom Property Columns](#custom-property-columns) topic.
 
-The content of this column is rendered as JSON by default or with a custom ITextFormatter passed by the caller as parameter `logEventFormatter`. Details can be found in [Sink Configuration Options](#sink-configuration-options).
+The content of this column is rendered as JSON by default or with a custom ITextFormatter passed by the caller as parameter `logEventFormatter`. Details can be found in [Sink Configuration](#sink-configuration).
 
 ## Custom Property Columns
 
