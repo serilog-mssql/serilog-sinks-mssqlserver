@@ -742,7 +742,7 @@ This capability requires SQL 2012 or newer. Given the following JSON properties:
 {
   "Properties": {
     "Action": "GetUsers",
-    "Controller": "UserControler"
+    "Controller": "UserController"
   }
 }
 ```
