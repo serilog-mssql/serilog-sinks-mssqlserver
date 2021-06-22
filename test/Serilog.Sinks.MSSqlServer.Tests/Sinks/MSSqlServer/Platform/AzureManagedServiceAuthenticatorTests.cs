@@ -13,26 +13,26 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Platform
         [Fact]
         public void InitializeThrowsIfUseAzureManagedIdentityIsTrueAndAuthenticatorIsNull()
         {
-            Assert.Throws<ArgumentNullException>(() => new AzureManagedServiceAuthenticator(true, null));
+            Assert.Throws<ArgumentNullException>(() => new AzureManagedServiceAuthenticator(true, null, null));
         }
 
         [Fact]
         public void InitializeThrowsIfUseAzureManagedIdentityIsTrueAndAuthenticatorIsEmpty()
         {
-            Assert.Throws<ArgumentNullException>(() => new AzureManagedServiceAuthenticator(true, string.Empty));
+            Assert.Throws<ArgumentNullException>(() => new AzureManagedServiceAuthenticator(true, string.Empty, null));
         }
 
         [Fact]
         public void InitializeThrowsIfUseAzureManagedIdentityIsTrueAndAuthenticatorIsWhitespace()
         {
-            Assert.Throws<ArgumentNullException>(() => new AzureManagedServiceAuthenticator(true, "    "));
+            Assert.Throws<ArgumentNullException>(() => new AzureManagedServiceAuthenticator(true, "    ", null));
         }
 
         [Fact]
         public async Task GetAuthenticationTokenReturnsNullIfUseAzureManagedIdentityIsFalse()
         {
             // Arrange
-            var sut = new AzureManagedServiceAuthenticator(false, null);
+            var sut = new AzureManagedServiceAuthenticator(false, null, null);
 
             // Act
             var result = await sut.GetAuthenticationToken().ConfigureAwait(false);
@@ -45,7 +45,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Platform
         public async Task GetAuthenticationTokenThrowsIfUseAzureManagedIdentityIsTrueAndTokenInvalid()
         {
             // Arrange
-            var sut = new AzureManagedServiceAuthenticator(true, "TestAccessToken");
+            var sut = new AzureManagedServiceAuthenticator(true, "TestAccessToken", null);
 
             // Act + assert
             await Assert.ThrowsAsync<AzureServiceTokenProviderException>(() => sut.GetAuthenticationToken()).ConfigureAwait(false);
