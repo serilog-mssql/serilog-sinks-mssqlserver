@@ -10,7 +10,7 @@ namespace Serilog.Sinks.MSSqlServer.Platform
         private readonly string _azureServiceTokenProviderResource;
         private readonly AzureServiceTokenProvider _azureServiceTokenProvider;
 
-        public AzureManagedServiceAuthenticator(bool useAzureManagedIdentity, string azureServiceTokenProviderResource)
+        public AzureManagedServiceAuthenticator(bool useAzureManagedIdentity, string azureServiceTokenProviderResource, string azureServiceTokenProviderConnectionString)
         {
             if (useAzureManagedIdentity && string.IsNullOrWhiteSpace(azureServiceTokenProviderResource))
             {
@@ -19,7 +19,7 @@ namespace Serilog.Sinks.MSSqlServer.Platform
 
             _useAzureManagedIdentity = useAzureManagedIdentity;
             _azureServiceTokenProviderResource = azureServiceTokenProviderResource;
-            _azureServiceTokenProvider = new AzureServiceTokenProvider();
+            _azureServiceTokenProvider = new AzureServiceTokenProvider(azureServiceTokenProviderConnectionString);
         }
 
         public Task<string> GetAuthenticationToken()

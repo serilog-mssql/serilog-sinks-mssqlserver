@@ -12,7 +12,7 @@ namespace Serilog.Sinks.MSSqlServer.Platform
         private readonly bool _useAzureManagedIdentity;
         private readonly string _azureServiceTokenProviderResource;
 
-        public AzureManagedServiceAuthenticator(bool useAzureManagedIdentity, string azureServiceTokenProviderResource)
+        public AzureManagedServiceAuthenticator(bool useAzureManagedIdentity, string azureServiceTokenProviderResource, string _)
         {
             if (useAzureManagedIdentity)
             {

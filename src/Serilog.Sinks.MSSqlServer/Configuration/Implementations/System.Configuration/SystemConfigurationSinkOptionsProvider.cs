@@ -37,6 +37,8 @@ namespace Serilog.Sinks.MSSqlServer.Configuration
                 value => sinkOptions.UseAzureManagedIdentity = value);
             SetProperty.IfProvided<string>(config.AzureServiceTokenProviderResource, nameof(config.AzureServiceTokenProviderResource.Value),
                 value => sinkOptions.AzureServiceTokenProviderResource = value);
+            SetProperty.IfProvided<string>(config.AzureServiceTokenProviderConnectionString, nameof(config.AzureServiceTokenProviderConnectionString.Value),
+               value => sinkOptions.AzureServiceTokenProviderConnectionString = value);
         }
     }
 }
