@@ -1,3 +1,7 @@
+# 5.6.1
+* Added support for reserved columns (thanks to @susanneschuster).
+* Fixes in README.
+
 # 5.6.0
 * Fixed issue #191: Added option `EagerlyEmitFirstEvent` by implementing new PeriodicBatchingSink API.
 * Replaced `SinkOptions` with `MSSqlServerSinkOptions` and cleaned up namespaced (thanks to @jonorossi for the contribution).

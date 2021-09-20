@@ -139,7 +139,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Platform
         public void WriteEventSetsSqlCommandWrapperCommandTextToSqlInsertWithCorrectFieldsAndValues()
         {
             // Arrange
-            var expectedSqlCommandText = $"INSERT INTO [{_schemaName}].[{_tableName}] (FieldName1,FieldName2,FieldNameThree) VALUES (@P0,@P1,@P2)";
+            var expectedSqlCommandText = $"INSERT INTO [{_schemaName}].[{_tableName}] ([FieldName1],[FieldName2],[FieldNameThree]) VALUES (@P0,@P1,@P2)";
             var logEvent = TestLogEventHelper.CreateLogEvent();
             var fieldsAndValues = new List<KeyValuePair<string, object>>
             {
