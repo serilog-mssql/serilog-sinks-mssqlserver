@@ -736,7 +736,7 @@ Extracting and querying the property column directly can be helpful when looking
 
 ### LogEvent JSON
 
-This capability requires SQL 2012 or newer. Given the following JSON properties:
+This capability requires SQL 2016 or newer. Given the following JSON properties:
 
 ```json
 {
