@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net452;netcoreapp2.0;netcoreapp2.1</TargetFrameworks>
+    <TargetFrameworks>net452;netcoreapp3.1</TargetFrameworks>
     <TargetFrameworks Condition=" '$(OS)' != 'Windows_NT' ">netstandard2.0</TargetFrameworks>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <AssemblyName>Serilog.Sinks.MSSqlServer.Tests</AssemblyName>
@@ -51,26 +51,7 @@
     <Compile Include="Sinks\MSSqlServer\Platform\AzureManagedServiceAuthenticatorStubTests.cs" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.0' ">
-    <PackageReference Include="System.Collections" Version="4.3.0" />
-    <PackageReference Include="System.Runtime.InteropServices" Version="4.3.0" />
-    <PackageReference Include="System.Runtime.Extensions" Version="4.3.1" />
-    <PackageReference Include="System.IO.FileSystem.Primitives" Version="4.3.0" />
-    <PackageReference Include="System.Resources.ResourceManager" Version="4.3.0" />
-    <PackageReference Include="System.Text.Encoding.Extensions" Version="4.3.0" />
-    <PackageReference Include="xunit" Version="2.4.1" />
-    <PackageReference Include="xunit.core" Version="2.4.1" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.1">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-    </PackageReference>
-    <Compile Include="Configuration\Extensions\Hybrid\**\*.cs" />
-    <Compile Include="Configuration\Implementations\Microsoft.Extensions.Configuration\**\*.cs" />
-    <Compile Include="Configuration\Implementations\System.Configuration\**\*.cs" />
-    <Compile Include="Sinks\MSSqlServer\Platform\AzureManagedServiceAuthenticatorStubTests.cs" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.1' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp3.1' ">
     <PackageReference Include="System.Collections" Version="4.3.0" />
     <PackageReference Include="System.Runtime.InteropServices" Version="4.3.0" />
     <PackageReference Include="System.Runtime.Extensions" Version="4.3.1" />
@@ -86,6 +67,9 @@
     <Compile Remove="**\*.*" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="TestUtils\**\*.cs" />
+    <Compile Include="Configuration\Extensions\Hybrid\**\*.cs" />
+    <Compile Include="Configuration\Implementations\Microsoft.Extensions.Configuration\**\*.cs" />
+    <Compile Include="Configuration\Implementations\System.Configuration\**\*.cs" />
     <Compile Include="Sinks\MSSqlServer\Platform\AzureManagedServiceAuthenticatorTests.cs" />
   </ItemGroup>
 

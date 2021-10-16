@@ -91,8 +91,8 @@ Because of the way external configuration has been implemented in various .NET f
 | .NET Framework 4.6.1+ | `net461` | app or library | _System.Configuration_ |
 | .NET Framework 4.6.1+ | `net461` | app or library | _Microsoft.Extensions.Configuration_ |
 | .NET Standard 2.0 | `netstandard2.0` | library only | _Microsoft.Extensions.Configuration_ |
-| .NET Core 2.0+ | `netcoreapp2.0` | app or library | _System.Configuration_ |
-| .NET Core 2.0+ | `netcoreapp2.0` | app or library | _Microsoft.Extensions.Configuration_ |
+| .NET Core 3.1+ | `netcoreapp3.1` | app or library | _System.Configuration_ |
+| .NET Core 3.1+ | `netcoreapp3.1` | app or library | _Microsoft.Extensions.Configuration_ |
 
 Support for .NET Framework 4.5.2 is tied to the Windows 8.1 lifecycle with support scheduled to end in January 2023.
 
