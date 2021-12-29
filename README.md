@@ -285,7 +285,24 @@ See [Azure AD-managed identities for Azure resources documentation](https://docs
 
 ### AzureServiceTokenProviderResource
 
-Specifies the token provider resource to be used for aquiring an authentication token when using Azure Managed Identities for authenticating with an Azure SQL server. This setting is only used if `UseAzureManagedIdentity` is set to `true`.
+Specifies the token provider resource to be used for aquiring an authentication token when using Azure Managed Identities for authenticating with an Azure SQL server. This setting is only used if `UseAzureManagedIdentity` is set to `true`. For Azure SQL databases this value will always be `https://database.windows.net/`.
+
+### AzureTenantId
+
+Specifies the tenant ID of the the tenant the Azure SQL database exists in. This only needs to be set if the user authenticating against the database is in a different tenant to the database. This will most likely be the case when you are debugging locally and authenticating as yourself rather than the app to be deployed to.
+
+```
+ .WriteTo.MSSqlServer(
+	Environment.GetEnvironmentVariable("LogConnection"),
+	sinkOptions: new MSSqlServerSinkOptions()
+	{
+		TableName = "_Log",
+		UseAzureManagedIdentity = true,
+		AzureServiceTokenProviderResource = "https://database.windows.net/",
+		AzureTenantId = Environment.GetEnvironmentVariable("AZURE_TENANT_ID")
+	}
+```
+
 
 ## ColumnOptions Object
 
