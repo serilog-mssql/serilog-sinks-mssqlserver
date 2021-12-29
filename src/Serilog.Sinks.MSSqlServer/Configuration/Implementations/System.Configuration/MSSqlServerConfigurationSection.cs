@@ -191,6 +191,13 @@ namespace Serilog.Configuration
         {
             get => (ValueConfigElement)base[nameof(AzureServiceTokenProviderResource)];
         }
+
+
+        [ConfigurationProperty(nameof(AzureTenantId))]
+        public ValueConfigElement AzureTenantId
+        {
+            get => (ValueConfigElement)base[nameof(AzureTenantId)];
+        }
     }
 }
 

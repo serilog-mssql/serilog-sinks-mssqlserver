@@ -71,5 +71,10 @@ namespace Serilog.Sinks.MSSqlServer
         /// Azure service token provider to be used for Azure Managed Identities
         /// </summary>
         public string AzureServiceTokenProviderResource { get; set; }
+
+        /// <summary>
+        /// ID of the tenant where the Azure resource exists
+        /// </summary>
+        public string AzureTenantId { get; set; }
     }
 }

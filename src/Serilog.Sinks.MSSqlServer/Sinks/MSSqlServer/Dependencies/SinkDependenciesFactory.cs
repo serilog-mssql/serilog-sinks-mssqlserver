@@ -22,7 +22,8 @@ namespace Serilog.Sinks.MSSqlServer.Dependencies
                     sinkOptions?.UseAzureManagedIdentity ?? default,
                     new AzureManagedServiceAuthenticator(
                         sinkOptions?.UseAzureManagedIdentity ?? default,
-                        sinkOptions.AzureServiceTokenProviderResource));
+                        sinkOptions.AzureServiceTokenProviderResource,
+                        sinkOptions.AzureTenantId));
             var logEventDataGenerator =
                 new LogEventDataGenerator(columnOptions,
                     new StandardColumnDataGenerator(columnOptions, formatProvider,
