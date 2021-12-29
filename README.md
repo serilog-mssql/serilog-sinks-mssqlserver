@@ -88,13 +88,13 @@ Because of the way external configuration has been implemented in various .NET f
 | Your Framework | TFM | Project Types | External Configuration |
 | --- | --- | --- |  --- |
 | .NET Framework 4.5.2 | `net452` | app or library | _System.Configuration_ |
-| .NET Framework 4.6.1+ | `net461` | app or library | _System.Configuration_ |
-| .NET Framework 4.6.1+ | `net461` | app or library | _Microsoft.Extensions.Configuration_ |
+| .NET Framework 4.6.2+ | `net462` | app or library | _System.Configuration_ |
+| .NET Framework 4.6.2+ | `net462` | app or library | _Microsoft.Extensions.Configuration_ |
 | .NET Standard 2.0 | `netstandard2.0` | library only | _Microsoft.Extensions.Configuration_ |
 | .NET Core 3.1+ | `netcoreapp3.1` | app or library | _System.Configuration_ |
 | .NET Core 3.1+ | `netcoreapp3.1` | app or library | _Microsoft.Extensions.Configuration_ |
 
-Support for .NET Framework 4.5.2 is tied to the Windows 8.1 lifecycle with support scheduled to end in January 2023.
+Support for .NET Framework 4.5.2 is tied to the Windows 8.1 lifecycle with support scheduled to end in April 2022 (https://devblogs.microsoft.com/dotnet/net-framework-4-5-2-4-6-4-6-1-will-reach-end-of-support-on-april-26-2022/).
 
 Although it's possible to use both XML and _M.E.C_ configuration with certain frameworks, this is not supported, unintended consequences are possible, and a warning will be emitted to `SelfLog`. If you actually require multiple configuration sources, the _M.E.C_ builder-pattern is designed to support this, and your syntax will be consistent across configuration sources.
 
@@ -247,6 +247,7 @@ Basic settings of the sink are configured using the properties in a `MSSqlServer
 * `EagerlyEmitFirstEvent`
 * `UseAzureManagedIdentity`
 * `AzureServiceTokenProviderResource`
+* `AzureTenantId`
 
 ### TableName
 
