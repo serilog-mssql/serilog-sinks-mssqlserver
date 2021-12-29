@@ -38,6 +38,7 @@ namespace Serilog.Sinks.MSSqlServer.Configuration
         {
             SetProperty.IfNotNull<bool>(config["useAzureManagedIdentity"], val => sinkOptions.UseAzureManagedIdentity = val);
             SetProperty.IfNotNull<string>(config["azureServiceTokenProviderResource"], val => sinkOptions.AzureServiceTokenProviderResource = val);
+            SetProperty.IfNotNull<string>(config["azureTenantId"], val => sinkOptions.AzureTenantId = val);
         }
     }
 }
