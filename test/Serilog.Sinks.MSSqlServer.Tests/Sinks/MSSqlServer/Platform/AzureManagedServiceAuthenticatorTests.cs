@@ -50,5 +50,15 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Platform
             // Act + assert
             await Assert.ThrowsAsync<AzureServiceTokenProviderException>(() => sut.GetAuthenticationToken()).ConfigureAwait(false);
         }
+
+        [Fact]
+        public async Task GetAuthenticationTokenThrowsIfUseAzureManagedIdentityIsTrueAndTennantInvalid()
+        {
+            // Arrange
+            var sut = new AzureManagedServiceAuthenticator(true, "https://database.windows.net/", "TestTennantId");
+
+            // Act + assert
+            await Assert.ThrowsAsync<AzureServiceTokenProviderException>(() => sut.GetAuthenticationToken()).ConfigureAwait(false);
+        }
     }
 }
