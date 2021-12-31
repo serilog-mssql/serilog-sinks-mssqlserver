@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net452;netcoreapp3.1</TargetFrameworks>
+    <TargetFrameworks>net452;net462;netcoreapp3.1</TargetFrameworks>
     <TargetFrameworks Condition=" '$(OS)' != 'Windows_NT' ">netstandard2.0</TargetFrameworks>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <AssemblyName>Serilog.Sinks.MSSqlServer.Tests</AssemblyName>
@@ -18,10 +18,7 @@
     <PackageReference Include="FluentAssertions" Version="5.10.3" />
     <PackageReference Include="Dapper.StrongName" Version="1.50.5" />
     <DotNetCliToolReference Include="dotnet-xunit" Version="2.3.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="3.0.0">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
+    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="3.0.0"/>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.2" />
     <PackageReference Include="Moq" Version="4.14.1" />
     <PackageReference Include="System.Diagnostics.Debug" Version="4.3.0" />
@@ -47,6 +44,14 @@
     <PackageReference Include="xunit" Version="2.4.1" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.1" />
     <Compile Include="Configuration\Extensions\System.Configuration\**\*.cs" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net462' ">
+    <Reference Include="System" />
+    <Reference Include="Microsoft.CSharp" />
+    <PackageReference Include="xunit" Version="2.4.1" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.1" />
+    <Compile Include="Configuration\Extensions\Hybrid\**\*.cs" />
     <Compile Include="Configuration\Implementations\System.Configuration\**\*.cs" />
     <Compile Include="Sinks\MSSqlServer\Platform\AzureManagedServiceAuthenticatorStubTests.cs" />
   </ItemGroup>
@@ -60,13 +65,10 @@
     <PackageReference Include="System.Text.Encoding.Extensions" Version="4.3.0" />
     <PackageReference Include="xunit" Version="2.4.1" />
     <PackageReference Include="xunit.core" Version="2.4.1" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.1">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-    </PackageReference>
-    <Compile Remove="**\*.*" />
-    <Compile Include="GlobalSuppressions.cs" />
-    <Compile Include="TestUtils\**\*.cs" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.1"/>
+    <Compile Remove="Configuration\Extensions\System.Configuration\**\*.cs" />
+    <Compile Remove="Configuration\Implementations\System.Configuration\**\*.cs" />
+    <Compile Remove="Sinks\MSSqlServer\Platform\AzureManagedServiceAuthenticatorStubTests.cs" />
     <Compile Include="Configuration\Extensions\Hybrid\**\*.cs" />
     <Compile Include="Configuration\Implementations\Microsoft.Extensions.Configuration\**\*.cs" />
     <Compile Include="Configuration\Implementations\System.Configuration\**\*.cs" />
