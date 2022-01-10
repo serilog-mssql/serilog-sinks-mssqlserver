@@ -17,6 +17,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Options
             // Assert
             Assert.Equal(MSSqlServerSink.DefaultSchemaName, sut.SchemaName);
             Assert.Equal(MSSqlServerSink.DefaultBatchPostingLimit, sut.BatchPostingLimit);
+            Assert.Equal(MSSqlServerSink.DefaultRetentionPeriod, sut.RetentionPeriod);
             Assert.Equal(MSSqlServerSink.DefaultPeriod, sut.BatchPeriod);
         }
     }

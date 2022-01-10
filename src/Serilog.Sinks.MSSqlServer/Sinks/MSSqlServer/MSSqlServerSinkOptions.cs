@@ -16,6 +16,8 @@ namespace Serilog.Sinks.MSSqlServer
             BatchPostingLimit = MSSqlServerSink.DefaultBatchPostingLimit;
             BatchPeriod = MSSqlServerSink.DefaultPeriod;
             EagerlyEmitFirstEvent = true;
+            RetentionPeriod  = MSSqlServerSink.DefaultRetentionPeriod;
+            PruningInterval = MSSqlServerSink.DefaultPruningInterval;
         }
 
         internal MSSqlServerSinkOptions(
@@ -56,7 +58,14 @@ namespace Serilog.Sinks.MSSqlServer
         /// Time span until a batch of log events is written to the database (default: 5 seconds)
         /// </summary>
         public TimeSpan BatchPeriod { get; set; }
-
+        /// <summary>
+        /// Time span until a pruning would be fired if the next batch is being written (default: 2 hours)
+        /// </summary>
+        public TimeSpan? PruningInterval { get; set; }
+        /// <summary>
+        /// Retention period in which log events would be retained. If it is null, no pruning would happen at all. the default value is null (default: null)
+        /// </summary>
+        public TimeSpan? RetentionPeriod  { get; set; }
         /// <summary>
         /// Flag to eagerly emit a batch containing the first received event (default: true)
         /// </summary>

@@ -103,6 +103,11 @@ namespace Serilog.Sinks.MSSqlServer.Tests.TestUtils
             VerifyStringColumnWritten(messageColumnName, expectedMessage);
         }
 
+        protected static void VerifyLogMessageWasNotWritten(string expectedMessage, string messageColumnName = "Message")
+        {
+            VerifyStringColumnNotWritten(messageColumnName, expectedMessage);
+        }
+
         protected static void VerifyCustomLogMessageWasWritten(string expectedMessage)
         {
             using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
@@ -122,7 +127,15 @@ namespace Serilog.Sinks.MSSqlServer.Tests.TestUtils
                 logEvents.Should().Contain(c => c == expectedValue);
             }
         }
+        protected static void VerifyStringColumnNotWritten(string columnName, string expectedValue)
+        {
+            using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
+            {
+                var logEvents = conn.Query<string>($"SELECT {columnName} FROM {DatabaseFixture.LogTableName}");
 
+                logEvents.Should().NotContain(c => c == expectedValue);
+            }
+        }
         protected static void VerifyIntegerColumnWritten(string columnName, int expectedValue)
         {
             using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))

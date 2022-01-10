@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using Microsoft.Extensions.Configuration;
+using Serilog.Sinks.MSSqlServer.Configuration.Factories;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
 using Xunit.Abstractions;
@@ -139,6 +141,58 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.Hybrid
 
             // Assert
             VerifyDatabaseColumnsWereCreated(standardNames);
+        }
+
+        [Fact]
+        public void RetentionPolicyWorks()
+        {
+            // Arrange
+            var messageTemplate = "message number {i}";
+            var messagesNumber = 200;
+            var loggingDuration = TimeSpan.FromSeconds(10);
+            var retentionPeriod = TimeSpan.FromSeconds(6);
+            var pruningInterval = TimeSpan.FromMilliseconds(500);
+            var batchPostingLimit = 4;
+            // Act
+            var loggerConfiguration = new LoggerConfiguration();
+            Log.Logger = loggerConfiguration.WriteTo.MSSqlServer(
+
+                connectionString: DatabaseFixture.LogEventsConnectionString,
+                sinkOptions: new MSSqlServerSinkOptions
+                {
+                    TableName = DatabaseFixture.LogTableName,
+                    AutoCreateSqlTable = true,
+                    BatchPostingLimit = batchPostingLimit,
+                    PruningInterval = pruningInterval,
+                    RetentionPeriod = retentionPeriod,
+                },
+                formatProvider: null,
+                columnOptions: null,
+                logEventFormatter: null)
+                .CreateLogger();
+            for (var i = 0; i < messagesNumber; i++)
+            {
+                Log.Information(messageTemplate, i);
+                Thread.Sleep(new TimeSpan(loggingDuration.Ticks / messagesNumber));
+            }
+            Log.CloseAndFlush();
+
+            // Assert
+            var tolerance = 10 * batchPostingLimit;
+
+            var ExpectedDeletedMessages = (int)(messagesNumber * (1 - ((double)retentionPeriod.Ticks / loggingDuration.Ticks))) - tolerance;
+            for (var i = 0; i < ExpectedDeletedMessages; i++)
+            {
+                var expectedMessage = $"message number {i}";
+                VerifyLogMessageWasNotWritten(expectedMessage);
+            }
+
+            var ExpectedExistingMessages = (int)(messagesNumber * (((double)retentionPeriod.Ticks / loggingDuration.Ticks))) - tolerance;
+            for (var i = 0; i < ExpectedExistingMessages; i++)
+            {
+                var notExpectedMessage = $"message number {messagesNumber - (i + 1)}";
+                VerifyLogMessageWasWritten(notExpectedMessage);
+            }
         }
 
         private static IConfiguration TestConfiguration() =>

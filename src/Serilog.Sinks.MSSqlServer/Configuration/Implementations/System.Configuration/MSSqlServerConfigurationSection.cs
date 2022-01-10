@@ -198,6 +198,18 @@ namespace Serilog.Configuration
         {
             get => (ValueConfigElement)base[nameof(AzureTenantId)];
         }
+
+        [ConfigurationProperty(nameof(RetentionPeriod))]
+        public ValueConfigElement RetentionPeriod
+        {
+            get => (ValueConfigElement)base[nameof(RetentionPeriod)];
+        }
+
+        [ConfigurationProperty(nameof(PruningInterval))]
+        public ValueConfigElement PruningInterval
+        {
+            get => (ValueConfigElement)base[nameof(PruningInterval)];
+        }
     }
 }
 

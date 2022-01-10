@@ -43,6 +43,16 @@ namespace Serilog.Sinks.MSSqlServer
         public const int DefaultBatchPostingLimit = 50;
 
         /// <summary>
+        /// A reasonable default time to wait between the cleansing of logs.
+        /// </summary>
+        public static readonly TimeSpan DefaultPruningInterval = TimeSpan.FromHours(2);
+
+        /// <summary>
+        /// By default the retention policy is not activated and is set to null.
+        /// </summary>
+        public static readonly TimeSpan? DefaultRetentionPeriod = null;
+
+        /// <summary>
         /// A reasonable default time to wait between checking for event batches.
         /// </summary>
         public static readonly TimeSpan DefaultPeriod = TimeSpan.FromSeconds(5);

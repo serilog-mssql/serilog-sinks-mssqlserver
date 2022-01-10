@@ -248,6 +248,8 @@ Basic settings of the sink are configured using the properties in a `MSSqlServer
 * `UseAzureManagedIdentity`
 * `AzureServiceTokenProviderResource`
 * `AzureTenantId`
+* `RetentionPeriod`
+* `PruningInterval`
 
 ### TableName
 
@@ -303,6 +305,17 @@ Specifies the tenant ID of the the tenant the Azure SQL database exists in. This
 		AzureTenantId = Environment.GetEnvironmentVariable("AZURE_TENANT_ID")
 	}
 ```
+### RetentionPeriod
+
+Specifies a period, till now, in which the non-audit sink logs would be retained. For example, when its value is 6 months. That means in every pruning, the logs older than 6 months would be cleaned.
+
+### PruningInterval
+
+Specifies the interval in which the non-audit sink is being clean of old logs. It's default value is 2 hours. The `old` state would be determined by the `RetentionPeriod`.
+
+_NOTE:_ The pruning only occurs during the batch write events, Therefore if the interval is satisfied the actual pruning would be triggered in the next batch write event.
+
+_NOTE:_ If the `RetentionPeriod` is not set, The `PruningInterval` would never be checked. And logs would never be pruned.
 
 
 ## ColumnOptions Object

@@ -1,8 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System;
 using System.Data;
 using System.Globalization;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Serilog.Debugging;
 using Serilog.Events;
@@ -17,19 +18,24 @@ namespace Serilog.Sinks.MSSqlServer.Platform
         private readonly bool _disableTriggers;
         private readonly ISqlConnectionFactory _sqlConnectionFactory;
         private readonly ILogEventDataGenerator _logEventDataGenerator;
-
+        private readonly ISqlLogEventsPruner _sqlLogEventsPruner;
         public SqlBulkBatchWriter(
+
             string tableName,
             string schemaName,
             bool disableTriggers,
             ISqlConnectionFactory sqlConnectionFactory,
-            ILogEventDataGenerator logEventDataGenerator)
+            ILogEventDataGenerator logEventDataGenerator,
+             ISqlLogEventsPruner sqlLogEventsPruner
+            )
         {
             _tableName = tableName ?? throw new ArgumentNullException(nameof(tableName));
             _schemaName = schemaName ?? throw new ArgumentNullException(nameof(schemaName));
             _disableTriggers = disableTriggers;
             _sqlConnectionFactory = sqlConnectionFactory ?? throw new ArgumentNullException(nameof(sqlConnectionFactory));
             _logEventDataGenerator = logEventDataGenerator ?? throw new ArgumentNullException(nameof(logEventDataGenerator));
+            _sqlLogEventsPruner = sqlLogEventsPruner;
+
         }
 
         public async Task WriteBatch(IEnumerable<LogEvent> events, DataTable dataTable)
@@ -62,6 +68,16 @@ namespace Serilog.Sinks.MSSqlServer.Platform
             {
                 dataTable.Clear();
             }
+
+            try
+            {
+            await _sqlLogEventsPruner.PruneLogEventsToDateTime().ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                SelfLog.WriteLine("Unable to prune log events from the database due to the following error: {0}", ex.Message);
+            }
+
         }
 
         private void FillDataTable(IEnumerable<LogEvent> events, DataTable dataTable)
@@ -81,5 +97,6 @@ namespace Serilog.Sinks.MSSqlServer.Platform
 
             dataTable.AcceptChanges();
         }
+
     }
 }

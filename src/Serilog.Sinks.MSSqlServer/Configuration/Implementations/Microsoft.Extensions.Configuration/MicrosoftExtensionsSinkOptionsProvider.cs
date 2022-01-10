@@ -15,6 +15,7 @@ namespace Serilog.Sinks.MSSqlServer.Configuration
 
             ReadTableOptions(config, sinkOptions);
             ReadBatchSettings(config, sinkOptions);
+            ReadRetentionSettings(config, sinkOptions);
             ReadAzureManagedIdentitiesOptions(config, sinkOptions);
 
             return sinkOptions;
@@ -33,7 +34,11 @@ namespace Serilog.Sinks.MSSqlServer.Configuration
             SetProperty.IfNotNull<string>(config["batchPeriod"], val => sinkOptions.BatchPeriod = TimeSpan.Parse(val, CultureInfo.InvariantCulture));
             SetProperty.IfNotNull<bool>(config["eagerlyEmitFirstEvent"], val => sinkOptions.EagerlyEmitFirstEvent = val);
         }
-
+        private static void ReadRetentionSettings(IConfigurationSection config, MSSqlServerSinkOptions sinkOptions)
+        {
+            SetProperty.IfNotNull<string>(config["retentionPeriod"], val => sinkOptions.RetentionPeriod  = TimeSpan.Parse(val, CultureInfo.InvariantCulture));
+            SetProperty.IfNotNull<string>(config["pruningInterval"], val => sinkOptions.PruningInterval = TimeSpan.Parse(val, CultureInfo.InvariantCulture));
+        }
         private static void ReadAzureManagedIdentitiesOptions(IConfigurationSection config, MSSqlServerSinkOptions sinkOptions)
         {
             SetProperty.IfNotNull<bool>(config["useAzureManagedIdentity"], val => sinkOptions.UseAzureManagedIdentity = val);

@@ -37,31 +37,31 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Platform
 
             _dataTable = new DataTable(_tableName);
 
-            _sut = new SqlBulkBatchWriter(_tableName, _schemaName, false, _sqlConnectionFactoryMock.Object, _logEventDataGeneratorMock.Object);
+            _sut = new SqlBulkBatchWriter(_tableName, _schemaName, false, _sqlConnectionFactoryMock.Object, _logEventDataGeneratorMock.Object, null);
         }
 
         [Fact]
         public void InitializeWithoutTableNameThrows()
         {
-            Assert.Throws<ArgumentNullException>(() => new SqlBulkBatchWriter(null, _schemaName, false, _sqlConnectionFactoryMock.Object, _logEventDataGeneratorMock.Object));
+            Assert.Throws<ArgumentNullException>(() => new SqlBulkBatchWriter(null, _schemaName, false, _sqlConnectionFactoryMock.Object, _logEventDataGeneratorMock.Object, null));
         }
 
         [Fact]
         public void InitializeWithoutSchemaNameThrows()
         {
-            Assert.Throws<ArgumentNullException>(() => new SqlBulkBatchWriter(_tableName, null, false, _sqlConnectionFactoryMock.Object, _logEventDataGeneratorMock.Object));
+            Assert.Throws<ArgumentNullException>(() => new SqlBulkBatchWriter(_tableName, null, false, _sqlConnectionFactoryMock.Object, _logEventDataGeneratorMock.Object, null));
         }
 
         [Fact]
         public void InitializeWithoutSqlConnectionFactoryThrows()
         {
-            Assert.Throws<ArgumentNullException>(() => new SqlBulkBatchWriter(_tableName, _schemaName, false, null, _logEventDataGeneratorMock.Object));
+            Assert.Throws<ArgumentNullException>(() => new SqlBulkBatchWriter(_tableName, _schemaName, false, null, _logEventDataGeneratorMock.Object, null));
         }
 
         [Fact]
         public void InitializeWithoutLogEventDataGeneratorThrows()
         {
-            Assert.Throws<ArgumentNullException>(() => new SqlBulkBatchWriter(_tableName, _schemaName, false, _sqlConnectionFactoryMock.Object, null));
+            Assert.Throws<ArgumentNullException>(() => new SqlBulkBatchWriter(_tableName, _schemaName, false, _sqlConnectionFactoryMock.Object, null, null));
         }
 
         [Fact]
@@ -124,7 +124,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Platform
             // Arrange
             var logEvents = CreateLogEvents();
             var expectedDestinationTableName = string.Format(CultureInfo.InvariantCulture, "[{0}].[{1}]", _schemaName, _tableName);
-            var sut = new SqlBulkBatchWriter(_tableName, _schemaName, true, _sqlConnectionFactoryMock.Object, _logEventDataGeneratorMock.Object);
+            var sut = new SqlBulkBatchWriter(_tableName, _schemaName, true, _sqlConnectionFactoryMock.Object, _logEventDataGeneratorMock.Object, null);
 
             // Act
             await sut.WriteBatch(logEvents, _dataTable).ConfigureAwait(false);
