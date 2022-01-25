@@ -51,7 +51,25 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Platform
             using (var connection = sut.Create())
             {
                 // Assert
-                Assert.Equal(DatabaseFixture.LogEventsConnectionString, connection.ConnectionString);
+                Assert.Equal(DatabaseFixture.LogEventsConnectionString + ";Enlist=false", connection.ConnectionString);
+            }
+        }
+
+        [Theory]
+        [InlineData(DatabaseFixture.LogEventsConnectionString+ "; enlist = True")]
+        [InlineData(DatabaseFixture.LogEventsConnectionString + ";Enlist=False")]
+        [InlineData(" enlist= true;" + DatabaseFixture.LogEventsConnectionString)]
+        [InlineData("Enlist = false;" + DatabaseFixture.LogEventsConnectionString)]
+        public void CreatesSqlConnectionWithSpecifiedConnectionStringWithAndEnlistSet(string connectionString)
+        {
+            // Arrange
+            var sut = new SqlConnectionFactory(connectionString, false, _azureManagedServiceAuthenticatorMock.Object);
+
+            // Act
+            using (var connection = sut.Create())
+            {
+                // Assert
+                Assert.Equal(connectionString, connection.ConnectionString);
             }
         }
 

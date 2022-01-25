@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.RegularExpressions;
 using Serilog.Sinks.MSSqlServer.Platform.SqlClient;
 
 namespace Serilog.Sinks.MSSqlServer.Platform
@@ -14,6 +15,16 @@ namespace Serilog.Sinks.MSSqlServer.Platform
             if (string.IsNullOrWhiteSpace(connectionString))
             {
                 throw new ArgumentNullException(nameof(connectionString));
+            }
+
+            // Add 'Enlist=false'
+            // unless connectionstring already contains Enlist
+            //  to contain Enlist the word shoudld be at the beginning or after ';'
+            //  and contain a '=' after, with some optional space before or after the word
+            const RegexOptions regexOptions = RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture;
+            if (Regex.IsMatch(connectionString, @"(^|;)\s*Enlist\s*=", regexOptions) == false)
+            {
+                connectionString = connectionString + ";Enlist=false";
             }
 
             _connectionString = connectionString;

@@ -32,7 +32,7 @@ DROP DATABASE [{Database}]
 
         public static string Database => "LogTest";
         public static string LogTableName => "LogEvents";
-        public static string LogEventsConnectionString => $@"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog={Database};Integrated Security=True";
+        public const string LogEventsConnectionString = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=LogTest;Integrated Security=True";
 
         public DatabaseFixture()
         {
