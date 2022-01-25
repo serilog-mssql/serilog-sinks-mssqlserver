@@ -36,9 +36,11 @@ namespace Serilog.Sinks.MSSqlServer.Configuration
 
         private static void ReadAzureManagedIdentitiesOptions(IConfigurationSection config, MSSqlServerSinkOptions sinkOptions)
         {
+#pragma warning disable CS0618 // Type or member is obsolete
             SetProperty.IfNotNull<bool>(config["useAzureManagedIdentity"], val => sinkOptions.UseAzureManagedIdentity = val);
             SetProperty.IfNotNull<string>(config["azureServiceTokenProviderResource"], val => sinkOptions.AzureServiceTokenProviderResource = val);
             SetProperty.IfNotNull<string>(config["azureTenantId"], val => sinkOptions.AzureTenantId = val);
+#pragma warning restore CS0618 // Type or member is obsolete
         }
     }
 }

@@ -18,6 +18,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
             _configurationSectionMock = new Mock<IConfigurationSection>();
         }
 
+#pragma warning disable CS0618 // Type or member is obsolete
         [Fact]
         public void ConfigureSinkOptionsCalledWithConfigSectionNullReturnsUnchangedSinkOptions()
         {
@@ -31,6 +32,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
             // Assert
             Assert.True(result.UseAzureManagedIdentity);
         }
+
+#pragma warning restore CS0618 // Type or member is obsolete
 
         [Fact]
         public void ConfigureSinkOptionsSetsTableName()
@@ -122,6 +125,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
             Assert.True(result.EagerlyEmitFirstEvent);
         }
 
+#pragma warning disable CS0618 // Type or member is obsolete
         [Fact]
         public void ConfigureSinkOptionsSetsUseAzureManagedIdentity()
         {
@@ -165,5 +169,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
             // Assert
             Assert.Equal(azureTenantId, result.AzureTenantId);
         }
+#pragma warning restore CS0618 // Type or member is obsolete
+
     }
 }

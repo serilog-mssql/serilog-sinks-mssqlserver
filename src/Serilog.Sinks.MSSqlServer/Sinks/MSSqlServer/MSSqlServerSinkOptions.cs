@@ -65,16 +65,19 @@ namespace Serilog.Sinks.MSSqlServer
         /// <summary>
         /// Flag to enable SQL authentication using Azure Managed Identities (default: false)
         /// </summary>
+        [Obsolete("Use Microsoft.Data.SqlClient built in support for MSI https://docs.microsoft.com/en-us/sql/connect/ado-net/sql/azure-active-directory-authentication?view=sql-server-ver15", error: false)]
         public bool UseAzureManagedIdentity { get; set; }
 
         /// <summary>
         /// Azure service token provider to be used for Azure Managed Identities
         /// </summary>
+        [Obsolete("Use Microsoft.Data.SqlClient built in support for MSI https://docs.microsoft.com/en-us/sql/connect/ado-net/sql/azure-active-directory-authentication?view=sql-server-ver15", error: false)]
         public string AzureServiceTokenProviderResource { get; set; }
 
         /// <summary>
         /// ID of the tenant where the Azure resource exists
         /// </summary>
+        [Obsolete("Use Microsoft.Data.SqlClient built in support for MSI https://docs.microsoft.com/en-us/sql/connect/ado-net/sql/azure-active-directory-authentication?view=sql-server-ver15", error: false)]
         public string AzureTenantId { get; set; }
     }
 }

@@ -18,12 +18,14 @@ namespace Serilog.Sinks.MSSqlServer.Dependencies
             columnOptions.FinalizeConfigurationForSinkConstructor();
 
             var sqlConnectionFactory =
+#pragma warning disable CS0618 // Type or member is obsolete
                 new SqlConnectionFactory(connectionString,
                     sinkOptions?.UseAzureManagedIdentity ?? default,
                     new AzureManagedServiceAuthenticator(
                         sinkOptions?.UseAzureManagedIdentity ?? default,
                         sinkOptions.AzureServiceTokenProviderResource,
                         sinkOptions.AzureTenantId));
+#pragma warning restore CS0618 // Type or member is obsolete
             var logEventDataGenerator =
                 new LogEventDataGenerator(columnOptions,
                     new StandardColumnDataGenerator(columnOptions, formatProvider,
