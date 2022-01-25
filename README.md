@@ -278,6 +278,8 @@ This setting is not used by the audit sink as it writes each event immediately a
 
 ### UseAzureManagedIdentity
 
+> **OBSOLETE:** For Azure Active Directory authentication use the support built into the Microsoft.Data.SqlClient. See [Using Azure Active Directory authentication with SqlClient](https://docs.microsoft.com/en-us/sql/connect/ado-net/sql/azure-active-directory-authentication?view=sql-server-ver15#using-active-directory-managed-identity-authentication) 
+
 A flag specifiying to use Azure Managed Identities for authenticating with an Azure SQL server. It defaults to `false`. If enabled the property `AzureServiceTokenProviderResource` must be set as well.
 
 **IMPORTANT:** Azure Managed Identities is only supported for the target frameworks .NET Framework 4.7.2+ and .NET Core 2.2+. Setting this to `true` when targeting a different framework results in an exception.
@@ -286,9 +288,13 @@ See [Azure AD-managed identities for Azure resources documentation](https://docs
 
 ### AzureServiceTokenProviderResource
 
+> **OBSOLETE:** For Azure Active Directory authentication use the support built into the Microsoft.Data.SqlClient. See [Using Azure Active Directory authentication with SqlClient](https://docs.microsoft.com/en-us/sql/connect/ado-net/sql/azure-active-directory-authentication?view=sql-server-ver15#using-active-directory-managed-identity-authentication) 
+
 Specifies the token provider resource to be used for aquiring an authentication token when using Azure Managed Identities for authenticating with an Azure SQL server. This setting is only used if `UseAzureManagedIdentity` is set to `true`. For Azure SQL databases this value will always be `https://database.windows.net/`.
 
 ### AzureTenantId
+
+> **OBSOLETE:** For Azure Active Directory authentication use the support built into the Microsoft.Data.SqlClient. See [Using Azure Active Directory authentication with SqlClient](https://docs.microsoft.com/en-us/sql/connect/ado-net/sql/azure-active-directory-authentication?view=sql-server-ver15#using-active-directory-managed-identity-authentication) 
 
 Specifies the tenant ID of the the tenant the Azure SQL database exists in. This only needs to be set if the user authenticating against the database is in a different tenant to the database. This will most likely be the case when you are debugging locally and authenticating as yourself rather than the app to be deployed to.
 
