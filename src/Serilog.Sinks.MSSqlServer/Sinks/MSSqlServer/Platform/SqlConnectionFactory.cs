@@ -17,7 +17,7 @@ namespace Serilog.Sinks.MSSqlServer.Platform
                 throw new ArgumentNullException(nameof(connectionString));
             }
 
-            // Add 'Enlist=false'
+            // Add 'Enlist=false', so that ambient transactions (TransactionScope) will not affect logging
             // unless connectionstring already contains Enlist
             //  to contain Enlist the word shoudld be at the beginning or after ';'
             //  and contain a '=' after, with some optional space before or after the word
