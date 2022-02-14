@@ -18,7 +18,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Platform
         public void InitializeThrowsIfUseAzureManagedIdentityIsTrue()
         {
             // Throws because operation is not supported on the target framework that uses stub implementation
-            Assert.Throws<InvalidOperationException>(() => new AzureManagedServiceAuthenticator(true, "TestAccessToken"));
+            Assert.Throws<InvalidOperationException>(() => new AzureManagedServiceAuthenticator(true, "TestAccessToken", "TestTennantId"));
         }
     }
 }

@@ -8,9 +8,10 @@ namespace Serilog.Sinks.MSSqlServer.Platform
     {
         private readonly bool _useAzureManagedIdentity;
         private readonly string _azureServiceTokenProviderResource;
+        private readonly string _tenantId;
         private readonly AzureServiceTokenProvider _azureServiceTokenProvider;
 
-        public AzureManagedServiceAuthenticator(bool useAzureManagedIdentity, string azureServiceTokenProviderResource)
+        public AzureManagedServiceAuthenticator(bool useAzureManagedIdentity, string azureServiceTokenProviderResource, string tenantId = null)
         {
             if (useAzureManagedIdentity && string.IsNullOrWhiteSpace(azureServiceTokenProviderResource))
             {
@@ -19,6 +20,7 @@ namespace Serilog.Sinks.MSSqlServer.Platform
 
             _useAzureManagedIdentity = useAzureManagedIdentity;
             _azureServiceTokenProviderResource = azureServiceTokenProviderResource;
+            _tenantId = tenantId;
             _azureServiceTokenProvider = new AzureServiceTokenProvider();
         }
 
@@ -29,7 +31,7 @@ namespace Serilog.Sinks.MSSqlServer.Platform
                 return Task.FromResult((string)null);
             }
 
-            return _azureServiceTokenProvider.GetAccessTokenAsync(_azureServiceTokenProviderResource);
+            return _azureServiceTokenProvider.GetAccessTokenAsync(_azureServiceTokenProviderResource, _tenantId);
         }
     }
 }

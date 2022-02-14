@@ -150,5 +150,20 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
             // Assert
             Assert.Equal(azureServiceTokenProviderResource, result.AzureServiceTokenProviderResource);
         }
+
+        [Fact]
+        public void ConfigureSinkOptionsSetsAzureTenantId()
+        {
+            // Arrange
+            const string azureTenantId = "00000000-0000-0000-0000-000000000000";
+            _configurationSectionMock.Setup(s => s["azureTenantId"]).Returns(azureTenantId);
+            var sut = new MicrosoftExtensionsSinkOptionsProvider();
+
+            // Act
+            var result = sut.ConfigureSinkOptions(new MSSqlServerSinkOptions(), _configurationSectionMock.Object);
+
+            // Assert
+            Assert.Equal(azureTenantId, result.AzureTenantId);
+        }
     }
 }
