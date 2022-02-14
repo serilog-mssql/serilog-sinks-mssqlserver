@@ -1,3 +1,9 @@
+# 5.7.0
+* Fixed a wrong information in README.md regarding SQL Server compatibility (thanks to @domagojmedo).
+* Fixed bug #382 System.FormatExceotion due to invalid format strings when using SelfLog (thanks to @sommmen)
+* New sink option to configure tenant when using Azure managed identities (thanks to @mattosaurus).
+* Updated .NET target frameworks (obsolete .NET Core 2.0 and 2.1, added .NET Core 3.1 LTS).
+
 # 5.6.1
 * Added support for reserved columns (thanks to @susanneschuster).
 * Fixes in README.
@@ -24,7 +30,7 @@
 # 5.4.0
 * Added support for Azure Managed Identities for Resources authentication (thanks to @darrenschwarz for the contribution).
 * New interface using `SinkOptions` parameter. Marked old interfaces obsolete.
-* Implemented Enhancement #182: configurable property names for custom columns (thanks to  @rocknet for the contribution).
+* Implemented Enhancement #182: configurable property names for custom columns (thanks to @rocknet for the contribution).
 * Lots of refactoring and new unit tests.
 
 # 5.3.0  
