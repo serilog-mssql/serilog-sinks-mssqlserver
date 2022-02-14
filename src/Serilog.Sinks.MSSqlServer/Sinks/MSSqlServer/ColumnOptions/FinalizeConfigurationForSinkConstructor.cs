@@ -68,7 +68,7 @@ namespace Serilog.Sinks.MSSqlServer
             // PK must always be NON-NULL
             if (PrimaryKey != null && PrimaryKey.AllowNull == true)
             {
-                SelfLog.WriteLine($"Warning: Primary key must be NON-NULL, changing AllowNull property for {PrimaryKey.ColumnName} column.");
+                SelfLog.WriteLine("Warning: Primary key must be NON-NULL, changing AllowNull property for {0} column.", PrimaryKey.ColumnName);
                 PrimaryKey.AllowNull = false;
             }
 
@@ -81,7 +81,7 @@ namespace Serilog.Sinks.MSSqlServer
                 throw new ArgumentException($"Columnstore indexes do not support data type \"{column.DataType}\" declared for column \"{column.ColumnName}\".");
 
             if (column.DataLength == -1 && SqlDataTypes.DataLengthRequired.Contains(column.DataType))
-                SelfLog.WriteLine($"Warning: SQL2017 or newer required to use columnstore index with MAX length column \"{column.ColumnName}\".");
+                SelfLog.WriteLine("Warning: SQL2017 or newer required to use columnstore index with MAX length column \"{0}\".", column.ColumnName);
         }
     }
 }
