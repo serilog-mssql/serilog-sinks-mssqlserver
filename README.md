@@ -3,7 +3,7 @@
 A Serilog sink that writes events to Microsoft SQL Server. This sink will write the log event data to a table and can optionally also store the properties inside an XML or JSON column so they can be queried. Important properties can also be written to their own separate columns.
 
 **Package** - [Serilog.Sinks.MSSqlServer](http://nuget.org/packages/serilog.sinks.mssqlserver)
-| **Minimum Platforms** - .NET Framework 4.5.2, .NET Core 2.0, .NET Standard 2.0
+| **Minimum Platforms** - .NET Framework 4.5.2, .NET Core 3.1, .NET Standard 2.0
 
 #### Topics
 
