@@ -37,7 +37,7 @@ foreach ($src in ls src/*) {
     Pop-Location
 }
 
-if ( $RunTests -eq $true ) {
+if ($RunTests -eq $true) {
     foreach ($test in ls test/*.PerformanceTests) {
         Push-Location $test
 
