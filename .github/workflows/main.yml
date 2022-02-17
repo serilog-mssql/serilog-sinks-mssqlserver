@@ -31,5 +31,6 @@ jobs:
           draft: true
           title: "Release ${{ env.VERSION }}-test"
           files: |
-            .\artifacts\*.nupkg
+            \a\serilog-sinks-mssqlserver\serilog-sinks-mssqlserver\artifacts\Serilog.Sinks.MSSqlServer.5.7.0.nupkg
+            README.md
             .\artifacts\Serilog.Sinks.MSSqlServer.5.7.0-dev-local.snupkg
