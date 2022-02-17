@@ -15,21 +15,21 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       
-      - name: Run build script
-        run: ./Build.ps1
-
-      - name: Get version variable
+      - name: Read version from csproj
         run: |
           $selectResult = Select-String -Path ".\src\Serilog.Sinks.MSSqlServer\Serilog.Sinks.MSSqlServer.csproj" -Pattern '<VersionPrefix>(.+)</VersionPrefix>'
           echo ("VERSION=" + $selectResult.Matches[0].Groups[1].Value) >> $env:GITHUB_ENV
+
+      - name: Run build script
+        run: ./Build.ps1
           
       - name: Create releease
         uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           automatic_release_tag: "v${{ env.VERSION }}-test"
-          prerelease: true
+          draft: true
           title: "Release ${{ env.VERSION }}-test"
           files: |
-            artifacts\Serilog.Sinks.MSSqlServer.*.nupkg
-            artifacts\Serilog.Sinks.MSSqlServer.*.snupkg
+            .\artifacts\*.nupkg
+            .\artifacts\Serilog.Sinks.MSSqlServer.5.7.0-dev-local.snupkg
