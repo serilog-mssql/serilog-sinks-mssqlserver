@@ -15,27 +15,24 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       
+      - name: Run build
+        if: ${{ github.event_name == 'push' }}
+        run: ./Build.ps1
+
+      - name: Run build and tests
+        if: ${{ github.event_name == 'pull_request' }}
+        run: ./Build.ps1 -RunTests $true
+
       - name: Read version from csproj
+        # if: ${{ github.event_name == 'push' }}
         run: |
           $selectResult = Select-String -Path ".\src\Serilog.Sinks.MSSqlServer\Serilog.Sinks.MSSqlServer.csproj" -Pattern '<VersionPrefix>(.+)</VersionPrefix>'
           $versionMatch = $selectResult.Matches[0].Groups[1].Value
           echo ("VERSION=" + $versionMatch) >> $env:GITHUB_ENV
           echo "Found version $versionMatch"
 
-      - name: Print GitHub event
-        run: |
-          echo "GitHub event name is ${{ github.event_name }}"
-
-      - name: Run build
-        if: ${{ github.event_name != 'PullRequestEvent' }}
-        run: ./Build.ps1
-
-      - name: Run build and tests
-        if: ${{ github.event_name == 'PullRequestEvent' }}
-        run: ./Build.ps1 -RunTests $true
-
-      - name: Create releease
-        # if: ${{ (github.event_name == 'PushEvent') && (github.ref_name == 'master') }}
+      - name: Create GitHub releease
+        # if: ${{ (github.event_name == 'push') && (github.ref_name == 'master') }}
         uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
