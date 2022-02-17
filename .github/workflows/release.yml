@@ -1,36 +1,38 @@
-name: main
+name: Release
 
 on:
   push:
-    branches: [ dev ]
-  pull_request:
-    branches: [ dev ]
+    branches: [ dev, master ]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
 jobs:
-  build:
+  Build:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
       
+      - name: Run build
+        run: ./Build.ps1
+
       - name: Read version from csproj
         run: |
           $selectResult = Select-String -Path ".\src\Serilog.Sinks.MSSqlServer\Serilog.Sinks.MSSqlServer.csproj" -Pattern '<VersionPrefix>(.+)</VersionPrefix>'
-          echo ("VERSION=" + $selectResult.Matches[0].Groups[1].Value) >> $env:GITHUB_ENV
+          $versionMatch = $selectResult.Matches[0].Groups[1].Value
+          echo ("VERSION=" + $versionMatch) >> $env:GITHUB_ENV
+          echo "Found version $versionMatch"
 
-      - name: Run build script
-        run: ./Build.ps1
-          
-      - name: Create releease
+      - name: Create GitHub releease
+        # if: ${{ github.ref_name == 'master' }}
         uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           automatic_release_tag: "v${{ env.VERSION }}-test"
           draft: true
-          title: "Release ${{ env.VERSION }}-test"
+          title: "v${{ env.VERSION }}-test"
           files: |
-            \a\serilog-sinks-mssqlserver\serilog-sinks-mssqlserver\artifacts\Serilog.Sinks.MSSqlServer.5.7.0.nupkg
-            README.md
-            .\artifacts\Serilog.Sinks.MSSqlServer.5.7.0-dev-local.snupkg
+            artifacts/*.nupkg
+            artifacts/*.snupkg
+            
+      # TODO: upload to nuget.org 
