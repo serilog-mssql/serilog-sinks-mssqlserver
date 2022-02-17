@@ -24,18 +24,18 @@ jobs:
 
       - name: Print GitHub event
         run: |
-          echo "GitHub event is ${{ github.event }}"
+          echo "GitHub event is ${{ github.event.type }}"
 
       - name: Run build
-        if: ${{ github.event != 'PullRequestEvent' }}
+        if: ${{ github.event.type != 'PullRequestEvent' }}
         run: ./Build.ps1
 
       - name: Run build and tests
-        if: ${{ github.event == 'PullRequestEvent' }}
+        if: ${{ github.event.type == 'PullRequestEvent' }}
         run: ./Build.ps1 -RunTests $true
 
       - name: Create releease
-        # if: ${{ (github.event == 'PushEvent') && (github.ref == 'master') }}
+        # if: ${{ (github.event.type == 'PushEvent') && (github.ref == 'ref/heads/master') }}
         uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
