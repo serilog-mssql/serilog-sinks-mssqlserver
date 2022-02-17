@@ -22,9 +22,18 @@ jobs:
           echo ("VERSION=" + $versionMatch) >> $env:GITHUB_ENV
           echo "Found version $versionMatch"
 
-      - name: Run build script
+      - name: Print GitHub event
+        run: |
+          echo "GitHub event is ${{ github.event }}"
+
+      - name: Run build
+        if: ${{ github.event != PullRequestEvent }}
         run: ./Build.ps1
-          
+
+      - name: Run build and tests
+        if: ${{ github.event == PullRequestEvent }}
+        run: ./Build.ps1 -RunTests $true
+
       - name: Create releease
         uses: "marvinpinto/action-automatic-releases@latest"
         with:
@@ -33,7 +42,5 @@ jobs:
           draft: true
           title: "v${{ env.VERSION }}-test"
           files: |
-            README.md
-            D:\a\serilog-sinks-mssqlserver\serilog-sinks-mssqlserver\artifacts\Serilog.Sinks.MSSqlServer.5.7.0.nupkg
-            artifacts\Serilog.Sinks.MSSqlServer.${{ env.VERSION }}.snupkg
-            **/*.snupkg
+            artifacts/*.nupkg
+            artifacts/*.snupkg
