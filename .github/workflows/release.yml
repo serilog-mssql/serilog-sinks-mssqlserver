@@ -14,7 +14,7 @@ jobs:
       - uses: actions/checkout@v2
       
       - name: Run build
-        run: ./Build.ps1
+        run: ./Build.ps1 -SkipTests $true
 
       - name: Read version from csproj
         run: |
@@ -24,15 +24,15 @@ jobs:
           echo "Found version $versionMatch"
 
       - name: Create GitHub releease
-        # if: ${{ github.ref_name == 'master' }}
+        if: ${{ github.ref_name == 'master' }}
         uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: "v${{ env.VERSION }}-test"
-          draft: true
-          title: "v${{ env.VERSION }}-test"
+          automatic_release_tag: "v${{ env.VERSION }}"
+          title: "v${{ env.VERSION }}"
           files: |
             artifacts/*.nupkg
             artifacts/*.snupkg
             
-      # TODO: upload to nuget.org 
+      - name: Publish to nuget.org
+        run: nuget push artifacts\*.nupkg -Source 'https://api.nuget.org/v3/index.json' -ApiKey ${{secrets.NUGET_API_KEY}}

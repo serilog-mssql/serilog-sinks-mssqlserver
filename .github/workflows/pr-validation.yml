@@ -14,4 +14,4 @@ jobs:
       - uses: actions/checkout@v2
       
       - name: Run build and tests
-        run: ./Build.ps1 -RunTests $true
+        run: ./Build.ps1
