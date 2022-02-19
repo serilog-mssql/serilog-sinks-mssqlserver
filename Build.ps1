@@ -2,7 +2,7 @@
 param (
     [Parameter(Mandatory = $false)]
     [System.Boolean]
-    $RunTests = $false
+    $SkipTests = $false
 )
 
 echo "build: Build started"
@@ -37,7 +37,7 @@ foreach ($src in ls src/*) {
     Pop-Location
 }
 
-if ($RunTests -eq $true) {
+if ($SkipTests -eq $false) {
     foreach ($test in ls test/*.PerformanceTests) {
         Push-Location $test
 
