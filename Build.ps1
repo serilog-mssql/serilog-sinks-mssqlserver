@@ -17,7 +17,7 @@ if(Test-Path .\artifacts) {
 & dotnet restore --no-cache
 
 $branch = @{ $true = $env:GITHUB_REF_NAME; $false = $(git symbolic-ref --short -q HEAD) }[$env:GITHUB_REF_NAME -ne $NULL];
-$revision = @{ $true = "{0:00000}" -f [convert]::ToInt32("0" + $env:GITHUB_RUN_NUMBER, 10); $false = "local" }[$env:GITHUB_RUN_NUMBER -ne $NULL];
+$revision = @{ $true = "{0:00000}" -f [convert]::ToInt32("0" + $env:GITHUB_RUN_NUMBER, 10); $false = "local" }[($env:GITHUB_RUN_NUMBER -ne $NULL) -or ($branch -ne "master" -and $branch -ne "dev")];
 $suffix = @{ $true = ""; $false = "$($branch.Substring(0, [math]::Min(10,$branch.Length)))-$revision"}[$branch -eq "master" -and $revision -ne "local"]
 
 echo "build: Version suffix is $suffix"
