@@ -738,7 +738,7 @@ When you exit an application running in debug mode under Visual Studio, normal s
 
 ### Try a `dev` package
 
-If you're reading about a feature that doesn't seem to work, check whether you're reading the docs for the `master` branch or the `dev` branch -- most Serilog repositories are configured to use the `dev` branch by default. If you see something interesting only described by the `dev` branch documentation, you'll have to reference a `dev`-versioned package. The repository automatically generates a new `dev` package whenever code-related changes are merged.
+If you're reading about a feature that doesn't seem to work, check whether you're reading the docs for the `main` branch or the `dev` branch -- most Serilog repositories are configured to use the `dev` branch by default. If you see something interesting only described by the `dev` branch documentation, you'll have to reference a `dev`-versioned package. The repository automatically generates a new `dev` package whenever code-related changes are merged.
 
 ### Are you really using this sink?
 
