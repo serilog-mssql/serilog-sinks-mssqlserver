@@ -36,5 +36,5 @@ jobs:
             
       - name: Publish to nuget.org
         env:
-          NUGET_API_KEY: ${{ secrets.GITHUB_TOKEN }}
-        run: nuget push artifacts\*.nupkg -Source 'https://api.nuget.org/v3/index.json' -ApiKey $NUGET_API_KEY
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        run: nuget push artifacts\*.nupkg -Source 'https://api.nuget.org/v3/index.json' -ApiKey ${{ env.NUGET_API_KEY }}
