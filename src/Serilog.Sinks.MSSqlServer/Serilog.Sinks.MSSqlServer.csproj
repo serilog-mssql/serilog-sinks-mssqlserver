@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Description>A Serilog sink that writes events to Microsoft SQL Server</Description>
-    <VersionPrefix>5.7.0</VersionPrefix>
+    <VersionPrefix>5.7.1</VersionPrefix>
     <Authors>Michiel van Oudheusden;Christian Kadluba;Serilog Contributors</Authors>
     <TargetFrameworks>netstandard2.0;net452;net462;net472;netcoreapp3.1</TargetFrameworks>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -14,9 +14,9 @@
     <PackageId>Serilog.Sinks.MSSqlServer</PackageId>
     <PackageTags>serilog;sinks;mssqlserver</PackageTags>
     <PackageIcon>serilog-sink-nuget.png</PackageIcon>
-    <PackageProjectUrl>https://github.com/serilog/serilog-sinks-mssqlserver</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/serilog-mssql/serilog-sinks-mssqlserver</PackageProjectUrl>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <RepositoryUrl>https://github.com/serilog/serilog-sinks-mssqlserver</RepositoryUrl>
+    <RepositoryUrl>https://github.com/serilog-mssql/serilog-sinks-mssqlserver</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>

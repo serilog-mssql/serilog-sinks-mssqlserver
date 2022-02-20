@@ -1,4 +1,4 @@
-# Serilog.Sinks.MSSqlServer [![Build status](https://ci.appveyor.com/api/projects/status/3btbux1hbgyugind/branch/master?svg=true)](https://ci.appveyor.com/project/serilog/serilog-sinks-mssqlserver/branch/master) [![NuGet](https://img.shields.io/nuget/v/Serilog.Sinks.MSSqlServer.svg)](https://nuget.org/packages/Serilog.Sinks.MSSqlServer)
+# Serilog.Sinks.MSSqlServer ![Build & Test](https://github.com/serilog-mssql/serilog-sinks-mssqlserver/actions/workflows/pr-validation.yml/badge.svg) [![NuGet](https://img.shields.io/nuget/v/Serilog.Sinks.MSSqlServer.svg)](https://nuget.org/packages/Serilog.Sinks.MSSqlServer)
 
 A Serilog sink that writes events to Microsoft SQL Server. This sink will write the log event data to a table and can optionally also store the properties inside an XML or JSON column so they can be queried. Important properties can also be written to their own separate columns.
 
@@ -147,7 +147,7 @@ var log = new LoggerConfiguration()
 
 ### Code + _System.Configuration_
 
-Projects can load `MSSqlServerSinkOptions` and `ColumnOptions` objects from an XML configuration file such as `app.config` or `web.config`. The sink configuration method automatically checks `ConfigurationManager`, so there is no code to show, and no additional packages are required. See the [External Configuration Syntax](#external-configuration-syntax) topic for details. 
+Projects can load `MSSqlServerSinkOptions` and `ColumnOptions` objects from an XML configuration file such as `app.config` or `web.config`. The sink configuration method automatically checks `ConfigurationManager`, so there is no code to show, and no additional packages are required. See the [External Configuration Syntax](#external-configuration-syntax) topic for details.
 
 ### External using _Serilog.Settings.Configuration_
 
@@ -194,7 +194,7 @@ CREATE TABLE [Logs] (
    [Exception] nvarchar(max) NULL,
    [Properties] nvarchar(max) NULL
 
-   CONSTRAINT [PK_Logs] PRIMARY KEY CLUSTERED ([Id] ASC) 
+   CONSTRAINT [PK_Logs] PRIMARY KEY CLUSTERED ([Id] ASC)
 );
 ```
 
@@ -263,17 +263,17 @@ A flag specifiying if the log events table should be created if it does not exis
 
 ### BatchPostingLimit
 
-Specifies a maximum number of log events that the non-audit sink writes per batch. The default is 50.  
+Specifies a maximum number of log events that the non-audit sink writes per batch. The default is 50.
 This setting is not used by the audit sink as it writes each event immediately and not in a batched manner.
 
 ### BatchPeriod
 
-Specifies the interval in which the non-audit sink writes a batch of log events to the database. It defaults to 5 seconds.  
+Specifies the interval in which the non-audit sink writes a batch of log events to the database. It defaults to 5 seconds.
 This setting is not used by the audit sink as it writes each event immediately and not in a batched manner.
 
 ### EagerlyEmitFirstEvent
 
-A Flag to eagerly write a batch to the database containing the first received event regardless of `BatchPostingLimit` or `BatchPeriod`. It defaults to `true`.  
+A Flag to eagerly write a batch to the database containing the first received event regardless of `BatchPostingLimit` or `BatchPeriod`. It defaults to `true`.
 This setting is not used by the audit sink as it writes each event immediately and not in a batched manner.
 
 ### UseAzureManagedIdentity
@@ -537,13 +537,13 @@ In this example, when a log event contains any of the properties `UserName`, `Us
 
 Unlike previous versions of the sink, Standard Column names are not reserved. If you remove the `Id` Standard Column from the `ColumnOptions.Store` list, you are free to create a new custom column called `Id` which the sink will treat like any other custom column fully under your control.
 
-Note the use of the `SqlDbType` enumerations for specifying `DataType`. Unlike previous versions of the sink, .NET `System` data types and `DataColumn` objects are no longer used for custom column definition. 
+Note the use of the `SqlDbType` enumerations for specifying `DataType`. Unlike previous versions of the sink, .NET `System` data types and `DataColumn` objects are no longer used for custom column definition.
 
 ### Excluding redundant data
 
-By default, properties matching a custom column will still be included in the data saved to the XML `Properties` or JSON `LogEvent` column. This is consistent with the idea behind structured logging, and makes it easier to convert the log data to another document-data storage platform later, if desired. 
+By default, properties matching a custom column will still be included in the data saved to the XML `Properties` or JSON `LogEvent` column. This is consistent with the idea behind structured logging, and makes it easier to convert the log data to another document-data storage platform later, if desired.
 
-However, the properties being saved in their own columns can be excluded from these catch-all columns.  Use the `columnOptions.Properties.ExcludeAdditionalProperties` parameter to exclude the redundant properties from the `Properties` XML column, or `columnOptions.LogEvent.ExcludeAdditionalProperties` if you're using the JSON `LogEvent` column. 
+However, the properties being saved in their own columns can be excluded from these catch-all columns.  Use the `columnOptions.Properties.ExcludeAdditionalProperties` parameter to exclude the redundant properties from the `Properties` XML column, or `columnOptions.LogEvent.ExcludeAdditionalProperties` if you're using the JSON `LogEvent` column.
 
 Standard Columns are always excluded from the XML `Properties` column  but Standard Columns are included in the JSON data for backwards-compatibility reasons. They can be excluded from the JSON `LogEvent` column with `columnOptions.LogEvent.ExcludeStandardColumns`.
 
@@ -551,7 +551,7 @@ Standard Columns are always excluded from the XML `Properties` column  but Stand
 
 Projects targeting frameworks which are compatible with _System.Configuration_ automatically have support for XML-based configuration (either `app.config` or `web.config`) of a `MSSqlServerSinkOptions` parameters and a `ColumnOptions` table definition, and the _Serilog.Settings.AppSettings_ package adds XML-based configuration of other direct sink arguments (like `customFormatter` or `restrictedToMinimumLevel`).
 
-Projects targeting frameworks which are compatible with _Microsoft.Extensions.Configuration_ can apply configuration-driven sink setup and `MSSqlServerSinkOptions` or `ColumnOptions` settings using the _Serilog.Settings.Configuration_ package or by supplying the appropriate arguments through code. 
+Projects targeting frameworks which are compatible with _Microsoft.Extensions.Configuration_ can apply configuration-driven sink setup and `MSSqlServerSinkOptions` or `ColumnOptions` settings using the _Serilog.Settings.Configuration_ package or by supplying the appropriate arguments through code.
 
 All properties of the `MSSqlServerSinkOptions` class are configurable and almost all of the `ColumnOptions` class except the `Properties.PropertyFilter` predicate expression, and all elements and lists shown are optional. In most cases configuration key names match the class property names, but there are some exceptions. For example, because `PrimaryKey` is a `SqlColumn` object reference when configured through code, external configuration uses a `primaryKeyColumnName` setting to identify the primary key by name.
 
@@ -571,8 +571,8 @@ Keys and values are not case-sensitive. This is an example of configuring the si
     "Using":  ["Serilog.Sinks.MSSqlServer"],
     "MinimumLevel": "Debug",
     "WriteTo": [
-      { "Name": "MSSqlServer", 
-        "Args": { 
+      { "Name": "MSSqlServer",
+        "Args": {
             "connectionString": "NamedConnectionString",
             "sinkOptionsSection": {
                 "tableName": "Logs",
@@ -583,7 +583,7 @@ Keys and values are not case-sensitive. This is an example of configuring the si
             },
             "restrictedToMinimumLevel": "Warning",
             "columnOptionsSection": { . . . }
-        } 
+        }
       }
     ]
   }
@@ -612,15 +612,15 @@ As the name suggests, `columnOptionSection` is an entire configuration section i
     ],
     "id": { "nonClusteredIndex": true },
     "level": { "columnName": "Severity", "storeAsEnum": false },
-    "properties": { 
+    "properties": {
         "columnName": "Properties",
-        "excludeAdditionalProperties": true, 
+        "excludeAdditionalProperties": true,
         "dictionaryElementName": "dict",
         "itemElementName": "item",
-        "omitDictionaryContainerElement": false, 
-        "omitSequenceContainerElement": false, 
-        "omitStructureContainerElement": false, 
-        "omitElementIfEmpty": true, 
+        "omitDictionaryContainerElement": false,
+        "omitSequenceContainerElement": false,
+        "omitStructureContainerElement": false,
+        "omitElementIfEmpty": true,
         "propertyElementName": "prop",
         "rootElementName": "root",
         "sequenceElementName": "seq",
@@ -667,9 +667,9 @@ Keys and values are case-sensitive. Case must match **_exactly_** as shown below
     </RemoveStandardColumns>
     <Columns>
       <add ColumnName="EventType" DataType="int"/>
-      <add ColumnName="EnvironmentUserName" 
-           PropertyName="UserName" 
-           DataType="varchar" 
+      <add ColumnName="EnvironmentUserName"
+           PropertyName="UserName"
+           DataType="varchar"
            DataLength="50" />
       <add ColumnName="Release"
            DataType="varchar"
@@ -698,7 +698,7 @@ Keys and values are case-sensitive. Case must match **_exactly_** as shown below
                 StructureElementName="struct"
                 UsePropertyKeyAsElementName="false"/>
     <TimeStamp ConvertToUtc="true"/>
-  </MSSqlServerSettingsSection>      
+  </MSSqlServerSettingsSection>
 ```
 
 ### XML Sink (_Serilog.Settings.AppSettings_)
@@ -738,7 +738,7 @@ When you exit an application running in debug mode under Visual Studio, normal s
 
 ### Try a `dev` package
 
-If you're reading about a feature that doesn't seem to work, check whether you're reading the docs for the `master` branch or the `dev` branch -- most Serilog repositories are configured to use the `dev` branch by default. If you see something interesting only described by the `dev` branch documentation, you'll have to reference a `dev`-versioned package. The repository automatically generates a new `dev` package whenever code-related changes are merged.
+If you're reading about a feature that doesn't seem to work, check whether you're reading the docs for the `main` branch or the `dev` branch -- most Serilog repositories are configured to use the `dev` branch by default. If you see something interesting only described by the `dev` branch documentation, you'll have to reference a `dev`-versioned package. The repository automatically generates a new `dev` package whenever code-related changes are merged.
 
 ### Are you really using this sink?
 
@@ -746,7 +746,7 @@ Please check your NuGet references and confirm you are specifically referencing 
 
 ### .NET Framework apps must reference Microsoft.Data.SqlClient
 
-If you are using the sink in a .NET Framework app, make sure to add a nuget package reference to Microsoft.Data.SqlClient in your app project. This is necessary due to a bug in SqlClient which can lead to exceptions about missing Microsoft assemblies. Details can be found in [issue 283](https://github.com/serilog/serilog-sinks-mssqlserver/issues/283#issuecomment-664397489) and [issue 208](https://github.com/serilog/serilog-sinks-mssqlserver/issues/208#issuecomment-664503566).
+If you are using the sink in a .NET Framework app, make sure to add a nuget package reference to Microsoft.Data.SqlClient in your app project. This is necessary due to a bug in SqlClient which can lead to exceptions about missing Microsoft assemblies. Details can be found in [issue 283](https://github.com/serilog-mssql/serilog-sinks-mssqlserver/issues/283#issuecomment-664397489) and [issue 208](https://github.com/serilog-mssql/serilog-sinks-mssqlserver/issues/208#issuecomment-664503566).
 
 ## Querying Property Data
 
@@ -804,6 +804,6 @@ Feature | Notes
 :--- | :---
 `AdditionalDataColumns` | Use the `AdditionalColumns` collection instead. Configuring the sink no longer relies upon .NET `DataColumn` objects or .NET `System` types.
 `Id.BigInt` | Use `Id.DataType = SqlDb.BigInt` instead. (The `BigInt` property was only available in dev packages).
-`Binary` and `VarBinary` | Due to the way Serilog represents property data internally, it isn't possible for the sink to access property data as a byte array, so the sink can't write to these column types. 
+`Binary` and `VarBinary` | Due to the way Serilog represents property data internally, it isn't possible for the sink to access property data as a byte array, so the sink can't write to these column types.
 
 Most deprecated features are still available, but they are marked with the `[Obsolete]` attribute (which results in a compiler warning in your project) and will be removed in a future release. You should switch to the replacement implementations as soon as possible. Where possible, internally these are converted to the replacement implementation so that they only exist at the configuration level.
