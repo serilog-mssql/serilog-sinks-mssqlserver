@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  Build:
+  build-and-release:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
@@ -23,7 +23,7 @@ jobs:
           echo ("VERSION=" + $versionMatch) >> $env:GITHUB_ENV
           echo "Found version $versionMatch"
 
-      - name: Create GitHub releease
+      - name: Create GitHub release
         if: ${{ github.ref_name == 'main' }}
         uses: "marvinpinto/action-automatic-releases@latest"
         with:
