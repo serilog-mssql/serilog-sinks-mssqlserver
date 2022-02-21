@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  Build:
+  build-and-test:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
