@@ -1,8 +1,8 @@
 [CmdletBinding()]
 param (
     [Parameter(Mandatory = $false)]
-    [System.Boolean]
-    $SkipTests = $false
+    [Switch]
+    $SkipTests
 )
 
 echo "build: Build started"
@@ -32,7 +32,7 @@ foreach ($src in ls src/*) {
     } else {
         & dotnet pack -c Release -o ..\..\artifacts
     }
-    if($LASTEXITCODE -ne 0) { exit 1 }    
+    if($LASTEXITCODE -ne 0) { exit 1 }
 
     Pop-Location
 }
