@@ -242,6 +242,7 @@ Basic settings of the sink are configured using the properties in a `MSSqlServer
 * `TableName`
 * `SchemaName`
 * `AutoCreateSqlTable`
+* `PreventEnlistInTransaction`
 * `BatchPostingLimit`
 * `BatchPeriod`
 * `EagerlyEmitFirstEvent`
@@ -260,6 +261,15 @@ An optional parameter specifiying the database schema where the log events table
 ### AutoCreateSqlTable
 
 A flag specifiying if the log events table should be created if it does not exist. It defaults to `false`.
+
+### PreventEnlistInTransaction
+
+A flag to prevent logging SQL commands from taking part in ambient transactions. It defaults to `true`.
+Logging operations could be affected from surrounding `TransactionScope´s in the code, leading to log data
+being removed on a transation rollback. This is by default prevented by the sink adding `Enlist=false` to
+the `ConnectionString` that is passed. This option can be used to change this behaviour so that no `Enlist=false`
+is added and the passed `ConnectionString` is used as is and logging commands might be part of transations.
+Only change this option to `false` if you really know what you are doing!
 
 ### BatchPostingLimit
 
@@ -280,7 +290,7 @@ This setting is not used by the audit sink as it writes each event immediately a
 
 A flag specifiying to use Azure Managed Identities for authenticating with an Azure SQL server. It defaults to `false`. If enabled the property `AzureServiceTokenProviderResource` must be set as well.
 
-**IMPORTANT:** Azure Managed Identities is only supported for the target frameworks .NET Framework 4.7.2+ and .NET Core 2.2+. Setting this to `true` when targeting a different framework results in an exception.
+**IMPORTANT:** Azure Managed Identities is only supported for the target frameworks .NET Framework 4.7.2+ and .NET (Core) 2.2+. Setting this to `true` when targeting a different framework results in an exception.
 
 See [Azure AD-managed identities for Azure resources documentation](https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/) for details on how to configure and use Azure Managed Identitites.
 

@@ -15,7 +15,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Factories
             var sut = new MSSqlServerSinkFactory();
 
             // Act
-            var result = sut.Create("TestConnectionString", sinkOptions, null, new MSSqlServer.ColumnOptions(), null);
+            var result = sut.Create(DatabaseFixture.LogEventsConnectionString, sinkOptions, null, new MSSqlServer.ColumnOptions(), null);
 
             // Assert
             Assert.IsType<MSSqlServerSink>(result);
