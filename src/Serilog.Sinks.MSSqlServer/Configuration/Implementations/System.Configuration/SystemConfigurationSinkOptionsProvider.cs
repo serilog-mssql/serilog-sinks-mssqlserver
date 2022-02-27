@@ -21,6 +21,8 @@ namespace Serilog.Sinks.MSSqlServer.Configuration
             SetProperty.IfProvided<string>(config.SchemaName, nameof(config.SchemaName.Value), value => sinkOptions.SchemaName = value);
             SetProperty.IfProvided<bool>(config.AutoCreateSqlTable, nameof(config.AutoCreateSqlTable.Value),
                 value => sinkOptions.AutoCreateSqlTable = value);
+            SetProperty.IfProvided<bool>(config.PreventEnlistInTransaction, nameof(config.PreventEnlistInTransaction.Value),
+                value => sinkOptions.PreventEnlistInTransaction = value);
         }
 
         private static void ReadBatchSettings(MSSqlServerConfigurationSection config, MSSqlServerSinkOptions sinkOptions)
