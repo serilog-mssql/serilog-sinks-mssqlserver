@@ -304,9 +304,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                     new MSSqlServerSinkOptions
                     {
                         TableName = DatabaseFixture.LogTableName,
-                        AutoCreateSqlTable = true,
-                        EagerlyEmitFirstEvent = false,
-                        BatchPeriod = TimeSpan.FromSeconds(30),
+                        AutoCreateSqlTable = true
                     }
                 )
                 .CreateLogger();
@@ -338,9 +336,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                     {
                         TableName = DatabaseFixture.LogTableName,
                         AutoCreateSqlTable = true,
-                        PreventEnlistInTransaction = false,
-                        EagerlyEmitFirstEvent = false,
-                        BatchPeriod = TimeSpan.FromSeconds(30),
+                        PreventEnlistInTransaction = false
                     }
                 )
                 .CreateLogger();
