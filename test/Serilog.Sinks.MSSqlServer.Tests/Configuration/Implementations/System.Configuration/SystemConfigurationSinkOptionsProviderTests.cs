@@ -23,5 +23,21 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.System.C
             // Assert
             Assert.True(sinkOptions.EagerlyEmitFirstEvent);
         }
+
+        [Fact]
+        public void ConfigureSinkOptionsReadsPreventEnlistInTransaction()
+        {
+            // Arrange
+            var configSection = new MSSqlServerConfigurationSection();
+            configSection.PreventEnlistInTransaction.Value = "false";
+            var sinkOptions = new MSSqlServerSinkOptions { PreventEnlistInTransaction = true };
+            var sut = new SystemConfigurationSinkOptionsProvider();
+
+            // Act
+            sut.ConfigureSinkOptions(configSection, sinkOptions);
+
+            // Assert
+            Assert.False(sinkOptions.PreventEnlistInTransaction);
+        }
     }
 }

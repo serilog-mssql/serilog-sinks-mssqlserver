@@ -77,6 +77,20 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
         }
 
         [Fact]
+        public void ConfigureSinkOptionsSetsPreventEnlistInTransaction()
+        {
+            // Arrange
+            _configurationSectionMock.Setup(s => s["preventEnlistInTransaction"]).Returns("false");
+            var sut = new MicrosoftExtensionsSinkOptionsProvider();
+
+            // Act
+            var result = sut.ConfigureSinkOptions(new MSSqlServerSinkOptions(), _configurationSectionMock.Object);
+
+            // Assert
+            Assert.False(result.PreventEnlistInTransaction);
+        }
+
+        [Fact]
         public void ConfigureSinkOptionsSetsBatchPostingLimit()
         {
             // Arrange

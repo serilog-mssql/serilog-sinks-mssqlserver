@@ -157,6 +157,12 @@ namespace Serilog.Configuration
             get => (ValueConfigElement)base[nameof(AutoCreateSqlTable)];
         }
 
+        [ConfigurationProperty(nameof(PreventEnlistInTransaction))]
+        public ValueConfigElement PreventEnlistInTransaction
+        {
+            get => (ValueConfigElement)base[nameof(PreventEnlistInTransaction)];
+        }
+
         [ConfigurationProperty(nameof(BatchPostingLimit))]
         public ValueConfigElement BatchPostingLimit
         {
