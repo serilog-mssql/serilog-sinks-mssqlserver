@@ -1,6 +1,7 @@
 ﻿using System;
 using Moq;
 using Serilog.Sinks.MSSqlServer.Platform;
+using Serilog.Sinks.MSSqlServer.Platform.SqlClient;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
 
@@ -9,57 +10,89 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Platform
     [Trait(TestCategory.TraitName, TestCategory.Unit)]
     public class SqlConnectionFactoryTests
     {
+        private readonly Mock<ISqlConnectionStringBuilderWrapper> _sqlConnectionStringBuilderWrapperMock;
         private readonly Mock<IAzureManagedServiceAuthenticator> _azureManagedServiceAuthenticatorMock;
 
         public SqlConnectionFactoryTests()
         {
+            _sqlConnectionStringBuilderWrapperMock = new Mock<ISqlConnectionStringBuilderWrapper>();
             _azureManagedServiceAuthenticatorMock = new Mock<IAzureManagedServiceAuthenticator>();
+            _sqlConnectionStringBuilderWrapperMock.SetupAllProperties();
         }
 
         [Fact]
         public void IntializeThrowsIfConnectionStringIsNull()
         {
-            Assert.Throws<ArgumentNullException>(() => new SqlConnectionFactory(null, false, _azureManagedServiceAuthenticatorMock.Object));
+            Assert.Throws<ArgumentNullException>(() => new SqlConnectionFactory(null, true, false,
+                _sqlConnectionStringBuilderWrapperMock.Object, _azureManagedServiceAuthenticatorMock.Object));
         }
 
         [Fact]
         public void IntializeThrowsIfConnectionStringIsEmpty()
         {
-            Assert.Throws<ArgumentNullException>(() => new SqlConnectionFactory(string.Empty, false, _azureManagedServiceAuthenticatorMock.Object));
+            Assert.Throws<ArgumentNullException>(() => new SqlConnectionFactory(string.Empty, true, false,
+                _sqlConnectionStringBuilderWrapperMock.Object, _azureManagedServiceAuthenticatorMock.Object));
         }
 
         [Fact]
         public void IntializeThrowsIfConnectionStringIsWhitespace()
         {
-            Assert.Throws<ArgumentNullException>(() => new SqlConnectionFactory("    ", false, _azureManagedServiceAuthenticatorMock.Object));
+            Assert.Throws<ArgumentNullException>(() => new SqlConnectionFactory("    ", true, false,
+                _sqlConnectionStringBuilderWrapperMock.Object, _azureManagedServiceAuthenticatorMock.Object));
+        }
+
+        [Fact]
+        public void IntializeThrowsIfSqlConnectionStringBuilderWrapperIsNull()
+        {
+            Assert.Throws<ArgumentNullException>(() => new SqlConnectionFactory(
+                DatabaseFixture.LogEventsConnectionString, true, false, null, _azureManagedServiceAuthenticatorMock.Object));
         }
 
         [Fact]
         public void IntializeThrowsIfAzureManagedServiceAuthenticatorIsNull()
         {
             Assert.Throws<ArgumentNullException>(() => new SqlConnectionFactory(
-                DatabaseFixture.LogEventsConnectionString, false, null));
+                DatabaseFixture.LogEventsConnectionString, true, false, _sqlConnectionStringBuilderWrapperMock.Object, null));
         }
 
         [Fact]
-        public void CreatesSqlConnectionWithSpecifiedConnectionString()
+        public void SetsEnlistOnConnectionStringIfPreventEnlistTransactionTrue()
         {
             // Arrange
-            var sut = new SqlConnectionFactory(DatabaseFixture.LogEventsConnectionString, false, _azureManagedServiceAuthenticatorMock.Object);
+            var sut = new SqlConnectionFactory(DatabaseFixture.LogEventsConnectionString, true, false,
+                _sqlConnectionStringBuilderWrapperMock.Object, _azureManagedServiceAuthenticatorMock.Object);
 
             // Act
             using (var connection = sut.Create())
-            {
-                // Assert
-                Assert.Equal(DatabaseFixture.LogEventsConnectionString, connection.ConnectionString);
-            }
+            { }
+
+            // Assert
+            _sqlConnectionStringBuilderWrapperMock.VerifySet(c => c.ConnectionString = DatabaseFixture.LogEventsConnectionString);
+            _sqlConnectionStringBuilderWrapperMock.VerifySet(c => c.Enlist = false);
+        }
+
+        [Fact]
+        public void DoesNotSetEnlistOnConnectionStringIfPreventEnlistTransactionFalse()
+        {
+            // Arrange
+            var sut = new SqlConnectionFactory(DatabaseFixture.LogEventsConnectionString, false, false,
+                _sqlConnectionStringBuilderWrapperMock.Object, _azureManagedServiceAuthenticatorMock.Object);
+
+            // Act
+            using (var connection = sut.Create())
+            { }
+
+            // Assert
+            _sqlConnectionStringBuilderWrapperMock.VerifySet(c => c.ConnectionString = DatabaseFixture.LogEventsConnectionString);
+            _sqlConnectionStringBuilderWrapperMock.VerifySet(c => c.Enlist = false, Times.Never);
         }
 
         [Fact]
         public void CreateWithUseAzureManagedIdentitiesTrueCallsAzureManagedServiceAuthenticator()
         {
             // Arrange
-            var sut = new SqlConnectionFactory(DatabaseFixture.LogEventsConnectionString, true, _azureManagedServiceAuthenticatorMock.Object);
+            var sut = new SqlConnectionFactory(DatabaseFixture.LogEventsConnectionString, true, true,
+                _sqlConnectionStringBuilderWrapperMock.Object, _azureManagedServiceAuthenticatorMock.Object);
 
             // Act
             using (var connection = sut.Create())
@@ -74,7 +107,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Platform
         public void CreateWithUseAzureManagedIdentitiesFalseDoesNotCallAzureManagedServiceAuthenticator()
         {
             // Arrange
-            var sut = new SqlConnectionFactory(DatabaseFixture.LogEventsConnectionString, false, _azureManagedServiceAuthenticatorMock.Object);
+            var sut = new SqlConnectionFactory(DatabaseFixture.LogEventsConnectionString, true, false,
+                _sqlConnectionStringBuilderWrapperMock.Object, _azureManagedServiceAuthenticatorMock.Object);
 
             // Act
             using (var connection = sut.Create())

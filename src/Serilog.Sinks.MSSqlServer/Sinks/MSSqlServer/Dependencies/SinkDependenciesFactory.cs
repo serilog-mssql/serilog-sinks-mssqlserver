@@ -2,6 +2,7 @@
 using Serilog.Formatting;
 using Serilog.Sinks.MSSqlServer.Output;
 using Serilog.Sinks.MSSqlServer.Platform;
+using Serilog.Sinks.MSSqlServer.Platform.SqlClient;
 
 namespace Serilog.Sinks.MSSqlServer.Dependencies
 {
@@ -19,7 +20,9 @@ namespace Serilog.Sinks.MSSqlServer.Dependencies
 
             var sqlConnectionFactory =
                 new SqlConnectionFactory(connectionString,
+                    sinkOptions?.PreventEnlistInTransaction ?? true,
                     sinkOptions?.UseAzureManagedIdentity ?? default,
+                    new SqlConnectionStringBuilderWrapper(),
                     new AzureManagedServiceAuthenticator(
                         sinkOptions?.UseAzureManagedIdentity ?? default,
                         sinkOptions.AzureServiceTokenProviderResource,

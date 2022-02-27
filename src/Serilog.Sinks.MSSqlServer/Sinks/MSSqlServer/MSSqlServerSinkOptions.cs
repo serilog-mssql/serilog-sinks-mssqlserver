@@ -13,6 +13,7 @@ namespace Serilog.Sinks.MSSqlServer
         public MSSqlServerSinkOptions()
         {
             SchemaName = MSSqlServerSink.DefaultSchemaName;
+            PreventEnlistInTransaction = true;
             BatchPostingLimit = MSSqlServerSink.DefaultBatchPostingLimit;
             BatchPeriod = MSSqlServerSink.DefaultPeriod;
             EagerlyEmitFirstEvent = true;
@@ -46,6 +47,11 @@ namespace Serilog.Sinks.MSSqlServer
         /// Flag to automatically create the log events table if it does not exist (default: false)
         /// </summary>
         public bool AutoCreateSqlTable { get; set; }
+
+        /// <summary>
+        /// Flag to prevent logging SQL commands from taking part in ambient transactions (default: true)
+        /// </summary>
+        public bool PreventEnlistInTransaction { get; set; }
 
         /// <summary>
         /// Limits how many log events are written to the database per batch (default: 50)
