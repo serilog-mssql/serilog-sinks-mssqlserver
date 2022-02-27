@@ -8,7 +8,7 @@ using Xunit;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Serilog.Sinks.MSSqlServer.Platform.SqlClient;
 
-namespace Serilog.Sinks.MSSqlServer.Tests.Sinks.MSSqlServer.Platform.SqlClient
+namespace Serilog.Sinks.MSSqlServer.Tests.Platform.SqlClient
 {
     [Trait(TestCategory.TraitName, TestCategory.Unit)]
     public class SqlCommandWrapperTests
