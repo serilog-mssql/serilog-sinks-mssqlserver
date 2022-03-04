@@ -20,7 +20,7 @@ namespace Serilog.Sinks.MSSqlServer.Dependencies
 
             var sqlConnectionFactory =
                 new SqlConnectionFactory(connectionString,
-                    sinkOptions?.PreventEnlistInTransaction ?? true,
+                    sinkOptions?.EnlistInTransaction ?? default,
                     sinkOptions?.UseAzureManagedIdentity ?? default,
                     new SqlConnectionStringBuilderWrapper(),
                     new AzureManagedServiceAuthenticator(
