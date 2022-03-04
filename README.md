@@ -242,7 +242,7 @@ Basic settings of the sink are configured using the properties in a `MSSqlServer
 * `TableName`
 * `SchemaName`
 * `AutoCreateSqlTable`
-* `PreventEnlistInTransaction`
+* `EnlistInTransaction`
 * `BatchPostingLimit`
 * `BatchPeriod`
 * `EagerlyEmitFirstEvent`
@@ -262,14 +262,14 @@ An optional parameter specifiying the database schema where the log events table
 
 A flag specifiying if the log events table should be created if it does not exist. It defaults to `false`.
 
-### PreventEnlistInTransaction
+### EnlistInTransaction
 
-A flag to prevent logging SQL commands from taking part in ambient transactions. It defaults to `true`.
+A flag to make logging SQL commands take part in ambient transactions. It defaults to `false`.
 Logging operations could be affected from surrounding `TransactionScope´s in the code, leading to log data
-being removed on a transation rollback. This is by default prevented by the sink adding `Enlist=false` to
-the `ConnectionString` that is passed. This option can be used to change this behaviour so that no `Enlist=false`
-is added and the passed `ConnectionString` is used as is and logging commands might be part of transations.
-Only change this option to `false` if you really know what you are doing!
+being removed on a transaction rollback. This is by default prevented by the sink adding `Enlist=false` to
+the `ConnectionString` that is passed. This option can be used to change this behavior so that `Enlist=true`
+is added instead (which is the default for SQL connections) and logging commands might be part of transactions.
+Only change this option to `true` if you have a good reason and really know what you are doing!
 
 ### BatchPostingLimit
 
