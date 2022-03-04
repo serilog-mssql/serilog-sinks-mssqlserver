@@ -56,10 +56,10 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Platform
         }
 
         [Fact]
-        public void SetsEnlistOnConnectionStringIfPreventEnlistTransactionTrue()
+        public void SetsEnlistFalseOnConnectionStringIfEnlistTransactionFalse()
         {
             // Arrange
-            var sut = new SqlConnectionFactory(DatabaseFixture.LogEventsConnectionString, true, false,
+            var sut = new SqlConnectionFactory(DatabaseFixture.LogEventsConnectionString, false, false,
                 _sqlConnectionStringBuilderWrapperMock.Object, _azureManagedServiceAuthenticatorMock.Object);
 
             // Act
@@ -72,10 +72,10 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Platform
         }
 
         [Fact]
-        public void DoesNotSetEnlistOnConnectionStringIfPreventEnlistTransactionFalse()
+        public void SetsEnlistTrueOnConnectionStringIfEnlistTransactionTrue()
         {
             // Arrange
-            var sut = new SqlConnectionFactory(DatabaseFixture.LogEventsConnectionString, false, false,
+            var sut = new SqlConnectionFactory(DatabaseFixture.LogEventsConnectionString, true, false,
                 _sqlConnectionStringBuilderWrapperMock.Object, _azureManagedServiceAuthenticatorMock.Object);
 
             // Act
@@ -84,7 +84,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Platform
 
             // Assert
             _sqlConnectionStringBuilderWrapperMock.VerifySet(c => c.ConnectionString = DatabaseFixture.LogEventsConnectionString);
-            _sqlConnectionStringBuilderWrapperMock.VerifySet(c => c.Enlist = false, Times.Never);
+            _sqlConnectionStringBuilderWrapperMock.VerifySet(c => c.Enlist = true);
         }
 
         [Fact]

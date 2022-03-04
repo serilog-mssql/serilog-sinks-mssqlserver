@@ -12,7 +12,7 @@ namespace Serilog.Sinks.MSSqlServer.Platform
 
         public SqlConnectionFactory(
             string connectionString,
-            bool preventEnlistInTransaction,
+            bool enlistInTransaction,
             bool useAzureManagedIdentity,
             ISqlConnectionStringBuilderWrapper sqlConnectionStringBuilderWrapper,
             IAzureManagedServiceAuthenticator azureManagedServiceAuthenticator)
@@ -27,12 +27,9 @@ namespace Serilog.Sinks.MSSqlServer.Platform
                 ?? throw new ArgumentNullException(nameof(azureManagedServiceAuthenticator));
 
             // Add 'Enlist=false', so that ambient transactions (TransactionScope) will not affect/rollback logging
-            // unless sink option PreventEnlistInTransaction is set to false.
+            // unless sink option EnlistInTransaction is set to true.
             _sqlConnectionStringBuilderWrapper.ConnectionString = connectionString;
-            if (preventEnlistInTransaction)
-            {
-                _sqlConnectionStringBuilderWrapper.Enlist = false;
-            }
+            _sqlConnectionStringBuilderWrapper.Enlist = enlistInTransaction;
             _connectionString = _sqlConnectionStringBuilderWrapper.ConnectionString;
 
             _useAzureManagedIdentity = useAzureManagedIdentity;
