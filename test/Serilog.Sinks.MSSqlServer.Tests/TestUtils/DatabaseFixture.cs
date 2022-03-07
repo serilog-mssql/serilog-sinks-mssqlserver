@@ -13,7 +13,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.TestUtils
     public sealed class DatabaseFixture : IDisposable
     {
 
-        private const string _masterConnectionString = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=Master;Integrated Security=True";
+        private const string _masterConnectionString = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=Master;Integrated Security=True;Connect Timeout=120";
         private const string _createLogEventsDatabase = @"
 EXEC ('CREATE DATABASE [{0}] ON PRIMARY 
 	(NAME = [{0}], 

@@ -6,7 +6,6 @@ using Xunit.Abstractions;
 
 namespace Serilog.Sinks.MSSqlServer.Tests
 {
-    [Trait(TestCategory.TraitName, TestCategory.Isolated)]
     public class TransactionTests : DatabaseTestsBase
     {
         public TransactionTests(ITestOutputHelper output) : base(output)
