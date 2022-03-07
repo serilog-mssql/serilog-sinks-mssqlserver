@@ -54,18 +54,7 @@ if ($SkipTests -eq $false) {
 
         echo "build: Testing project in $test"
 
-        & dotnet test -c Release --filter "Category!=Isolated"
-        if($LASTEXITCODE -ne 0) { exit 3 }
-
-        Pop-Location
-    }
-
-    foreach ($test in ls test/*.Tests) {
-        Push-Location $test
-
-        echo "build: Running isolated tests in $test"
-
-        & dotnet test -c Release --filter "Category=Isolated"
+        & dotnet test -c Release
         if($LASTEXITCODE -ne 0) { exit 3 }
 
         Pop-Location
