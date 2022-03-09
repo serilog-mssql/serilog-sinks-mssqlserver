@@ -265,7 +265,7 @@ A flag specifiying if the log events table should be created if it does not exis
 ### EnlistInTransaction
 
 A flag to make logging SQL commands take part in ambient transactions. It defaults to `false`.
-Logging operations could be affected from surrounding `TransactionScope´s in the code, leading to log data
+Logging operations could be affected from surrounding `TransactionScopeï¿½s in the code, leading to log data
 being removed on a transaction rollback. This is by default prevented by the sink adding `Enlist=false` to
 the `ConnectionString` that is passed. This option can be used to change this behavior so that `Enlist=true`
 is added instead (which is the default for SQL connections) and logging commands might be part of transactions.
@@ -460,9 +460,13 @@ _BigInt data type:_ For very large log tables, if you absolutely require an iden
 
 This column stores the formatted output (property placeholders are replaced with property values). It defaults to `nvarchar(max)`. The `DataType` property can only be set to character-storage types.
 
+In case `DataLength` is set to a specific value different from -1 or 0, any message longer than that length will be effectively trimmed down to that size. Example: `DataLength` is set to 15 and the message is "this is a very long message" (without the quotes), the trimmed text stored in the database will be: "this is a ve..." (again without quotes).
+
 ### MessageTemplate
 
 This column stores the log event message with the property placeholders. It defaults to `nvarchar(max)`. The `DataType` property can only be set to character-storage types.
+
+In case `DataLength` is set to a specific value different from -1 or 0, any template text longer than that length will be effectively trimmed down to that size. Any trimming ignores all differences between the tokens in the template meaning that a template might get cut off in the middle of a property token. Example: `DataLength` is set to 20 and the message template is "a long {NumberOfCharacters} template text" (without the quotes), the final template stored in the database will be: "a long {NumberOfC..." (again without quotes).
 
 ### Level
 
