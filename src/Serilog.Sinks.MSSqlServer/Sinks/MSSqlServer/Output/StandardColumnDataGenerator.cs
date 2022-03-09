@@ -44,9 +44,9 @@ namespace Serilog.Sinks.MSSqlServer.Output
             switch (column)
             {
                 case StandardColumn.Message:
-                    return new KeyValuePair<string, object>(_columnOptions.Message.ColumnName, logEvent.RenderMessage(_formatProvider));
+                    return new KeyValuePair<string, object>(_columnOptions.Message.ColumnName, RenderLogMessage(logEvent));
                 case StandardColumn.MessageTemplate:
-                    return new KeyValuePair<string, object>(_columnOptions.MessageTemplate.ColumnName, logEvent.MessageTemplate.Text);
+                    return new KeyValuePair<string, object>(_columnOptions.MessageTemplate.ColumnName, TrimMessageTemplate(logEvent));
                 case StandardColumn.Level:
                     return new KeyValuePair<string, object>(_columnOptions.Level.ColumnName, _columnOptions.Level.StoreAsEnum ? (object)logEvent.Level : logEvent.Level.ToString());
                 case StandardColumn.TimeStamp:
@@ -60,6 +60,34 @@ namespace Serilog.Sinks.MSSqlServer.Output
                 default:
                     throw new ArgumentOutOfRangeException(nameof(column));
             }
+        }
+
+        private string RenderLogMessage(LogEvent logEvent)
+        {
+            var logMessage = logEvent.RenderMessage(_formatProvider);
+            var maxAllowedMessageLength = _columnOptions.Message.DataLength;
+
+            if (0 < maxAllowedMessageLength && logMessage.Length > maxAllowedMessageLength)
+            {
+                logMessage = logMessage.Substring(0, maxAllowedMessageLength - 3);
+                logMessage = $"{logMessage}...";
+            }
+
+            return logMessage;
+        }
+
+        private string TrimMessageTemplate(LogEvent logEvent)
+        {
+            var messageTemplate = logEvent.MessageTemplate.Text;
+            var maxAllowedMessageTemplateLength = _columnOptions.MessageTemplate.DataLength;
+
+            if (0 < maxAllowedMessageTemplateLength && messageTemplate.Length > maxAllowedMessageTemplateLength)
+            {
+                messageTemplate = messageTemplate.Substring(0, maxAllowedMessageTemplateLength - 3);
+                messageTemplate = $"{messageTemplate}...";
+            }
+
+            return messageTemplate;
         }
 
         private KeyValuePair<string, object> GetTimeStampStandardColumnNameAndValue(LogEvent logEvent)
