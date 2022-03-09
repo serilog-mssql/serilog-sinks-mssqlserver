@@ -64,6 +64,30 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Output
         }
 
         [Fact]
+        public void GetStandardColumnNameAndValueForMessageReturnsTrimmedSimpleTextMessageKeyValue()
+        {
+            // Arrange
+            const string messageText = "Test message";
+            var messageTextWithOverflow = $"{messageText} being too long";
+            var expectedMessageText = $"{messageText}...";
+            var messageFieldLength = expectedMessageText.Length;
+
+            var logEvent = new LogEvent(
+                new DateTimeOffset(2020, 1, 1, 0, 0, 0, 0, TimeSpan.Zero),
+                LogEventLevel.Debug, null, new MessageTemplate(new List<MessageTemplateToken>() { new TextToken(messageTextWithOverflow) }),
+                new List<LogEventProperty>());
+            var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions { Message = { DataLength = messageFieldLength } };
+            SetupSut(columnOptions);
+
+            // Act
+            var result = _sut.GetStandardColumnNameAndValue(StandardColumn.Message, logEvent);
+
+            // Assert
+            Assert.Equal("Message", result.Key);
+            Assert.Equal(expectedMessageText, result.Value);
+        }
+
+        [Fact]
         public void GetStandardColumnNameAndValueForMessageReturnsMessageKeyValueWithDefaultFormatting()
         {
             // Arrange
@@ -73,6 +97,33 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Output
                 LogEventLevel.Debug, null, new MessageTemplate(new List<MessageTemplateToken>() { new PropertyToken("NumberProperty", "{NumberProperty}") }),
                 new List<LogEventProperty> { new LogEventProperty("NumberProperty", new ScalarValue(2.4)) });
             SetupSut(new Serilog.Sinks.MSSqlServer.ColumnOptions(), CultureInfo.InvariantCulture);
+
+            // Act
+            var result = _sut.GetStandardColumnNameAndValue(StandardColumn.Message, logEvent);
+
+            // Assert
+            Assert.Equal("Message", result.Key);
+            Assert.Equal(expectedText, result.Value);
+        }
+
+        [Fact]
+        public void GetStandardColumnNameAndValueForMessageReturnsTrimmedMessageKeyValueWithDefaultFormatting()
+        {
+            // Arrange
+            const string expectedText = "2.4 seconds...";
+            var messageFieldLength = expectedText.Length;
+
+            var logEvent = new LogEvent(
+                new DateTimeOffset(2020, 1, 1, 0, 0, 0, 0, TimeSpan.Zero),
+                LogEventLevel.Debug, null, new MessageTemplate(new List<MessageTemplateToken>()
+                {
+                    new PropertyToken("NumberProperty", "{NumberProperty}"),
+                    new TextToken(" seconds duration")
+                }),
+                new List<LogEventProperty> { new LogEventProperty("NumberProperty", new ScalarValue(2.4)) });
+
+            var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions { Message = { DataLength = messageFieldLength } };
+            SetupSut(columnOptions, CultureInfo.InvariantCulture);
 
             // Act
             var result = _sut.GetStandardColumnNameAndValue(StandardColumn.Message, logEvent);
@@ -102,6 +153,33 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Output
         }
 
         [Fact]
+        public void GetStandardColumnNameAndValueForMessageReturnsTrimmedMessageKeyValueWithCustomFormatting()
+        {
+            // Arrange
+            const string expectedText = "2,4 seconds...";
+            var messageFieldLength = expectedText.Length;
+
+            var logEvent = new LogEvent(
+                new DateTimeOffset(2020, 1, 1, 0, 0, 0, 0, TimeSpan.Zero),
+                LogEventLevel.Debug, null, new MessageTemplate(new List<MessageTemplateToken>()
+                {
+                    new PropertyToken("NumberProperty", "{NumberProperty}"),
+                    new TextToken(" seconds duration")
+                }),
+                new List<LogEventProperty> { new LogEventProperty("NumberProperty", new ScalarValue(2.4)) });
+
+            var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions { Message = { DataLength = messageFieldLength } };
+            SetupSut(columnOptions, new CultureInfo("de-AT"));
+
+            // Act
+            var result = _sut.GetStandardColumnNameAndValue(StandardColumn.Message, logEvent);
+
+            // Assert
+            Assert.Equal("Message", result.Key);
+            Assert.Equal(expectedText, result.Value);
+        }
+
+        [Fact]
         public void GetStandardColumnNameAndValueForMessageTemplateReturnsMessageTemplateKeyValue()
         {
             // Arrange
@@ -118,6 +196,30 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Output
             // Assert
             Assert.Equal("MessageTemplate", result.Key);
             Assert.Equal(messageTemplate.Text, result.Value);
+        }
+
+        [Fact]
+        public void GetStandardColumnNameAndValueForMessageTemplateReturnsTrimmedMessageTemplateKeyValue()
+        {
+            // Arrange
+            var messageTemplate = new MessageTemplate(new List<MessageTemplateToken>() { new PropertyToken("NumberProperty", "{NumberProperty}") });
+            var expectedMessageTemplate = $"{messageTemplate.Text.Substring(0, 7)}...";
+            const int messageTemplateFieldLength = 10;
+
+            var logEvent = new LogEvent(
+                new DateTimeOffset(2020, 1, 1, 0, 0, 0, 0, TimeSpan.Zero),
+                LogEventLevel.Debug, null, messageTemplate,
+                new List<LogEventProperty> { new LogEventProperty("NumberProperty", new ScalarValue(2.4)) });
+
+            var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions { MessageTemplate = { DataLength = messageTemplateFieldLength } };
+            SetupSut(columnOptions, CultureInfo.InvariantCulture);
+
+            // Act
+            var result = _sut.GetStandardColumnNameAndValue(StandardColumn.MessageTemplate, logEvent);
+
+            // Assert
+            Assert.Equal("MessageTemplate", result.Key);
+            Assert.Equal(expectedMessageTemplate, result.Value);
         }
 
         [Fact]
