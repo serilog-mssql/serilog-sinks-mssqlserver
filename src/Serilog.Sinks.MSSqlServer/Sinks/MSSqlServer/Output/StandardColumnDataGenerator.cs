@@ -67,7 +67,7 @@ namespace Serilog.Sinks.MSSqlServer.Output
             var logMessage = logEvent.RenderMessage(_formatProvider);
             var maxAllowedMessageLength = _columnOptions.Message.DataLength;
 
-            if (0 < maxAllowedMessageLength && logMessage.Length > maxAllowedMessageLength)
+            if (maxAllowedMessageLength > 0 && logMessage.Length > maxAllowedMessageLength)
             {
                 logMessage = logMessage.Substring(0, maxAllowedMessageLength - 3);
                 logMessage = $"{logMessage}...";
@@ -81,7 +81,7 @@ namespace Serilog.Sinks.MSSqlServer.Output
             var messageTemplate = logEvent.MessageTemplate.Text;
             var maxAllowedMessageTemplateLength = _columnOptions.MessageTemplate.DataLength;
 
-            if (0 < maxAllowedMessageTemplateLength && messageTemplate.Length > maxAllowedMessageTemplateLength)
+            if (maxAllowedMessageTemplateLength > 0 && messageTemplate.Length > maxAllowedMessageTemplateLength)
             {
                 messageTemplate = messageTemplate.Substring(0, maxAllowedMessageTemplateLength - 3);
                 messageTemplate = $"{messageTemplate}...";
