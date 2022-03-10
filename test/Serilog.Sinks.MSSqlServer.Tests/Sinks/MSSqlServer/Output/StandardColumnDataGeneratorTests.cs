@@ -64,6 +64,26 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Output
         }
 
         [Fact]
+        public void GetStandardColumnNameAndValueForMessageReturnsSimpleTextMessageKeyValueWithMaxDataLengthDefined()
+        {
+            // Arrange
+            const string messageText = "A long test message";
+            var logEvent = new LogEvent(
+                new DateTimeOffset(2020, 1, 1, 0, 0, 0, 0, TimeSpan.Zero),
+                LogEventLevel.Debug, null, new MessageTemplate(new List<MessageTemplateToken>() { new TextToken(messageText) }),
+                new List<LogEventProperty>());
+            var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions { Message = { DataLength = -1 } };
+            SetupSut(columnOptions);
+
+            // Act
+            var result = _sut.GetStandardColumnNameAndValue(StandardColumn.Message, logEvent);
+
+            // Assert
+            Assert.Equal("Message", result.Key);
+            Assert.Equal(messageText, result.Value);
+        }
+
+        [Fact]
         public void GetStandardColumnNameAndValueForMessageReturnsTrimmedSimpleTextMessageKeyValue()
         {
             // Arrange
