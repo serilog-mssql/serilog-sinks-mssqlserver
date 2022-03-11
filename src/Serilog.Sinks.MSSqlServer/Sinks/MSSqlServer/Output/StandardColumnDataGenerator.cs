@@ -7,6 +7,7 @@ using System.Text;
 using Serilog.Debugging;
 using Serilog.Events;
 using Serilog.Formatting;
+using Serilog.Sinks.MSSqlServer.Extensions;
 
 namespace Serilog.Sinks.MSSqlServer.Output
 {
@@ -44,15 +45,15 @@ namespace Serilog.Sinks.MSSqlServer.Output
             switch (column)
             {
                 case StandardColumn.Message:
-                    return new KeyValuePair<string, object>(_columnOptions.Message.ColumnName, RenderLogMessage(logEvent));
+                    return new KeyValuePair<string, object>(_columnOptions.Message.ColumnName, TruncateOutput(logEvent.RenderMessage(_formatProvider), _columnOptions.Message.DataLength));
                 case StandardColumn.MessageTemplate:
-                    return new KeyValuePair<string, object>(_columnOptions.MessageTemplate.ColumnName, TrimMessageTemplate(logEvent));
+                    return new KeyValuePair<string, object>(_columnOptions.MessageTemplate.ColumnName, TruncateOutput(logEvent.MessageTemplate.Text, _columnOptions.MessageTemplate.DataLength));
                 case StandardColumn.Level:
                     return new KeyValuePair<string, object>(_columnOptions.Level.ColumnName, _columnOptions.Level.StoreAsEnum ? (object)logEvent.Level : logEvent.Level.ToString());
                 case StandardColumn.TimeStamp:
                     return GetTimeStampStandardColumnNameAndValue(logEvent);
                 case StandardColumn.Exception:
-                    return new KeyValuePair<string, object>(_columnOptions.Exception.ColumnName, logEvent.Exception?.ToString());
+                    return new KeyValuePair<string, object>(_columnOptions.Exception.ColumnName, TruncateOutput(logEvent.Exception?.ToString(), _columnOptions.Exception.DataLength));
                 case StandardColumn.Properties:
                     return new KeyValuePair<string, object>(_columnOptions.Properties.ColumnName, ConvertPropertiesToXmlStructure(logEvent.Properties));
                 case StandardColumn.LogEvent:
@@ -62,33 +63,10 @@ namespace Serilog.Sinks.MSSqlServer.Output
             }
         }
 
-        private string RenderLogMessage(LogEvent logEvent)
-        {
-            var logMessage = logEvent.RenderMessage(_formatProvider);
-            var maxAllowedMessageLength = _columnOptions.Message.DataLength;
-
-            if (maxAllowedMessageLength > 0 && logMessage.Length > maxAllowedMessageLength)
-            {
-                logMessage = logMessage.Substring(0, maxAllowedMessageLength - 3);
-                logMessage = $"{logMessage}...";
-            }
-
-            return logMessage;
-        }
-
-        private string TrimMessageTemplate(LogEvent logEvent)
-        {
-            var messageTemplate = logEvent.MessageTemplate.Text;
-            var maxAllowedMessageTemplateLength = _columnOptions.MessageTemplate.DataLength;
-
-            if (maxAllowedMessageTemplateLength > 0 && messageTemplate.Length > maxAllowedMessageTemplateLength)
-            {
-                messageTemplate = messageTemplate.Substring(0, maxAllowedMessageTemplateLength - 3);
-                messageTemplate = $"{messageTemplate}...";
-            }
-
-            return messageTemplate;
-        }
+        private static string TruncateOutput(string value, int dataLength) =>
+            dataLength < 0
+                ? value     // No need to truncate if length set to maximum
+                : value.Truncate(dataLength, "...");
 
         private KeyValuePair<string, object> GetTimeStampStandardColumnNameAndValue(LogEvent logEvent)
         {
