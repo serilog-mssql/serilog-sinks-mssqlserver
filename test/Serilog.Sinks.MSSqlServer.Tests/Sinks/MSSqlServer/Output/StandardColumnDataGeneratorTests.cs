@@ -84,7 +84,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Output
         }
 
         [Fact]
-        public void GetStandardColumnNameAndValueForMessageReturnsTrimmedSimpleTextMessageKeyValue()
+        public void GetStandardColumnNameAndValueForMessageReturnsTruncatedSimpleTextMessageKeyValue()
         {
             // Arrange
             const string messageText = "Test message";
@@ -127,7 +127,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Output
         }
 
         [Fact]
-        public void GetStandardColumnNameAndValueForMessageReturnsTrimmedMessageKeyValueWithDefaultFormatting()
+        public void GetStandardColumnNameAndValueForMessageReturnsTruncatedMessageKeyValueWithDefaultFormatting()
         {
             // Arrange
             const string expectedText = "2.4 seconds...";
@@ -173,7 +173,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Output
         }
 
         [Fact]
-        public void GetStandardColumnNameAndValueForMessageReturnsTrimmedMessageKeyValueWithCustomFormatting()
+        public void GetStandardColumnNameAndValueForMessageReturnsTruncatedMessageKeyValueWithCustomFormatting()
         {
             // Arrange
             const string expectedText = "2,4 seconds...";
@@ -219,7 +219,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Output
         }
 
         [Fact]
-        public void GetStandardColumnNameAndValueForMessageTemplateReturnsTrimmedMessageTemplateKeyValue()
+        public void GetStandardColumnNameAndValueForMessageTemplateReturnsTruncatedMessageTemplateKeyValue()
         {
             // Arrange
             var messageTemplate = new MessageTemplate(new List<MessageTemplateToken>() { new PropertyToken("NumberProperty", "{NumberProperty}") });
