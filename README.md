@@ -460,13 +460,13 @@ _BigInt data type:_ For very large log tables, if you absolutely require an iden
 
 This column stores the formatted output (property placeholders are replaced with property values). It defaults to `nvarchar(max)`. The `DataType` property can only be set to character-storage types.
 
-In case `DataLength` is set to a specific value different from -1 or 0, any message longer than that length will be effectively trimmed down to that size. Example: `DataLength` is set to 15 and the message is "this is a very long message" (without the quotes), the trimmed text stored in the database will be: "this is a ve..." (again without quotes).
+In case `DataLength` is set to a specific value different from -1, any message longer than that length will be effectively truncated to that size. Example: `DataLength` is set to 15 and the message is "this is a very long message" (without the quotes), the truncated text stored in the database will be: "this is a ve..." (again without quotes).
 
 ### MessageTemplate
 
 This column stores the log event message with the property placeholders. It defaults to `nvarchar(max)`. The `DataType` property can only be set to character-storage types.
 
-In case `DataLength` is set to a specific value different from -1 or 0, any template text longer than that length will be effectively trimmed down to that size. Any trimming ignores all differences between the tokens in the template meaning that a template might get cut off in the middle of a property token. Example: `DataLength` is set to 20 and the message template is "a long {NumberOfCharacters} template text" (without the quotes), the final template stored in the database will be: "a long {NumberOfC..." (again without quotes).
+In case `DataLength` is set to a specific value different from -1, any template text longer than that length will be effectively truncated to that size. Any truncating ignores all differences between the tokens in the template meaning that a template might get cut off in the middle of a property token. Example: `DataLength` is set to 20 and the message template is "a long {NumberOfCharacters} template text" (without the quotes), the final template stored in the database will be: "a long {NumberOfC..." (again without quotes).
 
 ### Level
 
@@ -495,6 +495,8 @@ When the `ConvertToUtc` property is set to `true`, the time stamp is adjusted to
 ### Exception
 
 When an exception is logged as part of the log event, the exception message is stored here automatically. The `DataType` must be `nvarchar`.
+
+Similar to the columns `Message` and `MessageTemplate`, setting `DataLength` of `Exception` to a specific value different from -1 will effectively truncate any exception message to the stated length in `DataLength`.
 
 ### Properties
 
