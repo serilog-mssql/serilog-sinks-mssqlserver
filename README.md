@@ -446,7 +446,17 @@ In addition to any special properties described below, each Standard Column also
 
 ### Id
 
-The `Id` column is an optional table identity column. It defaults to the `int` data type but can also be configured as `bigint`. The `AllowNull` property is always `false`. If it is included in the table, it must be an auto-incrementing unique identity column and is automatically configured and auto-created as such.
+The `Id` column is an optional table identity column. It defaults to the `int` data type but can also be configured as `bigint`. Example how to change the data type to bigint:
+
+```c#
+var colOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions();
+colOptions.Id.DataType = System.Data.SqlDbType.BigInt;
+
+Log.Logger = new LoggerConfiguration().WriteTo.MSSqlServer(columnOptions: colOptions)
+    // ...
+```
+
+The `AllowNull` property is always `false`. If it is included in the table, it must be an auto-incrementing unique identity column and is automatically configured and auto-created as such.
 
 Previous versions of this sink assumed the `Id` column was _always_ present as an `int` identity primary key with a clustered index. Other configurations are possible and probably preferable, however this is still the default for backwards-compatibility reasons. Carefully consider your anticipated logging volume and query requirements. The default setting is not ideal in real-world scenarios since a clustered index is primarily of use when the key is used for sorting or range searches. This is rarely the case for the `Id` column.
 
