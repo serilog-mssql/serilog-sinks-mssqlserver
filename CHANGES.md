@@ -1,3 +1,10 @@
+# 5.7.1
+* Exclude logging from DB transactions and added sink option `EnlistInTransaction` (thanks to @ @Daniel-Svensson for the idea and original PR).
+* Fixed issue #209: Add trimming to rendered message and message template (thanks to @studiopasokon)
+* Fixed documentation regarding supported .NET versions (thanks to @GhalamborM).
+* Migrated sink to new GitHub and nuget.org organizations.
+* Use GitHub Actions for build including automatic release documentation.
+
 # 5.7.0
 * Fixed a wrong information in README.md regarding SQL Server compatibility (thanks to @domagojmedo).
 * Fixed bug #382 System.FormatExceotion due to invalid format strings when using SelfLog (thanks to @sommmen)
