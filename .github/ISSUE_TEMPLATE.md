@@ -19,7 +19,6 @@ If you are opening a feature request, you can ignore this template. Bug reports 
 [ ] .NET Framework 4.8
 [ ] .NET Framework 4.7
 [ ] .NET Framework 4.6.x
-[ ] .NET Framework 4.5.x
 OS: 
 
 >> Provide a *simple* reproduction of your Serilog configuration code:

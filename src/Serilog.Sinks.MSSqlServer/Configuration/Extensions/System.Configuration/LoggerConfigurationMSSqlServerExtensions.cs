@@ -19,7 +19,7 @@ using Serilog.Formatting;
 using Serilog.Sinks.MSSqlServer;
 using Serilog.Sinks.MSSqlServer.Configuration.Factories;
 
-// System.Configuration support for .NET Framework 4.5.2 libraries and apps.
+// System.Configuration support for .NET Framework 4.6.2 libraries and apps.
 
 namespace Serilog
 {
