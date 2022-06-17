@@ -4,7 +4,7 @@
     <Description>A Serilog sink that writes events to Microsoft SQL Server</Description>
     <VersionPrefix>5.7.1</VersionPrefix>
     <Authors>Michiel van Oudheusden;Christian Kadluba;Serilog Contributors</Authors>
-    <TargetFrameworks>netstandard2.0;net452;net462;net472;netcoreapp3.1</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net462;net472;netcoreapp3.1</TargetFrameworks>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <AssemblyName>Serilog.Sinks.MSSqlServer</AssemblyName>
@@ -29,7 +29,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- Whenever these are updated, also update versions in packages.config for net452 -->
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All"/>
     <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="3.0.0">
       <PrivateAssets>all</PrivateAssets>
@@ -88,18 +87,6 @@
     <Compile Include="Configuration\Implementations\Microsoft.Extensions.Configuration\**\*.cs" />
     <Compile Include="Configuration\Implementations\System.Configuration\**\*.cs" />
     <Compile Include="Sinks\MSSqlServer\Platform\AzureManagedServiceAuthenticator.cs" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net452' ">
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Configuration" />
-    <Reference Include="System" />
-    <Reference Include="Microsoft.CSharp" />
-    <Compile Include="Configuration\Extensions\System.Configuration\**\*.cs" />
-    <Compile Include="Configuration\Implementations\System.Configuration\**\*.cs" />
-    <Compile Include="Sinks\MSSqlServer\Platform\AzureManagedServiceAuthenticatorStub.cs" />
   </ItemGroup>
 
   <ItemGroup>

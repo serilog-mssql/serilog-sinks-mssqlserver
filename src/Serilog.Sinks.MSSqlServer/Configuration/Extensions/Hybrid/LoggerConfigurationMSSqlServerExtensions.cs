@@ -23,7 +23,6 @@ using Serilog.Sinks.MSSqlServer.Configuration.Factories;
 
 // The "Hybrid" configuration system supports both Microsoft.Extensions.Configuration and System.Configuration.
 // This is necessary because .NET Framework 4.6.1+ and .NET Core 2.0+ apps support both approaches, whereas the
-// older .NET Framework 4.5.2 only supports System.Configuration and .NET Standard 2.0 only supports M.E.C.
 
 namespace Serilog
 {

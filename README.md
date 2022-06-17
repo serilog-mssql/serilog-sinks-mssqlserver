@@ -3,7 +3,7 @@
 A Serilog sink that writes events to Microsoft SQL Server. This sink will write the log event data to a table and can optionally also store the properties inside an XML or JSON column so they can be queried. Important properties can also be written to their own separate columns.
 
 **Package** - [Serilog.Sinks.MSSqlServer](http://nuget.org/packages/serilog.sinks.mssqlserver)
-| **Minimum Platforms** - .NET Framework 4.5.2, .NET Core 3.1, .NET Standard 2.0
+| **Minimum Platforms** - .NET Framework 4.6.2, .NET Core 3.1, .NET Standard 2.0
 
 #### Topics
 
@@ -87,14 +87,11 @@ Because of the way external configuration has been implemented in various .NET f
 
 | Your Framework | TFM | Project Types | External Configuration |
 | --- | --- | --- |  --- |
-| .NET Framework 4.5.2 | `net452` | app or library | _System.Configuration_ |
 | .NET Framework 4.6.2+ | `net462` | app or library | _System.Configuration_ |
 | .NET Framework 4.6.2+ | `net462` | app or library | _Microsoft.Extensions.Configuration_ |
 | .NET Standard 2.0 | `netstandard2.0` | library only | _Microsoft.Extensions.Configuration_ |
 | .NET Core 3.1+ | `netcoreapp3.1` | app or library | _System.Configuration_ |
 | .NET Core 3.1+ | `netcoreapp3.1` | app or library | _Microsoft.Extensions.Configuration_ |
-
-Support for .NET Framework 4.5.2 is tied to the Windows 8.1 lifecycle with support scheduled to end in April 2022 (https://devblogs.microsoft.com/dotnet/net-framework-4-5-2-4-6-4-6-1-will-reach-end-of-support-on-april-26-2022/).
 
 Although it's possible to use both XML and _M.E.C_ configuration with certain frameworks, this is not supported, unintended consequences are possible, and a warning will be emitted to `SelfLog`. If you actually require multiple configuration sources, the _M.E.C_ builder-pattern is designed to support this, and your syntax will be consistent across configuration sources.
 
