@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Microsoft.Azure.Services.AppAuthentication;
+using Azure.Core;
+using Azure.Identity;
 
 namespace Serilog.Sinks.MSSqlServer.Platform
 {
@@ -9,7 +10,7 @@ namespace Serilog.Sinks.MSSqlServer.Platform
         private readonly bool _useAzureManagedIdentity;
         private readonly string _azureServiceTokenProviderResource;
         private readonly string _tenantId;
-        private readonly AzureServiceTokenProvider _azureServiceTokenProvider;
+        private readonly DefaultAzureCredential _defaultAzureCredential;
 
         public AzureManagedServiceAuthenticator(bool useAzureManagedIdentity, string azureServiceTokenProviderResource, string tenantId = null)
         {
@@ -21,17 +22,21 @@ namespace Serilog.Sinks.MSSqlServer.Platform
             _useAzureManagedIdentity = useAzureManagedIdentity;
             _azureServiceTokenProviderResource = azureServiceTokenProviderResource;
             _tenantId = tenantId;
-            _azureServiceTokenProvider = new AzureServiceTokenProvider();
+            _defaultAzureCredential = new DefaultAzureCredential();
         }
 
-        public Task<string> GetAuthenticationToken()
+        public async Task<string> GetAuthenticationToken()
         {
             if (!_useAzureManagedIdentity)
             {
-                return Task.FromResult((string)null);
+                return await Task.FromResult((string)null).ConfigureAwait(false);
             }
 
-            return _azureServiceTokenProvider.GetAccessTokenAsync(_azureServiceTokenProviderResource, _tenantId);
+            var accessToken = await _defaultAzureCredential.GetTokenAsync(
+                new TokenRequestContext(scopes: new string[] { _azureServiceTokenProviderResource }, tenantId: _tenantId) { }
+            ).ConfigureAwait(false);
+
+            return accessToken.Token;
         }
     }
 }
