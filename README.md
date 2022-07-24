@@ -107,7 +107,7 @@ var columnOpts = new ColumnOptions();
 columnOpts.Store.Remove(StandardColumn.Properties);
 columnOpts.Store.Add(StandardColumn.LogEvent);
 columnOpts.LogEvent.DataLength = 2048;
-columnOpts.PrimaryKey = options.TimeStamp;
+columnOpts.PrimaryKey = columnOpts.TimeStamp;
 columnOpts.TimeStamp.NonClusteredIndex = true;
 
 var log = new LoggerConfiguration()
