@@ -29,7 +29,8 @@ namespace Serilog.Sinks.MSSqlServer.Platform
                 ExcludeVisualStudioCredential = true,
                 ExcludeAzureCliCredential = true,
                 ExcludeAzurePowerShellCredential = true,
-                ExcludeSharedTokenCacheCredential = true
+                ExcludeSharedTokenCacheCredential = true,
+                InteractiveBrowserTenantId = _tenantId
             });
         }
 
@@ -41,7 +42,7 @@ namespace Serilog.Sinks.MSSqlServer.Platform
             }
 
             var accessToken = await _defaultAzureCredential.GetTokenAsync(
-                new TokenRequestContext(scopes: new string[] { _azureServiceTokenProviderResource }, tenantId: _tenantId) { }
+                new TokenRequestContext(new[] { $"{_azureServiceTokenProviderResource}.default" }) { }
             ).ConfigureAwait(false);
 
             return accessToken.Token;
