@@ -89,6 +89,7 @@ Because of the way external configuration has been implemented in various .NET f
 | --- | --- | --- |  --- |
 | .NET Framework 4.6.2+ | `net462` | app or library | _System.Configuration_ |
 | .NET Framework 4.6.2+ | `net462` | app or library | _Microsoft.Extensions.Configuration_ |
+| .NET Framework 4.7.2+ | `net472` | app or library | _Azure.Identity_ |
 | .NET Standard 2.0 | `netstandard2.0` | library only | _Microsoft.Extensions.Configuration_ |
 | .NET Core 3.1+ | `netcoreapp3.1` | app or library | _System.Configuration_ |
 | .NET Core 3.1+ | `netcoreapp3.1` | app or library | _Microsoft.Extensions.Configuration_ |
