@@ -45,7 +45,7 @@ namespace Serilog.Sinks.MSSqlServer.Platform
                 new TokenRequestContext(new[] { $"{_azureServiceTokenProviderResource}.default" }) { }
             ).ConfigureAwait(false);
 
-            return accessToken.Token;
+            return !string.IsNullOrWhiteSpace(accessToken.Token) ? accessToken.Token : null;
         }
     }
 }
