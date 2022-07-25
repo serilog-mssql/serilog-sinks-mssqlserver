@@ -22,7 +22,15 @@ namespace Serilog.Sinks.MSSqlServer.Platform
             _useAzureManagedIdentity = useAzureManagedIdentity;
             _azureServiceTokenProviderResource = azureServiceTokenProviderResource;
             _tenantId = tenantId;
-            _defaultAzureCredential = new DefaultAzureCredential();
+            _defaultAzureCredential = new DefaultAzureCredential(new DefaultAzureCredentialOptions
+            {
+                ExcludeEnvironmentCredential = true,
+                ExcludeManagedIdentityCredential = true,
+                ExcludeVisualStudioCredential = true,
+                ExcludeAzureCliCredential = true,
+                ExcludeAzurePowerShellCredential = true,
+                ExcludeSharedTokenCacheCredential = true
+            });
         }
 
         public async Task<string> GetAuthenticationToken()
