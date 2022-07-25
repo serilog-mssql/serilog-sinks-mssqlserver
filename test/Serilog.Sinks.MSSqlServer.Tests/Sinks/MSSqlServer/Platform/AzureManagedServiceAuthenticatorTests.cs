@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Microsoft.Azure.Services.AppAuthentication;
+using Azure.Identity;
 using Serilog.Sinks.MSSqlServer.Platform;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
@@ -48,7 +48,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Platform
             var sut = new AzureManagedServiceAuthenticator(true, "TestAccessToken");
 
             // Act + assert
-            await Assert.ThrowsAsync<AzureServiceTokenProviderException>(() => sut.GetAuthenticationToken()).ConfigureAwait(false);
+            await Assert.ThrowsAsync<AuthenticationFailedException>(() => sut.GetAuthenticationToken()).ConfigureAwait(false);
         }
 
         [Fact]
@@ -58,7 +58,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Platform
             var sut = new AzureManagedServiceAuthenticator(true, "https://database.windows.net/", "TestTennantId");
 
             // Act + assert
-            await Assert.ThrowsAsync<AzureServiceTokenProviderException>(() => sut.GetAuthenticationToken()).ConfigureAwait(false);
+            await Assert.ThrowsAsync<AuthenticationFailedException>(() => sut.GetAuthenticationToken()).ConfigureAwait(false);
         }
     }
 }
