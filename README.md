@@ -3,7 +3,7 @@
 A Serilog sink that writes events to Microsoft SQL Server. This sink will write the log event data to a table and can optionally also store the properties inside an XML or JSON column so they can be queried. Important properties can also be written to their own separate columns.
 
 **Package** - [Serilog.Sinks.MSSqlServer](http://nuget.org/packages/serilog.sinks.mssqlserver)
-| **Minimum Platforms** - .NET Framework 4.6.2, .NET Core 3.1, .NET Standard 2.0
+| **Minimum Platforms** - .NET Framework 4.7.2, .NET Core 3.1, .NET Standard 2.0
 
 #### Topics
 
@@ -20,6 +20,7 @@ A Serilog sink that writes events to Microsoft SQL Server. This sink will write 
 * [Troubleshooting](#troubleshooting)
 * [Querying Property Data](#querying-property-data)
 * [Deprecated Features](#deprecated-features)
+* [Deprecated Packages](#deprecated-packages)
 
 ## Quick Start
 
@@ -89,7 +90,6 @@ Because of the way external configuration has been implemented in various .NET f
 | --- | --- | --- |  --- |
 | .NET Framework 4.6.2+ | `net462` | app or library | _System.Configuration_ |
 | .NET Framework 4.6.2+ | `net462` | app or library | _Microsoft.Extensions.Configuration_ |
-| .NET Framework 4.7.2+ | `net472` | app or library | _Azure.Identity_ |
 | .NET Standard 2.0 | `netstandard2.0` | library only | _Microsoft.Extensions.Configuration_ |
 | .NET Core 3.1+ | `netcoreapp3.1` | app or library | _System.Configuration_ |
 | .NET Core 3.1+ | `netcoreapp3.1` | app or library | _Microsoft.Extensions.Configuration_ |
@@ -831,3 +831,10 @@ Feature | Notes
 `Binary` and `VarBinary` | Due to the way Serilog represents property data internally, it isn't possible for the sink to access property data as a byte array, so the sink can't write to these column types.
 
 Most deprecated features are still available, but they are marked with the `[Obsolete]` attribute (which results in a compiler warning in your project) and will be removed in a future release. You should switch to the replacement implementations as soon as possible. Where possible, internally these are converted to the replacement implementation so that they only exist at the configuration level.
+
+## Deprecated Packages
+
+### _Microsoft.Azure.Services.AppAuthentication_
+
+As this package has vulnerabilities reported as Very High in Veracode, a switch to the [Azure.Identity](https://www.nuget.org/packages/Azure.Identity/) package has been made after the version 5.7.2.
+This package imply that your current solution/project target version need to be .NET Framework 4.7.2+ or .NET Core 3.1+
