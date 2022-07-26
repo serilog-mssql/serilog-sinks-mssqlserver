@@ -22,16 +22,7 @@ namespace Serilog.Sinks.MSSqlServer.Platform
             _useAzureManagedIdentity = useAzureManagedIdentity;
             _azureServiceTokenProviderResource = azureServiceTokenProviderResource;
             _tenantId = tenantId;
-            _defaultAzureCredential = new DefaultAzureCredential(new DefaultAzureCredentialOptions
-            {
-                ExcludeEnvironmentCredential = true,
-                ExcludeManagedIdentityCredential = true,
-                ExcludeVisualStudioCredential = true,
-                ExcludeAzureCliCredential = true,
-                ExcludeAzurePowerShellCredential = true,
-                ExcludeSharedTokenCacheCredential = true,
-                InteractiveBrowserTenantId = _tenantId
-            });
+            _defaultAzureCredential = new DefaultAzureCredential();
         }
 
         public async Task<string> GetAuthenticationToken()
@@ -42,7 +33,7 @@ namespace Serilog.Sinks.MSSqlServer.Platform
             }
 
             var accessToken = await _defaultAzureCredential.GetTokenAsync(
-                new TokenRequestContext(new[] { $"{_azureServiceTokenProviderResource}.default" }) { }
+                new TokenRequestContext(new[] { $"{_azureServiceTokenProviderResource}.default" }, tenantId: _tenantId) { }
             ).ConfigureAwait(false);
 
             return accessToken.Token;
