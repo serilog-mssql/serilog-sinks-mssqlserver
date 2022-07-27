@@ -3,7 +3,7 @@
 A Serilog sink that writes events to Microsoft SQL Server. This sink will write the log event data to a table and can optionally also store the properties inside an XML or JSON column so they can be queried. Important properties can also be written to their own separate columns.
 
 **Package** - [Serilog.Sinks.MSSqlServer](http://nuget.org/packages/serilog.sinks.mssqlserver)
-| **Minimum Platforms** - .NET Framework 4.7.2, .NET Core 3.1, .NET Standard 2.0
+| **Minimum Platforms** - .NET Framework 4.6.2, .NET Core 3.1, .NET Standard 2.0
 
 #### Topics
 
@@ -836,5 +836,6 @@ Most deprecated features are still available, but they are marked with the `[Obs
 
 ### _Microsoft.Azure.Services.AppAuthentication_
 
-As this package has vulnerabilities reported as Very High in Veracode, a switch to the [Azure.Identity](https://www.nuget.org/packages/Azure.Identity/) package has been made after the version 5.7.2.
-This package imply that your current solution/project target version need to be .NET Framework 4.7.2+ or .NET Core 3.1+
+If your current or future technical stack is using Azure, especially a database as logs storage component, please read the following :
+The package Microsoft.Azure.Services.AppAuthentication has vulnerabilities reported as Very High in Veracode, a switch to the [Azure.Identity](https://www.nuget.org/packages/Azure.Identity/) package has been made after the version 5.7.1.
+This package change imply that your current solution/project target version need to be .NET Framework 4.7.2+ or .NET Core 3.1+.
