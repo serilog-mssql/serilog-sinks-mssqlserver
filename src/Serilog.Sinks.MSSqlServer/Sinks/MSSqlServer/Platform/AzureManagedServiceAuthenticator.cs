@@ -30,22 +30,15 @@ namespace Serilog.Sinks.MSSqlServer.Platform
 
         public async Task<string> GetAuthenticationToken()
         {
-            try
+            if (!_useAzureManagedIdentity)
             {
-                if (!_useAzureManagedIdentity)
-                {
-                    return await Task.FromResult((string)null).ConfigureAwait(false);
-                }
-
-                var accessToken = await _defaultAzureCredential.GetTokenAsync(
-                    new TokenRequestContext(new[] { _azureServiceTokenProviderResource })).ConfigureAwait(false);
-
-                return accessToken.Token;
+                return await Task.FromResult((string)null).ConfigureAwait(false);
             }
-            catch(Exception e)
-            {
-                throw new AuthenticationFailedException(e.Message);
-            }
+
+            var accessToken = await _defaultAzureCredential.GetTokenAsync(
+                new TokenRequestContext(new[] { _azureServiceTokenProviderResource })).ConfigureAwait(false);
+
+            return accessToken.Token;
         }
     }
 }
