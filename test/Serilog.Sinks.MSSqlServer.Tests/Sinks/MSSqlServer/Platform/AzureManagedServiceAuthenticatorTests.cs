@@ -58,7 +58,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Platform
             var sut = new AzureManagedServiceAuthenticator(true, "https://database.windows.net/", "TestTennantId");
 
             // Act + assert
-            await Assert.ThrowsAsync<CredentialUnavailableException>(() => sut.GetAuthenticationToken()).ConfigureAwait(false);
+            await Assert.ThrowsAsync<AuthenticationFailedException>(() => sut.GetAuthenticationToken()).ConfigureAwait(false);
         }
     }
 }
