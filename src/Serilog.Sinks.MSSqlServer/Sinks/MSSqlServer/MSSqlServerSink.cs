@@ -129,11 +129,7 @@ namespace Serilog.Sinks.MSSqlServer
         /// </summary>
         /// <returns>A completed task</returns>
         public Task OnEmptyBatchAsync() =>
-#if NET452
-            Task.FromResult(false);
-#else
             Task.CompletedTask;
-#endif
 
         /// <summary>
         /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.

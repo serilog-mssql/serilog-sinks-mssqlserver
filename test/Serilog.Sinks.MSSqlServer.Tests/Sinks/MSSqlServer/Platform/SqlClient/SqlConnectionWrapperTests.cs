@@ -1,30 +1,12 @@
-﻿#if NET452
-using System.Data.SqlClient;
-#else
-using Microsoft.Data.SqlClient;
-#endif
-using Xunit;
+﻿using Xunit;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Serilog.Sinks.MSSqlServer.Platform.SqlClient;
-using System;
 
 namespace Serilog.Sinks.MSSqlServer.Tests.Platform.SqlClient
 {
     [Trait(TestCategory.TraitName, TestCategory.Unit)]
     public class SqlConnectionWrapperTests
     {
-        [Fact]
-        public void InitializeThrowsIfCalledWithAuthenticationTokenOnDotNetFramework452ButNotOnOtherTargets()
-        {
-#if NET452
-            Assert.Throws<InvalidOperationException>(() => new SqlConnectionWrapper(DatabaseFixture.LogEventsConnectionString, "AuthenticationToken"));
-#else
-            // Should not throw
-            using (_ = new SqlConnectionWrapper(@"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=Master", "AuthenticationToken"))
-            { }
-#endif
-        }
-
         [Fact]
         public void CreateCommandReturnsSqlCommandWrapper()
         {

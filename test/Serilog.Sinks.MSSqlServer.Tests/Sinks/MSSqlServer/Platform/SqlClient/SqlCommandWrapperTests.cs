@@ -1,9 +1,5 @@
 ﻿using System;
-#if NET452
-using System.Data.SqlClient;
-#else
 using Microsoft.Data.SqlClient;
-#endif
 using Xunit;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Serilog.Sinks.MSSqlServer.Platform.SqlClient;
