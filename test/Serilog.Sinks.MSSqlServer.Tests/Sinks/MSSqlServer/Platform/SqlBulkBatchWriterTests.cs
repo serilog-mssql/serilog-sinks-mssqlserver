@@ -13,6 +13,7 @@ using Xunit;
 
 namespace Serilog.Sinks.MSSqlServer.Tests.Platform
 {
+    [Trait(TestCategory.TraitName, TestCategory.Unit)]
     public class SqlBulkBatchWriterTests : IDisposable
     {
         private const string _tableName = "TestTableName";

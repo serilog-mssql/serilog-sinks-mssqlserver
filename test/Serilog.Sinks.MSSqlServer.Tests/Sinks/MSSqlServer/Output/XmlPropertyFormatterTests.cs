@@ -1,10 +1,12 @@
 ﻿using System.Collections.Generic;
 using Serilog.Events;
 using Serilog.Sinks.MSSqlServer.Output;
+using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
 
 namespace Serilog.Sinks.MSSqlServer.Tests.Output
 {
+    [Trait(TestCategory.TraitName, TestCategory.Unit)]
     public class XmlPropertyFormatterTests
     {
         [Fact]
