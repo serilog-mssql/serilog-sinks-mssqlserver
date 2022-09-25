@@ -1,12 +1,8 @@
 ﻿using System;
-#if NET452
-using System.Data.SqlClient;
-#else
-using Microsoft.Data.SqlClient;
-#endif
 using System.Globalization;
 using System.Linq;
 using Dapper;
+using Microsoft.Data.SqlClient;
 
 namespace Serilog.Sinks.MSSqlServer.Tests.TestUtils
 {

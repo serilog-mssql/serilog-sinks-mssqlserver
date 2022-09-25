@@ -1,12 +1,6 @@
-﻿#if NET452
-using System.Data.SqlClient;
-#else
-using Microsoft.Data.SqlClient;
-#endif
-using Xunit;
-using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
+﻿using Xunit;
 using Serilog.Sinks.MSSqlServer.Platform.SqlClient;
-using System;
+using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 
 namespace Serilog.Sinks.MSSqlServer.Tests.Platform.SqlClient
 {

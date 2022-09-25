@@ -1,10 +1,6 @@
 ﻿using System;
-#if NET452
-using System.Data.SqlClient;
-#else
-using Microsoft.Data.SqlClient;
-#endif
 using System.Threading.Tasks;
+using Microsoft.Data.SqlClient;
 
 namespace Serilog.Sinks.MSSqlServer.Platform.SqlClient
 {
@@ -16,15 +12,7 @@ namespace Serilog.Sinks.MSSqlServer.Platform.SqlClient
         public SqlConnectionWrapper(string connectionString, string accessToken)
         {
             _sqlConnection = new SqlConnection(connectionString);
-#if NET452
-            if (accessToken != null)
-            {
-                throw new InvalidOperationException(
-                    $"SqlConnection access token is set target framework that does not support it. Refer to MSSQLServer sink documentation for details.");
-            }
-#else
             _sqlConnection.AccessToken = accessToken;
-#endif
         }
 
         public string ConnectionString => _sqlConnection.ConnectionString;

@@ -1,8 +1,4 @@
-﻿#if NET452
-using System.Data.SqlClient;
-#else
-using Microsoft.Data.SqlClient;
-#endif
+﻿using Microsoft.Data.SqlClient;
 
 namespace Serilog.Sinks.MSSqlServer.Platform.SqlClient
 {
