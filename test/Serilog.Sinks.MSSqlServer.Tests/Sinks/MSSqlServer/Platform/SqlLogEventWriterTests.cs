@@ -10,6 +10,7 @@ using Xunit;
 
 namespace Serilog.Sinks.MSSqlServer.Tests.Platform
 {
+    [Trait(TestCategory.TraitName, TestCategory.Unit)]
     public class SqlLogEventWriterTests
     {
         private const string _tableName = "TestTableName";

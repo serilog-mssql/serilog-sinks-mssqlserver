@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Data;
-#if NET452
-using System.Data.SqlClient;
-#else
 using Microsoft.Data.SqlClient;
-#endif
 
 namespace Serilog.Sinks.MSSqlServer.Platform.SqlClient
 {
