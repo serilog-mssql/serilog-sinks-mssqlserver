@@ -1,3 +1,8 @@
+# 5.8.0
+* Partial fix of issue #417: Update SqlClient to 3.0.0 etc. to fix high severity vulnerability
+* Removed support for obsolete .NET Framework 4.5.2
+* Fixed issue #408: wrong sample in README
+
 # 5.7.1
 * Exclude logging from DB transactions and added sink option `EnlistInTransaction` (thanks to @ @Daniel-Svensson for the idea and original PR).
 * Fixed issue #209: Add trimming to rendered message and message template (thanks to @studiopasokon)
