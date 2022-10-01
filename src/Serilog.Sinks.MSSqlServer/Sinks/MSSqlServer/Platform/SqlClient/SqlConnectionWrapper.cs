@@ -9,10 +9,9 @@ namespace Serilog.Sinks.MSSqlServer.Platform.SqlClient
         private readonly SqlConnection _sqlConnection;
         private bool _disposedValue;
 
-        public SqlConnectionWrapper(string connectionString, string accessToken)
+        public SqlConnectionWrapper(string connectionString)
         {
             _sqlConnection = new SqlConnection(connectionString);
-            _sqlConnection.AccessToken = accessToken;
         }
 
         public string ConnectionString => _sqlConnection.ConnectionString;

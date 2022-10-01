@@ -15,7 +15,6 @@ namespace Serilog.Sinks.MSSqlServer.Configuration
 
             ReadTableOptions(config, sinkOptions);
             ReadBatchSettings(config, sinkOptions);
-            ReadAzureManagedIdentitiesOptions(config, sinkOptions);
 
             return sinkOptions;
         }
@@ -33,13 +32,6 @@ namespace Serilog.Sinks.MSSqlServer.Configuration
             SetProperty.IfNotNull<int>(config["batchPostingLimit"], val => sinkOptions.BatchPostingLimit = val);
             SetProperty.IfNotNull<string>(config["batchPeriod"], val => sinkOptions.BatchPeriod = TimeSpan.Parse(val, CultureInfo.InvariantCulture));
             SetProperty.IfNotNull<bool>(config["eagerlyEmitFirstEvent"], val => sinkOptions.EagerlyEmitFirstEvent = val);
-        }
-
-        private static void ReadAzureManagedIdentitiesOptions(IConfigurationSection config, MSSqlServerSinkOptions sinkOptions)
-        {
-            SetProperty.IfNotNull<bool>(config["useAzureManagedIdentity"], val => sinkOptions.UseAzureManagedIdentity = val);
-            SetProperty.IfNotNull<string>(config["azureServiceTokenProviderResource"], val => sinkOptions.AzureServiceTokenProviderResource = val);
-            SetProperty.IfNotNull<string>(config["azureTenantId"], val => sinkOptions.AzureTenantId = val);
         }
     }
 }

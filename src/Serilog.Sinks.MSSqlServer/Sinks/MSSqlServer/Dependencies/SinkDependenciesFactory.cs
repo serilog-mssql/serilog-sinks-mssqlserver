@@ -21,12 +21,7 @@ namespace Serilog.Sinks.MSSqlServer.Dependencies
             var sqlConnectionFactory =
                 new SqlConnectionFactory(connectionString,
                     sinkOptions?.EnlistInTransaction ?? default,
-                    sinkOptions?.UseAzureManagedIdentity ?? default,
-                    new SqlConnectionStringBuilderWrapper(),
-                    new AzureManagedServiceAuthenticator(
-                        sinkOptions?.UseAzureManagedIdentity ?? default,
-                        sinkOptions.AzureServiceTokenProviderResource,
-                        sinkOptions.AzureTenantId));
+                    new SqlConnectionStringBuilderWrapper());
             var logEventDataGenerator =
                 new LogEventDataGenerator(columnOptions,
                     new StandardColumnDataGenerator(columnOptions, formatProvider,
