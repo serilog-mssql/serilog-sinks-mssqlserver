@@ -243,9 +243,6 @@ Basic settings of the sink are configured using the properties in a `MSSqlServer
 * `BatchPostingLimit`
 * `BatchPeriod`
 * `EagerlyEmitFirstEvent`
-* `UseAzureManagedIdentity`
-* `AzureServiceTokenProviderResource`
-* `AzureTenantId`
 
 ### TableName
 
@@ -282,34 +279,6 @@ This setting is not used by the audit sink as it writes each event immediately a
 
 A Flag to eagerly write a batch to the database containing the first received event regardless of `BatchPostingLimit` or `BatchPeriod`. It defaults to `true`.
 This setting is not used by the audit sink as it writes each event immediately and not in a batched manner.
-
-### UseAzureManagedIdentity
-
-A flag specifiying to use Azure Managed Identities for authenticating with an Azure SQL server. It defaults to `false`. If enabled the property `AzureServiceTokenProviderResource` must be set as well.
-
-**IMPORTANT:** Azure Managed Identities is only supported for the target frameworks .NET Framework 4.7.2+ and .NET (Core) 2.2+. Setting this to `true` when targeting a different framework results in an exception.
-
-See [Azure AD-managed identities for Azure resources documentation](https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/) for details on how to configure and use Azure Managed Identitites.
-
-### AzureServiceTokenProviderResource
-
-Specifies the token provider resource to be used for aquiring an authentication token when using Azure Managed Identities for authenticating with an Azure SQL server. This setting is only used if `UseAzureManagedIdentity` is set to `true`. For Azure SQL databases this value will always be `https://database.windows.net/`.
-
-### AzureTenantId
-
-Specifies the tenant ID of the the tenant the Azure SQL database exists in. This only needs to be set if the user authenticating against the database is in a different tenant to the database. This will most likely be the case when you are debugging locally and authenticating as yourself rather than the app to be deployed to.
-
-```
- .WriteTo.MSSqlServer(
-	Environment.GetEnvironmentVariable("LogConnection"),
-	sinkOptions: new MSSqlServerSinkOptions()
-	{
-		TableName = "_Log",
-		UseAzureManagedIdentity = true,
-		AzureServiceTokenProviderResource = "https://database.windows.net/",
-		AzureTenantId = Environment.GetEnvironmentVariable("AZURE_TENANT_ID")
-	}
-```
 
 
 ## ColumnOptions Object
@@ -825,6 +794,7 @@ WHERE
 
 Feature | Notes
 :--- | :---
+`UseAzureManagedIdentity` | Since the update of Microsoft.Data.SqlClient in sink release 5.8.0 Active Directory auth capabilities of SqlClient can be used. You can specify one of the supported AD authentication methods, which include Azure Managed Identites, directly in the connection string. Refer to the [SqlClient documentation](https://learn.microsoft.com/en-us/sql/connect/ado-net/sql/azure-active-directory-authentication?view=sql-server-ver16) for details.
 `AdditionalDataColumns` | Use the `AdditionalColumns` collection instead. Configuring the sink no longer relies upon .NET `DataColumn` objects or .NET `System` types.
 `Id.BigInt` | Use `Id.DataType = SqlDb.BigInt` instead. (The `BigInt` property was only available in dev packages).
 `Binary` and `VarBinary` | Due to the way Serilog represents property data internally, it isn't possible for the sink to access property data as a byte array, so the sink can't write to these column types.

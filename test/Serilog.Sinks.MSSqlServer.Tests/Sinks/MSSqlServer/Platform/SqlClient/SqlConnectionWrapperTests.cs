@@ -11,7 +11,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Platform.SqlClient
         public void CreateCommandReturnsSqlCommandWrapper()
         {
             // Arrange
-            using (var sut = new SqlConnectionWrapper(DatabaseFixture.LogEventsConnectionString, null))
+            using (var sut = new SqlConnectionWrapper(DatabaseFixture.LogEventsConnectionString))
             {
                 // Act
                 var result = sut.CreateCommand();
@@ -25,7 +25,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Platform.SqlClient
         public void CreateCommandWithParameterReturnsSqlCommandWrapper()
         {
             // Arrange
-            using (var sut = new SqlConnectionWrapper(DatabaseFixture.LogEventsConnectionString, null))
+            using (var sut = new SqlConnectionWrapper(DatabaseFixture.LogEventsConnectionString))
             {
                 // Act
                 var result = sut.CreateCommand("CommandText");
@@ -40,7 +40,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Platform.SqlClient
         public void CreateSqlBulkCopyReturnsSqlBulkCopyWrapper()
         {
             // Arrange
-            using (var sut = new SqlConnectionWrapper(DatabaseFixture.LogEventsConnectionString, null))
+            using (var sut = new SqlConnectionWrapper(DatabaseFixture.LogEventsConnectionString))
             {
                 // Act
                 var result = sut.CreateSqlBulkCopy(false, "DestinationTableName");

@@ -66,20 +66,5 @@ namespace Serilog.Sinks.MSSqlServer
         /// Flag to eagerly emit a batch containing the first received event (default: true)
         /// </summary>
         public bool EagerlyEmitFirstEvent { get; set; }
-
-        /// <summary>
-        /// Flag to enable SQL authentication using Azure Managed Identities (default: false)
-        /// </summary>
-        public bool UseAzureManagedIdentity { get; set; }
-
-        /// <summary>
-        /// Azure service token provider to be used for Azure Managed Identities
-        /// </summary>
-        public string AzureServiceTokenProviderResource { get; set; }
-
-        /// <summary>
-        /// ID of the tenant where the Azure resource exists
-        /// </summary>
-        public string AzureTenantId { get; set; }
     }
 }
