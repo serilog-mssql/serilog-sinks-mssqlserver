@@ -185,25 +185,6 @@ namespace Serilog.Configuration
                 base[nameof(PrimaryKeyColumnName)] = value;
             }
         }
-
-        [ConfigurationProperty(nameof(UseAzureManagedIdentity))]
-        public ValueConfigElement UseAzureManagedIdentity
-        {
-            get => (ValueConfigElement)base[nameof(UseAzureManagedIdentity)];
-        }
-
-        [ConfigurationProperty(nameof(AzureServiceTokenProviderResource))]
-        public ValueConfigElement AzureServiceTokenProviderResource
-        {
-            get => (ValueConfigElement)base[nameof(AzureServiceTokenProviderResource)];
-        }
-
-
-        [ConfigurationProperty(nameof(AzureTenantId))]
-        public ValueConfigElement AzureTenantId
-        {
-            get => (ValueConfigElement)base[nameof(AzureTenantId)];
-        }
     }
 }
 

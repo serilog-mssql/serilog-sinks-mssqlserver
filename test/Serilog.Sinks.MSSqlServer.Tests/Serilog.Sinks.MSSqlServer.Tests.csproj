@@ -28,13 +28,9 @@
     <!-- Ensure MSBuild ignores all build-target-specific files by default -->
     <Compile Remove="Configuration\Extensions\**\*.*" />
     <Compile Remove="Configuration\Implementations\**\*.*" />
-    <Compile Remove="Sinks\MSSqlServer\Platform\AzureManagedServiceAuthenticatorStubTests.cs" />
-    <Compile Remove="Sinks\MSSqlServer\Platform\AzureManagedServiceAuthenticatorTests.cs" />
     <!-- Show in VStudio, but MSBuild ignores these (indicates files are not code, non-published-content, etc.) -->
     <None Include="Configuration\Extensions\**\*.*" />
     <None Include="Configuration\Implementations\**\*.*" />
-    <None Include="Sinks\MSSqlServer\Platform\AzureManagedServiceAuthenticatorStubTests.cs" />
-    <None Include="Sinks\MSSqlServer\Platform\AzureManagedServiceAuthenticatorTests.cs" />
     <!-- ItemGroups below with TFM conditions will re-include the compile targets -->
   </ItemGroup>
 
@@ -44,17 +40,14 @@
     <Reference Include="Microsoft.CSharp" />
     <Compile Include="Configuration\Extensions\Hybrid\**\*.cs" />
     <Compile Include="Configuration\Implementations\System.Configuration\**\*.cs" />
-    <Compile Include="Sinks\MSSqlServer\Platform\AzureManagedServiceAuthenticatorStubTests.cs" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net472' ">
     <Reference Include="System" />
     <Reference Include="System.Transactions" />
     <Reference Include="Microsoft.CSharp" />
-    <Compile Remove="Sinks\MSSqlServer\Platform\AzureManagedServiceAuthenticatorStubTests.cs" />
     <Compile Include="Configuration\Extensions\Hybrid\**\*.cs" />
     <Compile Include="Configuration\Implementations\System.Configuration\**\*.cs" />
-    <Compile Include="Sinks\MSSqlServer\Platform\AzureManagedServiceAuthenticatorTests.cs" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp3.1' ">
@@ -66,11 +59,9 @@
     <PackageReference Include="System.Text.Encoding.Extensions" Version="4.3.0" />
     <Compile Remove="Configuration\Extensions\System.Configuration\**\*.cs" />
     <Compile Remove="Configuration\Implementations\System.Configuration\**\*.cs" />
-    <Compile Remove="Sinks\MSSqlServer\Platform\AzureManagedServiceAuthenticatorStubTests.cs" />
     <Compile Include="Configuration\Extensions\Hybrid\**\*.cs" />
     <Compile Include="Configuration\Implementations\Microsoft.Extensions.Configuration\**\*.cs" />
     <Compile Include="Configuration\Implementations\System.Configuration\**\*.cs" />
-    <Compile Include="Sinks\MSSqlServer\Platform\AzureManagedServiceAuthenticatorTests.cs" />
   </ItemGroup>
 
   <ItemGroup>

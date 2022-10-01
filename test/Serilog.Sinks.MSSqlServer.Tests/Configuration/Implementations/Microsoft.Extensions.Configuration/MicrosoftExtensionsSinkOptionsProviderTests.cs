@@ -22,14 +22,14 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
         public void ConfigureSinkOptionsCalledWithConfigSectionNullReturnsUnchangedSinkOptions()
         {
             // Arrange
-            var sinkOptions = new MSSqlServerSinkOptions { UseAzureManagedIdentity = true };
+            var sinkOptions = new MSSqlServerSinkOptions { EnlistInTransaction = true };
             var sut = new MicrosoftExtensionsSinkOptionsProvider();
 
             // Act
             var result = sut.ConfigureSinkOptions(sinkOptions, null);
 
             // Assert
-            Assert.True(result.UseAzureManagedIdentity);
+            Assert.True(result.EnlistInTransaction);
         }
 
         [Fact]
@@ -134,50 +134,6 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
 
             // Assert
             Assert.True(result.EagerlyEmitFirstEvent);
-        }
-
-        [Fact]
-        public void ConfigureSinkOptionsSetsUseAzureManagedIdentity()
-        {
-            // Arrange
-            _configurationSectionMock.Setup(s => s["useAzureManagedIdentity"]).Returns("true");
-            var sut = new MicrosoftExtensionsSinkOptionsProvider();
-
-            // Act
-            var result = sut.ConfigureSinkOptions(new MSSqlServerSinkOptions(), _configurationSectionMock.Object);
-
-            // Assert
-            Assert.True(result.UseAzureManagedIdentity);
-        }
-
-        [Fact]
-        public void ConfigureSinkOptionsSetsAzureServiceTokenProviderResource()
-        {
-            // Arrange
-            const string azureServiceTokenProviderResource = "TestAzureServiceTokenProviderResource";
-            _configurationSectionMock.Setup(s => s["azureServiceTokenProviderResource"]).Returns(azureServiceTokenProviderResource);
-            var sut = new MicrosoftExtensionsSinkOptionsProvider();
-
-            // Act
-            var result = sut.ConfigureSinkOptions(new MSSqlServerSinkOptions(), _configurationSectionMock.Object);
-
-            // Assert
-            Assert.Equal(azureServiceTokenProviderResource, result.AzureServiceTokenProviderResource);
-        }
-
-        [Fact]
-        public void ConfigureSinkOptionsSetsAzureTenantId()
-        {
-            // Arrange
-            const string azureTenantId = "00000000-0000-0000-0000-000000000000";
-            _configurationSectionMock.Setup(s => s["azureTenantId"]).Returns(azureTenantId);
-            var sut = new MicrosoftExtensionsSinkOptionsProvider();
-
-            // Act
-            var result = sut.ConfigureSinkOptions(new MSSqlServerSinkOptions(), _configurationSectionMock.Object);
-
-            // Assert
-            Assert.Equal(azureTenantId, result.AzureTenantId);
         }
     }
 }
