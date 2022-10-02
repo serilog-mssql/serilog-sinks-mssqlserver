@@ -794,7 +794,7 @@ WHERE
 
 Feature | Notes
 :--- | :---
-`UseAzureManagedIdentity` | Since the update of Microsoft.Data.SqlClient in sink release 5.8.0 Active Directory auth capabilities of SqlClient can be used. You can specify one of the supported AD authentication methods, which include Azure Managed Identites, directly in the connection string. Refer to the [SqlClient documentation](https://learn.microsoft.com/en-us/sql/connect/ado-net/sql/azure-active-directory-authentication?view=sql-server-ver16) for details.
+`UseAzureManagedIdentity` | Since the update of Microsoft.Data.SqlClient in sink release 5.8.0 Active Directory auth capabilities of SqlClient can be used. You can specify one of the supported AD authentication methods, which include Azure Managed Identities, directly in the connection string. Refer to the [SqlClient documentation](https://learn.microsoft.com/en-us/sql/connect/ado-net/sql/azure-active-directory-authentication?view=sql-server-ver16) for details.
 `AdditionalDataColumns` | Use the `AdditionalColumns` collection instead. Configuring the sink no longer relies upon .NET `DataColumn` objects or .NET `System` types.
 `Id.BigInt` | Use `Id.DataType = SqlDb.BigInt` instead. (The `BigInt` property was only available in dev packages).
 `Binary` and `VarBinary` | Due to the way Serilog represents property data internally, it isn't possible for the sink to access property data as a byte array, so the sink can't write to these column types.
