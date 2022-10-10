@@ -3,7 +3,6 @@ using System.Runtime.CompilerServices;
 
 [assembly: AssemblyTitle("Serilog.Sinks.MSSqlServer")]
 [assembly: AssemblyDescription("Serilog sink for MSSqlServer")]
-[assembly: AssemblyCopyright("Copyright © Serilog Contributors 2020")]
 
 [assembly: InternalsVisibleTo("Serilog.Sinks.MSSqlServer.Tests, PublicKey=0024000004800000940000000602000000240000525341310004000001000100fb8d13fd344a1c" +
                                                                          "6fe0fe83ef33c1080bf30690765bc6eb0df26ebfdf8f21670c64265b30db09f73a0dea5b3db4c9" +

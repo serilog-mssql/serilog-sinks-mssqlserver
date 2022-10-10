@@ -4,6 +4,7 @@ using System.Text;
 using Serilog.Debugging;
 using Serilog.Events;
 using Serilog.Sinks.MSSqlServer.Output;
+using static System.FormattableString;
 
 namespace Serilog.Sinks.MSSqlServer.Platform
 {
@@ -37,7 +38,7 @@ namespace Serilog.Sinks.MSSqlServer.Platform
                     {
                         command.CommandType = CommandType.Text;
 
-                        var fieldList = new StringBuilder($"INSERT INTO [{_schemaName}].[{_tableName}] (");
+                        var fieldList = new StringBuilder(Invariant($"INSERT INTO [{_schemaName}].[{_tableName}] ("));
                         var parameterList = new StringBuilder(") VALUES (");
 
                         var index = 0;
@@ -49,17 +50,17 @@ namespace Serilog.Sinks.MSSqlServer.Platform
                                 parameterList.Append(',');
                             }
 
-                            fieldList.Append($"[{field.Key}]");
+                            fieldList.Append(Invariant($"[{field.Key}]"));
                             parameterList.Append("@P");
                             parameterList.Append(index);
 
-                            command.AddParameter($"@P{index}", field.Value);
+                            command.AddParameter(Invariant($"@P{index}"), field.Value);
 
                             index++;
                         }
 
                         parameterList.Append(')');
-                        fieldList.Append(parameterList.ToString());
+                        fieldList.Append(parameterList);
 
                         command.CommandText = fieldList.ToString();
 

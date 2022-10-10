@@ -162,7 +162,7 @@ namespace Serilog.Sinks.MSSqlServer.Configuration
                 foreach (var standardCol in columnOptions.Store)
                 {
                     var stdColcolumnOptions = columnOptions.GetStandardColumnOptions(standardCol);
-                    if (pkName.Equals(stdColcolumnOptions.ColumnName, StringComparison.InvariantCultureIgnoreCase))
+                    if (pkName.Equals(stdColcolumnOptions.ColumnName, StringComparison.OrdinalIgnoreCase))
                     {
                         columnOptions.PrimaryKey = stdColcolumnOptions;
                         break;
@@ -173,7 +173,7 @@ namespace Serilog.Sinks.MSSqlServer.Configuration
                 {
                     foreach (var col in columnOptions.AdditionalColumns)
                     {
-                        if (pkName.Equals(col.ColumnName, StringComparison.InvariantCultureIgnoreCase))
+                        if (pkName.Equals(col.ColumnName, StringComparison.OrdinalIgnoreCase))
                         {
                             columnOptions.PrimaryKey = col;
                             break;

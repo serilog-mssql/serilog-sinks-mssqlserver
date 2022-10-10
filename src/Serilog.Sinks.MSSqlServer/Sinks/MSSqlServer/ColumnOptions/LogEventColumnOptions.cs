@@ -37,13 +37,13 @@ namespace Serilog.Sinks.MSSqlServer
             /// Exclude properties from the LogEvent column if they are being saved to additional columns.
             /// Defaults to false for backwards-compatibility, but true is the recommended setting.
             /// </summary>
-            public bool ExcludeAdditionalProperties { get; set; } = false;
+            public bool ExcludeAdditionalProperties { get; set; }
 
             /// <summary>
             /// Whether to include Standard Columns in the LogEvent column (for backwards compatibility).
             /// Defaults to false for backwards-compatibility, but true is the recommended setting.
             /// </summary>
-            public bool ExcludeStandardColumns { get; set; } = false;
+            public bool ExcludeStandardColumns { get; set; }
         }
     }
 }

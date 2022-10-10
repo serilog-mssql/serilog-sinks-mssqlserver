@@ -1,6 +1,7 @@
 ﻿using System.Data;
 using System.Globalization;
 using System.Text;
+using static System.FormattableString;
 
 namespace Serilog.Sinks.MSSqlServer.Platform
 {
@@ -13,15 +14,15 @@ namespace Serilog.Sinks.MSSqlServer.Platform
             var indexCount = 1;
 
             // start schema check and DDL (wrap in EXEC to make a separate batch)
-            sql.AppendLine($"IF(NOT EXISTS(SELECT * FROM sys.schemas WHERE name = '{schemaName}'))");
+            sql.AppendLine(Invariant($"IF(NOT EXISTS(SELECT * FROM sys.schemas WHERE name = '{schemaName}'))"));
             sql.AppendLine("BEGIN");
-            sql.AppendLine($"EXEC('CREATE SCHEMA [{schemaName}] AUTHORIZATION [dbo]')");
+            sql.AppendLine(Invariant($"EXEC('CREATE SCHEMA [{schemaName}] AUTHORIZATION [dbo]')"));
             sql.AppendLine("END");
 
             // start table-creatin batch and DDL
-            sql.AppendLine($"IF NOT EXISTS (SELECT s.name, t.name FROM sys.tables t JOIN sys.schemas s ON t.schema_id = s.schema_id WHERE s.name = '{schemaName}' AND t.name = '{tableName}')");
+            sql.AppendLine(Invariant($"IF NOT EXISTS (SELECT s.name, t.name FROM sys.tables t JOIN sys.schemas s ON t.schema_id = s.schema_id WHERE s.name = '{schemaName}' AND t.name = '{tableName}')"));
             sql.AppendLine("BEGIN");
-            sql.AppendLine($"CREATE TABLE [{schemaName}].[{tableName}] ( ");
+            sql.AppendLine(Invariant($"CREATE TABLE [{schemaName}].[{tableName}] ( "));
 
             // build column list
             var i = 1;
@@ -30,19 +31,19 @@ namespace Serilog.Sinks.MSSqlServer.Platform
                 var common = (SqlColumn)column.ExtendedProperties["SqlColumn"];
 
                 sql.Append(GetColumnDDL(common));
-                if (dataTable.Columns.Count > i++) sql.Append(",");
+                if (dataTable.Columns.Count > i++) sql.Append(',');
                 sql.AppendLine();
 
                 // collect non-PK indexes for separate output after the table DDL
                 if (common != null && common.NonClusteredIndex && common != columnOptions.PrimaryKey)
-                    ix.AppendLine($"CREATE NONCLUSTERED INDEX [IX{indexCount++}_{tableName}] ON [{schemaName}].[{tableName}] ([{common.ColumnName}]);");
+                    ix.AppendLine(Invariant($"CREATE NONCLUSTERED INDEX [IX{indexCount++}_{tableName}] ON [{schemaName}].[{tableName}] ([{common.ColumnName}]);"));
             }
 
             // primary key constraint at the end of the table DDL
             if (columnOptions.PrimaryKey != null)
             {
                 var clustering = (columnOptions.PrimaryKey.NonClusteredIndex ? "NON" : string.Empty);
-                sql.AppendLine($" CONSTRAINT [PK_{tableName}] PRIMARY KEY {clustering}CLUSTERED ([{columnOptions.PrimaryKey.ColumnName}])");
+                sql.AppendLine(Invariant($" CONSTRAINT [PK_{tableName}] PRIMARY KEY {clustering}CLUSTERED ([{columnOptions.PrimaryKey.ColumnName}])"));
             }
 
             // end of CREATE TABLE
@@ -50,7 +51,7 @@ namespace Serilog.Sinks.MSSqlServer.Platform
 
             // CCI is output separately after table DDL
             if (columnOptions.ClusteredColumnstoreIndex)
-                sql.AppendLine($"CREATE CLUSTERED COLUMNSTORE INDEX [CCI_{tableName}] ON [{schemaName}].[{tableName}]");
+                sql.AppendLine(Invariant($"CREATE CLUSTERED COLUMNSTORE INDEX [CCI_{tableName}] ON [{schemaName}].[{tableName}]"));
 
             // output any extra non-clustered indexes
             sql.Append(ix);
@@ -68,12 +69,12 @@ namespace Serilog.Sinks.MSSqlServer.Platform
         {
             var sb = new StringBuilder();
 
-            sb.Append($"[{column.ColumnName}] ");
+            sb.Append(Invariant($"[{column.ColumnName}] "));
 
             sb.Append(column.DataType.ToString().ToUpperInvariant());
 
             if (SqlDataTypes.DataLengthRequired.Contains(column.DataType))
-                sb.Append("(").Append(column.DataLength == -1 ? "MAX" : column.DataLength.ToString(CultureInfo.InvariantCulture)).Append(")");
+                sb.Append('(').Append(column.DataLength == -1 ? "MAX" : column.DataLength.ToString(CultureInfo.InvariantCulture)).Append(')');
 
             if (column.StandardColumnIdentifier == StandardColumn.Id)
                 sb.Append(" IDENTITY(1,1)");
