@@ -6,7 +6,7 @@ namespace Serilog.Sinks.MSSqlServer
 {
     public partial class ColumnOptions
     {
-        private bool _configurationFinalized = false;
+        private bool _configurationFinalized;
 
         /// <summary>
         /// The logging sink and audit sink constructors call this. Defaults are resolved (like ensuring the

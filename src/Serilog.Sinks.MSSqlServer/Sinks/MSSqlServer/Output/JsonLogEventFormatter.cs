@@ -181,7 +181,7 @@ namespace Serilog.Sinks.MSSqlServer.Output
                     output.Write(",\"Rendering\":");
                     using (var sw = new StringWriter())
                     {
-                        format.Render(properties, sw);
+                        format.Render(properties, sw, CultureInfo.InvariantCulture);
                         JsonValueFormatter.WriteQuotedJsonString(sw.ToString(), output);
                     }
                     output.Write('}');
