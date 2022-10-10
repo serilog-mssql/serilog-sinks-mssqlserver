@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29806.167
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.32916.344
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{04226074-C72F-42BC-AB02-4D70A7BAE7E1}"
 EndProject
@@ -14,8 +14,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sample", "sample", "{AA346332-5BAF-47F1-B8FB-7600ED61265D}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CustomLogEventFormatterDemo", "sample\CustomLogEventFormatterDemo\CustomLogEventFormatterDemo.csproj", "{873320F1-8F6D-45E2-A853-D321C86793EC}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppConfigDemo", "sample\AppConfigDemo\AppConfigDemo.csproj", "{7DC530B1-68FD-4F07-A2F9-910C338562C1}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkerServiceDemo", "sample\WorkerServiceDemo\WorkerServiceDemo.csproj", "{04F523D9-F00B-4C63-9287-31A244378E06}"
 EndProject
@@ -30,11 +28,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetStandardDemoLib", "sample\NetStandardDemo\NetStandardDemoLib\NetStandardDemoLib.csproj", "{8E69E31B-61C7-4175-B886-9C2078FCA477}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetStandardDemoLib", "sample\NetStandardDemo\NetStandardDemoLib\NetStandardDemoLib.csproj", "{8E69E31B-61C7-4175-B886-9C2078FCA477}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetStandardDemoApp", "sample\NetStandardDemo\NetStandardDemoApp\NetStandardDemoApp.csproj", "{F908C46D-E72E-41E4-975D-73733294F93F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetStandardDemoApp", "sample\NetStandardDemo\NetStandardDemoApp\NetStandardDemoApp.csproj", "{F908C46D-E72E-41E4-975D-73733294F93F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NetStandardDemo", "NetStandardDemo", "{7B2B80DE-427A-4FEC-A7CE-7AD81FED73DE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppConfigDemo", "sample\AppConfigDemo\AppConfigDemo.csproj", "{6BFE1D21-1442-4375-AB69-14160B906A64}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -54,10 +54,6 @@ Global
 		{873320F1-8F6D-45E2-A853-D321C86793EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{873320F1-8F6D-45E2-A853-D321C86793EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{873320F1-8F6D-45E2-A853-D321C86793EC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7DC530B1-68FD-4F07-A2F9-910C338562C1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7DC530B1-68FD-4F07-A2F9-910C338562C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7DC530B1-68FD-4F07-A2F9-910C338562C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7DC530B1-68FD-4F07-A2F9-910C338562C1}.Release|Any CPU.Build.0 = Release|Any CPU
 		{04F523D9-F00B-4C63-9287-31A244378E06}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{04F523D9-F00B-4C63-9287-31A244378E06}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{04F523D9-F00B-4C63-9287-31A244378E06}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -74,6 +70,10 @@ Global
 		{F908C46D-E72E-41E4-975D-73733294F93F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F908C46D-E72E-41E4-975D-73733294F93F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F908C46D-E72E-41E4-975D-73733294F93F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6BFE1D21-1442-4375-AB69-14160B906A64}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6BFE1D21-1442-4375-AB69-14160B906A64}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6BFE1D21-1442-4375-AB69-14160B906A64}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6BFE1D21-1442-4375-AB69-14160B906A64}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -82,12 +82,12 @@ Global
 		{803CD13A-D54B-4CEC-A55F-E22AE3D93B3C} = {04226074-C72F-42BC-AB02-4D70A7BAE7E1}
 		{3C2D8E01-5580-426A-BDD9-EC59CD98E618} = {F02D6513-6F45-452E-85A0-41A872A2C1F8}
 		{873320F1-8F6D-45E2-A853-D321C86793EC} = {AA346332-5BAF-47F1-B8FB-7600ED61265D}
-		{7DC530B1-68FD-4F07-A2F9-910C338562C1} = {AA346332-5BAF-47F1-B8FB-7600ED61265D}
 		{04F523D9-F00B-4C63-9287-31A244378E06} = {AA346332-5BAF-47F1-B8FB-7600ED61265D}
 		{98F21125-AF7A-46E8-8C08-E3E4F5DBEDB9} = {AA346332-5BAF-47F1-B8FB-7600ED61265D}
 		{8E69E31B-61C7-4175-B886-9C2078FCA477} = {7B2B80DE-427A-4FEC-A7CE-7AD81FED73DE}
 		{F908C46D-E72E-41E4-975D-73733294F93F} = {7B2B80DE-427A-4FEC-A7CE-7AD81FED73DE}
 		{7B2B80DE-427A-4FEC-A7CE-7AD81FED73DE} = {AA346332-5BAF-47F1-B8FB-7600ED61265D}
+		{6BFE1D21-1442-4375-AB69-14160B906A64} = {AA346332-5BAF-47F1-B8FB-7600ED61265D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {AAA6BF8D-7B53-4A5F-A79A-D1B306383B45}

@@ -3,7 +3,7 @@
 A Serilog sink that writes events to Microsoft SQL Server. This sink will write the log event data to a table and can optionally also store the properties inside an XML or JSON column so they can be queried. Important properties can also be written to their own separate columns.
 
 **Package** - [Serilog.Sinks.MSSqlServer](http://nuget.org/packages/serilog.sinks.mssqlserver)
-| **Minimum Platforms** - .NET Framework 4.6.2, .NET Core 3.1, .NET Standard 2.0
+| **Minimum Platforms** - .NET Framework 4.6.2, .NET 6.0, .NET Standard 2.0
 
 #### Topics
 
@@ -90,8 +90,8 @@ Because of the way external configuration has been implemented in various .NET f
 | .NET Framework 4.6.2+ | `net462` | app or library | _System.Configuration_ |
 | .NET Framework 4.6.2+ | `net462` | app or library | _Microsoft.Extensions.Configuration_ |
 | .NET Standard 2.0 | `netstandard2.0` | library only | _Microsoft.Extensions.Configuration_ |
-| .NET Core 3.1+ | `netcoreapp3.1` | app or library | _System.Configuration_ |
-| .NET Core 3.1+ | `netcoreapp3.1` | app or library | _Microsoft.Extensions.Configuration_ |
+| .NET 6.0+ | `net6.0` | app or library | _System.Configuration_ |
+| .NET 6.0+ | `net6.0` | app or library | _Microsoft.Extensions.Configuration_ |
 
 Although it's possible to use both XML and _M.E.C_ configuration with certain frameworks, this is not supported, unintended consequences are possible, and a warning will be emitted to `SelfLog`. If you actually require multiple configuration sources, the _M.E.C_ builder-pattern is designed to support this, and your syntax will be consistent across configuration sources.
 

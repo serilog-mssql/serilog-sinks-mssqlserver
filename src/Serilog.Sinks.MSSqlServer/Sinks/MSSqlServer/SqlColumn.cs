@@ -94,7 +94,7 @@ namespace Serilog.Sinks.MSSqlServer
         /// Determines whether a non-clustered index is created for this column. Compound indexes are not
         /// supported for auto-created log tables. This property is only used when auto-creating a log table.
         /// </summary>
-        public bool NonClusteredIndex { get; set; } = false;
+        public bool NonClusteredIndex { get; set; }
 
         /// <summary>
         /// The name of the Serilog property to use as the value when filling the DataTable.
@@ -109,8 +109,8 @@ namespace Serilog.Sinks.MSSqlServer
         // Set by the constructors of the Standard Column classes that inherit from this;
         // allows Standard Columns and user-defined columns to coexist but remain identifiable
         // and allows casting back to the Standard Column without a lot of switch gymnastics.
-        internal StandardColumn? StandardColumnIdentifier { get; set; } = null;
-        internal Type StandardColumnType { get; set; } = null;
+        internal StandardColumn? StandardColumnIdentifier { get; set; }
+        internal Type StandardColumnType { get; set; }
 
         /// <summary>
         /// Converts a SQL sink SqlColumn object to a System.Data.DataColumn object. The original

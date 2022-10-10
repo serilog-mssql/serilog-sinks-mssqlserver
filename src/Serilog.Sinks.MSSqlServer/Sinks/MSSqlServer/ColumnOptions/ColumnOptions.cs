@@ -84,7 +84,7 @@ namespace Serilog.Sinks.MSSqlServer
         /// index. Prior to SQL Server 2017 you must NOT use any NVARCHAR(MAX) columns, and
         /// this restriction includes the Standard Columns (you must change their size).
         /// </summary>
-        public bool ClusteredColumnstoreIndex { get; set; } = false;
+        public bool ClusteredColumnstoreIndex { get; set; }
 
         /// <summary>
         /// Indicates if triggers should be disabled when inserting log entries.
