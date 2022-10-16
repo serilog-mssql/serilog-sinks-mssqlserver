@@ -65,4 +65,8 @@
     <Compile Include="Configuration\Implementations\System.Configuration\**\*.cs" />
   </ItemGroup>
 
+ <ItemGroup>
+    <None Include="Images\serilog-sink-nuget.png" Pack="true" PackagePath="" />
+  </ItemGroup>
+  
 </Project>
