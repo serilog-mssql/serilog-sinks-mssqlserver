@@ -8,7 +8,7 @@ namespace NetStandardDemoLib
 {
     public static class Initializer
     {
-        private const string _connectionString = "Server=localhost;Database=LogTest;Integrated Security=SSPI;";
+        private const string _connectionString = "Server=localhost;Database=LogTest;Integrated Security=SSPI;Encrypt=False;";
         private const string _tableName = "LogEvents";
 
         public static LoggerConfiguration CreateLoggerConfiguration()
