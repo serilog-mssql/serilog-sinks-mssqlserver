@@ -8,7 +8,7 @@ namespace AppConfigDemo
 {
     public static class Program
     {
-        private const string _connectionString = "Server=localhost;Database=LogTest;Integrated Security=SSPI;";
+        private const string _connectionString = "Server=localhost;Database=LogTest;Integrated Security=SSPI;Encrypt=False;";
         private const string _schemaName = "dbo";
         private const string _tableName = "LogEvents";
 

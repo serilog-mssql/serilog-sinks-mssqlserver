@@ -13,7 +13,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
         public void GetConnectionStringCalledWithConnectionStringReturnsSameValue()
         {
             // Arrange
-            const string connectionString = "Server=localhost;Database=LogTest;Integrated Security=SSPI;";
+            const string connectionString = "Server=localhost;Database=LogTest;Integrated Security=SSPI;Encrypt=False;";
             var configurationMock = new Mock<IConfiguration>();
             var sut = new MicrosoftExtensionsConnectionStringProvider();
 
@@ -29,7 +29,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
         {
             // Arrange
             const string connectionStringName = "LogDatabase";
-            const string connectionString = "Server=localhost;Database=LogTest;Integrated Security=SSPI;";
+            const string connectionString = "Server=localhost;Database=LogTest;Integrated Security=SSPI;Encrypt=False;";
             var configurationMock = new Mock<IConfiguration>();
             var configSectionMock = new Mock<IConfigurationSection>();
             configurationMock.Setup(c => c.GetSection(It.IsAny<string>())).Returns(configSectionMock.Object);

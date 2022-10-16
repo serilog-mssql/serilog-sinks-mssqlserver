@@ -8,7 +8,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Dependencies
     [Trait(TestCategory.TraitName, TestCategory.Unit)]
     public class SinkDependenciesFactoryTests
     {
-        private const string _connectionString = "Server=localhost;Database=LogTest;Integrated Security=SSPI;";
+        private const string _connectionString = "Server=localhost;Database=LogTest;Integrated Security=SSPI;Encrypt=False;";
         private readonly MSSqlServerSinkOptions _sinkOptions;
         private readonly Serilog.Sinks.MSSqlServer.ColumnOptions _columnOptions;
 
