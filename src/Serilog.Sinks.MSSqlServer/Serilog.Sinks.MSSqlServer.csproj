@@ -57,7 +57,7 @@
     <Compile Include="Configuration\Extensions\Microsoft.Extensions.Configuration\**\*.cs" />
     <Compile Include="Configuration\Implementations\Microsoft.Extensions.Configuration\**\*.cs" />
   </ItemGroup>
-  
+
   <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' Or '$(TargetFramework)' == 'net472' Or '$(TargetFramework)' == 'net462' ">
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="6.0.1" />
     <Compile Include="Configuration\Extensions\Hybrid\**\*.cs" />
@@ -65,8 +65,8 @@
     <Compile Include="Configuration\Implementations\System.Configuration\**\*.cs" />
   </ItemGroup>
 
- <ItemGroup>
+  <ItemGroup>
     <None Include="Images\serilog-sink-nuget.png" Pack="true" PackagePath="" />
   </ItemGroup>
-  
+
 </Project>
