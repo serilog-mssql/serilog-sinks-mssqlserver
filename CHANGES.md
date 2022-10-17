@@ -1,3 +1,10 @@
+# 6.0.0
+* Updated .NET target frameworks (removed soon obsolete .NET Core 3.1, added .NET 6.0 LTS).
+* Fixed issue #417: removed obsolete and vulnerable Microsoft.Azure.Services.AppAuthentication.
+* Updated SqlClient to 5.0.1 (breaking change: https://github.com/serilog-mssql/serilog-sinks-mssqlserver#release-600).
+* Updated all other dependencies to latest versions.
+* Removed obsolete System.Config extension methods (only for .NET Framework 4.5.2 which is no longer supported).
+
 # 5.8.0
 * Partial fix of issue #417: Update SqlClient to 3.0.0 etc. to fix high severity vulnerability
 * Removed support for obsolete .NET Framework 4.5.2
