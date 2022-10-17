@@ -22,10 +22,12 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{3C0AA8A2-9446-41A9-AD2A-24593C2CF168}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
-		appveyor.yml = appveyor.yml
 		Build.ps1 = Build.ps1
 		CHANGES.md = CHANGES.md
+		.github\ISSUE_TEMPLATE.md = .github\ISSUE_TEMPLATE.md
+		.github\workflows\pr-validation.yml = .github\workflows\pr-validation.yml
 		README.md = README.md
+		.github\workflows\release.yml = .github\workflows\release.yml
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetStandardDemoLib", "sample\NetStandardDemo\NetStandardDemoLib\NetStandardDemoLib.csproj", "{8E69E31B-61C7-4175-B886-9C2078FCA477}"
