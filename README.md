@@ -795,7 +795,7 @@ WHERE
 
 ### Release 6.0.0
 
-Micosoft.Data.SqlClient was upgraded to >4.0.0 which introduces a breaking change regarding the connection strings. If your SQL Server does not use encryption you have to explicitly specify this in the connection string by adding `Encrypt=False`. Otherwise the connection will fail with an SqlException. Refer to the [SqlClient documentation](https://github.com/dotnet/SqlClient/blob/main/release-notes/4.0/4.0.0.md#breaking-changes) for details.
+`Microsoft.Data.SqlClient` was upgraded to >4.0.0 which introduces a breaking change regarding connection strings. If your SQL Server does not use encryption you have to explicitly specify this in the connection string by adding `Encrypt=False`. Otherwise the connection will fail with a `SqlException`. Refer to the [SqlClient documentation](https://github.com/dotnet/SqlClient/blob/main/release-notes/4.0/4.0.0.md#breaking-changes) for details.
 
 ## Deprecated Features
 
