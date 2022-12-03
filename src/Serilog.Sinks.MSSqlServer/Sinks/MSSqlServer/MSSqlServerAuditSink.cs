@@ -18,6 +18,7 @@ using Serilog.Events;
 using Serilog.Formatting;
 using Serilog.Sinks.MSSqlServer.Dependencies;
 using Serilog.Sinks.MSSqlServer.Platform;
+using static System.FormattableString;
 
 namespace Serilog.Sinks.MSSqlServer
 {
@@ -123,7 +124,7 @@ namespace Serilog.Sinks.MSSqlServer
             }
 
             if (columnOptions.DisableTriggers)
-                throw new NotSupportedException($"The {nameof(ColumnOptions.DisableTriggers)} option is not supported for auditing.");
+                throw new NotSupportedException(Invariant($"The {nameof(ColumnOptions.DisableTriggers)} option is not supported for auditing."));
         }
 
         private static void CheckSinkDependencies(SinkDependencies sinkDependencies)
@@ -135,17 +136,17 @@ namespace Serilog.Sinks.MSSqlServer
 
             if (sinkDependencies.DataTableCreator == null)
             {
-                throw new InvalidOperationException($"DataTableCreator is not initialized!");
+                throw new InvalidOperationException("DataTableCreator is not initialized!");
             }
 
             if (sinkDependencies.SqlTableCreator == null)
             {
-                throw new InvalidOperationException($"SqlTableCreator is not initialized!");
+                throw new InvalidOperationException("SqlTableCreator is not initialized!");
             }
 
             if (sinkDependencies.SqlLogEventWriter == null)
             {
-                throw new InvalidOperationException($"SqlLogEventWriter is not initialized!");
+                throw new InvalidOperationException("SqlLogEventWriter is not initialized!");
             }
         }
 

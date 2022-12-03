@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
 using FluentAssertions;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
 using Xunit.Abstractions;
+using static System.FormattableString;
 
 namespace Serilog.Sinks.MSSqlServer.Tests.Misc
 {
@@ -45,7 +47,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Misc
                         BatchPostingLimit = 1,
                         BatchPeriod = TimeSpan.FromSeconds(10)
                     },
-                    columnOptions: columnOptions
+                    columnOptions: columnOptions,
+                    formatProvider: CultureInfo.InvariantCulture
                 )
                 .CreateLogger();
 
@@ -85,7 +88,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Misc
                         BatchPostingLimit = 1,
                         BatchPeriod = TimeSpan.FromSeconds(10)
                     },
-                    columnOptions: columnOptions
+                    columnOptions: columnOptions,
+                    formatProvider: CultureInfo.InvariantCulture
                 )
                 .CreateLogger();
 
@@ -121,13 +125,14 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Misc
                         BatchPostingLimit = 1,
                         BatchPeriod = TimeSpan.FromSeconds(10)
                     },
-                    columnOptions: columnOptions
+                    columnOptions: columnOptions,
+                    formatProvider: CultureInfo.InvariantCulture
                 )
                 .CreateLogger();
             Log.CloseAndFlush();
 
             // Assert
-            var query = $@"SELECT COLUMN_NAME AS ColumnName FROM {DatabaseFixture.Database}.INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{DatabaseFixture.LogTableName}'";
+            var query = Invariant($@"SELECT COLUMN_NAME AS ColumnName FROM {DatabaseFixture.Database}.INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{DatabaseFixture.LogTableName}'");
             VerifyCustomQuery<InfoSchema>(query, e => e.Should().Contain(x => x.ColumnName == columnOptions.Properties.ColumnName));
             VerifyCustomQuery<InfoSchema>(query, e => e.Should().NotContain(x => x.ColumnName == columnOptions.Id.ColumnName));
         }
@@ -150,7 +155,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Misc
                         BatchPostingLimit = 1,
                         BatchPeriod = TimeSpan.FromSeconds(10)
                     },
-                    columnOptions: columnOptions
+                    columnOptions: columnOptions,
+                    formatProvider: CultureInfo.InvariantCulture
                 )
                 .CreateLogger();
             Log.CloseAndFlush();
@@ -179,7 +185,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Misc
                         BatchPostingLimit = 1,
                         BatchPeriod = TimeSpan.FromSeconds(10)
                     },
-                    columnOptions: columnOptions
+                    columnOptions: columnOptions,
+                    formatProvider: CultureInfo.InvariantCulture
                 )
                 .CreateLogger();
             Log.CloseAndFlush();
@@ -213,7 +220,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Misc
                     columnOptions: columnOptions,
                     autoCreateSqlTable: true,
                     batchPostingLimit: 1,
-                    period: TimeSpan.FromSeconds(10)
+                    period: TimeSpan.FromSeconds(10),
+                    formatProvider: CultureInfo.InvariantCulture
                 )
                 .CreateLogger();
             Log.CloseAndFlush();
@@ -249,7 +257,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Misc
                         BatchPostingLimit = 1,
                         BatchPeriod = TimeSpan.FromSeconds(10)
                     },
-                    columnOptions: columnOptions
+                    columnOptions: columnOptions,
+                    formatProvider: CultureInfo.InvariantCulture
                 )
                 .CreateLogger();
             Log.CloseAndFlush();
@@ -277,7 +286,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Misc
                         TableName = DatabaseFixture.LogTableName,
                         AutoCreateSqlTable = true
                     },
-                    columnOptions: columnOptions
+                    columnOptions: columnOptions,
+                    formatProvider: CultureInfo.InvariantCulture
                 )
                 .CreateLogger();
 

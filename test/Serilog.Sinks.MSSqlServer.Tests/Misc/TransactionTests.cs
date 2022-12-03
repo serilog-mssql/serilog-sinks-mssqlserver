@@ -1,4 +1,5 @@
-﻿using System.Transactions;
+﻿using System.Globalization;
+using System.Transactions;
 using FluentAssertions;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
@@ -25,7 +26,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Misc
                     {
                         TableName = DatabaseFixture.LogTableName,
                         AutoCreateSqlTable = true
-                    }
+                    },
+                    formatProvider: CultureInfo.InvariantCulture
                 )
                 .CreateLogger();
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data;
+using System.Globalization;
 using FluentAssertions;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
@@ -29,7 +30,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Misc
                     BatchPostingLimit = 1,
                     BatchPeriod = TimeSpan.FromSeconds(10)
                 },
-                columnOptions: new MSSqlServer.ColumnOptions())
+                columnOptions: new MSSqlServer.ColumnOptions(),
+                formatProvider: CultureInfo.InvariantCulture)
                 .CreateLogger();
 
             // Act
@@ -57,7 +59,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Misc
                     BatchPostingLimit = 1,
                     BatchPeriod = TimeSpan.FromSeconds(10)
                 },
-                columnOptions: new MSSqlServer.ColumnOptions { TimeStamp = { DataType = SqlDbType.DateTimeOffset, ConvertToUtc = false } })
+                columnOptions: new MSSqlServer.ColumnOptions { TimeStamp = { DataType = SqlDbType.DateTimeOffset, ConvertToUtc = false } },
+                formatProvider: CultureInfo.InvariantCulture)
                 .CreateLogger();
             var dateTimeOffsetNow = DateTimeOffset.Now;
 
@@ -86,7 +89,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Misc
                     BatchPostingLimit = 1,
                     BatchPeriod = TimeSpan.FromSeconds(10)
                 },
-                columnOptions: new MSSqlServer.ColumnOptions { TimeStamp = { DataType = SqlDbType.DateTimeOffset, ConvertToUtc = true } })
+                columnOptions: new MSSqlServer.ColumnOptions { TimeStamp = { DataType = SqlDbType.DateTimeOffset, ConvertToUtc = true } },
+                formatProvider: CultureInfo.InvariantCulture)
                 .CreateLogger();
 
             // Act
