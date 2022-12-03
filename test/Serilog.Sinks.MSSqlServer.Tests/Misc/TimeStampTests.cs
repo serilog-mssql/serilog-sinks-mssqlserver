@@ -5,7 +5,7 @@ using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Serilog.Sinks.MSSqlServer.Tests
+namespace Serilog.Sinks.MSSqlServer.Tests.Misc
 {
     [Trait(TestCategory.TraitName, TestCategory.Integration)]
     public class TimeStampTests : DatabaseTestsBase
@@ -29,7 +29,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                     BatchPostingLimit = 1,
                     BatchPeriod = TimeSpan.FromSeconds(10)
                 },
-                columnOptions: new Serilog.Sinks.MSSqlServer.ColumnOptions())
+                columnOptions: new MSSqlServer.ColumnOptions())
                 .CreateLogger();
 
             // Act
@@ -57,7 +57,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                     BatchPostingLimit = 1,
                     BatchPeriod = TimeSpan.FromSeconds(10)
                 },
-                columnOptions: new Serilog.Sinks.MSSqlServer.ColumnOptions { TimeStamp = { DataType = SqlDbType.DateTimeOffset, ConvertToUtc = false } })
+                columnOptions: new MSSqlServer.ColumnOptions { TimeStamp = { DataType = SqlDbType.DateTimeOffset, ConvertToUtc = false } })
                 .CreateLogger();
             var dateTimeOffsetNow = DateTimeOffset.Now;
 
@@ -86,7 +86,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                     BatchPostingLimit = 1,
                     BatchPeriod = TimeSpan.FromSeconds(10)
                 },
-                columnOptions: new Serilog.Sinks.MSSqlServer.ColumnOptions { TimeStamp = { DataType = SqlDbType.DateTimeOffset, ConvertToUtc = true } })
+                columnOptions: new MSSqlServer.ColumnOptions { TimeStamp = { DataType = SqlDbType.DateTimeOffset, ConvertToUtc = true } })
                 .CreateLogger();
 
             // Act

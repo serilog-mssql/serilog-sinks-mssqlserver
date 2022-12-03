@@ -4,7 +4,7 @@ using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Serilog.Sinks.MSSqlServer.Tests
+namespace Serilog.Sinks.MSSqlServer.Tests.Misc
 {
     [Trait(TestCategory.TraitName, TestCategory.Integration)]
     public class TriggersOnLogTableTests : DatabaseTestsBase
@@ -29,7 +29,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                     BatchPostingLimit = 1,
                     BatchPeriod = TimeSpan.FromSeconds(10)
                 },
-                columnOptions: new Serilog.Sinks.MSSqlServer.ColumnOptions())
+                columnOptions: new MSSqlServer.ColumnOptions())
                 .CreateLogger();
 
             CreateTrigger(LogTriggerTableName, LogTriggerName);
@@ -49,7 +49,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         public void TestOptionsDisableTriggersOnLogTable()
         {
             // Arrange
-            var options = new Serilog.Sinks.MSSqlServer.ColumnOptions { DisableTriggers = true };
+            var options = new MSSqlServer.ColumnOptions { DisableTriggers = true };
             var loggerConfiguration = new LoggerConfiguration();
             Log.Logger = loggerConfiguration.WriteTo.MSSqlServer(
                 connectionString: DatabaseFixture.LogEventsConnectionString,
@@ -88,7 +88,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                     TableName = DatabaseFixture.LogTableName,
                     AutoCreateSqlTable = true
                 },
-                columnOptions: new Serilog.Sinks.MSSqlServer.ColumnOptions())
+                columnOptions: new MSSqlServer.ColumnOptions())
                 .CreateLogger();
 
             CreateTrigger(LogTriggerTableName, LogTriggerName);
@@ -108,7 +108,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         public void TestAuditOptionsDisableTriggersOnLogTableThrowsNotSupportedException()
         {
             // Arrange
-            var options = new Serilog.Sinks.MSSqlServer.ColumnOptions { DisableTriggers = true };
+            var options = new MSSqlServer.ColumnOptions { DisableTriggers = true };
             var loggerConfiguration = new LoggerConfiguration();
             Assert.Throws<NotSupportedException>(() => loggerConfiguration.AuditTo.MSSqlServer(
                 connectionString: DatabaseFixture.LogEventsConnectionString,

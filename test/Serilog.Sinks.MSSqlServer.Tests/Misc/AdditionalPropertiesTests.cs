@@ -4,7 +4,7 @@ using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Serilog.Sinks.MSSqlServer.Tests
+namespace Serilog.Sinks.MSSqlServer.Tests.Misc
 {
     [Trait(TestCategory.TraitName, TestCategory.Integration)]
     public class AdditionalPropertiesTests : DatabaseTestsBase
@@ -19,7 +19,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             // Arrange
             const string additionalColumnName1 = "AdditionalColumn1";
             const string additionalColumnName2 = "AdditionalColumn2";
-            var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions
+            var columnOptions = new MSSqlServer.ColumnOptions
             {
                 AdditionalColumns = new List<SqlColumn>
                 {
@@ -73,7 +73,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             const string additionalProperty1Name = "AdditionalProperty1";
             const string additionalColumn2Name = "AdditionalColumn2";
             const string additionalProperty2Name = "AdditionalProperty2";
-            var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions
+            var columnOptions = new MSSqlServer.ColumnOptions
             {
                 AdditionalColumns = new List<SqlColumn>
                 {
