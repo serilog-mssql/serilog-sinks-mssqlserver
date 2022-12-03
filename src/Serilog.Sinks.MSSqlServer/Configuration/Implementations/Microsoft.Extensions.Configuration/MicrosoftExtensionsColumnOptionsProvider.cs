@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using Microsoft.Extensions.Configuration;
+using static System.FormattableString;
 
 namespace Serilog.Sinks.MSSqlServer.Configuration
 {
@@ -182,7 +183,7 @@ namespace Serilog.Sinks.MSSqlServer.Configuration
                 }
 
                 if (columnOptions.PrimaryKey == null)
-                    throw new ArgumentException($"Could not match the configured primary key column name \"{pkName}\" with a data column in the table.");
+                    throw new ArgumentException(Invariant($"Could not match the configured primary key column name \"{pkName}\" with a data column in the table."));
             }
         }
     }
