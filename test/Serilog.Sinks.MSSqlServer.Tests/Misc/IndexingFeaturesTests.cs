@@ -4,7 +4,7 @@ using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Serilog.Sinks.MSSqlServer.Tests
+namespace Serilog.Sinks.MSSqlServer.Tests.Misc
 {
     [Trait(TestCategory.TraitName, TestCategory.Integration)]
     public class IndexingFeaturesTests : DatabaseTestsBase
@@ -17,7 +17,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         public void NonClusteredDefaultIdPrimaryKey()
         {
             // Arrange
-            var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions();
+            var columnOptions = new MSSqlServer.ColumnOptions();
             columnOptions.Id.NonClusteredIndex = true;
 
             Log.Logger = new LoggerConfiguration()
@@ -45,7 +45,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         public void AlternatePrimaryKey()
         {
             // Arrange
-            var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions();
+            var columnOptions = new MSSqlServer.ColumnOptions();
             columnOptions.PrimaryKey = columnOptions.TimeStamp;
 
             Log.Logger = new LoggerConfiguration()
@@ -75,7 +75,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         public void ColumnstoreIndex()
         {
             // Arrange
-            var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions();
+            var columnOptions = new MSSqlServer.ColumnOptions();
             // char MAX not supported prior to SQL2017
             columnOptions.Exception.DataLength = 512;
             columnOptions.Level.DataLength = 16;

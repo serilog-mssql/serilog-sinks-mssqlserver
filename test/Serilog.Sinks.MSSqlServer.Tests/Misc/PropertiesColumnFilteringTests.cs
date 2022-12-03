@@ -3,7 +3,7 @@ using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Serilog.Sinks.MSSqlServer.Tests
+namespace Serilog.Sinks.MSSqlServer.Tests.Misc
 {
     [Trait(TestCategory.TraitName, TestCategory.Integration)]
     public class PropertiesColumnFilteringTests : DatabaseTestsBase
@@ -16,7 +16,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         public void FilteredProperties()
         {
             // Arrange
-            var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions();
+            var columnOptions = new MSSqlServer.ColumnOptions();
             columnOptions.Properties.PropertiesFilter = (propName) => propName == "A";
 
             Log.Logger = new LoggerConfiguration()
@@ -51,7 +51,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         public void FilteredPropertiesWhenAuditing()
         {
             // Arrange
-            var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions();
+            var columnOptions = new MSSqlServer.ColumnOptions();
             columnOptions.Properties.PropertiesFilter = (propName) => propName == "A";
 
             Log.Logger = new LoggerConfiguration()

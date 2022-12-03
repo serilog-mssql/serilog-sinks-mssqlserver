@@ -6,7 +6,7 @@ using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Serilog.Sinks.MSSqlServer.Tests
+namespace Serilog.Sinks.MSSqlServer.Tests.Misc
 {
     [Trait(TestCategory.TraitName, TestCategory.Integration)]
     public class LevelAsEnumTests : DatabaseTestsBase
@@ -29,14 +29,14 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                     BatchPostingLimit = 1,
                     BatchPeriod = TimeSpan.FromSeconds(10)
                 },
-                columnOptions: new Serilog.Sinks.MSSqlServer.ColumnOptions { Level = { StoreAsEnum = true } })
+                columnOptions: new MSSqlServer.ColumnOptions { Level = { StoreAsEnum = true } })
                 .CreateLogger();
 
             // Act
             const string loggingInformationMessage = "Logging Information message";
             using (var file = File.CreateText("LevelAsEnum.True.Enum.Self.log"))
             {
-                Serilog.Debugging.SelfLog.Enable(TextWriter.Synchronized(file));
+                Debugging.SelfLog.Enable(TextWriter.Synchronized(file));
                 Log.Information(loggingInformationMessage);
                 Log.CloseAndFlush();
             }
@@ -60,14 +60,14 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                     BatchPostingLimit = 1,
                     BatchPeriod = TimeSpan.FromSeconds(10)
                 },
-                columnOptions: new Serilog.Sinks.MSSqlServer.ColumnOptions { Level = { StoreAsEnum = false } })
+                columnOptions: new MSSqlServer.ColumnOptions { Level = { StoreAsEnum = false } })
                 .CreateLogger();
 
             // Act
             const string loggingInformationMessage = "Logging Information message";
             using (var file = File.CreateText("LevelAsEnum.False.Self.log"))
             {
-                Serilog.Debugging.SelfLog.Enable(TextWriter.Synchronized(file));
+                Debugging.SelfLog.Enable(TextWriter.Synchronized(file));
                 Log.Information(loggingInformationMessage);
                 Log.CloseAndFlush();
             }
@@ -89,14 +89,14 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                     TableName = DatabaseFixture.LogTableName,
                     AutoCreateSqlTable = true
                 },
-                columnOptions: new Serilog.Sinks.MSSqlServer.ColumnOptions { Level = { StoreAsEnum = true } })
+                columnOptions: new MSSqlServer.ColumnOptions { Level = { StoreAsEnum = true } })
                 .CreateLogger();
 
             // Act
             const string loggingInformationMessage = "Logging Information message";
             using (var file = File.CreateText("LevelAsEnum.Audit.True.Enum.Self.log"))
             {
-                Serilog.Debugging.SelfLog.Enable(TextWriter.Synchronized(file));
+                Debugging.SelfLog.Enable(TextWriter.Synchronized(file));
                 Log.Information(loggingInformationMessage);
                 Log.CloseAndFlush();
             }
@@ -118,14 +118,14 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                     TableName = DatabaseFixture.LogTableName,
                     AutoCreateSqlTable = true
                 },
-                columnOptions: new Serilog.Sinks.MSSqlServer.ColumnOptions { Level = { StoreAsEnum = false } })
+                columnOptions: new MSSqlServer.ColumnOptions { Level = { StoreAsEnum = false } })
                 .CreateLogger();
 
             // Act
             const string loggingInformationMessage = "Logging Information message";
             using (var file = File.CreateText("LevelAsEnum.Audit.False.Self.log"))
             {
-                Serilog.Debugging.SelfLog.Enable(TextWriter.Synchronized(file));
+                Debugging.SelfLog.Enable(TextWriter.Synchronized(file));
                 Log.Information(loggingInformationMessage);
                 Log.CloseAndFlush();
             }

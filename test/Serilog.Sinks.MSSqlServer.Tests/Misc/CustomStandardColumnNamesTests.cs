@@ -5,7 +5,7 @@ using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Serilog.Sinks.MSSqlServer.Tests
+namespace Serilog.Sinks.MSSqlServer.Tests.Misc
 {
     [Trait(TestCategory.TraitName, TestCategory.Integration)]
     public class CustomStandardColumnNamesTests : DatabaseTestsBase
@@ -19,7 +19,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         public void CustomIdColumnLegacyInterface()
         {
             // Arrange
-            var options = new Serilog.Sinks.MSSqlServer.ColumnOptions();
+            var options = new MSSqlServer.ColumnOptions();
             var customIdName = "CustomIdName";
             options.Id.ColumnName = customIdName;
 
@@ -35,7 +35,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         public void CustomIdColumnSinkOptionsInterface()
         {
             // Arrange
-            var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions();
+            var columnOptions = new MSSqlServer.ColumnOptions();
             var customIdName = "CustomIdName";
             columnOptions.Id.ColumnName = customIdName;
 
@@ -60,7 +60,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         public void DefaultIdColumnLegacyInterface()
         {
             // Arrange
-            var options = new Serilog.Sinks.MSSqlServer.ColumnOptions();
+            var options = new MSSqlServer.ColumnOptions();
 
             // Act
             using (var sink = new MSSqlServerSink(DatabaseFixture.LogEventsConnectionString, DatabaseFixture.LogTableName, 1, TimeSpan.FromSeconds(1), null, true, options, "dbo", null))
@@ -74,7 +74,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         public void DefaultIdColumnSinkOptionsInterface()
         {
             // Arrange
-            var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions();
+            var columnOptions = new MSSqlServer.ColumnOptions();
 
             // Act
             using (var sink = new MSSqlServerSink(DatabaseFixture.LogEventsConnectionString,
@@ -97,7 +97,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         public void TableCreatedWithCustomNamesLegacyInterface()
         {
             // Arrange
-            var options = new Serilog.Sinks.MSSqlServer.ColumnOptions();
+            var options = new MSSqlServer.ColumnOptions();
             var standardNames = new List<string> { "CustomMessage", "CustomMessageTemplate", "CustomLevel", "CustomTimeStamp", "CustomException", "CustomProperties" };
 
             options.Message.ColumnName = "CustomMessage";
@@ -119,7 +119,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         public void TableCreatedWithCustomNamesSinkOptionsInterface()
         {
             // Arrange
-            var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions();
+            var columnOptions = new MSSqlServer.ColumnOptions();
             var standardNames = new List<string> { "CustomMessage", "CustomMessageTemplate", "CustomLevel", "CustomTimeStamp", "CustomException", "CustomProperties" };
 
             columnOptions.Message.ColumnName = "CustomMessage";
@@ -150,7 +150,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         public void TableCreatedWithDefaultNamesLegacyInterface()
         {
             // Arrange
-            var options = new Serilog.Sinks.MSSqlServer.ColumnOptions();
+            var options = new MSSqlServer.ColumnOptions();
             var standardNames = new List<string> { "Message", "MessageTemplate", "Level", "TimeStamp", "Exception", "Properties" };
 
             // Act
@@ -165,7 +165,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         public void TableCreatedWithDefaultNamesSinkOptionsInterface()
         {
             // Arrange
-            var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions();
+            var columnOptions = new MSSqlServer.ColumnOptions();
             var standardNames = new List<string> { "Message", "MessageTemplate", "Level", "TimeStamp", "Exception", "Properties" };
 
             // Act
@@ -189,7 +189,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         public void WriteEventToCustomStandardColumnsLegacyInterface()
         {
             // Arrange
-            var options = new Serilog.Sinks.MSSqlServer.ColumnOptions();
+            var options = new MSSqlServer.ColumnOptions();
 
             options.Message.ColumnName = "CustomMessage";
             options.MessageTemplate.ColumnName = "CustomMessageTemplate";
@@ -211,7 +211,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             const string loggingInformationMessage = "Logging Information message";
             using (var file = File.CreateText("CustomColumnsEvent.Self.log"))
             {
-                Serilog.Debugging.SelfLog.Enable(TextWriter.Synchronized(file));
+                Debugging.SelfLog.Enable(TextWriter.Synchronized(file));
                 Log.Information(loggingInformationMessage);
                 Log.CloseAndFlush();
             }
@@ -224,7 +224,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         public void WriteEventToCustomStandardColumnsSinkOptionsInterface()
         {
             // Arrange
-            var options = new Serilog.Sinks.MSSqlServer.ColumnOptions();
+            var options = new MSSqlServer.ColumnOptions();
 
             options.Message.ColumnName = "CustomMessage";
             options.MessageTemplate.ColumnName = "CustomMessageTemplate";
@@ -249,7 +249,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             const string loggingInformationMessage = "Logging Information message";
             using (var file = File.CreateText("CustomColumnsEvent.Self.log"))
             {
-                Serilog.Debugging.SelfLog.Enable(TextWriter.Synchronized(file));
+                Debugging.SelfLog.Enable(TextWriter.Synchronized(file));
                 Log.Information(loggingInformationMessage);
                 Log.CloseAndFlush();
             }
@@ -270,14 +270,14 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                 autoCreateSqlTable: true,
                 batchPostingLimit: 1,
                 period: TimeSpan.FromSeconds(10),
-                columnOptions: new Serilog.Sinks.MSSqlServer.ColumnOptions())
+                columnOptions: new MSSqlServer.ColumnOptions())
                 .CreateLogger();
 
             // Act
             const string loggingInformationMessage = "Logging Information message";
             using (var file = File.CreateText("StandardColumns.Self.log"))
             {
-                Serilog.Debugging.SelfLog.Enable(TextWriter.Synchronized(file));
+                Debugging.SelfLog.Enable(TextWriter.Synchronized(file));
                 Log.Information(loggingInformationMessage);
                 Log.CloseAndFlush();
             }
@@ -300,14 +300,14 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                     BatchPostingLimit = 1,
                     BatchPeriod = TimeSpan.FromSeconds(10)
                 },
-                columnOptions: new Serilog.Sinks.MSSqlServer.ColumnOptions())
+                columnOptions: new MSSqlServer.ColumnOptions())
                 .CreateLogger();
 
             // Act
             const string loggingInformationMessage = "Logging Information message";
             using (var file = File.CreateText("StandardColumns.Self.log"))
             {
-                Serilog.Debugging.SelfLog.Enable(TextWriter.Synchronized(file));
+                Debugging.SelfLog.Enable(TextWriter.Synchronized(file));
                 Log.Information(loggingInformationMessage);
                 Log.CloseAndFlush();
             }
@@ -321,7 +321,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         public void AuditEventToCustomStandardColumnsLegacyInterface()
         {
             // Arrange
-            var options = new Serilog.Sinks.MSSqlServer.ColumnOptions();
+            var options = new MSSqlServer.ColumnOptions();
 
             options.Message.ColumnName = "CustomMessage";
             options.MessageTemplate.ColumnName = "CustomMessageTemplate";
@@ -343,7 +343,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             const string loggingInformationMessage = "Logging Information message";
             using (var file = File.CreateText("CustomColumnsAuditEvent.Self.log"))
             {
-                Serilog.Debugging.SelfLog.Enable(TextWriter.Synchronized(file));
+                Debugging.SelfLog.Enable(TextWriter.Synchronized(file));
                 Log.Information(loggingInformationMessage);
                 Log.CloseAndFlush();
             }
@@ -356,7 +356,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         public void AuditEventToCustomStandardColumnsSinkOptionsInterface()
         {
             // Arrange
-            var options = new Serilog.Sinks.MSSqlServer.ColumnOptions();
+            var options = new MSSqlServer.ColumnOptions();
 
             options.Message.ColumnName = "CustomMessage";
             options.MessageTemplate.ColumnName = "CustomMessageTemplate";
@@ -381,7 +381,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             const string loggingInformationMessage = "Logging Information message";
             using (var file = File.CreateText("CustomColumnsAuditEvent.Self.log"))
             {
-                Serilog.Debugging.SelfLog.Enable(TextWriter.Synchronized(file));
+                Debugging.SelfLog.Enable(TextWriter.Synchronized(file));
                 Log.Information(loggingInformationMessage);
                 Log.CloseAndFlush();
             }
@@ -402,14 +402,14 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                     TableName = DatabaseFixture.LogTableName,
                     AutoCreateSqlTable = true
                 },
-                columnOptions: new Serilog.Sinks.MSSqlServer.ColumnOptions())
+                columnOptions: new MSSqlServer.ColumnOptions())
                 .CreateLogger();
 
             // Act
             const string loggingInformationMessage = "Logging Information message";
             using (var file = File.CreateText("StandardColumns.Audit.Self.log"))
             {
-                Serilog.Debugging.SelfLog.Enable(TextWriter.Synchronized(file));
+                Debugging.SelfLog.Enable(TextWriter.Synchronized(file));
 
                 Log.Information(loggingInformationMessage);
                 Log.CloseAndFlush();

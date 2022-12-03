@@ -6,7 +6,7 @@ using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Serilog.Sinks.MSSqlServer.Tests
+namespace Serilog.Sinks.MSSqlServer.Tests.Misc
 {
     [Trait(TestCategory.TraitName, TestCategory.Integration)]
     public class SqlTypesTests : DatabaseTestsBase
@@ -135,7 +135,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
 
         private static void Arrange(ICollection<SqlColumn> customColumns)
         {
-            var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions
+            var columnOptions = new MSSqlServer.ColumnOptions
             {
                 AdditionalColumns = customColumns
             };
