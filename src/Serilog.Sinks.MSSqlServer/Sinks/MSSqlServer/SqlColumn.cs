@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data;
+using static System.FormattableString;
 
 namespace Serilog.Sinks.MSSqlServer
 {
@@ -38,13 +39,13 @@ namespace Serilog.Sinks.MSSqlServer
             AllowNull = dataColumn.AllowDBNull;
 
             if (!SqlDataTypes.ReverseTypeMap.ContainsKey(dataColumn.DataType))
-                throw new ArgumentException($".NET type {dataColumn.DataType} does not map to a supported SQL column data type.");
+                throw new ArgumentException(Invariant($".NET type {dataColumn.DataType} does not map to a supported SQL column data type."));
 
             DataType = SqlDataTypes.ReverseTypeMap[dataColumn.DataType];
             DataLength = dataColumn.MaxLength;
 
             if (DataLength == 0 && SqlDataTypes.DataLengthRequired.Contains(DataType))
-                throw new ArgumentException($".NET type {dataColumn.DataType} maps to a SQL column data type requiring a non-zero DataLength property.");
+                throw new ArgumentException(Invariant($".NET type {dataColumn.DataType} maps to a SQL column data type requiring a non-zero DataLength property."));
         }
 
         /// <summary>
@@ -74,7 +75,7 @@ namespace Serilog.Sinks.MSSqlServer
             set
             {
                 if (!SqlDataTypes.SystemTypeMap.ContainsKey(value))
-                    throw new ArgumentException($"SQL column data type {value} is not supported by this sink.");
+                    throw new ArgumentException(Invariant($"SQL column data type {value} is not supported by this sink."));
                 _dataType = value;
             }
         }
@@ -129,7 +130,7 @@ namespace Serilog.Sinks.MSSqlServer
             if (SqlDataTypes.DataLengthRequired.Contains(DataType))
             {
                 if (DataLength == 0)
-                    throw new ArgumentException($"Column \"{ColumnName}\" is of type {DataType.ToString().ToUpperInvariant()} which requires a non-zero DataLength.");
+                    throw new ArgumentException(Invariant($"Column \"{ColumnName}\" is of type {DataType.ToString().ToUpperInvariant()} which requires a non-zero DataLength."));
 
                 dataColumn.MaxLength = DataLength;
             }
@@ -145,7 +146,7 @@ namespace Serilog.Sinks.MSSqlServer
         internal void SetDataTypeFromConfigString(string requestedSqlType)
         {
             if (!SqlDataTypes.TryParseIfSupported(requestedSqlType, out SqlDbType sqlType))
-                throw new ArgumentException($"SQL column data type {requestedSqlType} is not recognized or not supported by this sink.");
+                throw new ArgumentException(Invariant($"SQL column data type {requestedSqlType} is not recognized or not supported by this sink."));
 
             DataType = sqlType;
         }

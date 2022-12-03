@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using Microsoft.Extensions.Configuration;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
 using Xunit.Abstractions;
+using static System.FormattableString;
 
 namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.Hybrid
 {
@@ -31,7 +33,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.Hybrid
                 connectionString: _connectionStringName,
                 tableName: DatabaseFixture.LogTableName,
                 autoCreateSqlTable: true,
-                appConfiguration: appConfig)
+                appConfiguration: appConfig,
+                formatProvider: CultureInfo.InvariantCulture)
                 .CreateLogger();
 
             // should not throw
@@ -52,7 +55,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.Hybrid
                     TableName = DatabaseFixture.LogTableName,
                     AutoCreateSqlTable = true
                 },
-                appConfiguration: appConfig)
+                appConfiguration: appConfig,
+                formatProvider: CultureInfo.InvariantCulture)
                 .CreateLogger();
 
             // should not throw
@@ -68,9 +72,9 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.Hybrid
             var standardNames = new List<string> { "CustomMessage", "CustomMessageTemplate", "CustomLevel", "CustomTimeStamp",
                 "CustomException", "CustomProperties", _additionalColumn1Name };
             var columnOptionsSection = TestConfiguration().GetSection(_columnOptionsSection);
-            var messageTemplate = $"Hello {{{_additionalColumn1PropertyName}}}!";
+            var messageTemplate = Invariant($"Hello {{{_additionalColumn1PropertyName}}}!");
             var propertyValue = 2;
-            var expectedMessage = $"Hello {propertyValue}!";
+            var expectedMessage = Invariant($"Hello {propertyValue}!");
 
             // Act
             var loggerConfiguration = new LoggerConfiguration();
@@ -78,7 +82,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.Hybrid
                 connectionString: DatabaseFixture.LogEventsConnectionString,
                 tableName: DatabaseFixture.LogTableName,
                 autoCreateSqlTable: true,
-                columnOptionsSection: columnOptionsSection)
+                columnOptionsSection: columnOptionsSection,
+                formatProvider: CultureInfo.InvariantCulture)
                 .CreateLogger();
             Log.Information(messageTemplate, propertyValue);
             Log.CloseAndFlush();
@@ -96,9 +101,9 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.Hybrid
             var standardNames = new List<string> { "CustomMessage", "CustomMessageTemplate", "CustomLevel", "CustomTimeStamp",
                 "CustomException", "CustomProperties", _additionalColumn1Name };
             var columnOptionsSection = TestConfiguration().GetSection(_columnOptionsSection);
-            var messageTemplate = $"Hello {{{_additionalColumn1PropertyName}}}!";
+            var messageTemplate = Invariant($"Hello {{{_additionalColumn1PropertyName}}}!");
             var propertyValue = 2;
-            var expectedMessage = $"Hello {propertyValue}!";
+            var expectedMessage = Invariant($"Hello {propertyValue}!");
 
             // Act
             var loggerConfiguration = new LoggerConfiguration();
@@ -109,7 +114,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.Hybrid
                     TableName = DatabaseFixture.LogTableName,
                     AutoCreateSqlTable = true
                 },
-                columnOptionsSection: columnOptionsSection)
+                columnOptionsSection: columnOptionsSection,
+                formatProvider: CultureInfo.InvariantCulture)
                 .CreateLogger();
             Log.Information(messageTemplate, propertyValue);
             Log.CloseAndFlush();
@@ -133,7 +139,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.Hybrid
             Log.Logger = loggerConfiguration.WriteTo.MSSqlServer(
                 connectionString: DatabaseFixture.LogEventsConnectionString,
                 sinkOptionsSection: sinkOptionsSection,
-                columnOptionsSection: columnOptionsSection)
+                columnOptionsSection: columnOptionsSection,
+                formatProvider: CultureInfo.InvariantCulture)
                 .CreateLogger();
             Log.CloseAndFlush();
 
@@ -145,22 +152,22 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.Hybrid
             new ConfigurationBuilder()
                 .AddInMemoryCollection(new Dictionary<string, string>
                 {
-                    { $"ConnectionStrings:{_connectionStringName}", DatabaseFixture.LogEventsConnectionString },
+                    { Invariant($"ConnectionStrings:{_connectionStringName}"), DatabaseFixture.LogEventsConnectionString },
 
-                    { $"{_columnOptionsSection}:message:columnName", "CustomMessage" },
-                    { $"{_columnOptionsSection}:messageTemplate:columnName", "CustomMessageTemplate" },
-                    { $"{_columnOptionsSection}:level:columnName", "CustomLevel" },
-                    { $"{_columnOptionsSection}:timeStamp:columnName", "CustomTimeStamp" },
-                    { $"{_columnOptionsSection}:exception:columnName", "CustomException" },
-                    { $"{_columnOptionsSection}:properties:columnName", "CustomProperties" },
-                    { $"{_columnOptionsSection}:additionalColumns:0:columnName", _additionalColumn1Name },
-                    { $"{_columnOptionsSection}:additionalColumns:0:propertyName", _additionalColumn1PropertyName },
-                    { $"{_columnOptionsSection}:additionalColumns:0:dataType", "8" },
+                    { Invariant($"{_columnOptionsSection}:message:columnName"), "CustomMessage" },
+                    { Invariant($"{_columnOptionsSection}:messageTemplate:columnName"), "CustomMessageTemplate" },
+                    { Invariant($"{_columnOptionsSection}:level:columnName"), "CustomLevel" },
+                    { Invariant($"{_columnOptionsSection}:timeStamp:columnName"), "CustomTimeStamp" },
+                    { Invariant($"{_columnOptionsSection}:exception:columnName"), "CustomException" },
+                    { Invariant($"{_columnOptionsSection}:properties:columnName"), "CustomProperties" },
+                    { Invariant($"{_columnOptionsSection}:additionalColumns:0:columnName"), _additionalColumn1Name },
+                    { Invariant($"{_columnOptionsSection}:additionalColumns:0:propertyName"), _additionalColumn1PropertyName },
+                    { Invariant($"{_columnOptionsSection}:additionalColumns:0:dataType"), "8" },
 
-                    { $"{_sinkOptionsSection}:tableName", DatabaseFixture.LogTableName },
-                    { $"{_sinkOptionsSection}:autoCreateSqlTable", "true" },
-                    { $"{_sinkOptionsSection}:batchPostingLimit", "13" },
-                    { $"{_sinkOptionsSection}:batchPeriod", "00:00:15" }
+                    { Invariant($"{_sinkOptionsSection}:tableName"), DatabaseFixture.LogTableName },
+                    { Invariant($"{_sinkOptionsSection}:autoCreateSqlTable"), "true" },
+                    { Invariant($"{_sinkOptionsSection}:batchPostingLimit"), "13" },
+                    { Invariant($"{_sinkOptionsSection}:batchPeriod"), "00:00:15" }
                 })
                 .Build();
     }

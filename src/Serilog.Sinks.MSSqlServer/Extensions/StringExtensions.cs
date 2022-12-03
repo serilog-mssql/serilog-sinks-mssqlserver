@@ -1,3 +1,5 @@
+using static System.FormattableString;
+
 namespace Serilog.Sinks.MSSqlServer.Extensions
 {
     internal static class StringExtensions
@@ -9,7 +11,7 @@ namespace Serilog.Sinks.MSSqlServer.Extensions
             if (maxLength <= suffixLength) return string.Empty;
 
             var correctedMaxLength = maxLength - suffixLength;
-            return value.Length <= maxLength ? value : $"{value.Substring(0, correctedMaxLength)}{suffix}";
+            return value.Length <= maxLength ? value : Invariant($"{value.Substring(0, correctedMaxLength)}{suffix}");
         }
     }
 }

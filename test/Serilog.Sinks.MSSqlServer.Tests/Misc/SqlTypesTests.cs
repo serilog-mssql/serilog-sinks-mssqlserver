@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
+using System.Globalization;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
 using Xunit.Abstractions;
@@ -149,7 +150,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Misc
                         TableName = DatabaseFixture.LogTableName,
                         AutoCreateSqlTable = true
                     },
-                    columnOptions: columnOptions
+                    columnOptions: columnOptions,
+                    formatProvider: CultureInfo.InvariantCulture
                 )
                 .CreateLogger();
         }

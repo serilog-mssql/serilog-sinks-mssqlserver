@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using FluentAssertions;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
@@ -29,7 +30,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Misc
                     BatchPostingLimit = 1,
                     BatchPeriod = TimeSpan.FromSeconds(10)
                 },
-                columnOptions: new MSSqlServer.ColumnOptions())
+                columnOptions: new MSSqlServer.ColumnOptions(),
+                formatProvider: CultureInfo.InvariantCulture)
                 .CreateLogger();
 
             CreateTrigger(LogTriggerTableName, LogTriggerName);
@@ -60,7 +62,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Misc
                     BatchPostingLimit = 1,
                     BatchPeriod = TimeSpan.FromSeconds(10)
                 },
-                columnOptions: options)
+                columnOptions: options,
+                formatProvider: CultureInfo.InvariantCulture)
                 .CreateLogger();
 
             CreateTrigger(LogTriggerTableName, LogTriggerName);
@@ -88,7 +91,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Misc
                     TableName = DatabaseFixture.LogTableName,
                     AutoCreateSqlTable = true
                 },
-                columnOptions: new MSSqlServer.ColumnOptions())
+                columnOptions: new MSSqlServer.ColumnOptions(),
+                formatProvider: CultureInfo.InvariantCulture)
                 .CreateLogger();
 
             CreateTrigger(LogTriggerTableName, LogTriggerName);
@@ -117,7 +121,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Misc
                     TableName = DatabaseFixture.LogTableName,
                     AutoCreateSqlTable = true
                 },
-                columnOptions: options)
+                columnOptions: options,
+                formatProvider: CultureInfo.InvariantCulture)
                 .CreateLogger());
 
             // throws, should be no table to delete unless the test fails

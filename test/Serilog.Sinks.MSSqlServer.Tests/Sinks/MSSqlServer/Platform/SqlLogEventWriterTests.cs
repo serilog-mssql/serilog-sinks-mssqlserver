@@ -201,58 +201,58 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Platform
         public void WriteEventRethrowsIfSqlConnectionFactoryCreateThrows()
         {
             // Arrange
-            _sqlConnectionFactoryMock.Setup(f => f.Create()).Callback(() => throw new Exception());
+            _sqlConnectionFactoryMock.Setup(f => f.Create()).Callback(() => throw new InvalidOperationException());
             var logEvent = TestLogEventHelper.CreateLogEvent();
 
             // Act + assert
-            Assert.Throws<Exception>(() => _sut.WriteEvent(logEvent));
+            Assert.Throws<InvalidOperationException>(() => _sut.WriteEvent(logEvent));
         }
 
         [Fact]
         public void WriteEventRethrowsIfSqlConnectionCreateCommandThrows()
         {
             // Arrange
-            _sqlConnectionWrapperMock.Setup(c => c.CreateCommand()).Callback(() => throw new Exception());
+            _sqlConnectionWrapperMock.Setup(c => c.CreateCommand()).Callback(() => throw new InvalidOperationException());
             var logEvent = TestLogEventHelper.CreateLogEvent();
 
             // Act + assert
-            Assert.Throws<Exception>(() => _sut.WriteEvent(logEvent));
+            Assert.Throws<InvalidOperationException>(() => _sut.WriteEvent(logEvent));
         }
 
         [Fact]
         public void WriteEventRethrowsIfLogEventDataGeneratorGetColumnsAndValuesThrows()
         {
             // Arrange
-            _logEventDataGeneratorMock.Setup(d => d.GetColumnsAndValues(It.IsAny<LogEvent>())).Callback(() => throw new Exception());
+            _logEventDataGeneratorMock.Setup(d => d.GetColumnsAndValues(It.IsAny<LogEvent>())).Callback(() => throw new InvalidOperationException());
             var logEvent = TestLogEventHelper.CreateLogEvent();
 
             // Act + assert
-            Assert.Throws<Exception>(() => _sut.WriteEvent(logEvent));
+            Assert.Throws<InvalidOperationException>(() => _sut.WriteEvent(logEvent));
         }
 
         [Fact]
         public void WriteEventRethrowsIfSqlCommandAddParameterThrows()
         {
             // Arrange
-            _sqlCommandWrapperMock.Setup(c => c.AddParameter(It.IsAny<string>(), It.IsAny<object>())).Callback(() => throw new Exception());
+            _sqlCommandWrapperMock.Setup(c => c.AddParameter(It.IsAny<string>(), It.IsAny<object>())).Callback(() => throw new InvalidOperationException());
             var fieldsAndValues = new List<KeyValuePair<string, object>> { new KeyValuePair<string, object>("FieldName1", "FieldValue1") };
             _logEventDataGeneratorMock.Setup(d => d.GetColumnsAndValues(It.IsAny<LogEvent>()))
                 .Returns(fieldsAndValues);
             var logEvent = TestLogEventHelper.CreateLogEvent();
 
             // Act + assert
-            Assert.Throws<Exception>(() => _sut.WriteEvent(logEvent));
+            Assert.Throws<InvalidOperationException>(() => _sut.WriteEvent(logEvent));
         }
 
         [Fact]
         public void WriteEventRethrowsIfSqlCommandExecuteNonQueryThrows()
         {
             // Arrange
-            _sqlCommandWrapperMock.Setup(c => c.ExecuteNonQuery()).Callback(() => throw new Exception());
+            _sqlCommandWrapperMock.Setup(c => c.ExecuteNonQuery()).Callback(() => throw new InvalidOperationException());
             var logEvent = TestLogEventHelper.CreateLogEvent();
 
             // Act + assert
-            Assert.Throws<Exception>(() => _sut.WriteEvent(logEvent));
+            Assert.Throws<InvalidOperationException>(() => _sut.WriteEvent(logEvent));
         }
     }
 }
