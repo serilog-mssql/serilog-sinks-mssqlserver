@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using Serilog.Debugging;
+using static System.FormattableString;
 
 namespace Serilog.Sinks.MSSqlServer
 {
@@ -58,7 +59,7 @@ namespace Serilog.Sinks.MSSqlServer
                         throw new ArgumentException("All custom columns must have a valid ColumnName property.");
 
                     if (col.DataType == SqlDataTypes.NotSupported)
-                        throw new ArgumentException($"Column \"{col.ColumnName}\" specified an invalid or unsupported SQL column type.");
+                        throw new ArgumentException(Invariant($"Column \"{col.ColumnName}\" specified an invalid or unsupported SQL column type."));
 
                     if (ClusteredColumnstoreIndex)
                         ColumnstoreCompatibilityCheck(col);
@@ -78,7 +79,7 @@ namespace Serilog.Sinks.MSSqlServer
         private static void ColumnstoreCompatibilityCheck(SqlColumn column)
         {
             if (!SqlDataTypes.ColumnstoreCompatible.Contains(column.DataType))
-                throw new ArgumentException($"Columnstore indexes do not support data type \"{column.DataType}\" declared for column \"{column.ColumnName}\".");
+                throw new ArgumentException(Invariant($"Columnstore indexes do not support data type \"{column.DataType}\" declared for column \"{column.ColumnName}\"."));
 
             if (column.DataLength == -1 && SqlDataTypes.DataLengthRequired.Contains(column.DataType))
                 SelfLog.WriteLine("Warning: SQL2017 or newer required to use columnstore index with MAX length column \"{0}\".", column.ColumnName);

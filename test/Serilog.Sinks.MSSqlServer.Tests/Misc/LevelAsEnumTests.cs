@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.IO;
 using FluentAssertions;
 using Serilog.Events;
@@ -29,7 +30,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Misc
                     BatchPostingLimit = 1,
                     BatchPeriod = TimeSpan.FromSeconds(10)
                 },
-                columnOptions: new MSSqlServer.ColumnOptions { Level = { StoreAsEnum = true } })
+                columnOptions: new MSSqlServer.ColumnOptions { Level = { StoreAsEnum = true } },
+                formatProvider: CultureInfo.InvariantCulture)
                 .CreateLogger();
 
             // Act
@@ -60,7 +62,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Misc
                     BatchPostingLimit = 1,
                     BatchPeriod = TimeSpan.FromSeconds(10)
                 },
-                columnOptions: new MSSqlServer.ColumnOptions { Level = { StoreAsEnum = false } })
+                columnOptions: new MSSqlServer.ColumnOptions { Level = { StoreAsEnum = false } },
+                formatProvider: CultureInfo.InvariantCulture)
                 .CreateLogger();
 
             // Act
@@ -89,7 +92,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Misc
                     TableName = DatabaseFixture.LogTableName,
                     AutoCreateSqlTable = true
                 },
-                columnOptions: new MSSqlServer.ColumnOptions { Level = { StoreAsEnum = true } })
+                columnOptions: new MSSqlServer.ColumnOptions { Level = { StoreAsEnum = true } },
+                formatProvider: CultureInfo.InvariantCulture)
                 .CreateLogger();
 
             // Act
@@ -118,7 +122,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Misc
                     TableName = DatabaseFixture.LogTableName,
                     AutoCreateSqlTable = true
                 },
-                columnOptions: new MSSqlServer.ColumnOptions { Level = { StoreAsEnum = false } })
+                columnOptions: new MSSqlServer.ColumnOptions { Level = { StoreAsEnum = false } },
+                formatProvider: CultureInfo.InvariantCulture)
                 .CreateLogger();
 
             // Act

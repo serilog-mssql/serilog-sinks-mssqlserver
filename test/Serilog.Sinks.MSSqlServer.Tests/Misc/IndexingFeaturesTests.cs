@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using FluentAssertions;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
@@ -31,7 +32,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Misc
                         BatchPostingLimit = 1,
                         BatchPeriod = TimeSpan.FromSeconds(10)
                     },
-                    columnOptions: columnOptions
+                    columnOptions: columnOptions,
+                    formatProvider: CultureInfo.InvariantCulture
                 )
                 .CreateLogger();
             Log.CloseAndFlush();
@@ -59,7 +61,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Misc
                         BatchPostingLimit = 1,
                         BatchPeriod = TimeSpan.FromSeconds(10)
                     },
-                    columnOptions: columnOptions
+                    columnOptions: columnOptions,
+                    formatProvider: CultureInfo.InvariantCulture
                 )
                 .CreateLogger();
             Log.CloseAndFlush();
@@ -95,7 +98,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Misc
                         BatchPostingLimit = 1,
                         BatchPeriod = TimeSpan.FromSeconds(10)
                     },
-                    columnOptions: columnOptions
+                    columnOptions: columnOptions,
+                    formatProvider: CultureInfo.InvariantCulture
                 )
                 .CreateLogger();
             Log.CloseAndFlush();

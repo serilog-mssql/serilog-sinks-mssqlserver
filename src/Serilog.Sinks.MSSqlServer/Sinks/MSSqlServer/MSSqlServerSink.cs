@@ -175,17 +175,17 @@ namespace Serilog.Sinks.MSSqlServer
 
             if (sinkDependencies.DataTableCreator == null)
             {
-                throw new InvalidOperationException($"DataTableCreator is not initialized!");
+                throw new InvalidOperationException("DataTableCreator is not initialized!");
             }
 
             if (sinkDependencies.SqlTableCreator == null)
             {
-                throw new InvalidOperationException($"SqlTableCreator is not initialized!");
+                throw new InvalidOperationException("SqlTableCreator is not initialized!");
             }
 
             if (sinkDependencies.SqlBulkBatchWriter == null)
             {
-                throw new InvalidOperationException($"SqlBulkBatchWriter is not initialized!");
+                throw new InvalidOperationException("SqlBulkBatchWriter is not initialized!");
             }
         }
 

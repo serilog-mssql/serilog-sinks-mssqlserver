@@ -14,6 +14,7 @@
 
 using System;
 using System.Configuration;
+using static System.FormattableString;
 
 // Disable XML comment warnings for internal config classes which are required to have public members
 #pragma warning disable 1591
@@ -89,7 +90,8 @@ namespace Serilog.Sinks.MSSqlServer
             SetProperty.IfProvided<int>(this, nameof(DataLength), (val) => sqlColumn.DataLength = val);
 
             if (sqlColumn.DataLength == 0 && SqlDataTypes.DataLengthRequired.Contains(sqlColumn.DataType))
-                throw new ArgumentException($"SQL column {ColumnName} of data type {sqlColumn.DataType} requires a non-zero DataLength property.");
+                throw new ArgumentException(Invariant(
+                    $"SQL column {ColumnName} of data type {sqlColumn.DataType} requires a non-zero DataLength property."));
 
             SetProperty.IfProvided<bool>(this, nameof(AllowNull), (val) => sqlColumn.AllowNull = val);
 

@@ -3,5 +3,5 @@
 namespace Serilog.Sinks.MSSqlServer.Tests.TestUtils
 {
     [CollectionDefinition("DatabaseTests", DisableParallelization = true)]
-    public class PatientSecureFixtureCollection : ICollectionFixture<DatabaseFixture> { }
+    public class PatientSecureFixture : ICollectionFixture<DatabaseFixture> { }
 }

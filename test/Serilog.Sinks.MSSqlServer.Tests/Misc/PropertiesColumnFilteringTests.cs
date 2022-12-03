@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using System.Globalization;
+using FluentAssertions;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
 using Xunit.Abstractions;
@@ -28,7 +29,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Misc
                         TableName = DatabaseFixture.LogTableName,
                         AutoCreateSqlTable = true,
                     },
-                    columnOptions: columnOptions
+                    columnOptions: columnOptions,
+                    formatProvider: CultureInfo.InvariantCulture
                 )
                 .CreateLogger();
 
@@ -63,7 +65,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Misc
                         TableName = DatabaseFixture.LogTableName,
                         AutoCreateSqlTable = true
                     },
-                    columnOptions: columnOptions
+                    columnOptions: columnOptions,
+                    formatProvider: CultureInfo.InvariantCulture
                 )
                 .CreateLogger();
 

@@ -183,33 +183,33 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Platform
         {
             // Arrange
             _logEventDataGeneratorMock.Setup(d => d.GetColumnsAndValues(It.IsAny<LogEvent>()))
-                .Callback(() => throw new Exception());
+                .Callback(() => throw new InvalidOperationException());
             var logEvents = CreateLogEvents();
 
             // Act + assert
-            Assert.ThrowsAsync<Exception>(() => _sut.WriteBatch(logEvents, _dataTable));
+            Assert.ThrowsAsync<InvalidOperationException>(() => _sut.WriteBatch(logEvents, _dataTable));
         }
 
         [Fact]
         public void WriteBatchRethrowsIfSqlConnectionFactoryCreateThrows()
         {
             // Arrange
-            _sqlConnectionFactoryMock.Setup(f => f.Create()).Callback(() => throw new Exception());
+            _sqlConnectionFactoryMock.Setup(f => f.Create()).Callback(() => throw new InvalidOperationException());
             var logEvents = CreateLogEvents();
 
             // Act + assert
-            Assert.ThrowsAsync<Exception>(() => _sut.WriteBatch(logEvents, _dataTable));
+            Assert.ThrowsAsync<InvalidOperationException>(() => _sut.WriteBatch(logEvents, _dataTable));
         }
 
         [Fact]
         public void WriteBatchRethrowsIfSqlConnectionOpenAsyncThrows()
         {
             // Arrange
-            _sqlConnectionWrapperMock.Setup(c => c.OpenAsync()).Callback(() => throw new Exception());
+            _sqlConnectionWrapperMock.Setup(c => c.OpenAsync()).Callback(() => throw new InvalidOperationException());
             var logEvents = CreateLogEvents();
 
             // Act + assert
-            Assert.ThrowsAsync<Exception>(() => _sut.WriteBatch(logEvents, _dataTable));
+            Assert.ThrowsAsync<InvalidOperationException>(() => _sut.WriteBatch(logEvents, _dataTable));
         }
 
         [Fact]
@@ -217,12 +217,12 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Platform
         {
             // Arrange
             _sqlBulkCopyWrapper.Setup(c => c.AddSqlBulkCopyColumnMapping(It.IsAny<string>(), It.IsAny<string>()))
-                .Callback(() => throw new Exception());
+                .Callback(() => throw new InvalidOperationException());
             var logEvents = CreateLogEvents();
             _dataTable.Columns.Add(new DataColumn("ColumnName"));
 
             // Act + assert
-            Assert.ThrowsAsync<Exception>(() => _sut.WriteBatch(logEvents, _dataTable));
+            Assert.ThrowsAsync<InvalidOperationException>(() => _sut.WriteBatch(logEvents, _dataTable));
         }
 
         [Fact]
@@ -230,11 +230,11 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Platform
         {
             // Arrange
             _sqlBulkCopyWrapper.Setup(c => c.WriteToServerAsync(It.IsAny<DataTable>()))
-                .Callback(() => throw new Exception());
+                .Callback(() => throw new InvalidOperationException());
             var logEvents = CreateLogEvents();
 
             // Act + assert
-            Assert.ThrowsAsync<Exception>(() => _sut.WriteBatch(logEvents, _dataTable));
+            Assert.ThrowsAsync<InvalidOperationException>(() => _sut.WriteBatch(logEvents, _dataTable));
         }
 
         private static List<LogEvent> CreateLogEvents()
