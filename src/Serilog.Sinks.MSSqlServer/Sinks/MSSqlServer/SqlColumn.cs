@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using static System.FormattableString;
 
@@ -12,6 +13,7 @@ namespace Serilog.Sinks.MSSqlServer
         private SqlDbType _dataType = SqlDbType.VarChar; // backwards-compatibility default
         private string _columnName = string.Empty;
         private string _propertyName;
+        private List<string> _propertyNameHierarchy = new List<string>();
 
         /// <summary>
         /// Default constructor.
@@ -104,7 +106,19 @@ namespace Serilog.Sinks.MSSqlServer
         public string PropertyName
         {
             get => _propertyName ?? ColumnName;
-            set => _propertyName = value;
+            set
+            {
+                _propertyName = value;
+                ParseHierarchicalPropertyName(value);
+            }
+        }
+
+        /// <summary>
+        /// List of the hierachical parts of a property name and all sub properties (e.g. Property.Settings.EventName)
+        /// </summary>
+        public IReadOnlyList<string> PropertyNameHierarchy
+        {
+            get => _propertyNameHierarchy;
         }
 
         // Set by the constructors of the Standard Column classes that inherit from this;
@@ -149,6 +163,11 @@ namespace Serilog.Sinks.MSSqlServer
                 throw new ArgumentException(Invariant($"SQL column data type {requestedSqlType} is not recognized or not supported by this sink."));
 
             DataType = sqlType;
+        }
+
+        private void ParseHierarchicalPropertyName(string propertyName)
+        {
+            _propertyNameHierarchy.AddRange(propertyName.Split('.'));
         }
     }
 }
