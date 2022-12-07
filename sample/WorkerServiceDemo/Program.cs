@@ -1,3 +1,4 @@
+using System;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
@@ -8,6 +9,7 @@ namespace WorkerServiceDemo
     {
         public static void Main(string[] args)
         {
+            //Serilog.Debugging.SelfLog.Enable(Console.Error);
             CreateHostBuilder(args).Build().Run();
         }
 
