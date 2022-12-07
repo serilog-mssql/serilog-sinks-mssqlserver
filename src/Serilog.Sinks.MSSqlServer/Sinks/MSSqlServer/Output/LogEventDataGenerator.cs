@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Serilog.Events;
 
 namespace Serilog.Sinks.MSSqlServer.Output
@@ -8,31 +9,32 @@ namespace Serilog.Sinks.MSSqlServer.Output
     {
         private readonly ColumnOptions _columnOptions;
         private readonly IStandardColumnDataGenerator _standardColumnDataGenerator;
-        private readonly IPropertiesColumnDataGenerator _propertiesColumnDataGenerator;
+        private readonly IAdditionalColumnDataGenerator _additionalColumnDataGenerator;
 
         public LogEventDataGenerator(
             ColumnOptions columnOptions,
             IStandardColumnDataGenerator standardColumnDataGenerator,
-            IPropertiesColumnDataGenerator propertiesColumnDataGenerator)
+            IAdditionalColumnDataGenerator additionalColumnDataGenerator)
         {
             _columnOptions = columnOptions ?? throw new ArgumentNullException(nameof(columnOptions));
             _standardColumnDataGenerator = standardColumnDataGenerator ?? throw new ArgumentNullException(nameof(standardColumnDataGenerator));
-            _propertiesColumnDataGenerator = propertiesColumnDataGenerator ?? throw new ArgumentNullException(nameof(propertiesColumnDataGenerator));
+            _additionalColumnDataGenerator = additionalColumnDataGenerator ?? throw new ArgumentNullException(nameof(additionalColumnDataGenerator));
         }
 
         public IEnumerable<KeyValuePair<string, object>> GetColumnsAndValues(LogEvent logEvent)
         {
-            foreach (var column in _columnOptions.Store)
+            // skip Id (auto-incrementing identity)
+            foreach (var column in _columnOptions.Store.Where(c => c != StandardColumn.Id))
             {
-                // skip Id (auto-incrementing identity)
-                if (column != StandardColumn.Id)
-                    yield return _standardColumnDataGenerator.GetStandardColumnNameAndValue(column, logEvent);
+                yield return _standardColumnDataGenerator.GetStandardColumnNameAndValue(column, logEvent);
             }
 
             if (_columnOptions.AdditionalColumns != null)
             {
-                foreach (var columnValuePair in _propertiesColumnDataGenerator.ConvertPropertiesToColumn(logEvent.Properties))
-                    yield return columnValuePair;
+                foreach (var additionalColumn in _columnOptions.AdditionalColumns)
+                {
+                    yield return _additionalColumnDataGenerator.GetAdditionalColumnNameAndValue(additionalColumn, logEvent.Properties);
+                }
             }
         }
     }

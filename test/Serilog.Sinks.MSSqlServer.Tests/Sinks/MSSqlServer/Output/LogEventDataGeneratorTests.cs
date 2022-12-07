@@ -13,35 +13,35 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Output
     [Trait(TestCategory.TraitName, TestCategory.Unit)]
     public class LogEventDataGeneratorTests
     {
-        private readonly Serilog.Sinks.MSSqlServer.ColumnOptions _columnOptions;
+        private readonly MSSqlServer.ColumnOptions _columnOptions;
         private readonly Mock<IStandardColumnDataGenerator> _standardColumnDataGeneratorMock;
-        private readonly Mock<IPropertiesColumnDataGenerator> _propertiesColumnDataGenerator;
+        private readonly Mock<IAdditionalColumnDataGenerator> _additionalColumnDataGeneratorMock;
         private readonly LogEventDataGenerator _sut;
 
         public LogEventDataGeneratorTests()
         {
-            _columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions();
+            _columnOptions = new MSSqlServer.ColumnOptions();
             _standardColumnDataGeneratorMock = new Mock<IStandardColumnDataGenerator>();
-            _propertiesColumnDataGenerator = new Mock<IPropertiesColumnDataGenerator>();
-            _sut = new LogEventDataGenerator(_columnOptions, _standardColumnDataGeneratorMock.Object, _propertiesColumnDataGenerator.Object);
+            _additionalColumnDataGeneratorMock = new Mock<IAdditionalColumnDataGenerator>();
+            _sut = new LogEventDataGenerator(_columnOptions, _standardColumnDataGeneratorMock.Object, _additionalColumnDataGeneratorMock.Object);
         }
 
         [Fact]
         public void InitializedWithoutColumnOptionsThrows()
         {
             // Act + assert
-            Assert.Throws<ArgumentNullException>(() => new LogEventDataGenerator(null, _standardColumnDataGeneratorMock.Object, _propertiesColumnDataGenerator.Object));
+            Assert.Throws<ArgumentNullException>(() => new LogEventDataGenerator(null, _standardColumnDataGeneratorMock.Object, _additionalColumnDataGeneratorMock.Object));
         }
 
         [Fact]
         public void InitializedWithoutStandardColumnDataGeneratorThrows()
         {
             // Act + assert
-            Assert.Throws<ArgumentNullException>(() => new LogEventDataGenerator(_columnOptions, null, _propertiesColumnDataGenerator.Object));
+            Assert.Throws<ArgumentNullException>(() => new LogEventDataGenerator(_columnOptions, null, _additionalColumnDataGeneratorMock.Object));
         }
 
         [Fact]
-        public void InitializedWithoutPropertiesColumnDataGeneratorThrows()
+        public void InitializedWithoutAdditionalColumnDataGeneratorThrows()
         {
             // Act + assert
             Assert.Throws<ArgumentNullException>(() => new LogEventDataGenerator(_columnOptions, _standardColumnDataGeneratorMock.Object, null));
@@ -69,14 +69,16 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Output
         }
 
         [Fact]
-        public void GetColumnsAndValuesWithAdditionalColumnsCallsPropertiesColumnDataGenerator()
+        public void GetColumnsAndValuesWithAdditionalColumnsCallsAdditionalColumnDataGenerator()
         {
             // Arrange
+            var additionalColumn = new SqlColumn();
             _columnOptions.Store.Clear();
-            _columnOptions.AdditionalColumns = new List<SqlColumn> { new SqlColumn() };
+            _columnOptions.AdditionalColumns = new List<SqlColumn> { additionalColumn };
             var logEvent = CreateLogEvent();
-            var expectedResult = new List<KeyValuePair<string, object>> { new KeyValuePair<string, object>("PropertyKey1", "PropertyValie1") };
-            _propertiesColumnDataGenerator.Setup(p => p.ConvertPropertiesToColumn(It.IsAny<IReadOnlyDictionary<string, LogEventPropertyValue>>()))
+            var expectedResult = new KeyValuePair<string, object>("PropertyKey1", "PropertyValie1");
+            _additionalColumnDataGeneratorMock.Setup(p => p.GetAdditionalColumnNameAndValue(
+                It.IsAny<SqlColumn>(), It.IsAny<IReadOnlyDictionary<string, LogEventPropertyValue>>()))
                 .Returns(expectedResult);
 
             // Act
@@ -84,13 +86,13 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Output
 
             // Assert
             Assert.Single(result);
-            Assert.Equal(expectedResult[0].Key, result[0].Key);
-            Assert.Equal(expectedResult[0].Value, result[0].Value);
-            _propertiesColumnDataGenerator.Verify(p => p.ConvertPropertiesToColumn(logEvent.Properties), Times.Once);
+            Assert.Equal(expectedResult, result[0]);
+            _additionalColumnDataGeneratorMock.Verify(p => p.GetAdditionalColumnNameAndValue(
+                additionalColumn, logEvent.Properties), Times.Once);
         }
 
         [Fact]
-        public void GetColumnsAndValuesWithoutAdditionalColumnsDoesNotCallPropertiesColumnDataGenerator()
+        public void GetColumnsAndValuesWithoutAdditionalColumnsDoesNotCallAdditionalColumnDataGenerator()
         {
             // Arrange
             var logEvent = CreateLogEvent();
@@ -99,7 +101,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Output
             var result = _sut.GetColumnsAndValues(logEvent).ToArray();
 
             // Assert
-            _propertiesColumnDataGenerator.Verify(p => p.ConvertPropertiesToColumn(logEvent.Properties), Times.Never);
+            _additionalColumnDataGeneratorMock.Verify(p => p.GetAdditionalColumnNameAndValue(
+                It.IsAny<SqlColumn>(), logEvent.Properties), Times.Never);
         }
 
         private static LogEvent CreateLogEvent()
