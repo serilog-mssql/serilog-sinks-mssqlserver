@@ -19,6 +19,14 @@ namespace WorkerServiceDemo
         {
             _logger.LogInformation("Worker started");
 
+            // Logging child property Name of structured object structured
+            // to a separate column according to configuration in AddictionalColumns in appsettings.json
+            var structured = new Structured
+            {
+                Name = "Structured Subproperty Value"
+            };
+            _logger.LogInformation("{@Structured} {@Scalar}", structured, "Scalar Value");
+
             while (!stoppingToken.IsCancellationRequested)
             {
                 _logger.LogInformation("Worker running at: {time}. CustomProperty1: {CustomProperty1}",
