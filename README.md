@@ -335,6 +335,8 @@ Any valid SQL column name can be used. Standard Columns have default names assig
 
 The optional name of a Serilog property to use as the value for a custom column. If not provided, the property used is the one that has the same name as the specified ColumnName. It applies only to custom columns defined in `AdditionalColumns` and is ignored for standard columns.
 
+PropertyName can contain a simple property name like `SomeProperty` but it can also be used to hierachically reference sub-properties with expressions like `SomeProperty.SomeSubProperty.SomeThirdLevelProperty`. This can be used to easily bind additional columns to specific sub-properties following the paradigm of structured logging. Please be aware that collections are not supported. This means expressions like `SomeProperty.SomeArray[2]` will not work.
+
 ### DataType
 
 This property can be set to nearly any value in the `System.Data.SqlDbType` enumeration. Unlike previous versions of this sink, SQL column types are fully supported end-to-end, including auto-table-creation. Earlier limitations imposed by the use of the .NET `DataColumn` object no longer apply. Most of the Standard Columns only support a limited subset of the SQL column types (and often just one type). Some of the special-case SQL column types are excluded such as `timestamp` and `udt`, and deprecated types like `text` and `image` are excluded. These are the supported SQL column data types:
