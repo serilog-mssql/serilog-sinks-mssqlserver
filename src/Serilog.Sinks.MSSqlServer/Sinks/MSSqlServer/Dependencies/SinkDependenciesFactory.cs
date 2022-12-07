@@ -3,6 +3,7 @@ using Serilog.Formatting;
 using Serilog.Sinks.MSSqlServer.Output;
 using Serilog.Sinks.MSSqlServer.Platform;
 using Serilog.Sinks.MSSqlServer.Platform.SqlClient;
+using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Output;
 
 namespace Serilog.Sinks.MSSqlServer.Dependencies
 {
@@ -27,7 +28,9 @@ namespace Serilog.Sinks.MSSqlServer.Dependencies
                     new StandardColumnDataGenerator(columnOptions, formatProvider,
                         new XmlPropertyFormatter(),
                         logEventFormatter),
-                    new PropertiesColumnDataGenerator(columnOptions));
+                    new AdditionalColumnDataGenerator(
+                        new ColumnSimplePropertyValueResolver(),
+                        new ColumnHierarchicalPropertyValueResolver()));
 
             var sinkDependencies = new SinkDependencies
             {
