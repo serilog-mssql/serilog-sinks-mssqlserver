@@ -20,7 +20,7 @@ namespace WorkerServiceDemo
             _logger.LogInformation("Worker started");
 
             // Logging child property Name of structured object structured
-            // to a separate column according to configuration in AddictionalColumns in appsettings.json
+            // to a separate column according to configuration in AdditionalColumns in appsettings.json
             var structured = new Structured
             {
                 Name = "Structured Subproperty Value"
