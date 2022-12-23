@@ -11,11 +11,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Extensions
         [Fact]
         public void ToMessageAndCompleteStackTraceReturnsEmptyIfExceptionIsNull()
         {
-            // Arrange
-            var exception = new InvalidOperationException();
-
-            // Act
-            var result = exception.ToMessageAndCompleteStackTrace();
+            // Arrange + Act
+            var result = ExceptionExtensions.ToMessageAndCompleteStackTrace(null);
 
             // Assert
             Assert.Equal(string.Empty, result);
