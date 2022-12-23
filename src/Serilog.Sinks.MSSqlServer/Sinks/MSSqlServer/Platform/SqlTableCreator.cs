@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Data;
 using Serilog.Debugging;
+using Serilog.Sinks.MSSqlServer.Extensions;
 
 namespace Serilog.Sinks.MSSqlServer.Platform
 {
@@ -42,7 +43,8 @@ namespace Serilog.Sinks.MSSqlServer.Platform
             }
             catch (Exception ex)
             {
-                SelfLog.WriteLine("Exception creating table {0}:\n{1}", _tableName, ex.ToString());
+                SelfLog.WriteLine("Exception creating table {0}:\n{1}", _tableName,
+                    ex.ToMessageAndCompleteStackTrace());
             }
         }
     }

@@ -113,7 +113,8 @@ namespace Serilog.Sinks.MSSqlServer.Output
                 }
                 catch (Exception ex)
                 {
-                    SelfLog.WriteLine("Unable to filter properties to store in {0} due to following error: {1}", this, ex);
+                    SelfLog.WriteLine("Unable to filter properties to store in {0} due to following error: {1}",
+                        this, ex.ToMessageAndCompleteStackTrace());
                 }
             }
 

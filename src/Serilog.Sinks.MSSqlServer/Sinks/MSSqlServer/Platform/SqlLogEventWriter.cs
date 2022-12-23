@@ -4,6 +4,7 @@ using System.Text;
 using Serilog.Debugging;
 using Serilog.Events;
 using Serilog.Sinks.MSSqlServer.Output;
+using Serilog.Sinks.MSSqlServer.Extensions;
 using static System.FormattableString;
 
 namespace Serilog.Sinks.MSSqlServer.Platform
@@ -70,7 +71,8 @@ namespace Serilog.Sinks.MSSqlServer.Platform
             }
             catch (Exception ex)
             {
-                SelfLog.WriteLine("Unable to write log event to the database due to following error: {0}", ex.Message);
+                SelfLog.WriteLine("Unable to write log event to the database due to following error: {0}",
+                    ex.ToMessageAndCompleteStackTrace());
                 throw;
             }
         }
