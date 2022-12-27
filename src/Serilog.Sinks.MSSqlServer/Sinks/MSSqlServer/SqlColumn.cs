@@ -13,7 +13,7 @@ namespace Serilog.Sinks.MSSqlServer
         private SqlDbType _dataType = SqlDbType.VarChar; // backwards-compatibility default
         private string _columnName = string.Empty;
         private string _propertyName;
-        private List<string> _propertyNameHierarchy = new List<string>();
+        private readonly List<string> _propertyNameHierarchy = new List<string>();
 
         /// <summary>
         /// Default constructor.
