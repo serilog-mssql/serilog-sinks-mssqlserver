@@ -56,7 +56,8 @@ namespace Serilog.Sinks.MSSqlServer.Platform
             }
             catch (Exception ex)
             {
-                SelfLog.WriteLine("Unable to write {0} log events to the database due to following error: {1}", events.Count(), ex.Message);
+                SelfLog.WriteLine("Unable to write batch of {0} log events to the database due to following error: {1}",
+                    events.Count(), ex);
             }
             finally
             {
