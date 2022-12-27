@@ -42,7 +42,7 @@ namespace Serilog.Sinks.MSSqlServer.Platform
             }
             catch (Exception ex)
             {
-                SelfLog.WriteLine("Exception creating table {0}:\n{1}", _tableName, ex.ToString());
+                SelfLog.WriteLine("Unable to create database table {0} due to following error: {1}", _tableName, ex);
             }
         }
     }

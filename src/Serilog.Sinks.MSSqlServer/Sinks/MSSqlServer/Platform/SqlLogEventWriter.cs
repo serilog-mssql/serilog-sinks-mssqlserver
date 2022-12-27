@@ -70,7 +70,7 @@ namespace Serilog.Sinks.MSSqlServer.Platform
             }
             catch (Exception ex)
             {
-                SelfLog.WriteLine("Unable to write log event to the database due to following error: {0}", ex.Message);
+                SelfLog.WriteLine("Unable to write log event to the database due to following error: {0}", ex);
                 throw;
             }
         }
