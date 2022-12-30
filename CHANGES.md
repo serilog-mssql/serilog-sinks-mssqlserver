@@ -1,3 +1,10 @@
+# 6.1.0
+* Fixed issues #207, #435, #419 & #292: Resolve hierarchical property expressions for additional columns
+* Fixed issue #432: Write full exception info to SelfLog
+* Use NuGet central package management
+* Added PR code security scanning (CodeQL & DevSkim)
+* Reorganizations & small fixes
+
 # 6.0.0
 * Updated .NET target frameworks (removed soon obsolete .NET Core 3.1, added .NET 6.0 LTS).
 * Fixed issue #417: removed obsolete and vulnerable Microsoft.Azure.Services.AppAuthentication.
