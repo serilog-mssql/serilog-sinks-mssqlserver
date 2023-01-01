@@ -1,5 +1,5 @@
 name: PR Analysis InferSharp
-on:
+
 on:
   workflow_run:
     workflows: [ "PR Validation" ]
