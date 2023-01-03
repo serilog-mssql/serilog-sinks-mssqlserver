@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-and-analyze:
+  build-and-codeql:
     runs-on: windows-latest
     permissions:
       actions: read
