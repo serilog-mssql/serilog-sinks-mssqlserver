@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  analyze:
+  devskim:
     runs-on: ubuntu-latest
     permissions:
       actions: read
