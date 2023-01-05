@@ -119,6 +119,20 @@ namespace Serilog.Sinks.MSSqlServer.Tests.TestUtils
             }
         }
 
+        protected static void VerifyStringColumnMultipleValuesWrittenAndNotWritten(
+            string columnName,
+            List<string> valuesWritten,
+            List<string> valuesNotWritten)
+        {
+            using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
+            {
+                var logEvents = conn.Query<string>($"SELECT {columnName} FROM {DatabaseFixture.LogTableName}");
+
+                valuesWritten?.ForEach(v =>  logEvents.Should().Contain(v));
+                valuesNotWritten?.ForEach(v =>  logEvents.Should().NotContain(v));
+            }
+        }
+
         protected static void VerifyIntegerColumnWritten(string columnName, int expectedValue)
         {
             using (var conn = new SqlConnection(DatabaseFixture.LogEventsConnectionString))
