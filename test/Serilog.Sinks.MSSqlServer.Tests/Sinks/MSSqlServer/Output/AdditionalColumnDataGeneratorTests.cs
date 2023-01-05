@@ -13,14 +13,12 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Output
     [Trait(TestCategory.TraitName, TestCategory.Unit)]
     public class AdditionalColumnDataGeneratorTests
     {
-        private readonly Dictionary<string, LogEventPropertyValue> _properties;
-        private Mock<IColumnSimplePropertyValueResolver> _columnSimplePropertyValueResolver;
-        private Mock<IColumnHierarchicalPropertyValueResolver> _columnHierarchicalPropertyValueResolver;
-        private AdditionalColumnDataGenerator _sut;
+        private readonly Mock<IColumnSimplePropertyValueResolver> _columnSimplePropertyValueResolver;
+        private readonly Mock<IColumnHierarchicalPropertyValueResolver> _columnHierarchicalPropertyValueResolver;
+        private readonly AdditionalColumnDataGenerator _sut;
 
         public AdditionalColumnDataGeneratorTests()
         {
-            _properties = new Dictionary<string, LogEventPropertyValue>();
             _columnSimplePropertyValueResolver = new Mock<IColumnSimplePropertyValueResolver>();
             _columnHierarchicalPropertyValueResolver = new Mock<IColumnHierarchicalPropertyValueResolver>();
             _sut = new AdditionalColumnDataGenerator(_columnSimplePropertyValueResolver.Object,
