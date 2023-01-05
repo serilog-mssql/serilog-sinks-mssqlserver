@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using Serilog;
+using Serilog.Core;
 using Serilog.Sinks.MSSqlServer;
 
 namespace CustomLogEventFormatterDemo
@@ -16,6 +17,7 @@ namespace CustomLogEventFormatterDemo
             var options = new ColumnOptions();
             options.Store.Add(StandardColumn.LogEvent);
             var customFormatter = new FlatLogEventFormatter();
+            var levelSwitch = new LoggingLevelSwitch();
 
             // Legacy interace - do not use this anymore
             //Log.Logger = new LoggerConfiguration()
@@ -47,7 +49,8 @@ namespace CustomLogEventFormatterDemo
                     formatProvider: null,
                     columnOptions: options,
                     columnOptionsSection: null,
-                    logEventFormatter: customFormatter)
+                    logEventFormatter: customFormatter,
+                    levelSwitch: levelSwitch)
                 .CreateLogger();
 
             try
@@ -58,6 +61,8 @@ namespace CustomLogEventFormatterDemo
 
                 Log.Warning("No coins remain at position {@Position}", new { Lat = 25, Long = 134 });
 
+                UseLevelSwitchToModifyLogLevelDuringRuntime(levelSwitch);
+
                 Fail();
             }
             catch (DivideByZeroException e)
@@ -66,6 +71,19 @@ namespace CustomLogEventFormatterDemo
             }
 
             Log.CloseAndFlush();
+        }
+
+        private static void UseLevelSwitchToModifyLogLevelDuringRuntime(LoggingLevelSwitch levelSwitch)
+        {
+            levelSwitch.MinimumLevel = Serilog.Events.LogEventLevel.Error;
+
+            Log.Information("This should not be logged");
+
+            Log.Error("This should be logged");
+
+            levelSwitch.MinimumLevel = Serilog.Events.LogEventLevel.Information;
+
+            Log.Information("This should be logged again");
         }
 
         private static void Fail()
