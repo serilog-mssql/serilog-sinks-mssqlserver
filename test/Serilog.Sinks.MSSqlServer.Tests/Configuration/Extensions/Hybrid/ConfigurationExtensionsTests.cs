@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using Microsoft.Extensions.Configuration;
+using Serilog.Core;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
 using Xunit.Abstractions;
@@ -146,6 +147,50 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.Hybrid
 
             // Assert
             VerifyDatabaseColumnsWereCreated(standardNames);
+        }
+
+        [Fact]
+        public void LogLevelSwitchIsApplied()
+        {
+            // Arrange
+            var columnOptionsSection = TestConfiguration().GetSection(_columnOptionsSection);
+            const string message1 = "info message 1";
+            const string message2 = "error message 2";
+            const string message3 = "info message 3";
+            const string message4 = "error message 4";
+            const string message5 = "info message 5";
+            const string message6 = "error message 6";
+            var levelSwitch = new LoggingLevelSwitch(Events.LogEventLevel.Information);
+
+            // Act
+            var loggerConfiguration = new LoggerConfiguration();
+            Log.Logger = loggerConfiguration.WriteTo.MSSqlServer(
+                connectionString: DatabaseFixture.LogEventsConnectionString,
+                sinkOptions: new MSSqlServerSinkOptions
+                {
+                    TableName = DatabaseFixture.LogTableName,
+                    AutoCreateSqlTable = true
+                },
+                columnOptionsSection: columnOptionsSection,
+                formatProvider: CultureInfo.InvariantCulture,
+                levelSwitch: levelSwitch)
+                .CreateLogger();
+
+            Log.Information(message1);
+            Log.Error(message2);
+            levelSwitch.MinimumLevel = Events.LogEventLevel.Error;
+            Log.Information(message3);
+            Log.Error(message4);
+            levelSwitch.MinimumLevel = Events.LogEventLevel.Information;
+            Log.Information(message5);
+            Log.Error(message6);
+
+            Log.CloseAndFlush();
+
+            // Assert
+            var writtenMessages = new List<string> { message1, message2, message4, message5, message6 };
+            var notWrittenMessages = new List<string> { message3 }; // Information message was filtered by level switch
+            VerifyStringColumnMultipleValuesWrittenAndNotWritten("CustomMessage", writtenMessages, notWrittenMessages);
         }
 
         private static IConfiguration TestConfiguration() =>
