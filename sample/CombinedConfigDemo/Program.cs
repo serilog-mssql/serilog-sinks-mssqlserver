@@ -49,7 +49,7 @@ namespace CombinedConfigDemo
                     columnOptionsSection: columnOptionsSection)
                 .CreateLogger();
 
-            Log.Information("Hello {Name} from thread {ThreadId}", Environment.GetEnvironmentVariable("USERNAME"), Thread.CurrentThread.ManagedThreadId);
+            Log.Information("Hello {Name} from thread {ThreadId}", Environment.GetEnvironmentVariable("USERNAME"), Environment.CurrentManagedThreadId);
 
             Log.Warning("No coins remain at position {@Position}", new { Lat = 25, Long = 134 });
 
