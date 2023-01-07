@@ -42,15 +42,15 @@ namespace CustomLogEventFormatterDemo
                     {
                         TableName = _tableName,
                         SchemaName = _schemaName,
-                        AutoCreateSqlTable = true
+                        AutoCreateSqlTable = true,
+                        LevelSwitch = levelSwitch
                     },
                     appConfiguration: null,
                     restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Verbose,
                     formatProvider: null,
                     columnOptions: options,
                     columnOptionsSection: null,
-                    logEventFormatter: customFormatter,
-                    levelSwitch: levelSwitch)
+                    logEventFormatter: customFormatter)
                 .CreateLogger();
 
             try

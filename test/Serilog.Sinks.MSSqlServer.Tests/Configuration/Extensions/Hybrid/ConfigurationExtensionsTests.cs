@@ -169,11 +169,11 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.Hybrid
                 sinkOptions: new MSSqlServerSinkOptions
                 {
                     TableName = DatabaseFixture.LogTableName,
-                    AutoCreateSqlTable = true
+                    AutoCreateSqlTable = true,
+                    LevelSwitch = levelSwitch,
                 },
                 columnOptionsSection: columnOptionsSection,
-                formatProvider: CultureInfo.InvariantCulture,
-                levelSwitch: levelSwitch)
+                formatProvider: CultureInfo.InvariantCulture)
                 .CreateLogger();
 
             Log.Information(message1);
