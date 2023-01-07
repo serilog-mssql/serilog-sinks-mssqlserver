@@ -1,4 +1,5 @@
 ﻿using System;
+using Serilog.Core;
 
 namespace Serilog.Sinks.MSSqlServer
 {
@@ -66,5 +67,10 @@ namespace Serilog.Sinks.MSSqlServer
         /// Flag to eagerly emit a batch containing the first received event (default: true)
         /// </summary>
         public bool EagerlyEmitFirstEvent { get; set; }
+
+        /// <summary>
+        /// A switch allowing the pass-through minimum level to be changed at runtime
+        /// </summary>
+        public LoggingLevelSwitch LevelSwitch { get; set; }
     }
 }
