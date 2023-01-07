@@ -281,6 +281,9 @@ This setting is not used by the audit sink as it writes each event immediately a
 A Flag to eagerly write a batch to the database containing the first received event regardless of `BatchPostingLimit` or `BatchPeriod`. It defaults to `true`.
 This setting is not used by the audit sink as it writes each event immediately and not in a batched manner.
 
+### LevelSwitch
+
+A switch allowing the pass-through minimum level to be changed at runtime. If this is set, the parameter `restrictedToMinimumLevel` in the [sink configuration method](#sink-configuration) is ignored.
 
 ## ColumnOptions Object
 
