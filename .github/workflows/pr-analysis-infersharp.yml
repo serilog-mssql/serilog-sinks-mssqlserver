@@ -3,7 +3,6 @@ name: PR Analysis InferSharp
 on:
   workflow_run:
     workflows: [ "PR Validation" ]
-    branches: [ dev, main ]
     types:
       - completed
 
