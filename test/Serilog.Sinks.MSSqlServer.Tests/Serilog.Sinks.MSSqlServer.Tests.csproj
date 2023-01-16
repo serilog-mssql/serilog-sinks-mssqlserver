@@ -52,6 +52,10 @@
     <PackageReference Include="System.IO.FileSystem.Primitives" />
     <PackageReference Include="System.Resources.ResourceManager" />
     <PackageReference Include="System.Text.Encoding.Extensions" />
+    <PackageReference Include="coverlet.collector">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
     <Compile Include="Configuration\Extensions\Hybrid\**\*.cs" />
     <Compile Include="Configuration\Implementations\Microsoft.Extensions.Configuration\**\*.cs" />
     <Compile Include="Configuration\Implementations\System.Configuration\**\*.cs" />

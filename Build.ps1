@@ -54,7 +54,7 @@ if ($SkipTests -eq $false) {
 
         echo "build: Testing project in $test"
 
-        & dotnet test -c Release
+        & dotnet test -c Release --collect "XPlat Code Coverage"
         if($LASTEXITCODE -ne 0) { exit 3 }
 
         Pop-Location
