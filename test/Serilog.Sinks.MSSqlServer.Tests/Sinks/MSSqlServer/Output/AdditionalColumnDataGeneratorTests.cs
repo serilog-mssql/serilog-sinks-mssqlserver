@@ -157,5 +157,28 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Output
             var expectedResult = Guid.Parse(propertyValue);
             Assert.Equal(expectedResult, result.Value);
         }
+
+        [Trait("Bugfix", "#458")]
+        [Fact]
+        public void GetAdditionalColumnNameAndValueConvertsNullValueForNullable()
+        {
+            // Arrange
+            const string columnName = "AdditionalProperty1";
+            int? propertyValue = null;
+            var additionalColumn = new SqlColumn(columnName, SqlDbType.Int, true);
+            var properties = new Dictionary<string, LogEventPropertyValue>();
+            _columnSimplePropertyValueResolver.Setup(r => r.GetPropertyValueForColumn(
+                It.IsAny<SqlColumn>(), It.IsAny<IReadOnlyDictionary<string, LogEventPropertyValue>>()))
+                .Returns(new KeyValuePair<string, LogEventPropertyValue>(columnName, new ScalarValue(propertyValue)));
+
+            // Act
+            var result = _sut.GetAdditionalColumnNameAndValue(additionalColumn, properties);
+
+            // Assert
+            _columnSimplePropertyValueResolver.Verify(r => r.GetPropertyValueForColumn(additionalColumn, properties), Times.Once);
+            Assert.Equal(columnName, result.Key);
+            Assert.IsType<DBNull>(result.Value);
+            Assert.Equal(DBNull.Value, result.Value);
+        }
     }
 }
