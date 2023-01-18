@@ -1,3 +1,8 @@
+# 6.2.0
+* Implemented #454: LoggingLevelSwitch support to allows log level manipulation at runtime.
+* Fixed issue #458: Error if enrich nullable int columns by null value
+* Added CodeQL code scanning
+
 # 6.1.0
 * Fixed issues #207, #435, #419 & #292: Resolve hierarchical property expressions for additional columns
 * Fixed issue #432: Write full exception info to SelfLog
