@@ -67,6 +67,58 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Misc
             VerifyIntegerColumnWritten(additionalColumnName2, property2Value);
         }
 
+        [Trait("Bugfix", "#458")]
+        [Fact]
+        public void WritesLogEventWithNullValueForNullableColumn()
+        {
+            // Arrange
+            const string additionalColumnName1 = "AdditionalColumn1";
+            const string additionalColumnName2 = "AdditionalColumn2";
+            var columnOptions = new MSSqlServer.ColumnOptions
+            {
+                AdditionalColumns = new List<SqlColumn>
+                {
+                    new SqlColumn
+                    {
+                        ColumnName = additionalColumnName1,
+                        DataType = SqlDbType.NVarChar,
+                        AllowNull = true,
+                        DataLength = 100
+                    },
+                    new SqlColumn
+                    {
+                        ColumnName = additionalColumnName2,
+                        DataType = SqlDbType.Int,
+                        AllowNull = true
+                    }
+                }
+            };
+
+            var messageTemplate = $"Hello {{{additionalColumnName1}}} from thread {{{additionalColumnName2}}}";
+            var property1Value = "PropertyValue1";
+            var expectedMessage = $"Hello \"{property1Value}\" from thread null";
+
+            // Act
+            Log.Logger = new LoggerConfiguration()
+                .WriteTo.MSSqlServer(
+                    DatabaseFixture.LogEventsConnectionString,
+                    sinkOptions: new MSSqlServerSinkOptions
+                    {
+                        TableName = DatabaseFixture.LogTableName,
+                        AutoCreateSqlTable = true
+                    },
+                    columnOptions: columnOptions,
+                    formatProvider: CultureInfo.InvariantCulture)
+                .CreateLogger();
+            Log.Information(messageTemplate, property1Value, null);
+            Log.CloseAndFlush();
+
+            // Assert
+            VerifyDatabaseColumnsWereCreated(columnOptions.AdditionalColumns);
+            VerifyLogMessageWasWritten(expectedMessage);
+            VerifyStringColumnWritten(additionalColumnName1, property1Value);
+        }
+
         [Fact]
         public void WritesLogEventWithCustomNamedProperties()
         {
