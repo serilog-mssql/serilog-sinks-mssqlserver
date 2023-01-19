@@ -28,12 +28,17 @@ namespace Serilog.Sinks.MSSqlServer.Output
                 : _columnHierarchicalPropertyValueResolver.GetPropertyValueForColumn(additionalColumn, properties);
 
             var columnName = additionalColumn.ColumnName;
+            if (property.Value == null)
+            {
+                return new KeyValuePair<string, object>(columnName, DBNull.Value);
+            }
+
             if (!(property.Value is ScalarValue scalarValue))
             {
                 return new KeyValuePair<string, object>(columnName, property.Value.ToString());
             }
 
-            if (scalarValue.Value == null && additionalColumn.AllowNull)
+            if (scalarValue.Value == null)
             {
                 return new KeyValuePair<string, object>(columnName, DBNull.Value);
             }
