@@ -13,14 +13,12 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Output
     [Trait(TestCategory.TraitName, TestCategory.Unit)]
     public class AdditionalColumnDataGeneratorTests
     {
-        private readonly Dictionary<string, LogEventPropertyValue> _properties;
-        private Mock<IColumnSimplePropertyValueResolver> _columnSimplePropertyValueResolver;
-        private Mock<IColumnHierarchicalPropertyValueResolver> _columnHierarchicalPropertyValueResolver;
-        private AdditionalColumnDataGenerator _sut;
+        private readonly Mock<IColumnSimplePropertyValueResolver> _columnSimplePropertyValueResolver;
+        private readonly Mock<IColumnHierarchicalPropertyValueResolver> _columnHierarchicalPropertyValueResolver;
+        private readonly AdditionalColumnDataGenerator _sut;
 
         public AdditionalColumnDataGeneratorTests()
         {
-            _properties = new Dictionary<string, LogEventPropertyValue>();
             _columnSimplePropertyValueResolver = new Mock<IColumnSimplePropertyValueResolver>();
             _columnHierarchicalPropertyValueResolver = new Mock<IColumnHierarchicalPropertyValueResolver>();
             _sut = new AdditionalColumnDataGenerator(_columnSimplePropertyValueResolver.Object,
@@ -158,6 +156,29 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Output
             Assert.IsType<Guid>(result.Value);
             var expectedResult = Guid.Parse(propertyValue);
             Assert.Equal(expectedResult, result.Value);
+        }
+
+        [Trait("Bugfix", "#458")]
+        [Fact]
+        public void GetAdditionalColumnNameAndValueConvertsNullValueForNullable()
+        {
+            // Arrange
+            const string columnName = "AdditionalProperty1";
+            int? propertyValue = null;
+            var additionalColumn = new SqlColumn(columnName, SqlDbType.Int, true);
+            var properties = new Dictionary<string, LogEventPropertyValue>();
+            _columnSimplePropertyValueResolver.Setup(r => r.GetPropertyValueForColumn(
+                It.IsAny<SqlColumn>(), It.IsAny<IReadOnlyDictionary<string, LogEventPropertyValue>>()))
+                .Returns(new KeyValuePair<string, LogEventPropertyValue>(columnName, new ScalarValue(propertyValue)));
+
+            // Act
+            var result = _sut.GetAdditionalColumnNameAndValue(additionalColumn, properties);
+
+            // Assert
+            _columnSimplePropertyValueResolver.Verify(r => r.GetPropertyValueForColumn(additionalColumn, properties), Times.Once);
+            Assert.Equal(columnName, result.Key);
+            Assert.IsType<DBNull>(result.Value);
+            Assert.Equal(DBNull.Value, result.Value);
         }
     }
 }

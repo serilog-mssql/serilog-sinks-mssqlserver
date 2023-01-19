@@ -1,0 +1,42 @@
+name: PR Analysis InferSharp
+
+on:
+  workflow_run:
+    workflows: [ "PR Validation" ]
+    types:
+      - completed
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  download-and-infersharp:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    steps:
+      - name: Download binaries artifact from PR Validation workflow
+        id: download-artifact
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          workflow: pr-validation.yml
+          workflow_conclusion: success
+          name: bin-net6
+          path: bin-net6
+          branch: ${{ github.ref }}
+          check_artifacts: true
+          search_artifacts: true
+
+      - name: Run Infer#
+        uses: microsoft/infersharpaction@v1.4
+        id: runinfersharp
+        with:
+          binary-path: bin-net6
+
+      - name: Upload SARIF output to GitHub Security Center
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: infer-out/report.sarif

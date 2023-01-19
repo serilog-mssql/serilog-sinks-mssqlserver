@@ -38,6 +38,11 @@ namespace Serilog.Sinks.MSSqlServer.Output
                 return new KeyValuePair<string, object>(columnName, property.Value.ToString());
             }
 
+            if (scalarValue.Value == null)
+            {
+                return new KeyValuePair<string, object>(columnName, DBNull.Value);
+            }
+
             var columnType = additionalColumn.AsDataColumn().DataType;
             if (columnType.IsAssignableFrom(scalarValue.Value.GetType()))
             {

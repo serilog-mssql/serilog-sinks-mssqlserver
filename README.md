@@ -60,7 +60,7 @@ All properties in the `MSSqlServerSinkOptions` object are discussed in the [MSSq
 
 Table configuration with the optional `ColumnOptions` object is a lengthy subject discussed in the [ColumnOptions Object](#columnoptions-object) topic and other related topics.
 
-Like other sinks, `restrictedToMinimumLevel` controls the `LogEventLevel` messages that are processed by this sink.
+Like other sinks, `restrictedToMinimumLevel` controls the `LogEventLevel` messages that are processed by this sink. This parameter is ignored if the property [LevelSwitch](#levelswitch) in the sink options is set.
 
 This is a "periodic batching sink." The sink will queue a certain number of log events before they're actually written to SQL Server as a bulk insert operation. There is also a timeout period so that the batch is always written even if it has not been filled. By default, the batch size is 50 rows and the timeout is 5 seconds. You can change these through by setting the `MSSqlServerSinkOptions.BatchPostingLimit` and `MSSqlServerSinkOptions.BatchPeriod` arguments.
 
@@ -244,6 +244,7 @@ Basic settings of the sink are configured using the properties in a `MSSqlServer
 * `BatchPostingLimit`
 * `BatchPeriod`
 * `EagerlyEmitFirstEvent`
+* `LevelSwitch`
 
 ### TableName
 
@@ -281,6 +282,9 @@ This setting is not used by the audit sink as it writes each event immediately a
 A Flag to eagerly write a batch to the database containing the first received event regardless of `BatchPostingLimit` or `BatchPeriod`. It defaults to `true`.
 This setting is not used by the audit sink as it writes each event immediately and not in a batched manner.
 
+### LevelSwitch
+
+A switch allowing the pass-through minimum level to be changed at runtime. If this is set, the parameter `restrictedToMinimumLevel` in the [sink configuration method](#sink-configuration) is ignored.
 
 ## ColumnOptions Object
 

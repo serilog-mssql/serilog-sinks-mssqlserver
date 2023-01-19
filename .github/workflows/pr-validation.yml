@@ -15,3 +15,15 @@ jobs:
 
       - name: Run build and tests
         run: ./Build.ps1
+
+      - name: Upload binaries artifact for InferSharp workflow
+        uses: actions/upload-artifact@v3
+        with:
+          name: bin-net6
+          path: src\Serilog.Sinks.MSSqlServer\bin\Release\net6.0
+
+      - name: Upload testresults artifact with code coverage file
+        uses: actions/upload-artifact@v3
+        with:
+          name: testresults
+          path: test\Serilog.Sinks.MSSqlServer.Tests\TestResults
