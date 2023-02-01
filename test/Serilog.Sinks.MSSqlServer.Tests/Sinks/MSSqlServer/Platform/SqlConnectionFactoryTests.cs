@@ -19,63 +19,24 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Platform
         }
 
         [Fact]
-        public void IntializeThrowsIfConnectionStringIsNull()
-        {
-            Assert.Throws<ArgumentNullException>(() => new SqlConnectionFactory(null, true, 
-                _sqlConnectionStringBuilderWrapperMock.Object));
-        }
-
-        [Fact]
-        public void IntializeThrowsIfConnectionStringIsEmpty()
-        {
-            Assert.Throws<ArgumentNullException>(() => new SqlConnectionFactory(string.Empty, true, 
-                _sqlConnectionStringBuilderWrapperMock.Object));
-        }
-
-        [Fact]
-        public void IntializeThrowsIfConnectionStringIsWhitespace()
-        {
-            Assert.Throws<ArgumentNullException>(() => new SqlConnectionFactory("    ", true, 
-                _sqlConnectionStringBuilderWrapperMock.Object));
-        }
-
-        [Fact]
         public void IntializeThrowsIfSqlConnectionStringBuilderWrapperIsNull()
         {
-            Assert.Throws<ArgumentNullException>(() => new SqlConnectionFactory(
-                DatabaseFixture.LogEventsConnectionString, true, null));
+            Assert.Throws<ArgumentNullException>(() => new SqlConnectionFactory(null));
         }
 
         [Fact]
-        public void SetsEnlistFalseOnConnectionStringIfEnlistTransactionFalse()
+        public void CreateConnectionReturnsConnectionWrapper()
         {
             // Arrange
-            var sut = new SqlConnectionFactory(DatabaseFixture.LogEventsConnectionString, false,
-                _sqlConnectionStringBuilderWrapperMock.Object);
+            var sut = new SqlConnectionFactory(_sqlConnectionStringBuilderWrapperMock.Object);
 
             // Act
             using (var connection = sut.Create())
-            { }
-
-            // Assert
-            _sqlConnectionStringBuilderWrapperMock.VerifySet(c => c.ConnectionString = DatabaseFixture.LogEventsConnectionString);
-            _sqlConnectionStringBuilderWrapperMock.VerifySet(c => c.Enlist = false);
-        }
-
-        [Fact]
-        public void SetsEnlistTrueOnConnectionStringIfEnlistTransactionTrue()
-        {
-            // Arrange
-            var sut = new SqlConnectionFactory(DatabaseFixture.LogEventsConnectionString, true,
-                _sqlConnectionStringBuilderWrapperMock.Object);
-
-            // Act
-            using (var connection = sut.Create())
-            { }
-
-            // Assert
-            _sqlConnectionStringBuilderWrapperMock.VerifySet(c => c.ConnectionString = DatabaseFixture.LogEventsConnectionString);
-            _sqlConnectionStringBuilderWrapperMock.VerifySet(c => c.Enlist = true);
+            {
+                // Assert
+                Assert.NotNull(connection);
+                Assert.IsAssignableFrom<ISqlConnectionWrapper>(connection);
+            }
         }
     }
 }

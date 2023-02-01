@@ -151,6 +151,12 @@ namespace Serilog.Configuration
             get => (ValueConfigElement)base[nameof(SchemaName)];
         }
 
+        [ConfigurationProperty(nameof(AutoCreateSqlDatabase))]
+        public ValueConfigElement AutoCreateSqlDatabase
+        {
+            get => (ValueConfigElement)base[nameof(AutoCreateSqlDatabase)];
+        }
+
         [ConfigurationProperty(nameof(AutoCreateSqlTable))]
         public ValueConfigElement AutoCreateSqlTable
         {
@@ -179,11 +185,6 @@ namespace Serilog.Configuration
         public ValueConfigElement EagerlyEmitFirstEvent
         {
             get => (ValueConfigElement)base[nameof(EagerlyEmitFirstEvent)];
-            internal set
-            {
-                // Internal setter for unit testing purpose
-                base[nameof(PrimaryKeyColumnName)] = value;
-            }
         }
     }
 }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Serilog.Events;
 
-namespace Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Output
+namespace Serilog.Sinks.MSSqlServer.Output
 {
     internal class ColumnHierarchicalPropertyValueResolver : IColumnHierarchicalPropertyValueResolver
     {

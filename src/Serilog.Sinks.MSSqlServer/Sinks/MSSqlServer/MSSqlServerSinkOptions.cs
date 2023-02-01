@@ -44,6 +44,11 @@ namespace Serilog.Sinks.MSSqlServer
         public string SchemaName { get; set; }
 
         /// <summary>
+        /// Flag to automatically create the log events database if it does not exist (default: false)
+        /// </summary>
+        public bool AutoCreateSqlDatabase { get; set; }
+
+        /// <summary>
         /// Flag to automatically create the log events table if it does not exist (default: false)
         /// </summary>
         public bool AutoCreateSqlTable { get; set; }

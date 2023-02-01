@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Data;
 using Serilog.Events;
-using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Output;
+using Serilog.Sinks.MSSqlServer.Output;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
 

@@ -1,7 +1,7 @@
 ﻿using Serilog.Events;
 using System.Collections.Generic;
 
-namespace Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Output
+namespace Serilog.Sinks.MSSqlServer.Output
 {
     internal interface IColumnSimplePropertyValueResolver
     {
