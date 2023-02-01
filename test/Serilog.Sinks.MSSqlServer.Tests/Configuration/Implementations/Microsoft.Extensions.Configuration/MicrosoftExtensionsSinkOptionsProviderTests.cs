@@ -63,6 +63,20 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
         }
 
         [Fact]
+        public void ConfigureSinkOptionsSetsAutoCreateSqlDatabase()
+        {
+            // Arrange
+            _configurationSectionMock.Setup(s => s["autoCreateSqlDatabase"]).Returns("true");
+            var sut = new MicrosoftExtensionsSinkOptionsProvider();
+
+            // Act
+            var result = sut.ConfigureSinkOptions(new MSSqlServerSinkOptions(), _configurationSectionMock.Object);
+
+            // Assert
+            Assert.True(result.AutoCreateSqlDatabase);
+        }
+
+        [Fact]
         public void ConfigureSinkOptionsSetsAutoCreateSqlTable()
         {
             // Arrange

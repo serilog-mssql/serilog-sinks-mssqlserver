@@ -89,7 +89,7 @@ namespace Serilog.Sinks.MSSqlServer
 
             _sqlLogEventWriter = sinkDependencies.SqlLogEventWriter;
 
-            CreateTable(sinkOptions, sinkDependencies);
+            CreateDatabaseAndTable(sinkOptions, sinkDependencies);
         }
 
         /// <summary>Emit the provided log event to the sink.</summary>
@@ -150,14 +150,16 @@ namespace Serilog.Sinks.MSSqlServer
             }
         }
 
-        private static void CreateTable(MSSqlServerSinkOptions sinkOptions, SinkDependencies sinkDependencies)
+        private static void CreateDatabaseAndTable(MSSqlServerSinkOptions sinkOptions, SinkDependencies sinkDependencies)
         {
+            if (sinkOptions.AutoCreateSqlDatabase)
+            {
+                sinkDependencies.SqlDatabaseCreator.Execute();
+            }
+
             if (sinkOptions.AutoCreateSqlTable)
             {
-                using (var eventTable = sinkDependencies.DataTableCreator.CreateDataTable())
-                {
-                    sinkDependencies.SqlTableCreator.CreateTable(eventTable);
-                }
+                sinkDependencies.SqlTableCreator.Execute();
             }
         }
     }

@@ -111,7 +111,7 @@ namespace Serilog.Sinks.MSSqlServer
             _sqlBulkBatchWriter = sinkDependencies.SqlBulkBatchWriter;
             _eventTable = sinkDependencies.DataTableCreator.CreateDataTable();
 
-            CreateTable(sinkOptions, sinkDependencies);
+            CreateDatabaseAndTable(sinkOptions, sinkDependencies);
         }
 
         /// <summary>
@@ -189,11 +189,16 @@ namespace Serilog.Sinks.MSSqlServer
             }
         }
 
-        private void CreateTable(MSSqlServerSinkOptions sinkOptions, SinkDependencies sinkDependencies)
+        private void CreateDatabaseAndTable(MSSqlServerSinkOptions sinkOptions, SinkDependencies sinkDependencies)
         {
+            if (sinkOptions.AutoCreateSqlDatabase)
+            {
+                sinkDependencies.SqlDatabaseCreator.Execute();
+            }
+
             if (sinkOptions.AutoCreateSqlTable)
             {
-                sinkDependencies.SqlTableCreator.CreateTable(_eventTable);
+                sinkDependencies.SqlTableCreator.Execute();
             }
         }
     }

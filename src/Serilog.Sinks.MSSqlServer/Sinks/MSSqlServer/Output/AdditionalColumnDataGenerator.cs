@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using Serilog.Events;
-using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Output;
 
 namespace Serilog.Sinks.MSSqlServer.Output
 {

@@ -2,7 +2,7 @@
 {
     internal interface ISqlConnectionStringBuilderWrapper
     {
-        string ConnectionString { get; set; }
-        bool Enlist { set; }
+        string ConnectionString { get; }
+        string InitialCatalog { get; }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using System;
+using Microsoft.Data.SqlClient;
 
 namespace Serilog.Sinks.MSSqlServer.Platform.SqlClient
 {
@@ -6,20 +7,25 @@ namespace Serilog.Sinks.MSSqlServer.Platform.SqlClient
     {
         private readonly SqlConnectionStringBuilder _sqlConnectionStringBuilder;
 
-        public SqlConnectionStringBuilderWrapper()
+        public SqlConnectionStringBuilderWrapper(string connectionString, bool enlist)
         {
-            _sqlConnectionStringBuilder = new SqlConnectionStringBuilder();
+            if (string.IsNullOrWhiteSpace(connectionString))
+            {
+                throw new ArgumentNullException(nameof(connectionString));
+            }
+
+            _sqlConnectionStringBuilder = new SqlConnectionStringBuilder(connectionString)
+            {
+                Enlist = enlist
+            };
         }
 
-        public string ConnectionString
-        {
-            get => _sqlConnectionStringBuilder.ConnectionString;
-            set => _sqlConnectionStringBuilder.ConnectionString = value;
-        }
+        public string ConnectionString => _sqlConnectionStringBuilder.ConnectionString;
 
-        public bool Enlist
+        public string InitialCatalog
         {
-            set => _sqlConnectionStringBuilder.Enlist = value;
+            get => _sqlConnectionStringBuilder.InitialCatalog;
+            set => _sqlConnectionStringBuilder.InitialCatalog = value;
         }
     }
 }
