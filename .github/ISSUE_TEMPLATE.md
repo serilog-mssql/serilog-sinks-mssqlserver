@@ -14,7 +14,7 @@ If you are opening a feature request, you can ignore this template. Bug reports 
 
 >> Target framework and operating system:
 
-[ ] .NET Core 6
+[ ] .NET 6
 [ ] .NET Framework 4.8
 [ ] .NET Framework 4.7
 [ ] .NET Framework 4.6
