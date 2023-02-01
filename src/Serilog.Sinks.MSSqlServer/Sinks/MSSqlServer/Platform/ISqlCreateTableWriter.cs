@@ -1,9 +1,7 @@
-﻿using System.Data;
-
-namespace Serilog.Sinks.MSSqlServer.Platform
+﻿namespace Serilog.Sinks.MSSqlServer.Platform
 {
-    internal interface ISqlCreateTableWriter
+    internal interface ISqlCreateTableWriter : ISqlWriter
     {
-        string GetSqlFromDataTable(string schemaName, string tableName, DataTable dataTable, ColumnOptions columnOptions);
+        string TableName { get; }
     }
 }

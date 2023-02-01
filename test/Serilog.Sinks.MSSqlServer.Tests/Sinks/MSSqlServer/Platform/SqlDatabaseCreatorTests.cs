@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using Moq;
 using Serilog.Sinks.MSSqlServer.Platform;
 using Serilog.Sinks.MSSqlServer.Platform.SqlClient;
@@ -9,19 +8,19 @@ using Xunit;
 namespace Serilog.Sinks.MSSqlServer.Tests.Platform
 {
     [Trait(TestCategory.TraitName, TestCategory.Unit)]
-    public class SqlTableCreatorTests
+    public class SqlDatabaseCreatorTests
     {
-        private readonly Mock<ISqlCreateTableWriter> _sqlWriterMock;
+        private readonly Mock<ISqlCreateDatabaseWriter> _sqlWriterMock;
         private readonly Mock<ISqlConnectionWrapper> _sqlConnectionWrapperMock;
         private readonly Mock<ISqlCommandWrapper> _sqlCommandWrapperMock;
         private readonly Mock<ISqlConnectionFactory> _sqlConnectionFactoryMock;
-        private readonly SqlTableCreator _sut;
+        private readonly SqlDatabaseCreator _sut;
 
-        public SqlTableCreatorTests()
+        public SqlDatabaseCreatorTests()
         {
-            _sqlWriterMock = new Mock<ISqlCreateTableWriter>();
+            _sqlWriterMock = new Mock<ISqlCreateDatabaseWriter>();
             _sqlWriterMock.Setup(w => w.GetSql()).Returns("");
-            _sqlWriterMock.Setup(w => w.TableName).Returns("TestTable");
+            _sqlWriterMock.Setup(w => w.DatabaseName).Returns("TestDatabase");
 
             _sqlConnectionFactoryMock = new Mock<ISqlConnectionFactory>();
             _sqlConnectionWrapperMock = new Mock<ISqlConnectionWrapper>();
@@ -30,7 +29,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Platform
             _sqlConnectionFactoryMock.Setup(f => f.Create()).Returns(_sqlConnectionWrapperMock.Object);
             _sqlConnectionWrapperMock.Setup(c => c.CreateCommand(It.IsAny<string>())).Returns(_sqlCommandWrapperMock.Object);
 
-            _sut = new SqlTableCreator(_sqlWriterMock.Object, _sqlConnectionFactoryMock.Object);
+            _sut = new SqlDatabaseCreator(_sqlWriterMock.Object, _sqlConnectionFactoryMock.Object);
         }
 
         [Fact]
@@ -51,7 +50,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Platform
 
             // Assert
             Assert.True(selflogCalled);
-            Assert.Contains("Unable to create database table TestTable due to following error: System.InvalidOperationException",
+            Assert.Contains("Unable to create database TestDatabase due to following error: System.InvalidOperationException",
                 selflogMessage);
         }
     }

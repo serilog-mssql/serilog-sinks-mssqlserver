@@ -8,70 +8,10 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Platform.SqlClient
     public class SqlConnectionStringBuilderWrapperTests
     {
         [Fact]
-        public void CreatesSqlConnectionString()
-        {
-            // Arrange
-            var sut = new SqlConnectionStringBuilderWrapper();
-
-            // Act
-            sut.ConnectionString = DatabaseFixture.LogEventsConnectionString;
-
-            // Assert
-            Assert.Equal(DatabaseFixture.LogEventsConnectionString, sut.ConnectionString);
-        }
-
-        [Fact]
-        public void DoesNotAddEnlistIfEnlistPropertyIsNotSet()
-        {
-            // Arrange + Act
-            var sut = new SqlConnectionStringBuilderWrapper
-            {
-                ConnectionString = DatabaseFixture.LogEventsConnectionString
-            };
-
-            // Assert
-            Assert.Equal(DatabaseFixture.LogEventsConnectionString, sut.ConnectionString);
-        }
-
-        [Fact]
-        public void DoesNotChangeEnlistFalseIfEnlistPropertyIsNotSet()
-        {
-            // Arrange + Act
-            var connectionStringEnlistFalse = DatabaseFixture.LogEventsConnectionString + ";Enlist=True";
-            var sut = new SqlConnectionStringBuilderWrapper
-            {
-                ConnectionString = connectionStringEnlistFalse
-            };
-
-            // Assert
-            Assert.Equal(connectionStringEnlistFalse, sut.ConnectionString);
-        }
-
-        [Fact]
-        public void DoesNotChangeEnlistTrueIfEnlistPropertyIsNotSet()
-        {
-            // Arrange + Act
-            var connectionStringEnlistFalse = DatabaseFixture.LogEventsConnectionString + ";Enlist=True";
-            var sut = new SqlConnectionStringBuilderWrapper
-            {
-                ConnectionString = connectionStringEnlistFalse
-            };
-
-            // Assert
-            Assert.Equal(connectionStringEnlistFalse, sut.ConnectionString);
-        }
-
-        [Fact]
         public void ChangeEnlistFalseToTrueIfEnlistPropertyIsSetToTrue()
         {
-            // Arrange
-            var sut = new SqlConnectionStringBuilderWrapper
-            {
-                ConnectionString = DatabaseFixture.LogEventsConnectionString + ";Enlist=False"
-            };
-
-            // Act
-            sut.Enlist = true;
+            // Arrange + act
+            var sut = new SqlConnectionStringBuilderWrapper(DatabaseFixture.LogEventsConnectionString + ";Enlist=False", true);
 
             // Assert
             Assert.Equal(DatabaseFixture.LogEventsConnectionString + ";Enlist=True", sut.ConnectionString);
@@ -81,13 +21,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Platform.SqlClient
         public void ChangeEnlistTrueToFalseIfEnlistPropertyIsSetToFalse()
         {
             // Arrange
-            var sut = new SqlConnectionStringBuilderWrapper
-            {
-                ConnectionString = DatabaseFixture.LogEventsConnectionString + ";Enlist=True"
-            };
-
-            // Act
-            sut.Enlist = false;
+            var sut = new SqlConnectionStringBuilderWrapper(DatabaseFixture.LogEventsConnectionString + ";Enlist=True", false);
 
             // Assert
             Assert.Equal(DatabaseFixture.LogEventsConnectionString + ";Enlist=False", sut.ConnectionString);
@@ -97,13 +31,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Platform.SqlClient
         public void AddsEnlistFalseIfEnlistPropertySetToFalse()
         {
             // Arrange
-            var sut = new SqlConnectionStringBuilderWrapper
-            {
-                ConnectionString = DatabaseFixture.LogEventsConnectionString,
-            };
-
-            // Act
-            sut.Enlist = false;
+            var sut = new SqlConnectionStringBuilderWrapper(DatabaseFixture.LogEventsConnectionString, false);
 
             // Assert
             Assert.Equal(DatabaseFixture.LogEventsConnectionString + ";Enlist=False", sut.ConnectionString);
@@ -113,13 +41,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Platform.SqlClient
         public void AddsEnlistTrueIfEnlistPropertySetToTrue()
         {
             // Arrange
-            var sut = new SqlConnectionStringBuilderWrapper
-            {
-                ConnectionString = DatabaseFixture.LogEventsConnectionString,
-            };
-
-            // Act
-            sut.Enlist = true;
+            var sut = new SqlConnectionStringBuilderWrapper(DatabaseFixture.LogEventsConnectionString, true);
 
             // Assert
             Assert.Equal(DatabaseFixture.LogEventsConnectionString + ";Enlist=True", sut.ConnectionString);
@@ -129,13 +51,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Platform.SqlClient
         public void DoesNotDuplicateEnlistIfEnlistFalseIsPresentAndEnlistPropertySetToFalse()
         {
             // Arrange
-            var sut = new SqlConnectionStringBuilderWrapper
-            {
-                ConnectionString = "Enlist = false ; " + DatabaseFixture.LogEventsConnectionString
-            };
-
-            // Act
-            sut.Enlist = false;
+            var sut = new SqlConnectionStringBuilderWrapper("Enlist = false ; " + DatabaseFixture.LogEventsConnectionString, false);
 
             // Assert
             Assert.Equal(DatabaseFixture.LogEventsConnectionString + ";Enlist=False", sut.ConnectionString);

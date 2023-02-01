@@ -17,7 +17,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         private readonly MSSqlServerSinkOptions _sinkOptions;
         private readonly SinkDependencies _sinkDependencies;
         private readonly Mock<IDataTableCreator> _dataTableCreatorMock;
-        private readonly Mock<ISqlTableCreator> _sqlTableCreatorMock;
+        private readonly Mock<ISqlCommandExecutor> _sqlDatabaseCreatorMock;
+        private readonly Mock<ISqlCommandExecutor> _sqlTableCreatorMock;
         private readonly Mock<ISqlBulkBatchWriter> _sqlBulkBatchWriter;
         private readonly string _tableName = "tableName";
         private readonly string _schemaName = "schemaName";
@@ -38,12 +39,14 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             _dataTableCreatorMock.Setup(d => d.CreateDataTable())
                 .Returns(_dataTable);
 
-            _sqlTableCreatorMock = new Mock<ISqlTableCreator>();
+            _sqlDatabaseCreatorMock = new Mock<ISqlCommandExecutor>();
+            _sqlTableCreatorMock = new Mock<ISqlCommandExecutor>();
             _sqlBulkBatchWriter = new Mock<ISqlBulkBatchWriter>();
 
             _sinkDependencies = new SinkDependencies
             {
                 DataTableCreator = _dataTableCreatorMock.Object,
+                SqlDatabaseCreator = _sqlDatabaseCreatorMock.Object,
                 SqlTableCreator = _sqlTableCreatorMock.Object,
                 SqlBulkBatchWriter = _sqlBulkBatchWriter.Object
             };
@@ -107,13 +110,33 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         }
 
         [Fact]
+        public void InitializeWithAutoCreateSqlDatabaseCallsSqlDatabaseCreator()
+        {
+            // Act
+            SetupSut(autoCreateSqlDatabase: true);
+
+            // Assert
+            _sqlDatabaseCreatorMock.Verify(c => c.Execute(), Times.Once);
+        }
+
+        [Fact]
+        public void InitializeWithoutAutoCreateSqlDatabaseDoesNotCallSqlDatabaseCreator()
+        {
+            // Act
+            SetupSut(autoCreateSqlDatabase: false);
+
+            // Assert
+            _sqlDatabaseCreatorMock.Verify(c => c.Execute(), Times.Never);
+        }
+
+        [Fact]
         public void InitializeWithAutoCreateSqlTableCallsSqlTableCreator()
         {
             // Act
             SetupSut(autoCreateSqlTable: true);
 
             // Assert
-            _sqlTableCreatorMock.Verify(c => c.CreateTable(_dataTable), Times.Once);
+            _sqlTableCreatorMock.Verify(c => c.Execute(), Times.Once);
         }
 
         [Fact]
@@ -123,7 +146,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             SetupSut(autoCreateSqlTable: false);
 
             // Assert
-            _sqlTableCreatorMock.Verify(c => c.CreateTable(It.IsAny<DataTable>()), Times.Never);
+            _sqlTableCreatorMock.Verify(c => c.Execute(), Times.Never);
         }
 
         [Fact]
@@ -173,8 +196,9 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             Assert.True(dataTableDisposeCalled);
         }
 
-        private void SetupSut(bool autoCreateSqlTable = false)
+        private void SetupSut(bool autoCreateSqlDatabase = false, bool autoCreateSqlTable = false)
         {
+            _sinkOptions.AutoCreateSqlDatabase = autoCreateSqlDatabase;
             _sinkOptions.AutoCreateSqlTable = autoCreateSqlTable;
             _sut = new MSSqlServerSink(_sinkOptions, _sinkDependencies);
         }

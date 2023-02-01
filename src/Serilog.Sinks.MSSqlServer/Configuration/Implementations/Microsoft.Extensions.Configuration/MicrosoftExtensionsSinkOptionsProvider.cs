@@ -23,6 +23,7 @@ namespace Serilog.Sinks.MSSqlServer.Configuration
         {
             SetProperty.IfNotNull<string>(config["tableName"], val => sinkOptions.TableName = val);
             SetProperty.IfNotNull<string>(config["schemaName"], val => sinkOptions.SchemaName = val);
+            SetProperty.IfNotNull<bool>(config["autoCreateSqlDatabase"], val => sinkOptions.AutoCreateSqlDatabase = val);
             SetProperty.IfNotNull<bool>(config["autoCreateSqlTable"], val => sinkOptions.AutoCreateSqlTable = val);
             SetProperty.IfNotNull<bool>(config["enlistInTransaction"], val => sinkOptions.EnlistInTransaction = val);
         }
