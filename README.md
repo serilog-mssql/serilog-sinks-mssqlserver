@@ -239,6 +239,7 @@ Basic settings of the sink are configured using the properties in a `MSSqlServer
 
 * `TableName`
 * `SchemaName`
+* `AutoCreateSqlDatabase`
 * `AutoCreateSqlTable`
 * `EnlistInTransaction`
 * `BatchPostingLimit`
@@ -253,6 +254,10 @@ A required parameter specifying the name of the table used to write the log even
 ### SchemaName
 
 An optional parameter specifiying the database schema where the log events table is located. It defaults to `"dbo"`.
+
+### AutoCreateSqlDatabase
+
+A flag specifiying if the log events database should be created if it does not exist. It defaults to `false`. If this is set to `true` the property `AutoCreateSqlTable` should also be set to `true`.
 
 ### AutoCreateSqlTable
 
