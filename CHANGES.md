@@ -1,3 +1,6 @@
+# 6.3.0
+* Implemented #360: Automatic DB creation
+
 # 6.2.0
 * Implemented #454: LoggingLevelSwitch support to allows log level manipulation at runtime.
 * Fixed issue #458: Error if enrich nullable int columns by null value
