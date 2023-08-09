@@ -32,6 +32,7 @@ namespace Serilog.Sinks.MSSqlServer.Platform
             catch (Exception ex)
             {
                 HandleException(ex);
+                throw;
             }
         }
 
