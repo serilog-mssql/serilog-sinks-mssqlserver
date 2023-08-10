@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 using static System.FormattableString;
 
 namespace Serilog.Sinks.MSSqlServer.Platform
@@ -15,6 +16,15 @@ namespace Serilog.Sinks.MSSqlServer.Platform
         public string DatabaseName => _databaseName;
 
         public string GetSql()
-            => Invariant($"CREATE DATABASE [{_databaseName}]");
+        {
+            var sql = new StringBuilder();
+
+            sql.AppendLine(Invariant($"IF NOT EXISTS (SELECT name FROM sys.databases WHERE name = '{_databaseName}')"));
+            sql.AppendLine("BEGIN");
+            sql.AppendLine(Invariant($"CREATE DATABASE [{_databaseName}]"));
+            sql.AppendLine("END");
+
+            return sql.ToString();
+        }
     }
 }
