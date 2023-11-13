@@ -27,8 +27,8 @@ namespace Serilog.Sinks.MSSqlServer
                 get => base.DataType;
                 set
                 {
-                    if (value != SqlDbType.NVarChar)
-                        throw new ArgumentException("The Standard Column \"Message\" must be NVarChar.");
+                    if (!SqlDataTypes.VariableCharactorColumnTypes.Contains(value))
+                        throw new ArgumentException("The Standard Column \"Message\" must be NVarChar or VarChar.");
                     base.DataType = value;
                 }
             }

@@ -114,7 +114,7 @@ namespace Serilog.Tests.Output
         }
 
         [Fact]
-        public void GetAdditionalColumnNameAndValueConvertsValueTypeToStringIfConversionToColumnTypeFails()
+        public void GetAdditionalColumnNameAndValueUsesNullIfConversionToColumnTypeFails()
         {
             // Arrange
             const string columnName = "AdditionalProperty1";
@@ -131,8 +131,8 @@ namespace Serilog.Tests.Output
             // Assert
             _columnSimplePropertyValueResolver.Verify(r => r.GetPropertyValueForColumn(additionalColumn, properties), Times.Once);
             Assert.Equal(columnName, result.Key);
-            Assert.IsType<string>(result.Value);
-            Assert.Equal("1", result.Value);  // Cannot convert int to SqlDbType.DateTimeOffset so returns string
+            Assert.IsType<DBNull>(result.Value);
+            Assert.Equal(DBNull.Value, result.Value);  // Cannot convert int to SqlDbType.DateTimeOffset so returns null
         }
 
         [Fact]
@@ -179,6 +179,28 @@ namespace Serilog.Tests.Output
             Assert.Equal(columnName, result.Key);
             Assert.IsType<DBNull>(result.Value);
             Assert.Equal(DBNull.Value, result.Value);
+        }
+
+        [Fact]
+        public void GetAdditionalColumnNameAndValueReturnsTruncatedForCharacterTypesWithDataLength()
+        {
+            // Arrange
+            const string columnName = "AdditionalProperty1";
+            const string propertyValue = "Additional Property Value";
+            var additionalColumn = new SqlColumn(columnName, SqlDbType.NVarChar);
+            additionalColumn.DataLength = 10;
+            var properties = new Dictionary<string, LogEventPropertyValue>();
+            _columnSimplePropertyValueResolver.Setup(r => r.GetPropertyValueForColumn(
+                It.IsAny<SqlColumn>(), It.IsAny<IReadOnlyDictionary<string, LogEventPropertyValue>>()))
+                .Returns(new KeyValuePair<string, LogEventPropertyValue>(columnName, new ScalarValue(propertyValue)));
+
+            // Act
+            var result = _sut.GetAdditionalColumnNameAndValue(additionalColumn, properties);
+
+            // Assert
+            _columnSimplePropertyValueResolver.Verify(r => r.GetPropertyValueForColumn(additionalColumn, properties), Times.Once);
+            Assert.Equal(columnName, result.Key);
+            Assert.Equal("Additional", result.Value);
         }
     }
 }

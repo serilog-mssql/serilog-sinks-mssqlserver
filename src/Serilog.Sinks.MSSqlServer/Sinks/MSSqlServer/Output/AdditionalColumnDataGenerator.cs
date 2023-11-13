@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using Serilog.Events;
+using Serilog.Sinks.MSSqlServer.Extensions;
 
 namespace Serilog.Sinks.MSSqlServer.Output
 {
@@ -45,6 +46,11 @@ namespace Serilog.Sinks.MSSqlServer.Output
             var columnType = additionalColumn.AsDataColumn().DataType;
             if (columnType.IsAssignableFrom(scalarValue.Value.GetType()))
             {
+                if (SqlDataTypes.DataLengthRequired.Contains(additionalColumn.DataType))
+                {
+                    return new KeyValuePair<string, object>(columnName, TruncateOutput((string)scalarValue.Value, additionalColumn.DataLength));
+
+                }
                 return new KeyValuePair<string, object>(columnName, scalarValue.Value);
             }
 
@@ -54,9 +60,14 @@ namespace Serilog.Sinks.MSSqlServer.Output
             }
             else
             {
-                return new KeyValuePair<string, object>(columnName, property.Value.ToString());
+                return new KeyValuePair<string, object>(columnName, DBNull.Value);
             }
         }
+
+        private static string TruncateOutput(string value, int dataLength) =>
+            dataLength < 0
+                ? value     // No need to truncate if length set to maximum
+                : value.Truncate(dataLength, string.Empty);
 
         private static bool TryChangeType(object obj, Type type, out object conversion)
         {

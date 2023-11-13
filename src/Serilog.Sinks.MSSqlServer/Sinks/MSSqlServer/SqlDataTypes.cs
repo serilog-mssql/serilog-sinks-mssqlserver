@@ -52,6 +52,15 @@ namespace Serilog.Sinks.MSSqlServer
         };
 
         /// <summary>
+        /// SQL column types for supported strings
+        /// </summary>
+        public static readonly HashSet<SqlDbType> VariableCharactorColumnTypes = new HashSet<SqlDbType>
+        {
+            SqlDbType.NVarChar,
+            SqlDbType.VarChar
+        };
+
+        /// <summary>
         /// The SQL column types which require a non-zero DataLength property.
         /// </summary>
         public static readonly List<SqlDbType> DataLengthRequired = new List<SqlDbType>

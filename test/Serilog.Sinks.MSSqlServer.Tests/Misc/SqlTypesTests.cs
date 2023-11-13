@@ -108,9 +108,12 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Misc
             Log.Information("NVarChar {NVarChar}", twentyChars);
             Log.Information("VarChar {VarChar}", twentyChars);
 
-            // should throw truncation exception
+            // should truncate but not throw
 
-            Assert.Throws<AggregateException>(() => Log.Information("Char {Char}", thirtyChars));
+            Log.Information("Char {Char}", thirtyChars);
+            Log.Information("NChar {NChar}", thirtyChars);
+            Log.Information("NVarChar {NVarChar}", thirtyChars);
+            Log.Information("VarChar {VarChar}", thirtyChars);
 
             Log.CloseAndFlush();
         }
