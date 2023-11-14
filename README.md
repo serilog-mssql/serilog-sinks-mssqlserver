@@ -512,7 +512,7 @@ The content of this column is rendered as JSON by default or with a custom IText
 
 ## Custom Property Columns
 
-By default, any log event properties you include in your log statements will be saved to the XML `Properties` column or the JSON `LogEvent` column. But they can also be stored in their own individual columns via the `AdditionalColumns` collection. This adds overhead to write operations but is very useful for frequently-queried properties. Only `ColumnName` is required; the default configuration is `varchar(max)`.
+By default, any log event properties you include in your log statements will be saved to the XML `Properties` column or the JSON `LogEvent` column. But they can also be stored in their own individual columns via the `AdditionalColumns` collection. This adds overhead to write operations but is very useful for frequently-queried properties. Only `ColumnName` is required; the default configuration is `varchar(max)`. If you specify a DataLength on a column of character data types (NVarChar, VarChar, Char, NChar) the string will be automatically truncated to the datalength to fit in the column.
 
 ```csharp
 var columnOptions = new ColumnOptions
