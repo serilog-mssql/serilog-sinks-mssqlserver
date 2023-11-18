@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Data;
 
 namespace Serilog.Sinks.MSSqlServer
@@ -54,11 +55,10 @@ namespace Serilog.Sinks.MSSqlServer
         /// <summary>
         /// SQL column types for supported strings
         /// </summary>
-        public static readonly HashSet<SqlDbType> VariableCharactorColumnTypes = new HashSet<SqlDbType>
-        {
+        public static readonly ReadOnlyCollection<SqlDbType> VariableCharacterColumnTypes = new(new[] {
             SqlDbType.NVarChar,
             SqlDbType.VarChar
-        };
+        });
 
         /// <summary>
         /// The SQL column types which require a non-zero DataLength property.

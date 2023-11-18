@@ -48,7 +48,7 @@ namespace Serilog.Sinks.MSSqlServer.Output
             {
                 if (SqlDataTypes.DataLengthRequired.Contains(additionalColumn.DataType))
                 {
-                    return new KeyValuePair<string, object>(columnName, TruncateOutput((string)scalarValue.Value, additionalColumn.DataLength));
+                    return new KeyValuePair<string, object>(columnName, scalarValue.Value.ToString().TruncateOutput(additionalColumn.DataLength));
 
                 }
                 return new KeyValuePair<string, object>(columnName, scalarValue.Value);
@@ -60,14 +60,12 @@ namespace Serilog.Sinks.MSSqlServer.Output
             }
             else
             {
-                return new KeyValuePair<string, object>(columnName, DBNull.Value);
+                if (additionalColumn.AllowNull) {
+                    return new KeyValuePair<string, object>(columnName, DBNull.Value);
+                }
+                return new KeyValuePair<string, object>(columnName, property.Value.ToString());
             }
         }
-
-        private static string TruncateOutput(string value, int dataLength) =>
-            dataLength < 0
-                ? value     // No need to truncate if length set to maximum
-                : value.Truncate(dataLength, string.Empty);
 
         private static bool TryChangeType(object obj, Type type, out object conversion)
         {

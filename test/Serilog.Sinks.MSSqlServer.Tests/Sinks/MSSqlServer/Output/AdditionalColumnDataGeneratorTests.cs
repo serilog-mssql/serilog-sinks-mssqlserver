@@ -200,7 +200,7 @@ namespace Serilog.Tests.Output
             // Assert
             _columnSimplePropertyValueResolver.Verify(r => r.GetPropertyValueForColumn(additionalColumn, properties), Times.Once);
             Assert.Equal(columnName, result.Key);
-            Assert.Equal("Additional", result.Value);
+            Assert.Equal("Additio...", result.Value);
         }
     }
 }

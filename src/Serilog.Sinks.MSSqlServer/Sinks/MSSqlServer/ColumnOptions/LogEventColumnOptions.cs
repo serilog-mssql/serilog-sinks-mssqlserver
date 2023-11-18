@@ -27,7 +27,7 @@ namespace Serilog.Sinks.MSSqlServer
                 get => base.DataType;
                 set
                 {
-                    if (!SqlDataTypes.VariableCharactorColumnTypes.Contains(value))
+                    if (!SqlDataTypes.VariableCharacterColumnTypes.Contains(value))
                         throw new ArgumentException("The Standard Column \"LogEvent\" must be NVarChar or VarChar.");
                     base.DataType = value;
                 }
