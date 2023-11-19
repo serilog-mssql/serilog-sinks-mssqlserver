@@ -55,7 +55,7 @@ namespace Serilog.Sinks.MSSqlServer
         /// <summary>
         /// SQL column types for supported strings
         /// </summary>
-        public static readonly ReadOnlyCollection<SqlDbType> VariableCharacterColumnTypes = new(new[] {
+        public static readonly ReadOnlyCollection<SqlDbType> VariableCharacterColumnTypes = new ReadOnlyCollection<SqlDbType>(new List<SqlDbType> {
             SqlDbType.NVarChar,
             SqlDbType.VarChar
         });
