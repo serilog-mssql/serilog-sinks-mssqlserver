@@ -28,8 +28,8 @@ namespace Serilog.Sinks.MSSqlServer
                 get => base.DataType;
                 set
                 {
-                    if (value != SqlDbType.NVarChar && value != SqlDbType.TinyInt)
-                        throw new ArgumentException("The Standard Column \"Level\" must be of data type NVarChar or TinyInt.");
+                    if (!SqlDataTypes.VariableCharacterColumnTypes.Contains(value) && value != SqlDbType.TinyInt)
+                        throw new ArgumentException("The Standard Column \"Level\" must be of data type NVarChar, VarChar or TinyInt.");
                     base.DataType = value;
                 }
             }

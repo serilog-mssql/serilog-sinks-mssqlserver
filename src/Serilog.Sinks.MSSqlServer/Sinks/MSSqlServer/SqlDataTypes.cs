@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Data;
 
 namespace Serilog.Sinks.MSSqlServer
@@ -50,6 +51,14 @@ namespace Serilog.Sinks.MSSqlServer
             // omitted deprecated types: ntext, text
             // not supported by enum: numeric, FILESTREAM, rowversion
         };
+
+        /// <summary>
+        /// SQL column types for supported strings
+        /// </summary>
+        public static readonly ReadOnlyCollection<SqlDbType> VariableCharacterColumnTypes = new ReadOnlyCollection<SqlDbType>(new List<SqlDbType> {
+            SqlDbType.NVarChar,
+            SqlDbType.VarChar
+        });
 
         /// <summary>
         /// The SQL column types which require a non-zero DataLength property.

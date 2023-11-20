@@ -45,15 +45,15 @@ namespace Serilog.Sinks.MSSqlServer.Output
             switch (column)
             {
                 case StandardColumn.Message:
-                    return new KeyValuePair<string, object>(_columnOptions.Message.ColumnName, TruncateOutput(logEvent.RenderMessage(_formatProvider), _columnOptions.Message.DataLength));
+                    return new KeyValuePair<string, object>(_columnOptions.Message.ColumnName, logEvent.RenderMessage(_formatProvider).TruncateOutput(_columnOptions.Message.DataLength));
                 case StandardColumn.MessageTemplate:
-                    return new KeyValuePair<string, object>(_columnOptions.MessageTemplate.ColumnName, TruncateOutput(logEvent.MessageTemplate.Text, _columnOptions.MessageTemplate.DataLength));
+                    return new KeyValuePair<string, object>(_columnOptions.MessageTemplate.ColumnName, logEvent.MessageTemplate.Text.TruncateOutput(_columnOptions.MessageTemplate.DataLength));
                 case StandardColumn.Level:
                     return new KeyValuePair<string, object>(_columnOptions.Level.ColumnName, _columnOptions.Level.StoreAsEnum ? (object)logEvent.Level : logEvent.Level.ToString());
                 case StandardColumn.TimeStamp:
                     return GetTimeStampStandardColumnNameAndValue(logEvent);
                 case StandardColumn.Exception:
-                    return new KeyValuePair<string, object>(_columnOptions.Exception.ColumnName, TruncateOutput(logEvent.Exception?.ToString(), _columnOptions.Exception.DataLength));
+                    return new KeyValuePair<string, object>(_columnOptions.Exception.ColumnName, logEvent.Exception?.ToString().TruncateOutput(_columnOptions.Exception.DataLength));
                 case StandardColumn.Properties:
                     return new KeyValuePair<string, object>(_columnOptions.Properties.ColumnName, ConvertPropertiesToXmlStructure(logEvent.Properties));
                 case StandardColumn.LogEvent:
@@ -62,11 +62,6 @@ namespace Serilog.Sinks.MSSqlServer.Output
                     throw new ArgumentOutOfRangeException(nameof(column));
             }
         }
-
-        private static string TruncateOutput(string value, int dataLength) =>
-            dataLength < 0
-                ? value     // No need to truncate if length set to maximum
-                : value.Truncate(dataLength, "...");
 
         private KeyValuePair<string, object> GetTimeStampStandardColumnNameAndValue(LogEvent logEvent)
         {
