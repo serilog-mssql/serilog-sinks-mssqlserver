@@ -3,6 +3,7 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
   <ItemGroup>
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
     <PackageVersion Include="System.Configuration.ConfigurationManager" Version="6.0.1" />
     <PackageVersion Include="System.Collections" Version="4.3.0" />
     <PackageVersion Include="System.IO.FileSystem.Primitives" Version="4.3.0" />
