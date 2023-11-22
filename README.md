@@ -454,7 +454,7 @@ In case `DataLength` is set to a specific value different from -1, any message l
 
 This column stores the log event message with the property placeholders. It defaults to `nvarchar(max)`. The `DataType` property can only be set to character-storage types.
 
-In case `DataLength` is set to a specific value different from -1, any template text longer than that length will be effectively truncated to that size. Any truncating ignores all differences between the tokens in the template meaning that a template might get cut off in the middle of a property token. Example: `DataLength` is set to 20 and the message template is "a long {NumberOfCharacters} template text" (without the quotes), the final template stored in the database will be: "a long {NumberOfC..." (again without quotes).
+If `DataLength` is set to a value different to -1 longer text will be truncated. See [Message column](#message ) for details.
 
 ### Level
 
@@ -484,7 +484,7 @@ When the `ConvertToUtc` property is set to `true`, the time stamp is adjusted to
 
 When an exception is logged as part of the log event, the exception message is stored here automatically. The `DataType` must be `nvarchar`.
 
-Similar to the columns `Message` and `MessageTemplate`, setting `DataLength` of `Exception` to a specific value different from -1 will effectively truncate any exception message to the stated length in `DataLength`.
+Similar to the columns `Message` and `MessageTemplate`, setting `DataLength` to a specific value different from -1 will effectively truncate any exception message to the stated length in `DataLength`. See [Message column](#message ) for details.
 
 ### Properties
 
@@ -512,7 +512,10 @@ The content of this column is rendered as JSON by default or with a custom IText
 
 ## Custom Property Columns
 
-By default, any log event properties you include in your log statements will be saved to the XML `Properties` column or the JSON `LogEvent` column. But they can also be stored in their own individual columns via the `AdditionalColumns` collection. This adds overhead to write operations but is very useful for frequently-queried properties. Only `ColumnName` is required; the default configuration is `varchar(max)`. If you specify a DataLength on a column of character data types (NVarChar, VarChar, Char, NChar) the string will be automatically truncated to the datalength to fit in the column.
+By default, any log event properties you include in your log statements will be saved to the XML `Properties` column or the JSON `LogEvent` column. But they can also be stored in their own individual columns via the `AdditionalColumns` collection. This adds overhead to write operations but is very useful for frequently-queried properties. Only `ColumnName` is required; the default configuration is `varchar(max)`.
+
+If you specify a DataLength other than -1 on a column of character data types (NVarChar, VarChar, Char, NChar) longer text will be truncated to the specified length. See [Message column](#message ) for details.
+
 
 ```csharp
 var columnOptions = new ColumnOptions
