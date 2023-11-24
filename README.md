@@ -406,9 +406,11 @@ By default (and consistent with the SQL DDL to create a table shown earlier) the
  - `StandardColumn.Exception`
  - `StandardColumn.Properties`
 
-There is one additional Standard Column which is not included by default (for backwards-compatibility reasons):
+There are the following additional standard columns which are not included by default (for backwards-compatibility reasons):
 
 - `StandardColumn.LogEvent`
+- `StandardColumn.TraceId`
+- `StandardColumn.SpanId`
 
 You can change this list as long as the underlying table definition is consistent:
 
@@ -416,8 +418,10 @@ You can change this list as long as the underlying table definition is consisten
 // we don't need XML data
 columnOptions.Store.Remove(StandardColumn.Properties);
 
-// we do want JSON data
+// we do want JSON data and OpenTelemetry
 columnOptions.Store.Add(StandardColumn.LogEvent);
+columnOptions.Store.Add(StandardColumn.TraceId);
+columnOptions.Store.Add(StandardColumn.SpanId);
 ```
 
 In addition to any special properties described below, each Standard Column also has the usual column properties like `ColumnName` as described in the topic [SqlColumn Objects](#sqlcolumn-objects).
@@ -454,7 +458,7 @@ In case `DataLength` is set to a specific value different from -1, any message l
 
 This column stores the log event message with the property placeholders. It defaults to `nvarchar(max)`. The `DataType` property can only be set to character-storage types.
 
-If `DataLength` is set to a value different to -1 longer text will be truncated. See [Message column](#message ) for details.
+If `DataLength` is set to a value different to -1 longer text will be truncated. See [Message column](#message) for details.
 
 ### Level
 
@@ -506,9 +510,15 @@ If `OmitElementIfEmpty` is set then if a property is empty, it will not be seria
 
 This column stores log event property values as JSON. Typically you will use either this column or the XML-based `Properties` column, but not both. This column's `DataType` must always be `nvarchar`.
 
-The `ExcludeAddtionalProperties` and `ExcludeStandardColumns` properties are described in the [Custom Property Columns](#custom-property-columns) topic.
+By default this column is not used unless it is added to the `ColumnOptions.Store` property as documented [above](#standard-columns).
 
 The content of this column is rendered as JSON by default or with a custom ITextFormatter passed by the caller as parameter `logEventFormatter`. Details can be found in [Sink Configuration](#sink-configuration).
+
+### TraceId and SpanId
+
+These two columns store the OpenTelemetry `TraceId` and `SpanId` log event properties which are documented [here](https://github.com/serilog/serilog/issues/1923). The `DataType` of these columns must be `nvarchar` or `varchar`.
+
+By default these columns are not used unless they are added to the `ColumnOptions.Store` property as documented [above](#standard-columns).
 
 ## Custom Property Columns
 
@@ -604,7 +614,7 @@ As the name suggests, `columnOptionSection` is an entire configuration section i
     "disableTriggers": true,
     "clusteredColumnstoreIndex": false,
     "primaryKeyColumnName": "Id",
-    "addStandardColumns": [ "LogEvent" ],
+    "addStandardColumns": [ "LogEvent", "TraceId", "SpanId" ],
     "removeStandardColumns": [ "MessageTemplate", "Properties" ],
     "additionalColumns": [
         { "ColumnName": "EventType", "DataType": "int", "AllowNull": false },
@@ -668,6 +678,8 @@ Keys and values are case-sensitive. Case must match **_exactly_** as shown below
     <!-- ColumnOptions parameters -->
     <AddStandardColumns>
         <add Name="LogEvent"/>
+        <add Name="TraceId"/>
+        <add Name="SpanId"/>
     </AddStandardColumns>
     <RemoveStandardColumns>
         <remove Name="Properties"/>
