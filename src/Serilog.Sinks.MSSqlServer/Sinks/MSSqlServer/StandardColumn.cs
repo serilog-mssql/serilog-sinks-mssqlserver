@@ -26,6 +26,16 @@
         Level,
 
         /// <summary>
+        /// The OpenTelemetry trace id of the event.
+        /// </summary>
+        TraceId,
+
+        /// <summary>
+        /// The OpenTelemetry span id of the event.
+        /// </summary>
+        SpanId,
+
+        /// <summary>
         /// The time at which the event occurred.
         /// </summary>
         TimeStamp,

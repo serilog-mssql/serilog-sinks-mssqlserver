@@ -105,6 +105,8 @@ namespace Serilog.Sinks.MSSqlServer.Configuration
             SetCommonColumnOptions(config.Id, columnOptions.Id);
             SetCommonColumnOptions(config.Level, columnOptions.Level);
             SetCommonColumnOptions(config.LogEvent, columnOptions.LogEvent);
+            SetCommonColumnOptions(config.TraceId, columnOptions.TraceId);
+            SetCommonColumnOptions(config.SpanId, columnOptions.SpanId);
             SetCommonColumnOptions(config.Message, columnOptions.Message);
             SetCommonColumnOptions(config.MessageTemplate, columnOptions.MessageTemplate);
             SetCommonColumnOptions(config.PropertiesColumn, columnOptions.Properties);
