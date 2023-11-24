@@ -1,3 +1,7 @@
+# 6.4.0
+* Implemented #436: Truncate additional columns (thanks to @nhart12)
+* Fixed issue #489: allow varchar on standard columns (thanks to @nhart12)
+
 # 6.3.0
 * Implemented #360: Automatic DB creation
 
