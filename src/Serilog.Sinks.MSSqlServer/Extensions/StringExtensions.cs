@@ -4,6 +4,11 @@ namespace Serilog.Sinks.MSSqlServer.Extensions
 {
     internal static class StringExtensions
     {
+        public static string TruncateOutput(this string value, int dataLength) =>
+            dataLength < 0
+                ? value     // No need to truncate if length set to maximum
+                : value.Truncate(dataLength, "...");
+
         public static string Truncate(this string value, int maxLength, string suffix)
         {
             if (value == null) return null;

@@ -100,7 +100,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Platform
             };
 
             // Act
-            _sut.Execute();
+            Assert.Throws<InvalidOperationException>(() => _sut.Execute());
 
             // Assert
             Assert.True(handlerCalled);
@@ -124,7 +124,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Platform
             };
 
             // Act
-            _sut.Execute();
+            Assert.Throws<InvalidOperationException>(() => _sut.Execute());
 
             // Assert
             Assert.True(handlerCalled);
@@ -148,7 +148,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Platform
             };
 
             // Act
-            _sut.Execute();
+            Assert.Throws<InvalidOperationException>(() => _sut.Execute());
 
             // Assert
             Assert.True(handlerCalled);
@@ -172,7 +172,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Platform
             };
 
             // Act
-            _sut.Execute();
+            Assert.Throws<InvalidOperationException>(() => _sut.Execute());
 
             // Assert
             Assert.True(handlerCalled);
