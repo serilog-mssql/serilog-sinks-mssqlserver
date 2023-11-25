@@ -12,7 +12,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Platform
         {
             // Arrange
             const string databaseName = "LogDatabase";
-            const string expectedResult = "CREATE DATABASE [LogDatabase]";
+            const string expectedResult = "IF NOT EXISTS (SELECT name FROM sys.databases WHERE name = 'LogDatabase')\r\nBEGIN\r\nCREATE DATABASE [LogDatabase]\r\nEND\r\n";
             var sut = new SqlCreateDatabaseWriter(databaseName);
 
             // Act
@@ -27,7 +27,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Platform
         {
             // Arrange
             const string databaseName = "Log Data Base";
-            const string expectedResult = "CREATE DATABASE [Log Data Base]";
+            const string expectedResult = "IF NOT EXISTS (SELECT name FROM sys.databases WHERE name = 'Log Data Base')\r\nBEGIN\r\nCREATE DATABASE [Log Data Base]\r\nEND\r\n";
             var sut = new SqlCreateDatabaseWriter(databaseName);
 
             // Act
