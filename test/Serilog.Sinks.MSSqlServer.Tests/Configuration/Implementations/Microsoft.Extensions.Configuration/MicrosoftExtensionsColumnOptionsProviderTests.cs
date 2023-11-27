@@ -489,6 +489,44 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
         }
 
         [Fact]
+        public void ConfigureColumnOptionsAddsColumnTraceIdWithSpecifiedOptions()
+        {
+            // Arrange
+            const string columnName = "TestColumnName";
+            var dataType = SqlDbType.NVarChar;
+            var allowNull = true;
+            var nonClusteredIndex = true;
+            SetupConfigurationSectionMocks();
+            SetupColumnSectionMock("traceId", columnName, dataType, allowNull, nonClusteredIndex);
+            var sut = new MicrosoftExtensionsColumnOptionsProvider();
+
+            // Act
+            var result = sut.ConfigureColumnOptions(new Serilog.Sinks.MSSqlServer.ColumnOptions(), _configurationSectionMock.Object);
+
+            // Assert
+            AssertColumnSqlOptions(columnName, dataType, allowNull, nonClusteredIndex, result.TraceId);
+        }
+
+        [Fact]
+        public void ConfigureColumnOptionsAddsColumnSpanIdWithSpecifiedOptions()
+        {
+            // Arrange
+            const string columnName = "TestColumnName";
+            var dataType = SqlDbType.NVarChar;
+            var allowNull = true;
+            var nonClusteredIndex = true;
+            SetupConfigurationSectionMocks();
+            SetupColumnSectionMock("spanId", columnName, dataType, allowNull, nonClusteredIndex);
+            var sut = new MicrosoftExtensionsColumnOptionsProvider();
+
+            // Act
+            var result = sut.ConfigureColumnOptions(new Serilog.Sinks.MSSqlServer.ColumnOptions(), _configurationSectionMock.Object);
+
+            // Assert
+            AssertColumnSqlOptions(columnName, dataType, allowNull, nonClusteredIndex, result.SpanId);
+        }
+
+        [Fact]
         public void ConfigureColumnOptionsAddsColumnMessageWithSpecifiedOptions()
         {
             // Arrange

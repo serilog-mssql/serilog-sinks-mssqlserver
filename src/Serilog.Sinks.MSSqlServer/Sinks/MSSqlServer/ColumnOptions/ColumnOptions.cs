@@ -20,6 +20,8 @@ namespace Serilog.Sinks.MSSqlServer
             // Apply any defaults in the individual Standard Column constructors.
             Id = new IdColumnOptions();
             Level = new LevelColumnOptions();
+            TraceId = new TraceIdColumnOptions();
+            SpanId = new SpanIdColumnOptions();
             Properties = new PropertiesColumnOptions();
             Message = new MessageColumnOptions();
             MessageTemplate = new MessageTemplateColumnOptions();
@@ -114,6 +116,16 @@ namespace Serilog.Sinks.MSSqlServer
         public LevelColumnOptions Level { get; private set; }
 
         /// <summary>
+        /// Options for the TraceId column.
+        /// </summary>
+        public TraceIdColumnOptions TraceId { get; private set; }
+
+        /// <summary>
+        /// Options for the SpanId column.
+        /// </summary>
+        public SpanIdColumnOptions SpanId { get; private set; }
+
+        /// <summary>
         /// Options for the Properties column.
         /// </summary>
         public PropertiesColumnOptions Properties { get; private set; }
@@ -152,6 +164,8 @@ namespace Serilog.Sinks.MSSqlServer
             {
                 case StandardColumn.Id: return Id;
                 case StandardColumn.Level: return Level;
+                case StandardColumn.TraceId: return TraceId;
+                case StandardColumn.SpanId: return SpanId;
                 case StandardColumn.TimeStamp: return TimeStamp;
                 case StandardColumn.LogEvent: return LogEvent;
                 case StandardColumn.Message: return Message;

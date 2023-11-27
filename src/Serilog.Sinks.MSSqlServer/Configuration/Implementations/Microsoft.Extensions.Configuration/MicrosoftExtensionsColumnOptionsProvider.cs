@@ -147,6 +147,18 @@ namespace Serilog.Sinks.MSSqlServer.Configuration
             section = config.GetSection("messageTemplate");
             if (section != null)
                 SetCommonColumnOptions(section, columnOptions.MessageTemplate);
+
+            section = config.GetSection("traceId");
+            if (section != null)
+            {
+                SetCommonColumnOptions(section, columnOptions.TraceId);
+            }
+
+            section = config.GetSection("spanId");
+            if (section != null)
+            {
+                SetCommonColumnOptions(section, columnOptions.SpanId);
+            }
         }
 
         private static void ReadMiscColumnOptions(IConfigurationSection config, ColumnOptions columnOptions)
