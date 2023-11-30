@@ -1,5 +1,6 @@
 # 6.5.0
 * Implemented #488: Support OpenTelemetry TraceId and SpanId as provided by Serilog core
+* Include README in NuGet package
 
 # 6.4.0
 * Implemented #436: Truncate additional columns (thanks to @nhart12)
