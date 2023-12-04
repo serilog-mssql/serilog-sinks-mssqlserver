@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Description>A Serilog sink that writes events to Microsoft SQL Server and Azure SQL</Description>
-    <VersionPrefix>6.5.0</VersionPrefix>
+    <VersionPrefix>6.5.1</VersionPrefix>
     <Authors>Michiel van Oudheusden;Christian Kadluba;Serilog Contributors</Authors>
     <TargetFrameworks>netstandard2.0;net462;net472;net6.0</TargetFrameworks>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
