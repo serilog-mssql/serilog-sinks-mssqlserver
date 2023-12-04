@@ -106,6 +106,18 @@ namespace Serilog.Configuration
             get => (StandardColumnConfigLevel)base[nameof(Level)];
         }
 
+        [ConfigurationProperty(nameof(TraceId))]
+        public StandardColumnConfigTraceId TraceId
+        {
+            get => (StandardColumnConfigTraceId)base[nameof(TraceId)];
+        }
+
+        [ConfigurationProperty(nameof(SpanId))]
+        public StandardColumnConfigSpanId SpanId
+        {
+            get => (StandardColumnConfigSpanId)base[nameof(SpanId)];
+        }
+
         [ConfigurationProperty(nameof(LogEvent))]
         public StandardColumnConfigLogEvent LogEvent
         {

@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <Description>A Serilog sink that writes events to Microsoft SQL Server</Description>
-    <VersionPrefix>6.4.0</VersionPrefix>
+    <Description>A Serilog sink that writes events to Microsoft SQL Server and Azure SQL</Description>
+    <VersionPrefix>6.5.0</VersionPrefix>
     <Authors>Michiel van Oudheusden;Christian Kadluba;Serilog Contributors</Authors>
     <TargetFrameworks>netstandard2.0;net462;net472;net6.0</TargetFrameworks>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -14,6 +14,7 @@
     <PackageId>Serilog.Sinks.MSSqlServer</PackageId>
     <PackageTags>serilog;sinks;mssqlserver</PackageTags>
     <PackageIcon>serilog-sink-nuget.png</PackageIcon>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageProjectUrl>https://github.com/serilog-mssql/serilog-sinks-mssqlserver</PackageProjectUrl>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <RepositoryUrl>https://github.com/serilog-mssql/serilog-sinks-mssqlserver</RepositoryUrl>
@@ -67,6 +68,7 @@
 
   <ItemGroup>
     <None Include="Images\serilog-sink-nuget.png" Pack="true" PackagePath="" />
+    <None Include="../../README.md" Pack="true" PackagePath="" />
   </ItemGroup>
 
   <ItemGroup>
