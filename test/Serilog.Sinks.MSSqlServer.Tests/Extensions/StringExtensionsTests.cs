@@ -62,6 +62,20 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Extensions
             Assert.Equal("A simple tes...", truncatedMessage);
         }
 
+        [Theory]
+        [InlineData("Abc")]
+        [InlineData("Ab")]
+        [InlineData("X")]
+        [Trait("Bugfix", "#505")]
+        public void ReturnNonTruncatedShortStringWhenMaxLengthIsLessOrEqualToSuffixLength(string inputMessage)
+        {
+            // Act
+            var nonTruncatedMessage = inputMessage.Truncate(3, "...");
+
+            // Assert
+            Assert.Equal(inputMessage, nonTruncatedMessage);
+        }
+
         [Fact]
         public void ReturnTruncatedStringWithEmptySuffix()
         {
