@@ -17,6 +17,7 @@ namespace Serilog.Sinks.MSSqlServer
             BatchPostingLimit = MSSqlServerSink.DefaultBatchPostingLimit;
             BatchPeriod = MSSqlServerSink.DefaultPeriod;
             EagerlyEmitFirstEvent = true;
+            UseSqlBulkCopy = true;
         }
 
         internal MSSqlServerSinkOptions(
@@ -77,5 +78,10 @@ namespace Serilog.Sinks.MSSqlServer
         /// A switch allowing the pass-through minimum level to be changed at runtime
         /// </summary>
         public LoggingLevelSwitch LevelSwitch { get; set; }
+
+        /// <summary>
+        /// Flag to use <see cref="Microsoft.Data.SqlClient.SqlBulkCopy"/> instead of individual INSERT statements (default: true)
+        /// </summary>
+        public bool UseSqlBulkCopy { get; set; }
     }
 }
