@@ -73,7 +73,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Platform
         }
 
         [Fact]
-        public async Task WriteBatchCallsSqlConnectionWrapperOpen()
+        public async Task WriteBatchCallsSqlConnectionWrapperOpenAsync()
         {
             // Arrange
             var logEvents = CreateLogEvents();
@@ -95,7 +95,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Platform
             await _sut.WriteBatch(logEvents, null);
 
             // Assert
-            _sqlConnectionWrapperMock.Verify(c => c.CreateCommand(), Times.AtLeastOnce);
+            _sqlConnectionWrapperMock.Verify(c => c.CreateCommand(), Times.Exactly(logEvents.Count));
         }
 
         [Fact]
@@ -169,7 +169,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Platform
             await _sut.WriteBatch(logEvents, null);
 
             // Assert
-            _sqlCommandWrapperMock.Verify(c => c.ExecuteNonQueryAsync(), Times.AtLeastOnce);
+            _sqlCommandWrapperMock.Verify(c => c.ExecuteNonQueryAsync(), Times.Exactly(logEvents.Count));
         }
 
         [Fact]
@@ -182,7 +182,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Platform
             await _sut.WriteBatch(logEvents, null);
 
             // Assert
-            _sqlCommandWrapperMock.Verify(c => c.Dispose(), Times.AtLeastOnce);
+            _sqlCommandWrapperMock.Verify(c => c.Dispose(), Times.Exactly(logEvents.Count));
         }
 
         [Fact]
@@ -247,7 +247,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Platform
         }
 
         [Fact]
-        public async Task WriteBatchRethrowsIfSqlCommandExecuteNonQueryThrows()
+        public async Task WriteBatchRethrowsIfSqlCommandExecuteNonQueryAsyncThrows()
         {
             // Arrange
             _sqlCommandWrapperMock.Setup(c => c.ExecuteNonQueryAsync()).Callback(() => throw new InvalidOperationException());

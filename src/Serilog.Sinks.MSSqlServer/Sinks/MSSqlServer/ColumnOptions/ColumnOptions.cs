@@ -90,6 +90,7 @@ namespace Serilog.Sinks.MSSqlServer
 
         /// <summary>
         /// Indicates if triggers should be disabled when inserting log entries.
+        /// Only applies when SqlBulkCopy is used.
         /// </summary>
         public bool DisableTriggers { get; set; }
 
