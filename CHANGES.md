@@ -1,3 +1,6 @@
+# 6.5.1
+* Fixed issue #505: NVarChar Columns with 1 data length gets their values truncated into empty strings (thanks to @Whinarn)
+
 # 6.5.0
 * Implemented #488: Support OpenTelemetry TraceId and SpanId as provided by Serilog core
 * Include README in NuGet package
