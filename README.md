@@ -246,6 +246,7 @@ Basic settings of the sink are configured using the properties in a `MSSqlServer
 * `BatchPeriod`
 * `EagerlyEmitFirstEvent`
 * `LevelSwitch`
+* `UseSqlBulkCopy`
 
 ### TableName
 
@@ -291,6 +292,11 @@ This setting is not used by the audit sink as it writes each event immediately a
 
 A switch allowing the pass-through minimum level to be changed at runtime. If this is set, the parameter `restrictedToMinimumLevel` in the [sink configuration method](#sink-configuration) is ignored.
 
+### UseSqlBulkCopy
+
+A flag to use `SqlBulkCopy` instead of individual INSERT statements when writing log events.  The default is `true`.
+This setting is not used by the audit sink as it always uses INSERT statements to write events.
+
 ## ColumnOptions Object
 
 Features of the log table are defined by changing properties on a `ColumnOptions` object:
@@ -319,7 +325,7 @@ Setting this to `true` changes the table to the clustered columnstore index (CCI
 
 ### DisableTriggers
 
-Disabling triggers can significantly improve batch-write performance.
+Disabling triggers can significantly improve batch-write performance. Only applies when `SqlBulkCopy` is used.
 
 ### AdditionalColumns
 
