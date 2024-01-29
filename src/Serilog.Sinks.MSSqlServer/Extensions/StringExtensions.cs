@@ -12,11 +12,13 @@ namespace Serilog.Sinks.MSSqlServer.Extensions
         public static string Truncate(this string value, int maxLength, string suffix)
         {
             if (value == null) return null;
+            else if (value.Length <= maxLength) return value;
+
             var suffixLength = suffix?.Length ?? 0;
             if (maxLength <= suffixLength) return string.Empty;
 
             var correctedMaxLength = maxLength - suffixLength;
-            return value.Length <= maxLength ? value : Invariant($"{value.Substring(0, correctedMaxLength)}{suffix}");
+            return Invariant($"{value.Substring(0, correctedMaxLength)}{suffix}");
         }
     }
 }

@@ -1,3 +1,7 @@
+# 6.5.1
+* Fixed issue #505: NVarChar Columns with 1 data length gets their values truncated into empty strings (thanks to @Whinarn)
+* Updated Microsoft.Data.SqlClient to 5.1.4 to fix CVE-2024-0056 (https://github.com/advisories/GHSA-98g6-xh36-x2p7)
+
 # 6.5.0
 * Implemented #488: Support OpenTelemetry TraceId and SpanId as provided by Serilog core
 * Include README in NuGet package
