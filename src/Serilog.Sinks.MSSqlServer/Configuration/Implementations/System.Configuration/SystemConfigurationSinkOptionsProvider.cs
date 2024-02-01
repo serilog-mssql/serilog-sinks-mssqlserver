@@ -32,6 +32,8 @@ namespace Serilog.Sinks.MSSqlServer.Configuration
             SetProperty.IfProvided<string>(config.BatchPeriod, nameof(config.BatchPeriod.Value), value => sinkOptions.BatchPeriod = TimeSpan.Parse(value, CultureInfo.InvariantCulture));
             SetProperty.IfProvided<bool>(config.EagerlyEmitFirstEvent, nameof(config.EagerlyEmitFirstEvent.Value),
                 value => sinkOptions.EagerlyEmitFirstEvent = value);
+            SetProperty.IfProvided<bool>(config.UseSqlBulkCopy, nameof(config.UseSqlBulkCopy.Value),
+                value => sinkOptions.UseSqlBulkCopy = value);
         }
     }
 }

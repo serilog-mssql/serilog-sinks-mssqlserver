@@ -149,5 +149,19 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
             // Assert
             Assert.True(result.EagerlyEmitFirstEvent);
         }
+
+        [Fact]
+        public void ConfigureSinkOptionsSetsUseSqlBulkCopy()
+        {
+            // Arrange
+            _configurationSectionMock.Setup(s => s["useSqlBulkCopy"]).Returns("false");
+            var sut = new MicrosoftExtensionsSinkOptionsProvider();
+
+            // Act
+            var result = sut.ConfigureSinkOptions(new MSSqlServerSinkOptions(), _configurationSectionMock.Object);
+
+            // Assert
+            Assert.False(result.UseSqlBulkCopy);
+        }
     }
 }
