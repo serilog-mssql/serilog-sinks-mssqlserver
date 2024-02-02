@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Serilog.Debugging;
@@ -11,14 +10,14 @@ using static System.FormattableString;
 
 namespace Serilog.Sinks.MSSqlServer.Platform
 {
-    internal class SqlInsertBatchWriter : ISqlBulkBatchWriter
+    internal class SqlInsertStatementWriter : ISqlBulkBatchWriter, ISqlLogEventWriter
     {
         private readonly string _tableName;
         private readonly string _schemaName;
         private readonly ISqlConnectionFactory _sqlConnectionFactory;
         private readonly ILogEventDataGenerator _logEventDataGenerator;
 
-        public SqlInsertBatchWriter(
+        public SqlInsertStatementWriter(
             string tableName,
             string schemaName,
             ISqlConnectionFactory sqlConnectionFactory,
@@ -30,7 +29,11 @@ namespace Serilog.Sinks.MSSqlServer.Platform
             _logEventDataGenerator = logEventDataGenerator ?? throw new ArgumentNullException(nameof(logEventDataGenerator));
         }
 
-        public async Task WriteBatch(IEnumerable<LogEvent> events, DataTable dataTable)
+        public Task WriteBatch(IEnumerable<LogEvent> events, DataTable dataTable) => WriteBatch(events);
+
+        public void WriteEvent(LogEvent logEvent) => WriteBatch(new[] { logEvent }).GetAwaiter().GetResult();
+
+        public async Task WriteBatch(IEnumerable<LogEvent> events)
         {
             try
             {
@@ -77,8 +80,7 @@ namespace Serilog.Sinks.MSSqlServer.Platform
             }
             catch (Exception ex)
             {
-                SelfLog.WriteLine("Unable to write batch of {0} log events to the database due to following error: {1}",
-                    events.Count(), ex);
+                SelfLog.WriteLine("Unable to write log event to the database due to following error: {0}", ex);
                 throw;
             }
         }

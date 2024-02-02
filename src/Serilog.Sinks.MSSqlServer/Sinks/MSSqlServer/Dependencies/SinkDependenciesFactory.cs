@@ -56,10 +56,10 @@ namespace Serilog.Sinks.MSSqlServer.Dependencies
                     ? (ISqlBulkBatchWriter)new SqlBulkBatchWriter(
                         sinkOptions.TableName, sinkOptions.SchemaName, columnOptions.DisableTriggers,
                         sqlConnectionFactory, logEventDataGenerator)
-                    : (ISqlBulkBatchWriter)new SqlInsertBatchWriter(
+                    : (ISqlBulkBatchWriter)new SqlInsertStatementWriter(
                         sinkOptions.TableName, sinkOptions.SchemaName,
                         sqlConnectionFactory, logEventDataGenerator),
-                SqlLogEventWriter = new SqlLogEventWriter(
+                SqlLogEventWriter = new SqlInsertStatementWriter(
                     sinkOptions.TableName, sinkOptions.SchemaName,
                     sqlConnectionFactory, logEventDataGenerator)
             };
