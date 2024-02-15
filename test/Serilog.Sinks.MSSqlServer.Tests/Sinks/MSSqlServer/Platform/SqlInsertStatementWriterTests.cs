@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Moq;
 using Serilog.Events;
 using Serilog.Sinks.MSSqlServer.Output;
@@ -11,7 +12,7 @@ using Xunit;
 namespace Serilog.Sinks.MSSqlServer.Tests.Platform
 {
     [Trait(TestCategory.TraitName, TestCategory.Unit)]
-    public class SqlLogEventWriterTests
+    public class SqlInsertStatementWriterTests
     {
         private const string _tableName = "TestTableName";
         private const string _schemaName = "TestSchemaName";
@@ -19,9 +20,9 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Platform
         private readonly Mock<ILogEventDataGenerator> _logEventDataGeneratorMock;
         private readonly Mock<ISqlConnectionWrapper> _sqlConnectionWrapperMock;
         private readonly Mock<ISqlCommandWrapper> _sqlCommandWrapperMock;
-        private readonly SqlLogEventWriter _sut;
+        private readonly SqlInsertStatementWriter _sut;
 
-        public SqlLogEventWriterTests()
+        public SqlInsertStatementWriterTests()
         {
             _sqlConnectionFactoryMock = new Mock<ISqlConnectionFactory>();
             _logEventDataGeneratorMock = new Mock<ILogEventDataGenerator>();
@@ -31,87 +32,87 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Platform
             _sqlConnectionFactoryMock.Setup(f => f.Create()).Returns(_sqlConnectionWrapperMock.Object);
             _sqlConnectionWrapperMock.Setup(c => c.CreateCommand()).Returns(_sqlCommandWrapperMock.Object);
 
-            _sut = new SqlLogEventWriter(_tableName, _schemaName, _sqlConnectionFactoryMock.Object, _logEventDataGeneratorMock.Object);
+            _sut = new SqlInsertStatementWriter(_tableName, _schemaName, _sqlConnectionFactoryMock.Object, _logEventDataGeneratorMock.Object);
         }
 
         [Fact]
         public void InitializeWithoutTableNameThrows()
         {
-            Assert.Throws<ArgumentNullException>(() => new SqlLogEventWriter(null, _schemaName, _sqlConnectionFactoryMock.Object, _logEventDataGeneratorMock.Object));
+            Assert.Throws<ArgumentNullException>(() => new SqlInsertStatementWriter(null, _schemaName, _sqlConnectionFactoryMock.Object, _logEventDataGeneratorMock.Object));
         }
 
         [Fact]
         public void InitializeWithoutSchemaNameThrows()
         {
-            Assert.Throws<ArgumentNullException>(() => new SqlLogEventWriter(_tableName, null, _sqlConnectionFactoryMock.Object, _logEventDataGeneratorMock.Object));
+            Assert.Throws<ArgumentNullException>(() => new SqlInsertStatementWriter(_tableName, null, _sqlConnectionFactoryMock.Object, _logEventDataGeneratorMock.Object));
         }
 
         [Fact]
         public void InitializeWithoutSqlConnectionFactoryThrows()
         {
-            Assert.Throws<ArgumentNullException>(() => new SqlLogEventWriter(_tableName, _schemaName, null, _logEventDataGeneratorMock.Object));
+            Assert.Throws<ArgumentNullException>(() => new SqlInsertStatementWriter(_tableName, _schemaName, null, _logEventDataGeneratorMock.Object));
         }
 
         [Fact]
         public void InitializeWithoutLogEventDataGeneratorThrows()
         {
-            Assert.Throws<ArgumentNullException>(() => new SqlLogEventWriter(_tableName, _schemaName, _sqlConnectionFactoryMock.Object, null));
+            Assert.Throws<ArgumentNullException>(() => new SqlInsertStatementWriter(_tableName, _schemaName, _sqlConnectionFactoryMock.Object, null));
         }
 
         [Fact]
-        public void WriteEventCallsSqlConnectionFactoryCreate()
+        public async Task WriteBatchCallsSqlConnectionFactoryCreate()
         {
             // Arrange
-            var logEvent = TestLogEventHelper.CreateLogEvent();
+            var logEvents = CreateLogEvents();
 
             // Act
-            _sut.WriteEvent(logEvent);
+            await _sut.WriteBatch(logEvents);
 
             // Assert
             _sqlConnectionFactoryMock.Verify(f => f.Create(), Times.Once);
         }
 
         [Fact]
-        public void WriteEventCallsSqlConnectionWrapperOpen()
+        public async Task WriteBatchCallsSqlConnectionWrapperOpenAsync()
         {
             // Arrange
-            var logEvent = TestLogEventHelper.CreateLogEvent();
+            var logEvents = CreateLogEvents();
 
             // Act
-            _sut.WriteEvent(logEvent);
+            await _sut.WriteBatch(logEvents);
 
             // Assert
-            _sqlConnectionWrapperMock.Verify(c => c.Open(), Times.Once);
+            _sqlConnectionWrapperMock.Verify(c => c.OpenAsync(), Times.Once);
         }
 
         [Fact]
-        public void WriteEventCallsSqlConnectionWrappeCreateCommand()
+        public async Task WriteBatchCallsSqlConnectionWrappeCreateCommand()
         {
             // Arrange
-            var logEvent = TestLogEventHelper.CreateLogEvent();
+            var logEvents = CreateLogEvents();
 
             // Act
-            _sut.WriteEvent(logEvent);
+            await _sut.WriteBatch(logEvents);
 
             // Assert
-            _sqlConnectionWrapperMock.Verify(c => c.CreateCommand(), Times.Once);
+            _sqlConnectionWrapperMock.Verify(c => c.CreateCommand(), Times.Exactly(logEvents.Count));
         }
 
         [Fact]
-        public void WriteEventSetsSqlCommandWrapperCommandTypeText()
+        public async Task WriteBatchSetsSqlCommandWrapperCommandTypeText()
         {
             // Arrange
-            var logEvent = TestLogEventHelper.CreateLogEvent();
+            var logEvents = CreateLogEvents();
 
             // Act
-            _sut.WriteEvent(logEvent);
+            await _sut.WriteBatch(logEvents);
 
             // Assert
             _sqlCommandWrapperMock.VerifySet(c => c.CommandType = System.Data.CommandType.Text);
         }
 
         [Fact]
-        public void WriteEventCallsSqlCommandWrapperAddParameterForEachField()
+        public async Task WriteBatchCallsSqlCommandWrapperAddParameterForEachField()
         {
             // Arrange
             var logEvent = TestLogEventHelper.CreateLogEvent();
@@ -128,7 +129,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Platform
                 .Returns(fieldsAndValues);
 
             // Act
-            _sut.WriteEvent(logEvent);
+            await _sut.WriteBatch(new[] { logEvent });
 
             // Assert
             _sqlCommandWrapperMock.Verify(c => c.AddParameter("@P0", field1Value), Times.Once);
@@ -137,7 +138,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Platform
         }
 
         [Fact]
-        public void WriteEventSetsSqlCommandWrapperCommandTextToSqlInsertWithCorrectFieldsAndValues()
+        public async Task WriteBatchSetsSqlCommandWrapperCommandTextToSqlInsertWithCorrectFieldsAndValues()
         {
             // Arrange
             var expectedSqlCommandText = $"INSERT INTO [{_schemaName}].[{_tableName}] ([FieldName1],[FieldName2],[FieldNameThree]) VALUES (@P0,@P1,@P2)";
@@ -152,107 +153,118 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Platform
                 .Returns(fieldsAndValues);
 
             // Act
-            _sut.WriteEvent(logEvent);
+            await _sut.WriteBatch(new[] { logEvent });
 
             // Assert
             _sqlCommandWrapperMock.VerifySet(c => c.CommandText = expectedSqlCommandText);
         }
 
         [Fact]
-        public void WriteEventCallsSqlCommandWrapperExecuteNonQuery()
+        public async Task WriteBatchCallsSqlCommandWrapperExecuteNonQueryAsync()
         {
             // Arrange
-            var logEvent = TestLogEventHelper.CreateLogEvent();
+            var logEvents = CreateLogEvents();
 
             // Act
-            _sut.WriteEvent(logEvent);
+            await _sut.WriteBatch(logEvents);
 
             // Assert
-            _sqlCommandWrapperMock.Verify(c => c.ExecuteNonQuery(), Times.Once);
+            _sqlCommandWrapperMock.Verify(c => c.ExecuteNonQueryAsync(), Times.Exactly(logEvents.Count));
         }
 
         [Fact]
-        public void WriteEventCallsSqlCommandWrapperDispose()
+        public async Task WriteBatchCallsSqlCommandWrapperDispose()
         {
             // Arrange
-            var logEvent = TestLogEventHelper.CreateLogEvent();
+            var logEvents = CreateLogEvents();
 
             // Act
-            _sut.WriteEvent(logEvent);
+            await _sut.WriteBatch(logEvents);
 
             // Assert
-            _sqlCommandWrapperMock.Verify(c => c.Dispose(), Times.Once);
+            _sqlCommandWrapperMock.Verify(c => c.Dispose(), Times.Exactly(logEvents.Count));
         }
 
         [Fact]
-        public void WriteEventCallsLogEventDataGeneratorGetColumnsAndValuesWithLogEvent()
+        public async Task WriteBatchCallsLogEventDataGeneratorGetColumnsAndValuesForEachLogEvent()
         {
             // Arrange
-            var logEvent = TestLogEventHelper.CreateLogEvent();
+            var logEvents = CreateLogEvents();
 
             // Act
-            _sut.WriteEvent(logEvent);
+            await _sut.WriteBatch(logEvents).ConfigureAwait(false);
 
             // Assert
-            _logEventDataGeneratorMock.Verify(d => d.GetColumnsAndValues(logEvent), Times.Once);
+            _logEventDataGeneratorMock.Verify(c => c.GetColumnsAndValues(logEvents[0]), Times.Once);
+            _logEventDataGeneratorMock.Verify(c => c.GetColumnsAndValues(logEvents[1]), Times.Once);
         }
 
         [Fact]
-        public void WriteEventRethrowsIfSqlConnectionFactoryCreateThrows()
+        public async Task WriteBatchRethrowsIfSqlConnectionFactoryCreateThrows()
         {
             // Arrange
             _sqlConnectionFactoryMock.Setup(f => f.Create()).Callback(() => throw new InvalidOperationException());
-            var logEvent = TestLogEventHelper.CreateLogEvent();
+            var logEvents = CreateLogEvents();
 
             // Act + assert
-            Assert.Throws<InvalidOperationException>(() => _sut.WriteEvent(logEvent));
+            await Assert.ThrowsAsync<InvalidOperationException>(() => _sut.WriteBatch(logEvents));
         }
 
         [Fact]
-        public void WriteEventRethrowsIfSqlConnectionCreateCommandThrows()
+        public async Task WriteBatchRethrowsIfSqlConnectionCreateCommandThrows()
         {
             // Arrange
             _sqlConnectionWrapperMock.Setup(c => c.CreateCommand()).Callback(() => throw new InvalidOperationException());
-            var logEvent = TestLogEventHelper.CreateLogEvent();
+            var logEvents = CreateLogEvents();
 
             // Act + assert
-            Assert.Throws<InvalidOperationException>(() => _sut.WriteEvent(logEvent));
+            await Assert.ThrowsAsync<InvalidOperationException>(() => _sut.WriteBatch(logEvents));
         }
 
         [Fact]
-        public void WriteEventRethrowsIfLogEventDataGeneratorGetColumnsAndValuesThrows()
+        public async Task WriteBatchRethrowsIfLogEventDataGeneratorGetColumnsAndValuesThrows()
         {
             // Arrange
             _logEventDataGeneratorMock.Setup(d => d.GetColumnsAndValues(It.IsAny<LogEvent>())).Callback(() => throw new InvalidOperationException());
-            var logEvent = TestLogEventHelper.CreateLogEvent();
+            var logEvents = CreateLogEvents();
 
             // Act + assert
-            Assert.Throws<InvalidOperationException>(() => _sut.WriteEvent(logEvent));
+            await Assert.ThrowsAsync<InvalidOperationException>(() => _sut.WriteBatch(logEvents));
         }
 
         [Fact]
-        public void WriteEventRethrowsIfSqlCommandAddParameterThrows()
+        public async Task WriteBatchRethrowsIfSqlCommandAddParameterThrows()
         {
             // Arrange
             _sqlCommandWrapperMock.Setup(c => c.AddParameter(It.IsAny<string>(), It.IsAny<object>())).Callback(() => throw new InvalidOperationException());
             var fieldsAndValues = new List<KeyValuePair<string, object>> { new KeyValuePair<string, object>("FieldName1", "FieldValue1") };
             _logEventDataGeneratorMock.Setup(d => d.GetColumnsAndValues(It.IsAny<LogEvent>()))
                 .Returns(fieldsAndValues);
-            var logEvent = TestLogEventHelper.CreateLogEvent();
+            var logEvents = CreateLogEvents();
 
             // Act + assert
-            Assert.Throws<InvalidOperationException>(() => _sut.WriteEvent(logEvent));
+            await Assert.ThrowsAsync<InvalidOperationException>(() => _sut.WriteBatch(logEvents));
         }
 
         [Fact]
-        public void WriteEventRethrowsIfSqlCommandExecuteNonQueryThrows()
+        public async Task WriteBatchRethrowsIfSqlCommandExecuteNonQueryAsyncThrows()
         {
             // Arrange
-            _sqlCommandWrapperMock.Setup(c => c.ExecuteNonQuery()).Callback(() => throw new InvalidOperationException());
-            var logEvent = TestLogEventHelper.CreateLogEvent();
+            _sqlCommandWrapperMock.Setup(c => c.ExecuteNonQueryAsync()).Callback(() => throw new InvalidOperationException());
+            var logEvents = CreateLogEvents();
 
             // Act + assert
-            Assert.Throws<InvalidOperationException>(() => _sut.WriteEvent(logEvent));
+            await Assert.ThrowsAsync<InvalidOperationException>(() => _sut.WriteBatch(logEvents));
+        }
+
+        private static List<LogEvent> CreateLogEvents()
+        {
+            var logEvents = new List<LogEvent>
+            {
+                TestLogEventHelper.CreateLogEvent(),
+                TestLogEventHelper.CreateLogEvent()
+            };
+            return logEvents;
         }
     }
 }

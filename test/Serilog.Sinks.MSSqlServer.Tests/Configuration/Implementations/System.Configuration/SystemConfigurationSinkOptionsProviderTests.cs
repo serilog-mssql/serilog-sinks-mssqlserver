@@ -67,5 +67,21 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.System.C
             // Assert
             Assert.True(sinkOptions.EnlistInTransaction);
         }
+
+        [Fact]
+        public void ConfigureSinkOptionsReadsUseSqlBulkCopy()
+        {
+            // Arrange
+            var configSection = new MSSqlServerConfigurationSection();
+            configSection.UseSqlBulkCopy.Value = "false";
+            var sinkOptions = new MSSqlServerSinkOptions { UseSqlBulkCopy = true };
+            var sut = new SystemConfigurationSinkOptionsProvider();
+
+            // Act
+            sut.ConfigureSinkOptions(configSection, sinkOptions);
+
+            // Assert
+            Assert.False(sinkOptions.UseSqlBulkCopy);
+        }
     }
 }
