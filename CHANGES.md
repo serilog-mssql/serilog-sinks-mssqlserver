@@ -1,3 +1,6 @@
+# 6.6.0
+* Fixed issue #509: Add SqlInsertStatementWriter which uses INSERT statements instead of SqlBulkCopy (thanks to @BrettJaner)
+
 # 6.5.2
 * Fixed issue #517: Updated Microsoft.Data.SqlClient to 5.1.5 to fix  CVE-2024-21319
 
