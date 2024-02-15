@@ -1,3 +1,6 @@
+# 6.5.2
+* Fixed issue #517: Updated Microsoft.Data.SqlClient to 5.1.5 to fix  CVE-2024-21319
+
 # 6.5.1
 * Fixed issue #505: NVarChar Columns with 1 data length gets their values truncated into empty strings (thanks to @Whinarn)
 * Updated Microsoft.Data.SqlClient to 5.1.4 to fix CVE-2024-0056 (https://github.com/advisories/GHSA-98g6-xh36-x2p7)
