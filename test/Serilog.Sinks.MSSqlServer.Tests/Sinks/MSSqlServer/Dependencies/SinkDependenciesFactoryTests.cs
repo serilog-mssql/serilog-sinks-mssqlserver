@@ -70,7 +70,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Dependencies
 
             // Assert
             Assert.NotNull(result.SqlLogEventWriter);
-            Assert.IsType<SqlLogEventWriter>(result.SqlLogEventWriter);
+            Assert.IsType<SqlInsertStatementWriter>(result.SqlLogEventWriter);
         }
 
         [Fact]

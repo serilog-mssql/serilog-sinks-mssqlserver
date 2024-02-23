@@ -198,6 +198,12 @@ namespace Serilog.Configuration
         {
             get => (ValueConfigElement)base[nameof(EagerlyEmitFirstEvent)];
         }
+
+        [ConfigurationProperty(nameof(UseSqlBulkCopy))]
+        public ValueConfigElement UseSqlBulkCopy
+        {
+            get => (ValueConfigElement)base[nameof(UseSqlBulkCopy)];
+        }
     }
 }
 

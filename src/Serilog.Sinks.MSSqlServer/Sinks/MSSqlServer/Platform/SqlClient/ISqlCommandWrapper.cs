@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data;
+using System.Threading.Tasks;
 
 namespace Serilog.Sinks.MSSqlServer.Platform.SqlClient
 {
@@ -10,5 +11,6 @@ namespace Serilog.Sinks.MSSqlServer.Platform.SqlClient
 
         void AddParameter(string parameterName, object value);
         int ExecuteNonQuery();
+        Task<int> ExecuteNonQueryAsync();
     }
 }
