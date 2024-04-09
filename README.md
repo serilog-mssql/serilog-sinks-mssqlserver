@@ -602,7 +602,7 @@ Keys and values are not case-sensitive. This is an example of configuring the si
                 "schemaName": "EventLogging",
                 "autoCreateSqlTable": true,
                 "batchPostingLimit": 1000,
-                "period": "0.00:00:30"
+                "batchPeriod": "0.00:00:30"
             },
             "restrictedToMinimumLevel": "Warning",
             "columnOptionsSection": { . . . }
