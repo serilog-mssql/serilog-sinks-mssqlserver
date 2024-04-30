@@ -279,7 +279,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Output
 
             // Assert
             Assert.Equal("TraceId", result.Key);
-            Assert.Equal(traceId, result.Value);
+            Assert.Equal("34898a9020e0390190b0982370034f00", result.Value);
         }
 
         [Fact]
@@ -298,7 +298,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Output
 
             // Assert
             Assert.Equal("SpanId", result.Key);
-            Assert.Equal(spanId, result.Value);
+            Assert.Equal("0390190b09823700", result.Value);
         }
 
         [Fact]
