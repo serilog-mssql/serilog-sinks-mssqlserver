@@ -383,7 +383,7 @@ Numeric types use the default precision and scale. For numeric types, you are re
 
 ### AllowNull
 
-Determines whether or not the column can store SQL `NULL` values. Some of the other features like `PrimaryKey` have related restrictions, and some of the Standard Columns impose restrictions (for example, the `Id` column never allows nulls).
+Determines whether or not the column can store SQL `NULL` values. The default is true. Some of the other features like `PrimaryKey` have related restrictions, and some of the Standard Columns impose restrictions (for example, the `Id` column never allows nulls).
 
 ### DataLength
 
@@ -602,7 +602,7 @@ Keys and values are not case-sensitive. This is an example of configuring the si
                 "schemaName": "EventLogging",
                 "autoCreateSqlTable": true,
                 "batchPostingLimit": 1000,
-                "period": "0.00:00:30"
+                "batchPeriod": "0.00:00:30"
             },
             "restrictedToMinimumLevel": "Warning",
             "columnOptionsSection": { . . . }
