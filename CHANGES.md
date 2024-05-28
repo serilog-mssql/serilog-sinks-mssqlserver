@@ -1,3 +1,8 @@
+# 6.6.1
+* Fixed issue #515: Cannot use .AuditTo with SpanId or TraceId (thanks to @Kolthor and @vui611)
+* Fixed issue #530: Document default value of AllowNull
+* Fixed issue #528: Wrong period in README.md sample
+
 # 6.6.0
 * Fixed issue #509: Add SqlInsertStatementWriter which uses INSERT statements instead of SqlBulkCopy (thanks to @BrettJaner)
 
