@@ -6,7 +6,7 @@ using Serilog.Events;
 using Serilog.Formatting;
 using Serilog.Sinks.MSSqlServer.Configuration.Factories;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
-using Serilog.Sinks.PeriodicBatching;
+using Serilog.Core;
 using Xunit;
 
 namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Extensions.Hybrid

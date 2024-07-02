@@ -1,5 +1,4 @@
 ﻿using Serilog.Core;
-using Serilog.Sinks.PeriodicBatching;
 
 namespace Serilog.Sinks.MSSqlServer.Configuration.Factories
 {
