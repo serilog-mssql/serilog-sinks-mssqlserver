@@ -1,5 +1,5 @@
-﻿using Serilog.Core;
-using Serilog.Sinks.PeriodicBatching;
+﻿using Serilog.Configuration;
+using Serilog.Core;
 
 namespace Serilog.Sinks.MSSqlServer.Configuration.Factories
 {
@@ -7,14 +7,13 @@ namespace Serilog.Sinks.MSSqlServer.Configuration.Factories
     {
         public ILogEventSink Create(IBatchedLogEventSink sink, MSSqlServerSinkOptions sinkOptions)
         {
-            var periodicBatchingSinkOptions = new PeriodicBatchingSinkOptions
+            var periodicBatchingSinkOptions = new BatchingOptions
             {
                 BatchSizeLimit = sinkOptions.BatchPostingLimit,
-                Period = sinkOptions.BatchPeriod,
+                BufferingTimeLimit = sinkOptions.BatchPeriod,
                 EagerlyEmitFirstEvent = sinkOptions.EagerlyEmitFirstEvent
             };
-
-            return new PeriodicBatchingSink(sink, periodicBatchingSinkOptions);
+            return LoggerSinkConfiguration.CreateSink(lc => lc.Sink(sink, periodicBatchingSinkOptions));
         }
     }
 }
