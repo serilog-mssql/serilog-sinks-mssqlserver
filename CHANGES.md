@@ -1,3 +1,7 @@
+# 6.7.0
+* Fixed some of the vulnerabilities referenced in issue #544 by updating SqlClient dependency to 5.2.1
+* Update codeql-action to v3 before deprecation
+
 # 6.6.1
 * Fixed issue #515: Cannot use .AuditTo with SpanId or TraceId (thanks to @Kolthor and @vui611)
 * Fixed issue #530: Document default value of AllowNull
