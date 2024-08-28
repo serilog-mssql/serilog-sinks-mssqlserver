@@ -5,6 +5,7 @@
   <ItemGroup>
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
     <PackageVersion Include="System.Configuration.ConfigurationManager" Version="6.0.1" />
+        <PackageVersion Include="System.Private.Uri" Version="4.3.2" />
     <PackageVersion Include="Microsoft.Data.SqlClient" Version="5.1.6" />
     <PackageVersion Include="Microsoft.Extensions.Configuration" Version="6.0.1" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
