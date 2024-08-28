@@ -38,8 +38,6 @@
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net472' Or '$(TargetFramework)' == 'net462' ">
-    <Reference Include="System" />
-    <Reference Include="System.Transactions" />
     <Reference Include="Microsoft.CSharp" />
     <Compile Include="Configuration\Extensions\Hybrid\**\*.cs" />
     <Compile Include="Configuration\Implementations\Microsoft.Extensions.Configuration\**\*.cs" />
@@ -47,12 +45,6 @@
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
-    <PackageReference Include="System.Collections" />
-    <PackageReference Include="System.Runtime.InteropServices" />
-    <PackageReference Include="System.Runtime.Extensions" />
-    <PackageReference Include="System.IO.FileSystem.Primitives" />
-    <PackageReference Include="System.Resources.ResourceManager" />
-    <PackageReference Include="System.Text.Encoding.Extensions" />
     <PackageReference Include="coverlet.collector">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
