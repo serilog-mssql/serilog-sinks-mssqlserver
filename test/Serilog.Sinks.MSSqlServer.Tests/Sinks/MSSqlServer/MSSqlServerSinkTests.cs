@@ -162,7 +162,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
                  });
 
             // Act
-            await _sut.EmitBatchAsync(logEvents).ConfigureAwait(false);
+            await _sut.EmitBatchAsync(logEvents);
 
             // Assert
             _sqlBulkBatchWriter.Verify(w => w.WriteBatch(It.IsAny<IEnumerable<LogEvent>>(), _dataTable), Times.Once);

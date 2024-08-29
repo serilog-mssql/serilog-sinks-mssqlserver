@@ -192,7 +192,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Platform
             var logEvents = CreateLogEvents();
 
             // Act
-            await _sut.WriteBatch(logEvents).ConfigureAwait(false);
+            await _sut.WriteBatch(logEvents);
 
             // Assert
             _logEventDataGeneratorMock.Verify(c => c.GetColumnsAndValues(logEvents[0]), Times.Once);

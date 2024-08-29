@@ -1,3 +1,11 @@
+# 6.7.1
+* Fixed issue #552 by downgrading SqlClient dependency to 5.1.6 which is LTS and fixed the vulnerabilities referenced in issue #544
+* Fixed vulnerabilities by removing all System.* 4 versions as recommended by Microsoft (https://devblogs.microsoft.com/nuget/nugetaudit-2-0-elevating-security-and-trust-in-package-management/#system-net-http-and-system-text-regularexpressions, issue #544)
+* Fixed vulnerability by updating xunit to 2.9.0 (issue #544)
+* Fixed vulnerability by directly referencing transitive dependency System.Formats.Asn1 (https://github.com/advisories/GHSA-447r-wph3-92pm, issue #544)
+* Fixed vulnerability by directly referencing transitive dependency System.Private.Uri (https://github.com/advisories/GHSA-xhfc-gr8f-ffwc, issue #544)
+* Activated NuGet Audit for high and critical vulnerabilities in direct and transitive dependencies for all projects (https://devblogs.microsoft.com/nuget/nugetaudit-2-0-elevating-security-and-trust-in-package-management/)
+
 # 6.7.0
 * Fixed some of the vulnerabilities referenced in issue #544 by updating SqlClient dependency to 5.2.1
 * Update codeql-action to v3 before deprecation

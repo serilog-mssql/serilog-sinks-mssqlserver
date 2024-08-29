@@ -33,7 +33,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
 
             // Assert
             Assert.Equal(propertyName, sut.PropertyName);
-            Assert.Equal(1, sut.PropertyNameHierarchy.Count);
+            Assert.Single(sut.PropertyNameHierarchy);
             Assert.Equal(propertyName, sut.PropertyNameHierarchy[0]);
             Assert.False(sut.HasHierarchicalPropertyName);
         }
