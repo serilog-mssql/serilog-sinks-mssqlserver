@@ -1,3 +1,6 @@
+# 7.0.0
+* Fixed issue #543: Update to Serilog v4, remove reference to Serilog.Sinks.PeriodicBatching (thanks to @cancakar35)
+
 # 6.7.1
 * Fixed issue #552 by downgrading SqlClient dependency to 5.1.6 which is LTS and fixed the vulnerabilities referenced in issue #544
 * Fixed vulnerabilities by removing all System.* 4 versions as recommended by Microsoft (https://devblogs.microsoft.com/nuget/nugetaudit-2-0-elevating-security-and-trust-in-package-management/#system-net-http-and-system-text-regularexpressions, issue #544)
