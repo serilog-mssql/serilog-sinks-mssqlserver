@@ -164,8 +164,6 @@ namespace Serilog
 
             var periodicBatchingSink = batchingSinkFactory.Create(sink, sinkOptions);
 
-            if (periodicBatchingSink == null) return null;
-
             return loggerConfiguration.Sink(periodicBatchingSink, restrictedToMinimumLevel, sinkOptions?.LevelSwitch);
         }
 
@@ -282,8 +280,6 @@ namespace Serilog
                 ref columnOptions, columnOptionsSection, applySystemConfiguration, applyMicrosoftExtensionsConfiguration);
 
             var auditSink = auditSinkFactory.Create(connectionString, sinkOptions, formatProvider, columnOptions, logEventFormatter);
-
-            if (auditSink == null) return null;
 
             return loggerAuditSinkConfiguration.Sink(auditSink, restrictedToMinimumLevel, sinkOptions?.LevelSwitch);
         }
