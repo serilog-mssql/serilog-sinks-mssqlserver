@@ -16,24 +16,107 @@ jobs:
       - name: Run build
         run: ./Build.ps1 -SkipTests
 
-      - name: Read version from csproj
-        run: |
-          $selectResult = Select-String -Path ".\src\Serilog.Sinks.MSSqlServer\Serilog.Sinks.MSSqlServer.csproj" -Pattern '<VersionPrefix>(.+)</VersionPrefix>'
-          $versionMatch = $selectResult.Matches[0].Groups[1].Value
-          echo ("VERSION=" + $versionMatch) >> $env:GITHUB_ENV
-          echo "Found version $versionMatch"
+      # - name: Read version from csproj
+      #   run: |
+      #     $selectResult = Select-String -Path ".\src\Serilog.Sinks.MSSqlServer\Serilog.Sinks.MSSqlServer.csproj" -Pattern '<VersionPrefix>(.+)</VersionPrefix>'
+      #     $versionMatch = $selectResult.Matches[0].Groups[1].Value
+      #     echo ("VERSION=" + $versionMatch) >> $env:GITHUB_ENV
+      #     echo "Found version $versionMatch"
 
-      - name: Create GitHub release
+      # - name: Create GitHub release
+      #   if: ${{ github.ref_name == 'main' }}
+      #   uses: "marvinpinto/action-automatic-releases@latest"
+      #   with:
+      #     repo_token: "${{ secrets.GITHUB_TOKEN }}"
+      #     prerelease: false
+      #     automatic_release_tag: "v${{ env.VERSION }}"
+      #     title: "v${{ env.VERSION }}"
+      #     files: |
+      #       artifacts/*.nupkg
+      #       artifacts/*.snupkg
+
+      - name: Extract version from .csproj
+        id: extract_version
+        run: |
+          version=$(grep '<Version>' src/Serilog.Sinks.MSSqlServer/Serilog.Sinks.MSSqlServer.csproj | sed -E 's/.*<Version>([^<]+)<\/Version>.*/\1/')
+          echo "VERSION=$version" >> $GITHUB_ENV
+          echo "Extracted version: $version"
+
+      - name: Get the last commit message
+        id: last_commit
         if: ${{ github.ref_name == 'main' }}
-        uses: "marvinpinto/action-automatic-releases@latest"
+        run: echo "LAST_COMMIT=$(git log -1 --pretty=%B)" >> $GITHUB_ENV
+
+      - name: Get the commits since the last release
+        id: commits_since_last_release
+        if: ${{ github.ref_name == 'main' }}
+        run: |
+          last_tag=$(git describe --tags --abbrev=0)
+          commits=$(git log $last_tag..HEAD --pretty=format:"- %s")
+          echo "COMMITS_SINCE_LAST_RELEASE=$commits" >> $GITHUB_ENV
+
+      - name: Get closed issues since last release
+        id: closed_issues
+        if: ${{ github.ref_name == 'main' }}
+        run: |
+          last_tag=$(git describe --tags --abbrev=0)
+          issues=$(gh issue list --state closed --search "merged:>$last_tag" --json number,title --jq '.[] | "- #" + (.number|tostring) + " " + .title')
+          echo "CLOSED_ISSUES=$issues" >> $GITHUB_ENV
+
+      - name: Get contributors since last release
+        id: contributors
+        if: ${{ github.ref_name == 'main' }}
+        run: |
+          contributors=$(git log --format='%aN <%aE>' $last_tag..HEAD | sort | uniq | awk -F'<|>' '{print $1 " (" $2 ")"}' | sort | uniq | sed 's/^/- /')
+          echo "CONTRIBUTORS=$contributors" >> $GITHUB_ENV
+
+      - name: Create Git Tag
+        id: create_tag
+        if: ${{ github.ref_name == 'main' }}
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git tag -a "v${{ env.VERSION }}" -m "Release version ${{ env.VERSION }}"
+          git push origin "v${{ env.VERSION }}"
+
+      - name: Create Release
+        id: create_release
+        if: ${{ github.ref_name == 'main' }}
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          tag_name: "v${{ env.VERSION }}"  # Der Tag-Name, der das Release auslöst
+          release_name: "v${{ env.VERSION }}"  # Der Name des Releases
+          body: |
+            ## Details
+            ${{ env.LAST_COMMIT }}
+
+            ## Commits
+            ${{ env.COMMITS_SINCE_LAST_RELEASE }}
+
+            ## Contributors
+            ${{ env.CONTRIBUTORS }}
+          draft: false
           prerelease: false
-          automatic_release_tag: "v${{ env.VERSION }}"
-          title: "v${{ env.VERSION }}"
-          files: |
-            artifacts/*.nupkg
-            artifacts/*.snupkg
+
+      - name: Upload NuGet packages to Release
+        if: ${{ github.ref_name == 'main' }}
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: artifacts/*.nupkg
+          asset_name: serilog.sinks.mssqlserver.${{ env.VERSION }}.nupkg
+          asset_content_type: application/zip
+
+      - name: Upload NuGet symbol packages to Release
+        if: ${{ github.ref_name == 'main' }}
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: artifacts/*.snupkg
+          asset_name: serilog.sinks.mssqlserver.${{ env.VERSION }}.snupkg
+          asset_content_type: application/zip
 
       - name: Publish to nuget.org
         env:
