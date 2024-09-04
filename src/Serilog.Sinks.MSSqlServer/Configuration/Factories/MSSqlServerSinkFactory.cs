@@ -1,6 +1,6 @@
 ﻿using System;
 using Serilog.Formatting;
-using Serilog.Sinks.PeriodicBatching;
+using Serilog.Core;
 
 namespace Serilog.Sinks.MSSqlServer.Configuration.Factories
 {
