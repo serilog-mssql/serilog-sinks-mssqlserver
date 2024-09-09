@@ -20,7 +20,7 @@ using Serilog.Events;
 using Serilog.Formatting;
 using Serilog.Sinks.MSSqlServer.Dependencies;
 using Serilog.Sinks.MSSqlServer.Platform;
-using Serilog.Sinks.PeriodicBatching;
+using Serilog.Core;
 
 namespace Serilog.Sinks.MSSqlServer
 {
@@ -117,12 +117,9 @@ namespace Serilog.Sinks.MSSqlServer
         /// <summary>
         /// Emit a batch of log events, running asynchronously.
         /// </summary>
-        /// <param name="events">The events to emit.</param>
-        /// <remarks>
-        /// Override either <see cref="PeriodicBatchingSink.EmitBatch" /> or <see cref="PeriodicBatchingSink.EmitBatchAsync" />, not both.
-        /// </remarks>
-        public Task EmitBatchAsync(IEnumerable<LogEvent> events) =>
-            _sqlBulkBatchWriter.WriteBatch(events, _eventTable);
+        /// <param name="batch">The events to emit.</param>
+        public Task EmitBatchAsync(IReadOnlyCollection<LogEvent> batch) =>
+            _sqlBulkBatchWriter.WriteBatch(batch, _eventTable);
 
         /// <summary>
         /// Called upon batchperiod if no data is in batch. Not used by this sink.

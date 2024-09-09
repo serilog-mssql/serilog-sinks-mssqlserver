@@ -2,40 +2,55 @@ name: Release
 
 on:
   push:
-    branches: [ dev, main ]
+    branches:
+      - main
+      - dev
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
 jobs:
   build-and-release:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Read version from csproj
+        id: extract_version
+        if: github.ref == 'refs/heads/main'
+        run: |
+          VERSION=$(grep '<VersionPrefix>' src/Serilog.Sinks.MSSqlServer/Serilog.Sinks.MSSqlServer.csproj | sed 's/.*<VersionPrefix>\(.*\)<\/VersionPrefix>.*/\1/')
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          if git rev-parse "v$VERSION" >/dev/null 2>&1; then
+            echo "Tag v$VERSION already exists"
+            exit 1
+          fi
 
       - name: Run build
         run: ./Build.ps1 -SkipTests
+        shell: pwsh
 
-      - name: Read version from csproj
+      - name: Get last commit message
+        id: last_commit
+        if: success() && github.ref == 'refs/heads/main'
         run: |
-          $selectResult = Select-String -Path ".\src\Serilog.Sinks.MSSqlServer\Serilog.Sinks.MSSqlServer.csproj" -Pattern '<VersionPrefix>(.+)</VersionPrefix>'
-          $versionMatch = $selectResult.Matches[0].Groups[1].Value
-          echo ("VERSION=" + $versionMatch) >> $env:GITHUB_ENV
-          echo "Found version $versionMatch"
+          git log -1 --pretty=%B > last_commit_message.txt
 
-      - name: Create GitHub release
-        if: ${{ github.ref_name == 'main' }}
-        uses: "marvinpinto/action-automatic-releases@latest"
-        with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          prerelease: false
-          automatic_release_tag: "v${{ env.VERSION }}"
-          title: "v${{ env.VERSION }}"
-          files: |
-            artifacts/*.nupkg
-            artifacts/*.snupkg
+      # Create GitHub release only on main branch (latest release)
+      - name: Create Release
+        if: github.ref == 'refs/heads/main' && success()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create v${{ env.VERSION }} \
+            --title "v${{ env.VERSION }}" \
+            --notes "$(cat last_commit_message.txt)" \
+            artifacts/*.nupkg artifacts/*.snupkg
 
       - name: Publish to nuget.org
         env:
           NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
-        run: nuget push artifacts\*.nupkg -Source 'https://api.nuget.org/v3/index.json' -ApiKey ${{ env.NUGET_API_KEY }}
+        run: |
+          nuget push artifacts/*.nupkg -Source https://api.nuget.org/v3/index.json -ApiKey ${{ secrets.NUGET_API_KEY }}
