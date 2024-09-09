@@ -1,5 +1,8 @@
 # 7.0.0
 * Fixed issue #543: Update to Serilog v4, remove reference to Serilog.Sinks.PeriodicBatching (thanks to @cancakar35)
+* Full automatic release and run on ubuntu-latest agent
+* Added developer documentation
+* Enabled .NET package validation
 
 # 6.7.1
 * Fixed issue #552 by downgrading SqlClient dependency to 5.1.6 which is LTS and fixed the vulnerabilities referenced in issue #544
