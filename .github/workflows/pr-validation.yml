@@ -13,21 +13,46 @@ on:
 
 jobs:
   build-and-test:
-    runs-on: windows-latest
+    runs-on: windows-latest # SQL Server LocalDB used in tests requires Windows
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Run build and tests
         run: ./Build.ps1
+        shell: pwsh
 
-      - name: Upload binaries artifact for InferSharp workflow
-        uses: actions/upload-artifact@v3
+      - name: Upload binaries artifact for InferSharp job
+        uses: actions/upload-artifact@v4
         with:
           name: bin-net6
           path: src\Serilog.Sinks.MSSqlServer\bin\Release\net6.0
 
       - name: Upload testresults artifact with code coverage file
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: testresults
           path: test\Serilog.Sinks.MSSqlServer.Tests\TestResults
+
+  infersharp:
+    runs-on: ubuntu-latest # Container action used by Infer# requires Linux
+    needs: build-and-test
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    steps:
+      - name: Download binaries artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: bin-net6
+          path: bin-net6
+
+      - name: Run Infer#
+        uses: microsoft/infersharpaction@v1.5
+        with:
+          binary-path: bin-net6
+
+      - name: Upload SARIF output to GitHub Security Center
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: infer-out/report.sarif
