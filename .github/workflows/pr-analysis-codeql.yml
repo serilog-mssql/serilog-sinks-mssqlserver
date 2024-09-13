@@ -11,7 +11,7 @@ on:
 
 jobs:
   build-and-codeql:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     permissions:
       actions: read
       contents: read
@@ -19,7 +19,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
@@ -28,6 +28,7 @@ jobs:
 
       - name: Run build
         run: ./Build.ps1 -SkipTests
+        shell: pwsh
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
