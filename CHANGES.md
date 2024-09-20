@@ -1,3 +1,6 @@
+# 7.0.1
+* Fixed issue #567: .NET Framework assemblies were not built properly
+
 # 7.0.0
 * Fixed issue #543: Update to Serilog v4, remove reference to Serilog.Sinks.PeriodicBatching (thanks to @cancakar35)
 * Full automatic release and run on ubuntu-latest agent
