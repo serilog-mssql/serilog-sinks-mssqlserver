@@ -1,5 +1,6 @@
 # 7.0.1
 * Fixed issue #567: .NET Framework assemblies were not built properly
+* Consolidated PR validation action workflows and updated some task versions
 
 # 7.0.0
 * Fixed issue #543: Update to Serilog v4, remove reference to Serilog.Sinks.PeriodicBatching (thanks to @cancakar35)

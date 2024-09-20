@@ -2,9 +2,7 @@ name: Release
 
 on:
   push:
-    branches:
-      - main
-      - dev
+    branches: [ dev, main ]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -18,15 +16,20 @@ jobs:
           fetch-depth: 0
 
       - name: Read version from csproj
-        id: extract_version
         if: github.ref == 'refs/heads/main'
         run: |
-          VERSION=$(grep '<VersionPrefix>' src/Serilog.Sinks.MSSqlServer/Serilog.Sinks.MSSqlServer.csproj | sed 's/.*<VersionPrefix>\(.*\)<\/VersionPrefix>.*/\1/')
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-          if git rev-parse "v$VERSION" >/dev/null 2>&1; then
-            echo "Tag v$VERSION already exists"
-            exit 1
-          fi
+          # Extract the version from the .csproj file using PowerShell XML parsing
+          [xml]$csproj = Get-Content 'src/Serilog.Sinks.MSSqlServer/Serilog.Sinks.MSSqlServer.csproj'
+          $version = $csproj.Project.PropertyGroup.VersionPrefix
+          echo "VERSION=$version" >> $env:GITHUB_ENV
+
+          # Check if the tag already exists in git
+          $tagExists = git tag -l "v$version"
+          if ($tagExists) {
+              Write-Host "Tag v$version already exists"
+              exit 1
+          }
+        shell: pwsh
 
       - name: Run build
         run: ./Build.ps1 -SkipTests
@@ -37,20 +40,41 @@ jobs:
         if: success() && github.ref == 'refs/heads/main'
         run: |
           git log -1 --pretty=%B > last_commit_message.txt
+        shell: pwsh
 
-      # Create GitHub release only on main branch (latest release)
       - name: Create Release
         if: github.ref == 'refs/heads/main' && success()
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release create v${{ env.VERSION }} \
-            --title "v${{ env.VERSION }}" \
-            --notes "$(cat last_commit_message.txt)" \
-            artifacts/*.nupkg artifacts/*.snupkg
+          # Der Basisname der Dateien basierend auf der Versionsnummer
+          $baseFileName = "Serilog.Sinks.MSSqlServer.${{ env.VERSION }}"
+
+          # Suche die exakten Dateipfade für .nupkg und .snupkg
+          $nupkgFile = Get-ChildItem -Path "artifacts/$baseFileName*.nupkg" | Select-Object -First 1
+          $snupkgFile = Get-ChildItem -Path "artifacts/$baseFileName*.snupkg" | Select-Object -First 1
+
+          # Überprüfe, ob beide Dateien gefunden wurden
+          if (-not $nupkgFile) { Write-Error "nupkg file not found" ; exit 1 }
+          if (-not $snupkgFile) { Write-Error "snupkg file not found" ; exit 1 }
+
+          # Ersetze Backslashes durch Forward Slashes für GitHub CLI-Kompatibilität
+          $nupkgFilePath = $nupkgFile.FullName -replace '\\', '/'
+          $snupkgFilePath = $snupkgFile.FullName -replace '\\', '/'
+
+          # Ausgabe der Dateipfade zu Debugging-Zwecken
+          Write-Host "Uploading files: $nupkgFilePath, $snupkgFilePath"
+
+          # Erstelle das Release mit den genauen Dateipfaden
+          gh release create v${{ env.VERSION }} `
+            --title "v${{ env.VERSION }}" `
+            --notes "$(Get-Content last_commit_message.txt)" `
+            $nupkgFilePath $snupkgFilePath
+        shell: pwsh
 
       - name: Publish to nuget.org
         env:
           NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
         run: |
           nuget push artifacts\*.nupkg -Source https://api.nuget.org/v3/index.json -ApiKey ${{ secrets.NUGET_API_KEY }}
+        shell: pwsh
