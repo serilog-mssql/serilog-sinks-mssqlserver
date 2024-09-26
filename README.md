@@ -187,7 +187,7 @@ CREATE TABLE [Logs] (
    [Id] int IDENTITY(1,1) NOT NULL,
    [Message] nvarchar(max) NULL,
    [MessageTemplate] nvarchar(max) NULL,
-   [Level] nvarchar(128) NULL,
+   [Level] nvarchar(max) NULL,
    [TimeStamp] datetime NOT NULL,
    [Exception] nvarchar(max) NULL,
    [Properties] nvarchar(max) NULL
@@ -468,7 +468,7 @@ If `DataLength` is set to a value different to -1 longer text will be truncated.
 
 ### Level
 
-This column stores the event level (Error, Information, etc.). For backwards-compatibility reasons it defaults to a length of 128 characters, but 12 characters is recommended. Alternately, the `StoreAsEnum` property can be set to `true` which causes the underlying level enum integer value to be stored as a SQL `tinyint` column. The `DataType` property can only be set to `nvarchar` or `tinyint`. Setting the `DataType` to `tinyint` is identical to setting `StoreAsEnum` to `true`.
+This column stores the event level (Error, Information, etc.). For backwards-compatibility reasons it defaults to a length of `nvarchar(max)` characters, but 12 characters is recommended. Alternately, the `StoreAsEnum` property can be set to `true` which causes the underlying level enum integer value to be stored as a SQL `tinyint` column. The `DataType` property can only be set to `nvarchar` or `tinyint`. Setting the `DataType` to `tinyint` is identical to setting `StoreAsEnum` to `true`.
 
 ### TimeStamp
 
