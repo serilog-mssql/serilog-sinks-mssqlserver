@@ -33,6 +33,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.github\workflows\pr-validation.yml = .github\workflows\pr-validation.yml
 		README.md = README.md
 		.github\workflows\release.yml = .github\workflows\release.yml
+		RunPerfTests.ps1 = RunPerfTests.ps1
+		.github\workflows\perftests.yml = .github\workflows\perftests.yml
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetStandardDemoLib", "sample\NetStandardDemo\NetStandardDemoLib\NetStandardDemoLib.csproj", "{8E69E31B-61C7-4175-B886-9C2078FCA477}"
@@ -42,6 +44,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NetStandardDemo", "NetStandardDemo", "{7B2B80DE-427A-4FEC-A7CE-7AD81FED73DE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppConfigDemo", "sample\AppConfigDemo\AppConfigDemo.csproj", "{6BFE1D21-1442-4375-AB69-14160B906A64}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Serilog.Sinks.MSSqlServer.PerformanceTests", "test\Serilog.Sinks.MSSqlServer.PerformanceTests\Serilog.Sinks.MSSqlServer.PerformanceTests.csproj", "{106A6BAF-F8E4-408B-BB09-391330DA87F2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -81,6 +85,10 @@ Global
 		{6BFE1D21-1442-4375-AB69-14160B906A64}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6BFE1D21-1442-4375-AB69-14160B906A64}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6BFE1D21-1442-4375-AB69-14160B906A64}.Release|Any CPU.Build.0 = Release|Any CPU
+		{106A6BAF-F8E4-408B-BB09-391330DA87F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{106A6BAF-F8E4-408B-BB09-391330DA87F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{106A6BAF-F8E4-408B-BB09-391330DA87F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{106A6BAF-F8E4-408B-BB09-391330DA87F2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -95,6 +103,7 @@ Global
 		{F908C46D-E72E-41E4-975D-73733294F93F} = {7B2B80DE-427A-4FEC-A7CE-7AD81FED73DE}
 		{7B2B80DE-427A-4FEC-A7CE-7AD81FED73DE} = {AA346332-5BAF-47F1-B8FB-7600ED61265D}
 		{6BFE1D21-1442-4375-AB69-14160B906A64} = {AA346332-5BAF-47F1-B8FB-7600ED61265D}
+		{106A6BAF-F8E4-408B-BB09-391330DA87F2} = {F02D6513-6F45-452E-85A0-41A872A2C1F8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {AAA6BF8D-7B53-4A5F-A79A-D1B306383B45}

@@ -38,17 +38,6 @@ foreach ($src in Get-ChildItem "$PSScriptRoot/src" -Directory) {
 }
 
 if ($SkipTests -eq $false) {
-    foreach ($test in Get-ChildItem "$PSScriptRoot/test" -Filter "*.PerformanceTests" -Directory) {
-        Push-Location $test.FullName
-
-        echo "build: Building performance test project in $($test.FullName)"
-
-        & dotnet build -c Release
-        if ($LASTEXITCODE -ne 0) { exit 2 }
-
-        Pop-Location
-    }
-
     foreach ($test in Get-ChildItem "$PSScriptRoot/test" -Filter "*.Tests" -Directory) {
         Push-Location $test.FullName
 
