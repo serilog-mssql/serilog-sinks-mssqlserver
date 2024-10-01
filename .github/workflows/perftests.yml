@@ -17,3 +17,9 @@ jobs:
       - name: Run performance tests
         run: ./RunPerfTests.ps1
         shell: pwsh
+
+      - name: Upload perf test results artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: perftestresults
+          path: artifacts\perftests
