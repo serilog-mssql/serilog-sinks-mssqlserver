@@ -48,6 +48,15 @@ if ($SkipTests -eq $false) {
 
         Pop-Location
     }
+
+    # The performance benchmark tests should at least build without errors during PR validation
+    $perfTestProjectPath = "$PSScriptRoot/test/Serilog.Sinks.MSSqlServer.PerformanceTests"
+    Push-Location "$perfTestProjectPath"
+
+    echo "build: Building performance test project in $perfTestProjectPath"
+    & dotnet build -c Release
+
+    Pop-Location
 }
 
 Pop-Location
