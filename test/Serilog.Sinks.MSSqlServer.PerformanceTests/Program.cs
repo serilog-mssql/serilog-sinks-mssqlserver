@@ -2,16 +2,10 @@
 
 namespace Serilog.Sinks.MSSqlServer.PerformanceTests;
 
-/// <summary>
-/// Wrappers that make it easy to run benchmark suites through the <c>dotnet test</c> runner.
-/// </summary>
-/// <example>
-/// <code>dotnet test -c Release --filter "FullyQualifiedName=Serilog.Sinks.MSSqlServer.PerformanceTests.Harness.Pipeline"</code>
-/// </example>
-public class Program
+public static class Program
 {
-    public static void Main()
+    public static void Main(string[] args)
     {
-        BenchmarkRunner.Run<SinkBenchmarks>();
+        BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
     }
 }

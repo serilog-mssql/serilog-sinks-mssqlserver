@@ -36,7 +36,7 @@ jobs:
         shell: pwsh
 
       - name: Run performance tests
-        run: ./RunPerfTests.ps1
+        run: ./RunPerfTests.ps1 -Filter "*QuickBenchmarks*"
         shell: pwsh
 
       - name: Get last commit message
@@ -55,28 +55,30 @@ jobs:
 
           $nupkgFile = Get-ChildItem -Path "artifacts/$baseFileName*.nupkg" | Select-Object -First 1
           $snupkgFile = Get-ChildItem -Path "artifacts/$baseFileName*.snupkg" | Select-Object -First 1
-          $perfReportSinkFile = Get-ChildItem -Path "artifacts/perftests/Serilog.Sinks.MSSqlServer.PerformanceTests.SinkBenchmarks-report.csv" `
+          $perfReportSinkFile = Get-ChildItem -Path "artifacts/perftests/Serilog.Sinks.MSSqlServer.PerformanceTests.SinkQuickBenchmarks-report.csv" `
+            | Select-Object -First 1
+          $perfReportAuditSinkFile = Get-ChildItem -Path "artifacts/perftests/Serilog.Sinks.MSSqlServer.PerformanceTests.AuditSinkQuickBenchmarks-report.csv" `
             | Select-Object -First 1
 
           if (-not $nupkgFile) { Write-Error "nupkg file not found" ; exit 1 }
           if (-not $snupkgFile) { Write-Error "snupkg file not found" ; exit 1 }
           if (-not $perfReportSinkFile) { Write-Error "Benchmark report for sink file not found" ; exit 1 }
+          if (-not $perfReportAuditSinkFile) { Write-Error "Benchmark report for audit sink file not found" ; exit 1 }
 
           $nupkgFilePath = $nupkgFile.FullName -replace '\\', '/'
           $snupkgFilePath = $snupkgFile.FullName -replace '\\', '/'
           $perfReportSinkFilePath = $perfReportSinkFile.FullName -replace '\\', '/'
+          $perfReportAuditSinkFilePath = $perfReportAuditSinkFile.FullName -replace '\\', '/'
 
-          Write-Host "Uploading files: $nupkgFilePath, $snupkgFilePath $perfReportPipelineFilePath"
+          Write-Host "Uploading files: $nupkgFilePath, $snupkgFilePath $perfReportSinkFilePath $perfReportAuditSinkFilePath"
 
           gh release create v${{ env.VERSION }} `
             --title "v${{ env.VERSION }}" `
             --notes "$(Get-Content last_commit_message.txt)" `
-            $nupkgFilePath $snupkgFilePath $perfReportSinkFilePath
+            $nupkgFilePath $snupkgFilePath $perfReportSinkFilePath $perfReportAuditSinkFilePath
         shell: pwsh
 
       - name: Publish to nuget.org
-        env:
-          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
         run: |
           nuget push artifacts\*.nupkg -Source https://api.nuget.org/v3/index.json -ApiKey ${{ secrets.NUGET_API_KEY }}
         shell: pwsh

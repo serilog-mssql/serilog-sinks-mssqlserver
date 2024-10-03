@@ -15,6 +15,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Serilog.Sinks.MSSqlServer\Serilog.Sinks.MSSqlServer.csproj"/>
     <PackageReference Include="BenchmarkDotNet" />
+    <PackageReference Include="Moq" />
   </ItemGroup>
   
 </Project>

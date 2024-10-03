@@ -1,11 +1,11 @@
 ﻿using BenchmarkDotNet.Attributes;
 
-namespace Serilog.Sinks.MSSqlServer.PerformanceTests;
+namespace Serilog.Sinks.MSSqlServer.PerformanceTests.Misc;
 
 [MemoryDiagnoser]
-public class SinkBenchmarks
+public class SinkQuickBenchmarks
 {
-    private const string _connectionString = @"Data Source=(localdb)\MSSQLLocalDB;Database=LogTest;Integrated Security=SSPI;Encrypt=False;";
+    private const string _connectionString = @"Data Source=(localdb)\MSSQLLocalDB;Database=LogQuickPerfTest;Integrated Security=SSPI;Encrypt=False;";
     private const string _schemaName = "dbo";
     private const string _tableName = "LogEvents";
     private ILogger _log = null!;

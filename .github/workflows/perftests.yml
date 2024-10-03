@@ -15,7 +15,7 @@ jobs:
         shell: pwsh
 
       - name: Run performance tests
-        run: ./RunPerfTests.ps1
+        run: ./RunPerfTests.ps1 -Filter ${{ secrets.PERF_TESTS_FILTER }}
         shell: pwsh
 
       - name: Upload perf test results artifact
