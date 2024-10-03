@@ -1,4 +1,13 @@
-﻿Push-Location $PSScriptRoot
+﻿[CmdletBinding()]
+param (
+    [Parameter(Mandatory = $false)]
+    [string]
+    $Filter = "*"
+)
+
+echo "perf: Performance tests started with Filter = $Filter"
+
+Push-Location $PSScriptRoot
 
 $artifactsPath = "$PSScriptRoot\artifacts\perftests"
 
@@ -13,7 +22,7 @@ $perfTestProjectPath = "$PSScriptRoot/test/Serilog.Sinks.MSSqlServer.Performance
 Push-Location "$perfTestProjectPath"
 
 echo "perf: Running performance test project in $perfTestProjectPath"
-& dotnet run -c Release
+& dotnet run -c Release -- -f $Filter
 
 cp ".\BenchmarkDotNet.Artifacts\results\*.*" "$artifactsPath\"
 Pop-Location
