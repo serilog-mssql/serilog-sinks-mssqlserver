@@ -13,15 +13,17 @@ using Serilog.Sinks.MSSqlServer.Platform.SqlClient;
 namespace Serilog.Sinks.MSSqlServer.PerformanceTests.Platform;
 
 [MemoryDiagnoser]
-[MaxIterationCount(20)]
-public class SqlBulkBatchWriterBenchmarks
+[MaxIterationCount(16)]
+public class SqlBulkBatchWriterBenchmarks : IDisposable
 {
     private const string _tableName = "TestTableName";
     private const string _schemaName = "TestSchemaName";
+    private readonly DataTable _dataTable = new(_tableName);
     private Mock<ISqlConnectionFactory> _sqlConnectionFactoryMock;
     private Mock<ILogEventDataGenerator> _logEventDataGeneratorMock;
     private Mock<ISqlConnectionWrapper> _sqlConnectionWrapperMock;
     private Mock<ISqlBulkCopyWrapper> _sqlBulkCopyWrapper;
+    private List<LogEvent> _logEvents;
     private SqlBulkBatchWriter _sut;
 
     [GlobalSetup]
@@ -36,6 +38,8 @@ public class SqlBulkBatchWriterBenchmarks
         _sqlConnectionWrapperMock.Setup(c => c.CreateSqlBulkCopy(It.IsAny<bool>(), It.IsAny<string>()))
             .Returns(_sqlBulkCopyWrapper.Object);
 
+        CreateLogEvents();
+
         _sut = new SqlBulkBatchWriter(_tableName, _schemaName, false, _sqlConnectionFactoryMock.Object,
             _logEventDataGeneratorMock.Object);
     }
@@ -43,15 +47,7 @@ public class SqlBulkBatchWriterBenchmarks
     [Benchmark]
     public async Task WriteBatch()
     {
-        var logEvents = CreateLogEvents();
-        using var dataTable = new DataTable(_tableName);
-        await _sut.WriteBatch(logEvents, dataTable);
-    }
-
-    private static List<LogEvent> CreateLogEvents()
-    {
-        var logEvents = new List<LogEvent> { CreateLogEvent(), CreateLogEvent() };
-        return logEvents;
+        await _sut.WriteBatch(_logEvents, _dataTable);
     }
 
     private static LogEvent CreateLogEvent()
@@ -60,5 +56,21 @@ public class SqlBulkBatchWriterBenchmarks
             new DateTimeOffset(2020, 1, 1, 0, 0, 0, 0, TimeSpan.Zero),
             LogEventLevel.Debug, null, new MessageTemplate(new List<MessageTemplateToken>()),
             new List<LogEventProperty>());
+    }
+
+    private void CreateLogEvents()
+    {
+        _logEvents = new List<LogEvent>();
+        var eventCount = 500_000;
+        while (eventCount-- > 0)
+        {
+            _logEvents.Add(CreateLogEvent());
+        }
+    }
+
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+        _dataTable.Dispose();
     }
 }
