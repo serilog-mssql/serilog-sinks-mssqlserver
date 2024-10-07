@@ -14,7 +14,7 @@ namespace Serilog.Sinks.MSSqlServer.PerformanceTests.Platform;
 
 [MemoryDiagnoser]
 [MaxIterationCount(16)]
-public class SqlBulkBatchWriterBenchmarks : IDisposable
+public class SqlInsertStatementWriterBenchmarks : IDisposable
 {
     private const string _tableName = "TestTableName";
     private const string _schemaName = "TestSchemaName";
@@ -22,9 +22,9 @@ public class SqlBulkBatchWriterBenchmarks : IDisposable
     private Mock<ISqlConnectionFactory> _sqlConnectionFactoryMock;
     private Mock<ILogEventDataGenerator> _logEventDataGeneratorMock;
     private Mock<ISqlConnectionWrapper> _sqlConnectionWrapperMock;
-    private Mock<ISqlBulkCopyWrapper> _sqlBulkCopyWrapper;
+    private Mock<ISqlCommandWrapper> _sqlCommandWrapperMock;
     private List<LogEvent> _logEvents;
-    private SqlBulkBatchWriter _sut;
+    private SqlInsertStatementWriter _sut;
 
     [GlobalSetup]
     public void Setup()
@@ -32,15 +32,14 @@ public class SqlBulkBatchWriterBenchmarks : IDisposable
         _sqlConnectionFactoryMock = new Mock<ISqlConnectionFactory>();
         _logEventDataGeneratorMock = new Mock<ILogEventDataGenerator>();
         _sqlConnectionWrapperMock = new Mock<ISqlConnectionWrapper>();
-        _sqlBulkCopyWrapper = new Mock<ISqlBulkCopyWrapper>();
+        _sqlCommandWrapperMock = new Mock<ISqlCommandWrapper>();
 
         _sqlConnectionFactoryMock.Setup(f => f.Create()).Returns(_sqlConnectionWrapperMock.Object);
-        _sqlConnectionWrapperMock.Setup(c => c.CreateSqlBulkCopy(It.IsAny<bool>(), It.IsAny<string>()))
-            .Returns(_sqlBulkCopyWrapper.Object);
+        _sqlConnectionWrapperMock.Setup(f => f.CreateCommand()).Returns(_sqlCommandWrapperMock.Object);
 
         CreateLogEvents();
 
-        _sut = new SqlBulkBatchWriter(_tableName, _schemaName, false, _sqlConnectionFactoryMock.Object,
+        _sut = new SqlInsertStatementWriter(_tableName, _schemaName,  _sqlConnectionFactoryMock.Object,
             _logEventDataGeneratorMock.Object);
     }
 
@@ -61,7 +60,7 @@ public class SqlBulkBatchWriterBenchmarks : IDisposable
     private void CreateLogEvents()
     {
         _logEvents = new List<LogEvent>();
-        var eventCount = 500_000;
+        var eventCount = 200_000;
         while (eventCount-- > 0)
         {
             _logEvents.Add(CreateLogEvent());
