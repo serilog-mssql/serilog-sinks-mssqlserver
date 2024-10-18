@@ -1,3 +1,9 @@
+# 7.0.2
+* Fixed issue #580: Removed deprecated transitive dependency on Microsoft.NETCore.Targets by removing runtime identifier (thanks to @david-brink-talogy)
+* Fixed issues #540 and #541 in README
+* Added performance tests including a GitHub actions workflow
+* Minor cleanups and fixes
+
 # 7.0.1
 * Fixed issue #567: .NET Framework assemblies were not built properly
 * Consolidated PR validation action workflows and updated some task versions
