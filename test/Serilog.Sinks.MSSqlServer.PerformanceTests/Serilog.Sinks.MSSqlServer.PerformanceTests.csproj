@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <AssemblyName>Serilog.Sinks.MSSqlServer.PerformanceTests</AssemblyName>
+    <OutputType>Exe</OutputType>
+    <AssemblyOriginatorKeyFile>../../assets/Serilog.snk</AssemblyOriginatorKeyFile>
+    <SignAssembly>true</SignAssembly>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <AnalysisLevel>6.0-recommended</AnalysisLevel>
+    <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Serilog.Sinks.MSSqlServer\Serilog.Sinks.MSSqlServer.csproj"/>
+    <PackageReference Include="BenchmarkDotNet" />
+    <PackageReference Include="Moq" />
+  </ItemGroup>
+  
+</Project>

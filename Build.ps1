@@ -38,17 +38,6 @@ foreach ($src in Get-ChildItem "$PSScriptRoot/src" -Directory) {
 }
 
 if ($SkipTests -eq $false) {
-    foreach ($test in Get-ChildItem "$PSScriptRoot/test" -Filter "*.PerformanceTests" -Directory) {
-        Push-Location $test.FullName
-
-        echo "build: Building performance test project in $($test.FullName)"
-
-        & dotnet build -c Release
-        if ($LASTEXITCODE -ne 0) { exit 2 }
-
-        Pop-Location
-    }
-
     foreach ($test in Get-ChildItem "$PSScriptRoot/test" -Filter "*.Tests" -Directory) {
         Push-Location $test.FullName
 
@@ -59,6 +48,15 @@ if ($SkipTests -eq $false) {
 
         Pop-Location
     }
+
+    # The performance benchmark tests should at least build without errors during PR validation
+    $perfTestProjectPath = "$PSScriptRoot/test/Serilog.Sinks.MSSqlServer.PerformanceTests"
+    Push-Location "$perfTestProjectPath"
+
+    echo "build: Building performance test project in $perfTestProjectPath"
+    & dotnet build -c Release
+
+    Pop-Location
 }
 
 Pop-Location

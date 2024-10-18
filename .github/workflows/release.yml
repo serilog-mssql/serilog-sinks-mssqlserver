@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-and-release:
+  build-perftest-and-release:
     runs-on: windows-latest # Build on Windows to ensure .NET Framework targets
     steps:
       - uses: actions/checkout@v4
@@ -35,6 +35,10 @@ jobs:
         run: ./Build.ps1 -SkipTests
         shell: pwsh
 
+      - name: Run performance tests
+        run: ./RunPerfTests.ps1 -Filter "*QuickBenchmarks*"
+        shell: pwsh
+
       - name: Get last commit message
         id: last_commit
         if: success() && github.ref == 'refs/heads/main'
@@ -47,34 +51,34 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Der Basisname der Dateien basierend auf der Versionsnummer
           $baseFileName = "Serilog.Sinks.MSSqlServer.${{ env.VERSION }}"
 
-          # Suche die exakten Dateipfade für .nupkg und .snupkg
           $nupkgFile = Get-ChildItem -Path "artifacts/$baseFileName*.nupkg" | Select-Object -First 1
           $snupkgFile = Get-ChildItem -Path "artifacts/$baseFileName*.snupkg" | Select-Object -First 1
+          $perfReportSinkFile = Get-ChildItem -Path "artifacts/perftests/Serilog.Sinks.MSSqlServer.PerformanceTests.SinkQuickBenchmarks-report.csv" `
+            | Select-Object -First 1
+          $perfReportAuditSinkFile = Get-ChildItem -Path "artifacts/perftests/Serilog.Sinks.MSSqlServer.PerformanceTests.AuditSinkQuickBenchmarks-report.csv" `
+            | Select-Object -First 1
 
-          # Überprüfe, ob beide Dateien gefunden wurden
           if (-not $nupkgFile) { Write-Error "nupkg file not found" ; exit 1 }
           if (-not $snupkgFile) { Write-Error "snupkg file not found" ; exit 1 }
+          if (-not $perfReportSinkFile) { Write-Error "Benchmark report for sink file not found" ; exit 1 }
+          if (-not $perfReportAuditSinkFile) { Write-Error "Benchmark report for audit sink file not found" ; exit 1 }
 
-          # Ersetze Backslashes durch Forward Slashes für GitHub CLI-Kompatibilität
           $nupkgFilePath = $nupkgFile.FullName -replace '\\', '/'
           $snupkgFilePath = $snupkgFile.FullName -replace '\\', '/'
+          $perfReportSinkFilePath = $perfReportSinkFile.FullName -replace '\\', '/'
+          $perfReportAuditSinkFilePath = $perfReportAuditSinkFile.FullName -replace '\\', '/'
 
-          # Ausgabe der Dateipfade zu Debugging-Zwecken
-          Write-Host "Uploading files: $nupkgFilePath, $snupkgFilePath"
+          Write-Host "Uploading files: $nupkgFilePath, $snupkgFilePath $perfReportSinkFilePath $perfReportAuditSinkFilePath"
 
-          # Erstelle das Release mit den genauen Dateipfaden
           gh release create v${{ env.VERSION }} `
             --title "v${{ env.VERSION }}" `
             --notes "$(Get-Content last_commit_message.txt)" `
-            $nupkgFilePath $snupkgFilePath
+            $nupkgFilePath $snupkgFilePath $perfReportSinkFilePath $perfReportAuditSinkFilePath
         shell: pwsh
 
       - name: Publish to nuget.org
-        env:
-          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
         run: |
           nuget push artifacts\*.nupkg -Source https://api.nuget.org/v3/index.json -ApiKey ${{ secrets.NUGET_API_KEY }}
         shell: pwsh
