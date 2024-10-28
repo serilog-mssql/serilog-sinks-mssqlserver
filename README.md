@@ -91,8 +91,8 @@ Because of the way external configuration has been implemented in various .NET f
 | .NET Framework 4.6.2+ | `net462` | app or library | _System.Configuration_ |
 | .NET Framework 4.6.2+ | `net462` | app or library | _Microsoft.Extensions.Configuration_ |
 | .NET Standard 2.0 | `netstandard2.0` | library only | _Microsoft.Extensions.Configuration_ |
-| .NET 6.0+ | `net6.0` | app or library | _System.Configuration_ |
-| .NET 6.0+ | `net6.0` | app or library | _Microsoft.Extensions.Configuration_ |
+| .NET 8.0+ | `net8.0` | app or library | _System.Configuration_ |
+| .NET 8.0+ | `net8.0` | app or library | _Microsoft.Extensions.Configuration_ |
 
 Although it's possible to use both XML and _M.E.C_ configuration with certain frameworks, this is not supported, unintended consequences are possible, and a warning will be emitted to `SelfLog`. If you actually require multiple configuration sources, the _M.E.C_ builder-pattern is designed to support this, and your syntax will be consistent across configuration sources.
 

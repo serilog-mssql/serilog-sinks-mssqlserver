@@ -2,11 +2,11 @@
 
   <PropertyGroup>
     <Description>A Serilog sink that writes events to Microsoft SQL Server and Azure SQL</Description>
-    <VersionPrefix>7.0.2</VersionPrefix>
-    <EnablePackageValidation>true</EnablePackageValidation>
+    <VersionPrefix>8.0.0</VersionPrefix>
+    <EnablePackageValidation>false</EnablePackageValidation>
     <PackageValidationBaselineVersion>7.0.0</PackageValidationBaselineVersion>
     <Authors>Michiel van Oudheusden;Christian Kadluba;Serilog Contributors</Authors>
-    <TargetFrameworks>netstandard2.0;net462;net472;net6.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net462;net472;net8.0</TargetFrameworks>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <AssemblyName>Serilog.Sinks.MSSqlServer</AssemblyName>
@@ -60,7 +60,7 @@
     <Compile Include="Configuration\Implementations\Microsoft.Extensions.Configuration\**\*.cs" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' Or '$(TargetFramework)' == 'net472' Or '$(TargetFramework)' == 'net462' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net8.0' Or '$(TargetFramework)' == 'net472' Or '$(TargetFramework)' == 'net462' ">
     <PackageReference Include="System.Configuration.ConfigurationManager" />
     <Compile Include="Configuration\Extensions\Hybrid\**\*.cs" />
     <Compile Include="Configuration\Implementations\Microsoft.Extensions.Configuration\**\*.cs" />
