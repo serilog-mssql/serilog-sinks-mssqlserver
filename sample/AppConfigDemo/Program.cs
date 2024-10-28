@@ -14,7 +14,7 @@ namespace AppConfigDemo
 
         public static void Main()
         {
-            // Legacy interace - do not use this anymore
+            // Legacy interface - do not use this anymore
             //Log.Logger = new LoggerConfiguration().WriteTo
             //    .MSSqlServer(
             //        connectionString: _connectionString,
