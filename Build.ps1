@@ -108,7 +108,7 @@ try
 
     if ($SkipSamples -eq $false)
     {
-        foreach ($src in Get-ChildItem "$PSScriptRoot/sample/**/*.csproj" -File)
+        foreach ($src in Get-ChildItem "$PSScriptRoot/sample/*.csproj" -File -Recurse)
         {
             try
             {
