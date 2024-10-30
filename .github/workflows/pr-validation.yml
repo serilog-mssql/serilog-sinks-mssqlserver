@@ -50,7 +50,7 @@ jobs:
       - name: Run Infer#
         uses: microsoft/infersharpaction@v1.5
         with:
-          binary-path: bin-net
+          binary-path: bin
 
       - name: Upload SARIF output to GitHub Security Center
         uses: github/codeql-action/upload-sarif@v3
