@@ -14,21 +14,6 @@ namespace AppConfigDemo
 
         public static void Main()
         {
-            // Legacy interface - do not use this anymore
-            //Log.Logger = new LoggerConfiguration().WriteTo
-            //    .MSSqlServer(
-            //        connectionString: _connectionString,
-            //        tableName: _tableName,
-            //        restrictedToMinimumLevel: LogEventLevel.Debug,
-            //        batchPostingLimit: MSSqlServerSink.DefaultBatchPostingLimit,
-            //        period: null,
-            //        formatProvider: null,
-            //        autoCreateSqlTable: true,
-            //        columnOptions: null,
-            //        schemaName: _schemaName,
-            //        logEventFormatter: null)
-            //    .CreateLogger();
-
             // New MSSqlServerSinkOptions based interface
             Log.Logger = new LoggerConfiguration().WriteTo
                 .MSSqlServer(
