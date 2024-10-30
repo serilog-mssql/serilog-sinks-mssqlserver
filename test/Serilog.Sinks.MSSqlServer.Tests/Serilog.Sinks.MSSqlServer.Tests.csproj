@@ -38,6 +38,7 @@
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net472' Or '$(TargetFramework)' == 'net462' ">
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Transactions" />
     <Compile Include="Configuration\Extensions\Hybrid\**\*.cs" />
     <Compile Include="Configuration\Implementations\Microsoft.Extensions.Configuration\**\*.cs" />
     <Compile Include="Configuration\Implementations\System.Configuration\**\*.cs" />
@@ -51,10 +52,6 @@
     <Compile Include="Configuration\Extensions\Hybrid\**\*.cs" />
     <Compile Include="Configuration\Implementations\Microsoft.Extensions.Configuration\**\*.cs" />
     <Compile Include="Configuration\Implementations\System.Configuration\**\*.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="System.Transactions" />
   </ItemGroup>
 
   <ItemGroup>
