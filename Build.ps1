@@ -108,14 +108,14 @@ try
 
     if ($SkipSamples -eq $false)
     {
-        foreach ($src in Get-ChildItem "$PSScriptRoot/samples/**/*.csproj" -File)
+        foreach ($src in Get-ChildItem "$PSScriptRoot/sample/**/*.csproj" -File)
         {
             try
             {
                 Push-Location $src.DirectoryName
 
                 echo "build: Building sample project $( $src.FullName )"
-                & dotnet pack -c Release -o ..\..\artifacts
+                & dotnet build -c Release -o ..\..\artifacts
                 if ($LASTEXITCODE -ne 0)
                 {
                     echo "Error returned by dotnet build. Aborting build."
