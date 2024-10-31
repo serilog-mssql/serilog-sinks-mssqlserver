@@ -1,3 +1,10 @@
+# 8.0.0
+* Updated to .NET 8
+* Updated nearly all dependencies
+* Improved build script (build samples, fail on vulns, ...)
+* Removed some obsolete vulnerability fix dependencies
+* Fixed missing dependency in AppConfigDemo sample
+
 # 7.0.2
 * Fixed issue #580: Removed deprecated transitive dependency on Microsoft.NETCore.Targets by removing runtime identifier (thanks to @david-brink-talogy)
 * Fixed issues #540 and #541 in README

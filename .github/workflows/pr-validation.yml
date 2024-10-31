@@ -7,7 +7,7 @@ on:
   # Run every biweekly to discover failures due to environment changes
   schedule:
     - cron: '0 0 1,15 * *'
-  
+
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
@@ -24,8 +24,8 @@ jobs:
       - name: Upload binaries artifact for InferSharp job
         uses: actions/upload-artifact@v4
         with:
-          name: bin-net6
-          path: src\Serilog.Sinks.MSSqlServer\bin\Release\net6.0
+          name: bin
+          path: src\Serilog.Sinks.MSSqlServer\bin\Release\net8.0
 
       - name: Upload testresults artifact with code coverage file
         uses: actions/upload-artifact@v4
@@ -44,13 +44,13 @@ jobs:
       - name: Download binaries artifact
         uses: actions/download-artifact@v4
         with:
-          name: bin-net6
-          path: bin-net6
+          name: bin
+          path: bin
 
       - name: Run Infer#
         uses: microsoft/infersharpaction@v1.5
         with:
-          binary-path: bin-net6
+          binary-path: bin
 
       - name: Upload SARIF output to GitHub Security Center
         uses: github/codeql-action/upload-sarif@v3
