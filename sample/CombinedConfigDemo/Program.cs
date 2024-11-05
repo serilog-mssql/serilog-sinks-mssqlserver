@@ -23,7 +23,7 @@ namespace CombinedConfigDemo
             var columnOptionsSection = configuration.GetSection("Serilog:ColumnOptions");
             var sinkOptionsSection = configuration.GetSection("Serilog:SinkOptions");
 
-            // Legacy interace - do not use this anymore
+            // Legacy interface - do not use this anymore
             //Log.Logger = new LoggerConfiguration()
             //    .WriteTo.MSSqlServer(
             //        connectionString: _connectionStringName,

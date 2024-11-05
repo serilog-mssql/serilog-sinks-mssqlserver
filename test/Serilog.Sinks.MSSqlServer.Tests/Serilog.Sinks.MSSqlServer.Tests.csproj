@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net462;net472;net6.0</TargetFrameworks>
+    <TargetFrameworks>net462;net472;net8.0</TargetFrameworks>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <AssemblyName>Serilog.Sinks.MSSqlServer.Tests</AssemblyName>
     <AssemblyOriginatorKeyFile>../../assets/Serilog.snk</AssemblyOriginatorKeyFile>
@@ -38,12 +38,13 @@
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net472' Or '$(TargetFramework)' == 'net462' ">
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Transactions" />
     <Compile Include="Configuration\Extensions\Hybrid\**\*.cs" />
     <Compile Include="Configuration\Implementations\Microsoft.Extensions.Configuration\**\*.cs" />
     <Compile Include="Configuration\Implementations\System.Configuration\**\*.cs" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net8.0' ">
     <PackageReference Include="coverlet.collector">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>

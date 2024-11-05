@@ -19,7 +19,7 @@ namespace CustomLogEventFormatterDemo
             var customFormatter = new FlatLogEventFormatter();
             var levelSwitch = new LoggingLevelSwitch();
 
-            // Legacy interace - do not use this anymore
+            // Legacy interface - do not use this anymore
             //Log.Logger = new LoggerConfiguration()
             //    .WriteTo.MSSqlServer(_connectionString,
             //        _tableName,
