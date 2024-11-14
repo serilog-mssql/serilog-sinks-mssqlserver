@@ -200,6 +200,8 @@ CREATE TABLE [Logs] (
 
 At a minimum, writing log entries requires SELECT and INSERT permissions for the log table. (SELECT is required because the sink's batching behavior uses bulk inserts which reads the schema before the write operations begin).
 
+If the audit version of the sink is used or the sink option [UseSqlBulkCopy](#usesqlbulkcopy) is set to `true`, only INSERT statements are used and no SELECT permission is required.
+
 SQL permissions are a very complex subject. Here is an example of one possible solution (valid for SQL 2012 or later):
 
 ```

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
 using Moq;
@@ -18,8 +17,8 @@ public class SqlInsertStatementWriterBenchmarks : IDisposable
 {
     private const string _tableName = "TestTableName";
     private const string _schemaName = "TestSchemaName";
-    private readonly DataTable _dataTable = new(_tableName);
     private Mock<ISqlConnectionFactory> _sqlConnectionFactoryMock;
+    private Mock<ISqlCommandFactory> _sqlCommandFactoryMock;
     private Mock<ILogEventDataGenerator> _logEventDataGeneratorMock;
     private Mock<ISqlConnectionWrapper> _sqlConnectionWrapperMock;
     private Mock<ISqlCommandWrapper> _sqlCommandWrapperMock;
@@ -30,23 +29,25 @@ public class SqlInsertStatementWriterBenchmarks : IDisposable
     public void Setup()
     {
         _sqlConnectionFactoryMock = new Mock<ISqlConnectionFactory>();
+        _sqlCommandFactoryMock = new Mock<ISqlCommandFactory>();
         _logEventDataGeneratorMock = new Mock<ILogEventDataGenerator>();
         _sqlConnectionWrapperMock = new Mock<ISqlConnectionWrapper>();
         _sqlCommandWrapperMock = new Mock<ISqlCommandWrapper>();
 
         _sqlConnectionFactoryMock.Setup(f => f.Create()).Returns(_sqlConnectionWrapperMock.Object);
-        _sqlConnectionWrapperMock.Setup(f => f.CreateCommand()).Returns(_sqlCommandWrapperMock.Object);
+        _sqlCommandFactoryMock.Setup(f => f.CreateCommand(It.IsAny<ISqlConnectionWrapper>()))
+            .Returns(_sqlCommandWrapperMock.Object);
 
         CreateLogEvents();
 
-        _sut = new SqlInsertStatementWriter(_tableName, _schemaName,  _sqlConnectionFactoryMock.Object,
-            _logEventDataGeneratorMock.Object);
+        _sut = new SqlInsertStatementWriter(_tableName, _schemaName,
+            _sqlConnectionFactoryMock.Object, _sqlCommandFactoryMock.Object, _logEventDataGeneratorMock.Object);
     }
 
     [Benchmark]
-    public async Task WriteBatch()
+    public async Task WriteEvents()
     {
-        await _sut.WriteBatch(_logEvents, _dataTable);
+        await _sut.WriteEvents(_logEvents);
     }
 
     private static LogEvent CreateLogEvent()
@@ -70,6 +71,6 @@ public class SqlInsertStatementWriterBenchmarks : IDisposable
     public void Dispose()
     {
         GC.SuppressFinalize(this);
-        _dataTable.Dispose();
+        _sut.Dispose();
     }
 }

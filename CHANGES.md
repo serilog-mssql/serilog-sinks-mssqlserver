@@ -1,3 +1,10 @@
+# 8.0.1
+* Refactoring and performance optimizations in batched and audit sink
+* Create perftest result on release
+* Updated issue template
+* Updated editorconfig
+* Added specific documentation about when SQL SELECT permission is not required
+
 # 8.0.0
 * Updated to .NET 8
 * Updated nearly all dependencies

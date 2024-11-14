@@ -7,7 +7,8 @@ namespace Serilog.Sinks.MSSqlServer.Platform
     {
         public TestableSqlCommandExecutor(
             ISqlWriter sqlWriter,
-            ISqlConnectionFactory sqlConnectionFactory) : base(sqlWriter, sqlConnectionFactory)
+            ISqlConnectionFactory sqlConnectionFactory,
+            ISqlCommandFactory sqlCommandFactory) : base(sqlWriter, sqlConnectionFactory, sqlCommandFactory)
         {
         }
 

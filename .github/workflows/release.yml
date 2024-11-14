@@ -39,6 +39,12 @@ jobs:
         run: ./RunPerfTests.ps1 -Filter "*QuickBenchmarks*"
         shell: pwsh
 
+      - name: Upload perf test results artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: perftestresults
+          path: artifacts\perftests
+
       - name: Get last commit message
         id: last_commit
         if: success() && github.ref == 'refs/heads/main'
