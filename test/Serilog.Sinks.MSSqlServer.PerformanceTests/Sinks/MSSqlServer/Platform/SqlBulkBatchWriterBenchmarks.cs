@@ -19,6 +19,7 @@ public class SqlBulkBatchWriterBenchmarks : IDisposable
     private const string _tableName = "TestTableName";
     private const string _schemaName = "TestSchemaName";
     private readonly DataTable _dataTable = new(_tableName);
+    private Mock<IDataTableCreator> _dataTableCreatorMock;
     private Mock<ISqlConnectionFactory> _sqlConnectionFactoryMock;
     private Mock<ILogEventDataGenerator> _logEventDataGeneratorMock;
     private Mock<ISqlConnectionWrapper> _sqlConnectionWrapperMock;
@@ -29,10 +30,13 @@ public class SqlBulkBatchWriterBenchmarks : IDisposable
     [GlobalSetup]
     public void Setup()
     {
+        _dataTableCreatorMock = new Mock<IDataTableCreator>();
         _sqlConnectionFactoryMock = new Mock<ISqlConnectionFactory>();
         _logEventDataGeneratorMock = new Mock<ILogEventDataGenerator>();
         _sqlConnectionWrapperMock = new Mock<ISqlConnectionWrapper>();
         _sqlBulkCopyWrapper = new Mock<ISqlBulkCopyWrapper>();
+
+        _dataTableCreatorMock.Setup(d => d.CreateDataTable()).Returns(_dataTable);
 
         _sqlConnectionFactoryMock.Setup(f => f.Create()).Returns(_sqlConnectionWrapperMock.Object);
         _sqlConnectionWrapperMock.Setup(c => c.CreateSqlBulkCopy(It.IsAny<bool>(), It.IsAny<string>()))
@@ -40,14 +44,14 @@ public class SqlBulkBatchWriterBenchmarks : IDisposable
 
         CreateLogEvents();
 
-        _sut = new SqlBulkBatchWriter(_tableName, _schemaName, false, _sqlConnectionFactoryMock.Object,
-            _logEventDataGeneratorMock.Object);
+        _sut = new SqlBulkBatchWriter(_tableName, _schemaName, false,
+            _dataTableCreatorMock.Object, _sqlConnectionFactoryMock.Object, _logEventDataGeneratorMock.Object);
     }
 
     [Benchmark]
     public async Task WriteBatch()
     {
-        await _sut.WriteBatch(_logEvents, _dataTable);
+        await _sut.WriteBatch(_logEvents);
     }
 
     private static LogEvent CreateLogEvent()
@@ -71,6 +75,6 @@ public class SqlBulkBatchWriterBenchmarks : IDisposable
     public void Dispose()
     {
         GC.SuppressFinalize(this);
-        _dataTable.Dispose();
+        _sut.Dispose();
     }
 }

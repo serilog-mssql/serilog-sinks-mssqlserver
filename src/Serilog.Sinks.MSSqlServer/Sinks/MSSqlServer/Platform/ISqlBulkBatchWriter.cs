@@ -1,12 +1,12 @@
-﻿using System.Collections.Generic;
-using System.Data;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Serilog.Events;
 
 namespace Serilog.Sinks.MSSqlServer.Platform
 {
-    internal interface ISqlBulkBatchWriter
+    internal interface ISqlBulkBatchWriter : IDisposable
     {
-        Task WriteBatch(IEnumerable<LogEvent> events, DataTable dataTable);
+        Task WriteBatch(IEnumerable<LogEvent> events);
     }
 }

@@ -14,7 +14,7 @@ namespace Serilog.Sinks.MSSqlServer.Platform.SqlClient
             _sqlConnection = new SqlConnection(connectionString);
         }
 
-        public string ConnectionString => _sqlConnection.ConnectionString;
+        public SqlConnection SqlConnection => _sqlConnection;
 
         public void Open()
         {
@@ -24,18 +24,6 @@ namespace Serilog.Sinks.MSSqlServer.Platform.SqlClient
         public async Task OpenAsync()
         {
             await _sqlConnection.OpenAsync().ConfigureAwait(false);
-        }
-
-        public ISqlCommandWrapper CreateCommand()
-        {
-            var sqlCommand = _sqlConnection.CreateCommand();
-            return new SqlCommandWrapper(sqlCommand);
-        }
-
-        public ISqlCommandWrapper CreateCommand(string cmdText)
-        {
-            var sqlCommand = new SqlCommand(cmdText, _sqlConnection);
-            return new SqlCommandWrapper(sqlCommand);
         }
 
         public ISqlBulkCopyWrapper CreateSqlBulkCopy(bool disableTriggers, string destinationTableName)

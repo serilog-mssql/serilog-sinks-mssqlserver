@@ -1,11 +1,11 @@
-﻿// Copyright 2024 Serilog Contributors 
-// 
+﻿// Copyright 2024 Serilog Contributors
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //     http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,11 +30,13 @@ namespace Serilog.Sinks.MSSqlServer
     {
         private readonly ISqlLogEventWriter _sqlLogEventWriter;
 
+        private bool _disposedValue;
+
         /// <summary>
         /// Construct a sink posting to the specified database.
         ///
         /// Note: this is the legacy version of the extension method. Please use the new one using MSSqlServerSinkOptions instead.
-        /// 
+        ///
         /// </summary>
         /// <param name="connectionString">Connection string to access the database.</param>
         /// <param name="tableName">Name of the table to store the data in.</param>
@@ -113,7 +115,15 @@ namespace Serilog.Sinks.MSSqlServer
         /// <param name="disposing">True to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
         protected virtual void Dispose(bool disposing)
         {
-            // This class needn't to dispose anything. This is just here for sink interface compatibility.
+            if (!_disposedValue)
+            {
+                if (disposing)
+                {
+                    _sqlLogEventWriter.Dispose();
+                }
+
+                _disposedValue = true;
+            }
         }
 
         private static void ValidateParameters(MSSqlServerSinkOptions sinkOptions, ColumnOptions columnOptions)
@@ -132,11 +142,6 @@ namespace Serilog.Sinks.MSSqlServer
             if (sinkDependencies == null)
             {
                 throw new ArgumentNullException(nameof(sinkDependencies));
-            }
-
-            if (sinkDependencies.DataTableCreator == null)
-            {
-                throw new InvalidOperationException("DataTableCreator is not initialized!");
             }
 
             if (sinkDependencies.SqlTableCreator == null)

@@ -17,13 +17,11 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         private readonly MSSqlServerSinkOptions _sinkOptions;
         private readonly Serilog.Sinks.MSSqlServer.ColumnOptions _columnOptions;
         private readonly SinkDependencies _sinkDependencies;
-        private readonly Mock<IDataTableCreator> _dataTableCreatorMock;
         private readonly Mock<ISqlCommandExecutor> _sqlDatabaseCreatorMock;
         private readonly Mock<ISqlCommandExecutor> _sqlTableCreatorMock;
         private readonly Mock<ISqlLogEventWriter> _sqlLogEventWriter;
         private readonly string _tableName = "tableName";
         private readonly string _schemaName = "schemaName";
-        private readonly DataTable _dataTable;
         private MSSqlServerAuditSink _sut;
         private bool _disposedValue;
 
@@ -37,18 +35,12 @@ namespace Serilog.Sinks.MSSqlServer.Tests
 
             _columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions();
 
-            _dataTable = new DataTable(_tableName);
-            _dataTableCreatorMock = new Mock<IDataTableCreator>();
-            _dataTableCreatorMock.Setup(d => d.CreateDataTable())
-                .Returns(_dataTable);
-
             _sqlDatabaseCreatorMock = new Mock<ISqlCommandExecutor>();
             _sqlTableCreatorMock = new Mock<ISqlCommandExecutor>();
             _sqlLogEventWriter = new Mock<ISqlLogEventWriter>();
 
             _sinkDependencies = new SinkDependencies
             {
-                DataTableCreator = _dataTableCreatorMock.Object,
                 SqlDatabaseCreator = _sqlDatabaseCreatorMock.Object,
                 SqlTableCreator = _sqlTableCreatorMock.Object,
                 SqlLogEventWriter = _sqlLogEventWriter.Object
@@ -70,17 +62,6 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         {
             Assert.Throws<ArgumentNullException>(() =>
                 new MSSqlServerSink(_sinkOptions, null));
-        }
-
-        [Fact]
-        public void InitializeWithoutDataTableCreatorThrows()
-        {
-            // Arrange
-            _sinkDependencies.DataTableCreator = null;
-
-            // Act + assert
-            Assert.Throws<InvalidOperationException>(() =>
-                new MSSqlServerSink(_sinkOptions, _sinkDependencies));
         }
 
         [Fact]
@@ -138,16 +119,6 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         }
 
         [Fact]
-        public void InitializeWithoutAutoCreateSqlTableDoesNotCallDataTableCreator()
-        {
-            // Act
-            SetupSut(autoCreateSqlTable: false);
-
-            // Assert
-            _dataTableCreatorMock.Verify(c => c.CreateDataTable(), Times.Never);
-        }
-
-        [Fact]
         public void InitializeWithAutoCreateSqlTableCallsSqlTableCreator()
         {
             // Act
@@ -198,7 +169,6 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             if (!_disposedValue)
             {
                 _sut?.Dispose();
-                _dataTable?.Dispose();
                 _disposedValue = true;
             }
         }

@@ -11,9 +11,10 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Platform
     public class SqlCommandExecutorTests
     {
         private readonly Mock<ISqlWriter> _sqlWriterMock;
+        private readonly Mock<ISqlConnectionFactory> _sqlConnectionFactoryMock;
+        private readonly Mock<ISqlCommandFactory> _sqlCommandFactoryMock;
         private readonly Mock<ISqlConnectionWrapper> _sqlConnectionWrapperMock;
         private readonly Mock<ISqlCommandWrapper> _sqlCommandWrapperMock;
-        private readonly Mock<ISqlConnectionFactory> _sqlConnectionFactoryMock;
         private readonly TestableSqlCommandExecutor _sut;
 
         public SqlCommandExecutorTests()
@@ -22,13 +23,17 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Platform
             _sqlWriterMock.Setup(w => w.GetSql()).Returns($"USE {DatabaseFixture.Database}");
 
             _sqlConnectionFactoryMock = new Mock<ISqlConnectionFactory>();
+            _sqlCommandFactoryMock = new Mock<ISqlCommandFactory>();
+
             _sqlConnectionWrapperMock = new Mock<ISqlConnectionWrapper>();
             _sqlCommandWrapperMock = new Mock<ISqlCommandWrapper>();
 
             _sqlConnectionFactoryMock.Setup(f => f.Create()).Returns(_sqlConnectionWrapperMock.Object);
-            _sqlConnectionWrapperMock.Setup(c => c.CreateCommand(It.IsAny<string>())).Returns(_sqlCommandWrapperMock.Object);
+            _sqlCommandFactoryMock.Setup(c => c.CreateCommand(It.IsAny<string>(), It.IsAny<ISqlConnectionWrapper>()))
+                .Returns(_sqlCommandWrapperMock.Object);
 
-            _sut = new TestableSqlCommandExecutor(_sqlWriterMock.Object, _sqlConnectionFactoryMock.Object);
+            _sut = new TestableSqlCommandExecutor(_sqlWriterMock.Object, _sqlConnectionFactoryMock.Object,
+                _sqlCommandFactoryMock.Object);
         }
 
         [Fact]
@@ -62,7 +67,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Platform
             _sut.Execute();
 
             // Assert
-            _sqlConnectionWrapperMock.Verify(c => c.CreateCommand(expectedSqlCommandText), Times.Once);
+            _sqlCommandFactoryMock.Verify(c => c.CreateCommand(expectedSqlCommandText,
+                _sqlConnectionWrapperMock.Object), Times.Once);
         }
 
         [Fact]

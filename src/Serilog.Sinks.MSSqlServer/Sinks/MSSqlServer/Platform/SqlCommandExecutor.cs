@@ -6,13 +6,16 @@ namespace Serilog.Sinks.MSSqlServer.Platform
     {
         private readonly ISqlWriter _sqlWriter;
         private readonly ISqlConnectionFactory _sqlConnectionFactory;
+        private readonly ISqlCommandFactory _sqlCommandFactory;
 
         public SqlCommandExecutor(
             ISqlWriter sqlWriter,
-            ISqlConnectionFactory sqlConnectionFactory)
+            ISqlConnectionFactory sqlConnectionFactory,
+            ISqlCommandFactory sqlCommandFactory)
         {
             _sqlWriter = sqlWriter ?? throw new ArgumentNullException(nameof(sqlWriter));
             _sqlConnectionFactory = sqlConnectionFactory ?? throw new ArgumentNullException(nameof(sqlConnectionFactory));
+            _sqlCommandFactory = sqlCommandFactory ?? throw new ArgumentNullException(nameof(sqlCommandFactory));
         }
 
         public void Execute()
@@ -22,7 +25,7 @@ namespace Serilog.Sinks.MSSqlServer.Platform
                 using (var conn = _sqlConnectionFactory.Create())
                 {
                     var sql = _sqlWriter.GetSql();
-                    using (var cmd = conn.CreateCommand(sql))
+                    using (var cmd = _sqlCommandFactory.CreateCommand(sql, conn))
                     {
                         conn.Open();
                         cmd.ExecuteNonQuery();

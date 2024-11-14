@@ -9,7 +9,8 @@ namespace Serilog.Sinks.MSSqlServer.Platform
 
         public SqlTableCreator(
             ISqlCreateTableWriter sqlCreateTableWriter,
-            ISqlConnectionFactory sqlConnectionFactory) : base(sqlCreateTableWriter, sqlConnectionFactory)
+            ISqlConnectionFactory sqlConnectionFactory,
+            ISqlCommandFactory sqlCommandFactory) : base(sqlCreateTableWriter, sqlConnectionFactory, sqlCommandFactory)
         {
             if (sqlCreateTableWriter == null) throw new ArgumentNullException(nameof(sqlCreateTableWriter));
             _tableName = sqlCreateTableWriter.TableName;
