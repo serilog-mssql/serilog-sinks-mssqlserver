@@ -6,7 +6,7 @@ using static System.FormattableString;
 namespace Serilog.Sinks.MSSqlServer.Tests
 {
     [Trait(TestCategory.TraitName, TestCategory.Unit)]
-    public class SqlServerColumnTests
+    public class SqlColumnTests
     {
         [Fact]
         public void DefaultsPropertyNameToColumnName()
@@ -39,7 +39,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         }
 
         [Fact]
-        public void StoresHierachicalPropertyName()
+        public void StoresHierarchicalPropertyName()
         {
             // Arrange
             const string propertyName1 = "TestPropertyName";
@@ -60,6 +60,52 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             Assert.Equal(propertyName2, sut.PropertyNameHierarchy[1]);
             Assert.Equal(propertyName3, sut.PropertyNameHierarchy[2]);
             Assert.True(sut.HasHierarchicalPropertyName);
+        }
+
+        [Fact]
+        public void WhenResolveHierarchicalPropertyNameSetFalseDoesNotStoreHierarchicalPropertyName()
+        {
+            // Arrange
+            const string propertyName1 = "TestPropertyName";
+            const string propertyName2 = "SubPropertyName";
+            const string propertyName3 = "SubSubPropertyName";
+            var propertyName = Invariant($"{propertyName1}.{propertyName2}.{propertyName3}");
+
+            // Act
+            var sut = new SqlColumn("TestColumnName", SqlDbType.Int)
+            {
+                PropertyName = propertyName,
+                ResolveHierarchicalPropertyName = false
+            };
+
+            // Assert
+            Assert.Equal(propertyName, sut.PropertyName);
+            Assert.Single(sut.PropertyNameHierarchy);
+            Assert.Equal(propertyName, sut.PropertyNameHierarchy[0]);
+            Assert.False(sut.HasHierarchicalPropertyName);
+        }
+
+        [Fact]
+        public void WhenResolveHierarchicalPropertyNameSetFalseAfterPropertyNameDoesNotStoreHierarchicalPropertyName()
+        {
+            // Arrange
+            const string propertyName1 = "TestPropertyName";
+            const string propertyName2 = "SubPropertyName";
+            const string propertyName3 = "SubSubPropertyName";
+            var propertyName = Invariant($"{propertyName1}.{propertyName2}.{propertyName3}");
+
+            // Act
+            var sut = new SqlColumn("TestColumnName", SqlDbType.Int)
+            {
+                PropertyName = propertyName,
+            };
+            sut.ResolveHierarchicalPropertyName = false;
+
+            // Assert
+            Assert.Equal(propertyName, sut.PropertyName);
+            Assert.Single(sut.PropertyNameHierarchy);
+            Assert.Equal(propertyName, sut.PropertyNameHierarchy[0]);
+            Assert.False(sut.HasHierarchicalPropertyName);
         }
     }
 }

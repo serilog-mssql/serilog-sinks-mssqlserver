@@ -13,6 +13,7 @@ namespace Serilog.Sinks.MSSqlServer
         private SqlDbType _dataType = SqlDbType.VarChar; // backwards-compatibility default
         private string _columnName = string.Empty;
         private string _propertyName;
+        private bool _resolveHierarchicalPropertyName = true;
         private readonly List<string> _propertyNameHierarchy = new List<string>();
 
         /// <summary>
@@ -109,7 +110,20 @@ namespace Serilog.Sinks.MSSqlServer
             set
             {
                 _propertyName = value;
-                ParseHierarchicalPropertyName(value);
+                ParseHierarchicalPropertyName();
+            }
+        }
+
+        /// <summary>
+        /// Controls whether hierarchical expressions in `PropertyName` are evaluated. The default is `true`.
+        /// </summary>
+        public bool ResolveHierarchicalPropertyName
+        {
+            get => _resolveHierarchicalPropertyName;
+            set
+            {
+                _resolveHierarchicalPropertyName = value;
+                ParseHierarchicalPropertyName();
             }
         }
 
@@ -129,8 +143,6 @@ namespace Serilog.Sinks.MSSqlServer
         // allows Standard Columns and user-defined columns to coexist but remain identifiable
         // and allows casting back to the Standard Column without a lot of switch gymnastics.
         internal StandardColumn? StandardColumnIdentifier { get; set; }
-
-        internal Type StandardColumnType { get; set; }
 
         /// <summary>
         /// Converts a SQL sink SqlColumn object to a System.Data.DataColumn object. The original
@@ -170,9 +182,17 @@ namespace Serilog.Sinks.MSSqlServer
             DataType = sqlType;
         }
 
-        private void ParseHierarchicalPropertyName(string propertyName)
+        private void ParseHierarchicalPropertyName()
         {
-            _propertyNameHierarchy.AddRange(propertyName.Split('.'));
+            _propertyNameHierarchy.Clear();
+            if (ResolveHierarchicalPropertyName)
+            {
+                _propertyNameHierarchy.AddRange(PropertyName.Split('.'));
+            }
+            else
+            {
+                _propertyNameHierarchy.Add(PropertyName);
+            }
         }
     }
 }
