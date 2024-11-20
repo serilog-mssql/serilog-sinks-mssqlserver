@@ -71,13 +71,17 @@ try
         {
             Push-Location "$testProjectPath"
 
-            echo "build: Testing project in $testProjectPath"
-            & dotnet test -c Release --collect "XPlat Code Coverage"
-            if ($LASTEXITCODE -ne 0)
+            # Run tests for different targets in sequence to avoid database tests
+            # to fail because of concurrency problems
+            foreach ($tfm in @( "net462", "net472", "net8.0" ))
             {
-                exit 2
+                echo "build: Testing project in $testProjectPath for target $tfm"
+                & dotnet test -c Release --collect "XPlat Code Coverage" --framework "$tfm" --results-directory "./TestResults/$tfm"
+                if ($LASTEXITCODE -ne 0)
+                {
+                    exit 2
+                }
             }
-
         }
         finally
         {
