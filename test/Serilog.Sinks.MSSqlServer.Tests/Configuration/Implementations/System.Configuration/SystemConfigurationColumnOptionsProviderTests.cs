@@ -1,5 +1,6 @@
 ﻿using System.Data;
-using Moq;
+using System.Linq;
+using FluentAssertions;
 using Serilog.Configuration;
 using Serilog.Sinks.MSSqlServer.Configuration;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
@@ -28,7 +29,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.System.C
             _configurationSection.TraceId.AllowNull = "false";
             _configurationSection.TraceId.DataType = "22"; // VarChar
             var columnOptions = new MSSqlServer.ColumnOptions();
-            
+
             // Act
             _sut.ConfigureColumnOptions(_configurationSection, columnOptions);
 
@@ -55,6 +56,49 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.System.C
             Assert.Equal(columnName, columnOptions.SpanId.ColumnName);
             Assert.False(columnOptions.SpanId.AllowNull);
             Assert.Equal(SqlDbType.VarChar, columnOptions.SpanId.DataType);
+        }
+
+        [Fact]
+        public void ConfigureColumnOptionsReadsAdditionalColumnsResolveHierarchicalPropertyName()
+        {
+            // Arrange
+            const string columnName = "AdditionalColumn1";
+            var columnConfig = new ColumnConfig
+            {
+                ColumnName = columnName,
+                ResolveHierarchicalPropertyName = "false"
+            };
+            _configurationSection.Columns.Add(columnConfig);
+            var columnOptions = new MSSqlServer.ColumnOptions();
+
+            // Act
+            _sut.ConfigureColumnOptions(_configurationSection, columnOptions);
+
+            // Assert
+            var additionalColumn1 = columnOptions.AdditionalColumns.SingleOrDefault(c => c.ColumnName == columnName);
+            additionalColumn1.Should().NotBeNull();
+            additionalColumn1.ResolveHierarchicalPropertyName.Should().Be(false);
+        }
+
+        [Fact]
+        public void ConfigureColumnOptionsDefaultsAdditionalColumnsResolveHierarchicalPropertyName()
+        {
+            // Arrange
+            const string columnName = "AdditionalColumn1";
+            var columnConfig = new ColumnConfig
+            {
+                ColumnName = columnName
+            };
+            _configurationSection.Columns.Add(columnConfig);
+            var columnOptions = new MSSqlServer.ColumnOptions();
+
+            // Act
+            _sut.ConfigureColumnOptions(_configurationSection, columnOptions);
+
+            // Assert
+            var additionalColumn1 = columnOptions.AdditionalColumns.SingleOrDefault(c => c.ColumnName == columnName);
+            additionalColumn1.Should().NotBeNull();
+            additionalColumn1.ResolveHierarchicalPropertyName.Should().Be(true);
         }
     }
 }
