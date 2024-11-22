@@ -1,7 +1,6 @@
 # 8.1.0
 * Implemented #542: Column option `ResolveHierarchicalPropertyName` to force non-hierarchical handling
-
-# 8.0.1
+* Removed unnecessary exception handlers and let Serilog Core do the SelfLog()
 * Refactoring and performance optimizations in batched and audit sink
 * Create perftest result on release
 * Updated issue template
