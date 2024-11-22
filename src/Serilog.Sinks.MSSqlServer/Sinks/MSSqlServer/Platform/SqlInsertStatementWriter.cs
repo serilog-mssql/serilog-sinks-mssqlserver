@@ -43,33 +43,25 @@ namespace Serilog.Sinks.MSSqlServer.Platform
 
         public async Task WriteEvents(IEnumerable<LogEvent> events)
         {
-            try
+            using (var cn = _sqlConnectionFactory.Create())
             {
-                using (var cn = _sqlConnectionFactory.Create())
+                await cn.OpenAsync().ConfigureAwait(false);
+
+                foreach (var logEvent in events)
                 {
-                    await cn.OpenAsync().ConfigureAwait(false);
+                    var fields = _logEventDataGenerator.GetColumnsAndValues(logEvent).ToList();
+                    InitializeSqlCommand(cn, fields);
 
-                    foreach (var logEvent in events)
+                    var index = 0;
+                    _sqlCommand.ClearParameters();
+                    foreach (var field in fields)
                     {
-                        var fields = _logEventDataGenerator.GetColumnsAndValues(logEvent).ToList();
-                        InitializeSqlCommand(cn, fields);
-
-                        var index = 0;
-                        _sqlCommand.ClearParameters();
-                        foreach (var field in fields)
-                        {
-                            _sqlCommand.AddParameter(Invariant($"@P{index}"), field.Value);
-                            index++;
-                        }
-
-                        await _sqlCommand.ExecuteNonQueryAsync().ConfigureAwait(false);
+                        _sqlCommand.AddParameter(Invariant($"@P{index}"), field.Value);
+                        index++;
                     }
+
+                    await _sqlCommand.ExecuteNonQueryAsync().ConfigureAwait(false);
                 }
-            }
-            catch (Exception ex)
-            {
-                SelfLog.WriteLine("Unable to write log event to the database due to following error: {0}", ex);
-                throw;
             }
         }
 
