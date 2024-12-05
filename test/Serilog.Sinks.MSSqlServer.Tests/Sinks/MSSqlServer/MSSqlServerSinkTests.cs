@@ -173,7 +173,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         }
 
         [Fact]
-        public void OnEmpytBatchAsyncReturnsCompletedTask()
+        public void OnEmptyBatchAsyncReturnsCompletedTask()
         {
             // Arrange
             SetupSut();
