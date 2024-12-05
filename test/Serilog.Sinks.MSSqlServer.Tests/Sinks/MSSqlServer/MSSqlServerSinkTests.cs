@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Threading.Tasks;
 using Moq;
 using Serilog.Events;
@@ -183,6 +182,26 @@ namespace Serilog.Sinks.MSSqlServer.Tests
 
             // Assert
             Assert.True(task.IsCompleted);
+        }
+
+        [Fact]
+        public void OnDisposeDisposesSqlBulkBatchWriterDependency()
+        {
+            // Arrange + act
+            using (new MSSqlServerSink(_sinkOptions, _sinkDependencies)) { }
+
+            // Assert
+            _sqlBulkBatchWriter.Verify(w => w.Dispose(), Times.Once);
+        }
+
+        [Fact]
+        public void OnDisposeDisposesSqlLogEventWriterDependency()
+        {
+            // Arrange + act
+            using (new MSSqlServerSink(_sinkOptions, _sinkDependencies)) { }
+
+            // Assert
+            _sqlLogEventWriter.Verify(w => w.Dispose(), Times.Once);
         }
 
         private void SetupSut(
