@@ -200,6 +200,8 @@ CREATE TABLE [Logs] (
 
 At a minimum, writing log entries requires SELECT and INSERT permissions for the log table. (SELECT is required because the sink's batching behavior uses bulk inserts which reads the schema before the write operations begin).
 
+If the audit version of the sink is used or the sink option [UseSqlBulkCopy](#usesqlbulkcopy) is set to `true`, only INSERT statements are used and no SELECT permission is required.
+
 SQL permissions are a very complex subject. Here is an example of one possible solution (valid for SQL 2012 or later):
 
 ```
@@ -337,6 +339,7 @@ Each Standard Column in the `ColumnOptions.Store` list and any custom columns yo
 
 * `ColumnName`
 * `PropertyName`
+* `ResolveHierarchicalPropertyName`
 * `DataType`
 * `AllowNull`
 * `DataLength`
@@ -350,7 +353,11 @@ Any valid SQL column name can be used. Standard Columns have default names assig
 
 The optional name of a Serilog property to use as the value for a custom column. If not provided, the property used is the one that has the same name as the specified ColumnName. It applies only to custom columns defined in `AdditionalColumns` and is ignored for standard columns.
 
-PropertyName can contain a simple property name like `SomeProperty` but it can also be used to hierachically reference sub-properties with expressions like `SomeProperty.SomeSubProperty.SomeThirdLevelProperty`. This can be used to easily bind additional columns to specific sub-properties following the paradigm of structured logging. Please be aware that collections are not supported. This means expressions like `SomeProperty.SomeArray[2]` will not work.
+PropertyName can contain a simple property name like `SomeProperty` but it can also be used to hierarchically reference sub-properties with expressions like `SomeProperty.SomeSubProperty.SomeThirdLevelProperty`. This can be used to easily bind additional columns to specific sub-properties following the paradigm of structured logging. Please be aware that collections are not supported. This means expressions like `SomeProperty.SomeArray[2]` will not work. Hierarchical property resolution can be disabled using `ResolveHierarchicalPropertyName` in case you need property names containing dots which should not be treated as hierarchical.
+
+### ResolveHierarchicalPropertyName
+
+Controls whether hierarchical sub-property expressions in `PropertyName` are evaluated (see above). The default is `true`. If set to `false` any value is treated as a simple property name and no hierarchical sub-property binding is done.
 
 ### DataType
 
@@ -383,7 +390,7 @@ Numeric types use the default precision and scale. For numeric types, you are re
 
 ### AllowNull
 
-Determines whether or not the column can store SQL `NULL` values. The default is true. Some of the other features like `PrimaryKey` have related restrictions, and some of the Standard Columns impose restrictions (for example, the `Id` column never allows nulls).
+Determines whether the column can store SQL `NULL` values. The default is `true`. Some of the other features like `PrimaryKey` have related restrictions, and some of the Standard Columns impose restrictions (for example, the `Id` column never allows nulls).
 
 ### DataLength
 

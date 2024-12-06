@@ -41,17 +41,6 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Dependencies
         }
 
         [Fact]
-        public void CreatesSinkDependenciesWithDataTableCreator()
-        {
-            // Act
-            var result = SinkDependenciesFactory.Create(_connectionString, _sinkOptions, null, _columnOptions, null);
-
-            // Assert
-            Assert.NotNull(result.DataTableCreator);
-            Assert.IsType<DataTableCreator>(result.DataTableCreator);
-        }
-
-        [Fact]
         public void CreatesSinkDependenciesWithSqlBulkBatchWriter()
         {
             // Act

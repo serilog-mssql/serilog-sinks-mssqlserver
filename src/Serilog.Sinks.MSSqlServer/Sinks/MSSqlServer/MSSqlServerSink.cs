@@ -1,11 +1,11 @@
-﻿// Copyright 2024 Serilog Contributors 
-// 
+﻿// Copyright 2024 Serilog Contributors
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //     http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,7 +14,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Threading.Tasks;
 using Serilog.Events;
 using Serilog.Formatting;
@@ -29,8 +28,9 @@ namespace Serilog.Sinks.MSSqlServer
     /// </summary>
     public class MSSqlServerSink : IBatchedLogEventSink, IDisposable
     {
+        private readonly MSSqlServerSinkOptions _sinkOptions;
         private readonly ISqlBulkBatchWriter _sqlBulkBatchWriter;
-        private readonly DataTable _eventTable;
+        private readonly ISqlLogEventWriter _sqlLogEventWriter; // Used if sink option UseSqlBulkCopy is set to false
 
         /// <summary>
         /// The default database schema name.
@@ -53,7 +53,7 @@ namespace Serilog.Sinks.MSSqlServer
         /// Construct a sink posting to the specified database.
         ///
         /// Note: this is the legacy version of the extension method. Please use the new one using MSSqlServerSinkOptions instead.
-        /// 
+        ///
         /// </summary>
         /// <param name="connectionString">Connection string to access the database.</param>
         /// <param name="tableName">Name of the table to store the data in.</param>
@@ -108,8 +108,9 @@ namespace Serilog.Sinks.MSSqlServer
             ValidateParameters(sinkOptions);
             CheckSinkDependencies(sinkDependencies);
 
+            _sinkOptions = sinkOptions;
             _sqlBulkBatchWriter = sinkDependencies.SqlBulkBatchWriter;
-            _eventTable = sinkDependencies.DataTableCreator.CreateDataTable();
+            _sqlLogEventWriter = sinkDependencies.SqlLogEventWriter;
 
             CreateDatabaseAndTable(sinkOptions, sinkDependencies);
         }
@@ -119,7 +120,9 @@ namespace Serilog.Sinks.MSSqlServer
         /// </summary>
         /// <param name="batch">The events to emit.</param>
         public Task EmitBatchAsync(IReadOnlyCollection<LogEvent> batch) =>
-            _sqlBulkBatchWriter.WriteBatch(batch, _eventTable);
+            _sinkOptions.UseSqlBulkCopy
+                ? _sqlBulkBatchWriter.WriteBatch(batch)
+                : _sqlLogEventWriter.WriteEvents(batch);
 
         /// <summary>
         /// Called upon batchperiod if no data is in batch. Not used by this sink.
@@ -148,7 +151,8 @@ namespace Serilog.Sinks.MSSqlServer
             {
                 if (disposing)
                 {
-                    _eventTable.Dispose();
+                    _sqlBulkBatchWriter.Dispose();
+                    _sqlLogEventWriter.Dispose();
                 }
 
                 _disposedValue = true;
@@ -170,11 +174,6 @@ namespace Serilog.Sinks.MSSqlServer
                 throw new ArgumentNullException(nameof(sinkDependencies));
             }
 
-            if (sinkDependencies.DataTableCreator == null)
-            {
-                throw new InvalidOperationException("DataTableCreator is not initialized!");
-            }
-
             if (sinkDependencies.SqlTableCreator == null)
             {
                 throw new InvalidOperationException("SqlTableCreator is not initialized!");
@@ -183,6 +182,11 @@ namespace Serilog.Sinks.MSSqlServer
             if (sinkDependencies.SqlBulkBatchWriter == null)
             {
                 throw new InvalidOperationException("SqlBulkBatchWriter is not initialized!");
+            }
+
+            if (sinkDependencies.SqlLogEventWriter == null)
+            {
+                throw new InvalidOperationException("SqlLogEventWriter is not initialized!");
             }
         }
 

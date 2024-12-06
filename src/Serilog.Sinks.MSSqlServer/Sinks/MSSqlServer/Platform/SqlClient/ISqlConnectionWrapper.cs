@@ -1,16 +1,15 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Microsoft.Data.SqlClient;
 
 namespace Serilog.Sinks.MSSqlServer.Platform.SqlClient
 {
     internal interface ISqlConnectionWrapper : IDisposable
     {
-        string ConnectionString { get; }
+        SqlConnection SqlConnection { get; }
 
         void Open();
         Task OpenAsync();
-        ISqlCommandWrapper CreateCommand();
-        ISqlCommandWrapper CreateCommand(string cmdText);
         ISqlBulkCopyWrapper CreateSqlBulkCopy(bool disableTriggers, string destinationTableName);
     }
 }

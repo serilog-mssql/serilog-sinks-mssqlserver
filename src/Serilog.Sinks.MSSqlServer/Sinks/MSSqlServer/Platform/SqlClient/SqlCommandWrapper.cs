@@ -10,9 +10,10 @@ namespace Serilog.Sinks.MSSqlServer.Platform.SqlClient
         private readonly SqlCommand _sqlCommand;
         private bool _disposedValue;
 
-        public SqlCommandWrapper(SqlCommand sqlCommand)
+        public SqlCommandWrapper(SqlCommand sqlCommand, SqlConnection sqlConnection)
         {
             _sqlCommand = sqlCommand ?? throw new ArgumentNullException(nameof(sqlCommand));
+            _sqlCommand.Connection = sqlConnection ?? throw new ArgumentNullException(nameof(sqlConnection));
         }
 
         public CommandType CommandType
@@ -27,13 +28,23 @@ namespace Serilog.Sinks.MSSqlServer.Platform.SqlClient
             set => _sqlCommand.CommandText = value;
         }
 
+        public void SetConnection(ISqlConnectionWrapper sqlConnectionWrapper)
+        {
+            _sqlCommand.Connection = sqlConnectionWrapper.SqlConnection;
+        }
+
+        public void ClearParameters()
+        {
+            _sqlCommand.Parameters.Clear();
+        }
+
         public void AddParameter(string parameterName, object value)
         {
             var parameter = new SqlParameter(parameterName, value ?? DBNull.Value);
 
             // The default is SqlDbType.DateTime, which will truncate the DateTime value if the actual
             // type in the database table is datetime2. So we explicitly set it to DateTime2, which will
-            // work both if the field in the table is datetime and datetime2, which is also consistent with 
+            // work both if the field in the table is datetime and datetime2, which is also consistent with
             // the behavior of the non-audit sink.
             if (value is DateTime)
                 parameter.SqlDbType = SqlDbType.DateTime2;

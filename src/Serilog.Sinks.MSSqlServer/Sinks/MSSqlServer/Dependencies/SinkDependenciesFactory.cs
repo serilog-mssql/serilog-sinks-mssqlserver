@@ -23,6 +23,7 @@ namespace Serilog.Sinks.MSSqlServer.Dependencies
             var sqlConnectionStringBuilderWrapper = new SqlConnectionStringBuilderWrapper(
                 connectionString, sinkOptions.EnlistInTransaction);
             var sqlConnectionFactory = new SqlConnectionFactory(sqlConnectionStringBuilderWrapper);
+            var sqlCommandFactory = new SqlCommandFactory();
             var dataTableCreator = new DataTableCreator(sinkOptions.TableName, columnOptions);
             var sqlCreateTableWriter = new SqlCreateTableWriter(sinkOptions.SchemaName,
                 sinkOptions.TableName, columnOptions, dataTableCreator);
@@ -47,21 +48,16 @@ namespace Serilog.Sinks.MSSqlServer.Dependencies
 
             var sinkDependencies = new SinkDependencies
             {
-                DataTableCreator = dataTableCreator,
                 SqlDatabaseCreator = new SqlDatabaseCreator(
-                    sqlCreateDatabaseWriter, sqlConnectionFactoryNoDb),
+                    sqlCreateDatabaseWriter, sqlConnectionFactoryNoDb, sqlCommandFactory),
                 SqlTableCreator = new SqlTableCreator(
-                    sqlCreateTableWriter, sqlConnectionFactory),
-                SqlBulkBatchWriter = sinkOptions.UseSqlBulkCopy
-                    ? (ISqlBulkBatchWriter)new SqlBulkBatchWriter(
-                        sinkOptions.TableName, sinkOptions.SchemaName, columnOptions.DisableTriggers,
-                        sqlConnectionFactory, logEventDataGenerator)
-                    : (ISqlBulkBatchWriter)new SqlInsertStatementWriter(
-                        sinkOptions.TableName, sinkOptions.SchemaName,
-                        sqlConnectionFactory, logEventDataGenerator),
+                    sqlCreateTableWriter, sqlConnectionFactory, sqlCommandFactory),
+                SqlBulkBatchWriter = new SqlBulkBatchWriter(
+                    sinkOptions.TableName, sinkOptions.SchemaName, columnOptions.DisableTriggers,
+                    dataTableCreator, sqlConnectionFactory, logEventDataGenerator),
                 SqlLogEventWriter = new SqlInsertStatementWriter(
                     sinkOptions.TableName, sinkOptions.SchemaName,
-                    sqlConnectionFactory, logEventDataGenerator)
+                    sqlConnectionFactory, sqlCommandFactory, logEventDataGenerator)
             };
 
             return sinkDependencies;

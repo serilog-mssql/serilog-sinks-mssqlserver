@@ -9,7 +9,9 @@ namespace Serilog.Sinks.MSSqlServer.Platform
 
         public SqlDatabaseCreator(
             ISqlCreateDatabaseWriter sqlCreateDatabaseWriter,
-            ISqlConnectionFactory sqlConnectionFactory) : base(sqlCreateDatabaseWriter, sqlConnectionFactory)
+            ISqlConnectionFactory sqlConnectionFactory,
+            ISqlCommandFactory sqlCommandFactory) :
+            base(sqlCreateDatabaseWriter, sqlConnectionFactory, sqlCommandFactory)
         {
             if (sqlCreateDatabaseWriter == null) throw new ArgumentNullException(nameof(sqlCreateDatabaseWriter));
             _databaseName = sqlCreateDatabaseWriter.DatabaseName;
