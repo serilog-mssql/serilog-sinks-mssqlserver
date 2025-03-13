@@ -1,4 +1,5 @@
 ﻿using System;
+using Microsoft.Data.SqlClient;
 using Serilog.Sinks.MSSqlServer.Platform.SqlClient;
 
 namespace Serilog.Sinks.MSSqlServer.Platform
@@ -7,6 +8,7 @@ namespace Serilog.Sinks.MSSqlServer.Platform
     {
         private readonly string _connectionString;
         private readonly ISqlConnectionStringBuilderWrapper _sqlConnectionStringBuilderWrapper;
+        private readonly Func<SqlConnection> _sqlConnectionFactory;
 
         public SqlConnectionFactory(ISqlConnectionStringBuilderWrapper sqlConnectionStringBuilderWrapper)
         {
@@ -16,8 +18,17 @@ namespace Serilog.Sinks.MSSqlServer.Platform
             _connectionString = _sqlConnectionStringBuilderWrapper.ConnectionString;
         }
 
+        public SqlConnectionFactory(Func<SqlConnection> connectionFactory)
+        {
+            _sqlConnectionFactory = connectionFactory;
+        }
+
         public ISqlConnectionWrapper Create()
         {
+            if(_sqlConnectionFactory != null)
+            {
+                return new SqlConnectionWrapper(_sqlConnectionFactory);
+            }
             return new SqlConnectionWrapper(_connectionString);
         }
     }

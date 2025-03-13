@@ -14,6 +14,11 @@ namespace Serilog.Sinks.MSSqlServer.Platform.SqlClient
             _sqlConnection = new SqlConnection(connectionString);
         }
 
+        public SqlConnectionWrapper(Func<SqlConnection> connectionFactory)
+        {
+            _sqlConnection = connectionFactory();
+        }
+
         public SqlConnection SqlConnection => _sqlConnection;
 
         public void Open()

@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Serilog.Configuration;
 using Serilog.Debugging;
@@ -169,6 +170,85 @@ namespace Serilog
 
         /// <summary>
         /// Adds a sink that writes log events to a table in a MSSqlServer database.
+        /// Create a database and execute the table creation script found here
+        /// https://gist.github.com/mivano/10429656
+        /// or use the autoCreateSqlTable option.
+        /// </summary>
+        /// <param name="loggerConfiguration">The logger configuration.</param>
+        /// <param name="sqlConnectionFactory">A function to initialize a connection to the database where to store the events.</param>
+        /// <param name="initialCatalog">The initial catalog within the database (used if AutoCreateSqlDatabase is enabled).</param>
+        /// <param name="sinkOptions">Supplies additional settings for the sink</param>
+        /// <param name="sinkOptionsSection">A config section defining additional settings for the sink</param>
+        /// <param name="appConfiguration">Additional application-level configuration. Required if connectionString is a name.</param>
+        /// <param name="restrictedToMinimumLevel">The minimum level for events passed through the sink. Ignored when LevelSwitch in <paramref name="sinkOptions"/> is specified.</param>
+        /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
+        /// <param name="columnOptions">An externally-modified group of column settings</param>
+        /// <param name="columnOptionsSection">A config section defining various column settings</param>
+        /// <param name="logEventFormatter">Supplies custom formatter for the LogEvent column, or null</param>
+        /// <returns>Logger configuration, allowing configuration to continue.</returns>
+        /// <exception cref="ArgumentNullException">A required parameter is null.</exception>
+        public static LoggerConfiguration MSSqlServer(
+            this LoggerSinkConfiguration loggerConfiguration,
+            Func<SqlConnection> sqlConnectionFactory,
+            string initialCatalog,
+            MSSqlServerSinkOptions sinkOptions = null,
+            IConfigurationSection sinkOptionsSection = null,
+            IConfiguration appConfiguration = null,
+            LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
+            IFormatProvider formatProvider = null,
+            ColumnOptions columnOptions = null,
+            IConfigurationSection columnOptionsSection = null,
+            ITextFormatter logEventFormatter = null) =>
+            loggerConfiguration.MSSqlServerInternal(
+                sqlConnectionFactory: sqlConnectionFactory,
+                initialCatalog: initialCatalog,
+                sinkOptions: sinkOptions,
+                sinkOptionsSection: sinkOptionsSection,
+                appConfiguration: appConfiguration,
+                restrictedToMinimumLevel: restrictedToMinimumLevel,
+                formatProvider: formatProvider,
+                columnOptions: columnOptions,
+                columnOptionsSection: columnOptionsSection,
+                logEventFormatter: logEventFormatter,
+                applySystemConfiguration: new ApplySystemConfiguration(),
+                applyMicrosoftExtensionsConfiguration: new ApplyMicrosoftExtensionsConfiguration(),
+                sinkFactory: new MSSqlServerSinkFactory(),
+                batchingSinkFactory: new PeriodicBatchingSinkFactory());
+
+        // Internal overload with parameters used by tests to override the config section and inject mocks
+        internal static LoggerConfiguration MSSqlServerInternal(
+            this LoggerSinkConfiguration loggerConfiguration,
+            Func<SqlConnection> sqlConnectionFactory,
+            string initialCatalog,
+            MSSqlServerSinkOptions sinkOptions,
+            IConfigurationSection sinkOptionsSection,
+            IConfiguration appConfiguration,
+            LogEventLevel restrictedToMinimumLevel,
+            IFormatProvider formatProvider,
+            ColumnOptions columnOptions,
+            IConfigurationSection columnOptionsSection,
+            ITextFormatter logEventFormatter,
+            IApplySystemConfiguration applySystemConfiguration,
+            IApplyMicrosoftExtensionsConfiguration applyMicrosoftExtensionsConfiguration,
+            IMSSqlServerSinkFactory sinkFactory,
+            IPeriodicBatchingSinkFactory batchingSinkFactory)
+        {
+            if (loggerConfiguration == null)
+                throw new ArgumentNullException(nameof(loggerConfiguration));
+
+            ReadConfiguration(ref sinkOptions, sinkOptionsSection, appConfiguration,
+                ref columnOptions, columnOptionsSection, applySystemConfiguration, applyMicrosoftExtensionsConfiguration);
+
+            var sink = sinkFactory.Create(sqlConnectionFactory, initialCatalog, sinkOptions, formatProvider, columnOptions, logEventFormatter);
+
+            var periodicBatchingSink = batchingSinkFactory.Create(sink, sinkOptions);
+
+            return loggerConfiguration.Sink(periodicBatchingSink, restrictedToMinimumLevel, sinkOptions?.LevelSwitch);
+        }
+
+
+        /// <summary>
+        /// Adds a sink that writes log events to a table in a MSSqlServer database.
         ///
         /// Note: this is the legacy version of the extension method. Please use the new one using MSSqlServerSinkOptions instead.
         /// 
@@ -312,6 +392,40 @@ namespace Serilog
             {
                 connectionString = applyMicrosoftExtensionsConfiguration.GetConnectionString(connectionString, appConfiguration);
             }
+
+            if (columnOptionsSection != null)
+            {
+                columnOptions = applyMicrosoftExtensionsConfiguration.ConfigureColumnOptions(columnOptions, columnOptionsSection);
+            }
+
+            if (sinkOptionsSection != null)
+            {
+                sinkOptions = applyMicrosoftExtensionsConfiguration.ConfigureSinkOptions(sinkOptions, sinkOptionsSection);
+            }
+        }
+
+        private static void ReadConfiguration(
+            ref MSSqlServerSinkOptions sinkOptions,
+            IConfigurationSection sinkOptionsSection,
+            IConfiguration appConfiguration,
+            ref ColumnOptions columnOptions,
+            IConfigurationSection columnOptionsSection,
+            IApplySystemConfiguration applySystemConfiguration,
+            IApplyMicrosoftExtensionsConfiguration applyMicrosoftExtensionsConfiguration)
+        {
+            sinkOptions = sinkOptions ?? new MSSqlServerSinkOptions();
+            columnOptions = columnOptions ?? new ColumnOptions();
+
+            var serviceConfigSection = applySystemConfiguration.GetSinkConfigurationSection(AppConfigSectionName);
+            if (serviceConfigSection != null)
+            {
+                columnOptions = applySystemConfiguration.ConfigureColumnOptions(serviceConfigSection, columnOptions);
+                sinkOptions = applySystemConfiguration.ConfigureSinkOptions(serviceConfigSection, sinkOptions);
+
+                if (appConfiguration != null || columnOptionsSection != null || sinkOptionsSection != null)
+                    SelfLog.WriteLine("Warning: Both System.Configuration (app.config or web.config) and Microsoft.Extensions.Configuration are being applied to the MSSQLServer sink.");
+            }
+
 
             if (columnOptionsSection != null)
             {

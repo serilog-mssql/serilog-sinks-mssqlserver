@@ -20,6 +20,7 @@ using Serilog.Formatting;
 using Serilog.Sinks.MSSqlServer.Dependencies;
 using Serilog.Sinks.MSSqlServer.Platform;
 using Serilog.Core;
+using Microsoft.Data.SqlClient;
 
 namespace Serilog.Sinks.MSSqlServer
 {
@@ -97,6 +98,26 @@ namespace Serilog.Sinks.MSSqlServer
             ColumnOptions columnOptions = null,
             ITextFormatter logEventFormatter = null)
             : this(sinkOptions, SinkDependenciesFactory.Create(connectionString, sinkOptions, formatProvider, columnOptions, logEventFormatter))
+        {
+        }
+
+        /// <summary>
+        /// Construct a sink posting to the specified database.
+        /// </summary>
+        /// <param name="sqlConnectionFactory">Factory to initialize connection to the database.</param>
+        /// <param name="initialCatalog">The initial catalog within the database (used if AutoCreateSqlDatabase is enabled).</param>
+        /// <param name="sinkOptions">Supplies additional options for the sink</param>
+        /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
+        /// <param name="columnOptions">Options that pertain to columns</param>
+        /// <param name="logEventFormatter">Supplies custom formatter for the LogEvent column, or null</param>
+        public MSSqlServerSink(
+            Func<SqlConnection> sqlConnectionFactory,
+            string initialCatalog,
+            MSSqlServerSinkOptions sinkOptions,
+            IFormatProvider formatProvider = null,
+            ColumnOptions columnOptions = null,
+            ITextFormatter logEventFormatter = null)
+            : this(sinkOptions, SinkDependenciesFactory.Create(sqlConnectionFactory, initialCatalog, sinkOptions, formatProvider, columnOptions, logEventFormatter))
         {
         }
 
