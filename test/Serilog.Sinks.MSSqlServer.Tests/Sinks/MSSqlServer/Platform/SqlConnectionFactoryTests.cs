@@ -21,7 +21,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Platform
         [Fact]
         public void IntializeThrowsIfSqlConnectionStringBuilderWrapperIsNull()
         {
-            Assert.Throws<ArgumentNullException>(() => new SqlConnectionFactory(null));
+            Assert.Throws<ArgumentNullException>(() => new SqlConnectionFactory((ISqlConnectionStringBuilderWrapper)null));
         }
 
         [Fact]
