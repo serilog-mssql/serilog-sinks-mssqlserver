@@ -1,3 +1,6 @@
+# 8.1.1
+* Fixed concurrency issue #607 in audit sink
+
 # 8.1.0
 * Implemented #542: Column option `ResolveHierarchicalPropertyName` to force non-hierarchical handling
 * Removed unnecessary exception handlers and let Serilog Core do the SelfLog()
