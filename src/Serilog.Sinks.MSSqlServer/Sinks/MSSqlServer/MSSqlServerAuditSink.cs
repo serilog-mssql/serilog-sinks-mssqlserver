@@ -1,4 +1,4 @@
-﻿// Copyright 2024 Serilog Contributors
+﻿// Copyright 2025 Serilog Contributors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -29,8 +29,6 @@ namespace Serilog.Sinks.MSSqlServer
     public class MSSqlServerAuditSink : ILogEventSink, IDisposable
     {
         private readonly ISqlLogEventWriter _sqlLogEventWriter;
-
-        private bool _disposedValue;
 
         /// <summary>
         /// Construct a sink posting to the specified database.
@@ -115,15 +113,7 @@ namespace Serilog.Sinks.MSSqlServer
         /// <param name="disposing">True to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
         protected virtual void Dispose(bool disposing)
         {
-            if (!_disposedValue)
-            {
-                if (disposing)
-                {
-                    _sqlLogEventWriter.Dispose();
-                }
-
-                _disposedValue = true;
-            }
+            // This class needn't to dispose anything. This is just here for sink interface compatibility.
         }
 
         private static void ValidateParameters(MSSqlServerSinkOptions sinkOptions, ColumnOptions columnOptions)

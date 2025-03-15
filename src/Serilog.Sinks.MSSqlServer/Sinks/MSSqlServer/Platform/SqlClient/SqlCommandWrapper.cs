@@ -10,32 +10,9 @@ namespace Serilog.Sinks.MSSqlServer.Platform.SqlClient
         private readonly SqlCommand _sqlCommand;
         private bool _disposedValue;
 
-        public SqlCommandWrapper(SqlCommand sqlCommand, SqlConnection sqlConnection)
+        public SqlCommandWrapper(SqlCommand sqlCommand)
         {
             _sqlCommand = sqlCommand ?? throw new ArgumentNullException(nameof(sqlCommand));
-            _sqlCommand.Connection = sqlConnection ?? throw new ArgumentNullException(nameof(sqlConnection));
-        }
-
-        public CommandType CommandType
-        {
-            get => _sqlCommand.CommandType;
-            set => _sqlCommand.CommandType = value;
-        }
-
-        public string CommandText
-        {
-            get => _sqlCommand.CommandText;
-            set => _sqlCommand.CommandText = value;
-        }
-
-        public void SetConnection(ISqlConnectionWrapper sqlConnectionWrapper)
-        {
-            _sqlCommand.Connection = sqlConnectionWrapper.SqlConnection;
-        }
-
-        public void ClearParameters()
-        {
-            _sqlCommand.Parameters.Clear();
         }
 
         public void AddParameter(string parameterName, object value)

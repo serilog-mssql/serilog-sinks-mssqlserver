@@ -12,7 +12,7 @@ using Xunit;
 namespace Serilog.Sinks.MSSqlServer.Tests.Platform
 {
     [Trait(TestCategory.TraitName, TestCategory.Unit)]
-    public class SqlInsertStatementWriterTests : IDisposable
+    public class SqlInsertStatementWriterTests
     {
         private const string _tableName = "TestTableName";
         private const string _schemaName = "TestSchemaName";
@@ -22,7 +22,6 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Platform
         private readonly Mock<ISqlConnectionWrapper> _sqlConnectionWrapperMock;
         private readonly Mock<ISqlCommandWrapper> _sqlCommandWrapperMock;
         private readonly SqlInsertStatementWriter _sut;
-        private bool _disposedValue;
 
         public SqlInsertStatementWriterTests()
         {
@@ -33,7 +32,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Platform
             _sqlCommandWrapperMock = new Mock<ISqlCommandWrapper>();
 
             _sqlConnectionFactoryMock.Setup(f => f.Create()).Returns(_sqlConnectionWrapperMock.Object);
-            _sqlCommandFactoryMock.Setup(c => c.CreateCommand(It.IsAny<ISqlConnectionWrapper>()))
+            _sqlCommandFactoryMock.Setup(c => c.CreateCommand(It.IsAny<string>(), It.IsAny<ISqlConnectionWrapper>()))
                 .Returns(_sqlCommandWrapperMock.Object);
 
             _sut = new SqlInsertStatementWriter(_tableName, _schemaName,
@@ -102,7 +101,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Platform
         }
 
         [Fact]
-        public async Task WriteEventsCallsSqlConnectionWrappeCreateCommand()
+        public async Task WriteEventsCallsSqlConnectionWrappeCreateCommandForEachLogEvent()
         {
             // Arrange
             var logEvents = CreateLogEvents();
@@ -111,21 +110,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Platform
             await _sut.WriteEvents(logEvents);
 
             // Assert
-            _sqlCommandFactoryMock.Verify(c => c.CreateCommand(_sqlConnectionWrapperMock.Object),
-                Times.Once);
-        }
-
-        [Fact]
-        public async Task WriteEventsSetsSqlCommandWrapperCommandTypeText()
-        {
-            // Arrange
-            var logEvents = CreateLogEvents();
-
-            // Act
-            await _sut.WriteEvents(logEvents);
-
-            // Assert
-            _sqlCommandWrapperMock.VerifySet(c => c.CommandType = System.Data.CommandType.Text);
+            _sqlCommandFactoryMock.Verify(c => c.CreateCommand(
+                It.IsAny<string>(), _sqlConnectionWrapperMock.Object), Times.Exactly(2));
         }
 
         [Fact]
@@ -155,7 +141,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Platform
         }
 
         [Fact]
-        public async Task WriteEventsSetsSqlCommandWrapperCommandTextToSqlInsertWithCorrectFieldsAndValues()
+        public async Task WriteEventsCallsSqlCommandFactoryWithCommandTextToSqlInsertWithCorrectFieldsAndValues()
         {
             // Arrange
             var expectedSqlCommandText = $"INSERT INTO [{_schemaName}].[{_tableName}] ([FieldName1],[FieldName2],[FieldNameThree]) VALUES (@P0,@P1,@P2)";
@@ -173,7 +159,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Platform
             await _sut.WriteEvents(new[] { logEvent });
 
             // Assert
-            _sqlCommandWrapperMock.VerifySet(c => c.CommandText = expectedSqlCommandText);
+            _sqlCommandFactoryMock.Verify(f => f.CreateCommand(expectedSqlCommandText, _sqlConnectionWrapperMock.Object));
         }
 
         [Fact]
@@ -218,7 +204,7 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Platform
         public async Task WriteEventsRethrowsIfCreateCommandThrows()
         {
             // Arrange
-            _sqlCommandFactoryMock.Setup(c => c.CreateCommand(It.IsAny<ISqlConnectionWrapper>()))
+            _sqlCommandFactoryMock.Setup(c => c.CreateCommand(It.IsAny<string>(), It.IsAny<ISqlConnectionWrapper>()))
                 .Callback(() => throw new InvalidOperationException());
             var logEvents = CreateLogEvents();
 
@@ -270,21 +256,6 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Platform
                 TestLogEventHelper.CreateLogEvent()
             };
             return logEvents;
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!_disposedValue)
-            {
-                _sut?.Dispose();
-                _disposedValue = true;
-            }
-        }
-
-        public void Dispose()
-        {
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
         }
     }
 }

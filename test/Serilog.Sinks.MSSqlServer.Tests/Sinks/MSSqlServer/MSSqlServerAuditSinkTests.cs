@@ -156,16 +156,6 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             _sqlLogEventWriter.Verify(w => w.WriteEvent(logEvent), Times.Once);
         }
 
-        [Fact]
-        public void OnDisposeDisposesSqlLogEventWriterDependency()
-        {
-            // Arrange + act
-            using (new MSSqlServerAuditSink(_sinkOptions, _columnOptions, _sinkDependencies)) { }
-
-            // Assert
-            _sqlLogEventWriter.Verify(w => w.Dispose(), Times.Once);
-        }
-
         private void SetupSut(bool autoCreateSqlDatabase = false, bool autoCreateSqlTable = false)
         {
             _sinkOptions.AutoCreateSqlDatabase = autoCreateSqlDatabase;
