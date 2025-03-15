@@ -13,7 +13,7 @@ namespace Serilog.Sinks.MSSqlServer.PerformanceTests.Platform;
 
 [MemoryDiagnoser]
 [MaxIterationCount(16)]
-public class SqlInsertStatementWriterBenchmarks : IDisposable
+public class SqlInsertStatementWriterBenchmarks
 {
     private const string _tableName = "TestTableName";
     private const string _schemaName = "TestSchemaName";
@@ -35,7 +35,7 @@ public class SqlInsertStatementWriterBenchmarks : IDisposable
         _sqlCommandWrapperMock = new Mock<ISqlCommandWrapper>();
 
         _sqlConnectionFactoryMock.Setup(f => f.Create()).Returns(_sqlConnectionWrapperMock.Object);
-        _sqlCommandFactoryMock.Setup(f => f.CreateCommand(It.IsAny<ISqlConnectionWrapper>()))
+        _sqlCommandFactoryMock.Setup(f => f.CreateCommand(It.IsAny<string>(), It.IsAny<ISqlConnectionWrapper>()))
             .Returns(_sqlCommandWrapperMock.Object);
 
         CreateLogEvents();
@@ -66,11 +66,5 @@ public class SqlInsertStatementWriterBenchmarks : IDisposable
         {
             _logEvents.Add(CreateLogEvent());
         }
-    }
-
-    public void Dispose()
-    {
-        GC.SuppressFinalize(this);
-        _sut.Dispose();
     }
 }

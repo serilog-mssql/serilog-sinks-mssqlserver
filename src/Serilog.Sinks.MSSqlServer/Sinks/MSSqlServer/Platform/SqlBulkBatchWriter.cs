@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Linq;
 using System.Threading.Tasks;
-using Serilog.Debugging;
 using Serilog.Events;
 using Serilog.Sinks.MSSqlServer.Output;
 
@@ -45,10 +43,10 @@ namespace Serilog.Sinks.MSSqlServer.Platform
             {
                 FillDataTable(events);
 
-                using (var cn = _sqlConnectionFactory.Create())
+                using (var sqlConnection = _sqlConnectionFactory.Create())
                 {
-                    await cn.OpenAsync().ConfigureAwait(false);
-                    using (var copy = cn.CreateSqlBulkCopy(_disableTriggers, _schemaAndTableName))
+                    await sqlConnection.OpenAsync().ConfigureAwait(false);
+                    using (var copy = sqlConnection.CreateSqlBulkCopy(_disableTriggers, _schemaAndTableName))
                     {
                         for (var i = 0; i < _dataTable.Columns.Count; i++)
                         {
