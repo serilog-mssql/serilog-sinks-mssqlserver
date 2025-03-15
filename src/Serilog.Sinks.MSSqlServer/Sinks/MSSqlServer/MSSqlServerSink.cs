@@ -152,7 +152,6 @@ namespace Serilog.Sinks.MSSqlServer
                 if (disposing)
                 {
                     _sqlBulkBatchWriter.Dispose();
-                    _sqlLogEventWriter.Dispose();
                 }
 
                 _disposedValue = true;

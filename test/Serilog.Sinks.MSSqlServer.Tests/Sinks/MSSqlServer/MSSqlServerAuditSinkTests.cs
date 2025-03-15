@@ -11,7 +11,7 @@ using Xunit;
 namespace Serilog.Sinks.MSSqlServer.Tests
 {
     [Trait(TestCategory.TraitName, TestCategory.Unit)]
-    public class MSSqlServerAuditSinkTests : IDisposable
+    public class MSSqlServerAuditSinkTests
     {
         private readonly MSSqlServerSinkOptions _sinkOptions;
         private readonly Serilog.Sinks.MSSqlServer.ColumnOptions _columnOptions;
@@ -22,7 +22,6 @@ namespace Serilog.Sinks.MSSqlServer.Tests
         private readonly string _tableName = "tableName";
         private readonly string _schemaName = "schemaName";
         private MSSqlServerAuditSink _sut;
-        private bool _disposedValue;
 
         public MSSqlServerAuditSinkTests()
         {
@@ -156,36 +155,11 @@ namespace Serilog.Sinks.MSSqlServer.Tests
             _sqlLogEventWriter.Verify(w => w.WriteEvent(logEvent), Times.Once);
         }
 
-        [Fact]
-        public void OnDisposeDisposesSqlLogEventWriterDependency()
-        {
-            // Arrange + act
-            using (new MSSqlServerAuditSink(_sinkOptions, _columnOptions, _sinkDependencies)) { }
-
-            // Assert
-            _sqlLogEventWriter.Verify(w => w.Dispose(), Times.Once);
-        }
-
         private void SetupSut(bool autoCreateSqlDatabase = false, bool autoCreateSqlTable = false)
         {
             _sinkOptions.AutoCreateSqlDatabase = autoCreateSqlDatabase;
             _sinkOptions.AutoCreateSqlTable = autoCreateSqlTable;
             _sut = new MSSqlServerAuditSink(_sinkOptions, _columnOptions, _sinkDependencies);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!_disposedValue)
-            {
-                _sut?.Dispose();
-                _disposedValue = true;
-            }
-        }
-
-        public void Dispose()
-        {
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
         }
     }
 }

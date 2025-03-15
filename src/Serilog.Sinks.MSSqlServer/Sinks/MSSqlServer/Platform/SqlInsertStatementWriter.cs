@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Serilog.Debugging;
 using Serilog.Events;
 using Serilog.Sinks.MSSqlServer.Output;
 using Serilog.Sinks.MSSqlServer.Platform.SqlClient;
@@ -20,8 +18,7 @@ namespace Serilog.Sinks.MSSqlServer.Platform
         private readonly ISqlCommandFactory _sqlCommandFactory;
         private readonly ILogEventDataGenerator _logEventDataGenerator;
 
-        private ISqlCommandWrapper _sqlCommand;
-        private bool _disposedValue;
+        private string _sqlCommandText;
 
         public SqlInsertStatementWriter(
             string tableName,
@@ -43,92 +40,68 @@ namespace Serilog.Sinks.MSSqlServer.Platform
 
         public async Task WriteEvents(IEnumerable<LogEvent> events)
         {
-            using (var cn = _sqlConnectionFactory.Create())
+            using (var sqlConnection = _sqlConnectionFactory.Create())
             {
-                await cn.OpenAsync().ConfigureAwait(false);
+                await sqlConnection.OpenAsync().ConfigureAwait(false);
 
                 foreach (var logEvent in events)
                 {
                     var fields = _logEventDataGenerator.GetColumnsAndValues(logEvent).ToList();
-                    InitializeSqlCommand(cn, fields);
-
-                    var index = 0;
-                    _sqlCommand.ClearParameters();
-                    foreach (var field in fields)
+                    using (var sqlCommand = InitializeSqlCommand(sqlConnection, fields))
                     {
-                        _sqlCommand.AddParameter(Invariant($"@P{index}"), field.Value);
-                        index++;
+                        await sqlCommand.ExecuteNonQueryAsync().ConfigureAwait(false);
                     }
-
-                    await _sqlCommand.ExecuteNonQueryAsync().ConfigureAwait(false);
                 }
             }
         }
 
-        /// <summary>
-        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
-        /// </summary>
-        public void Dispose()
-        {
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
-        }
-
-        /// <summary>
-        /// Releases the unmanaged resources used by the Serilog.Sinks.MSSqlServer.Platform.SqlInsertStatementWriter and optionally
-        /// releases the managed resources.
-        /// </summary>
-        /// <param name="disposing">True to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!_disposedValue)
-            {
-                if (disposing)
-                {
-                    _sqlCommand?.Dispose();
-                }
-
-                _disposedValue = true;
-            }
-        }
-
-        private void InitializeSqlCommand(ISqlConnectionWrapper sqlConnection,
+        private ISqlCommandWrapper InitializeSqlCommand(
+            ISqlConnectionWrapper sqlConnection,
             IEnumerable<KeyValuePair<string, object>> logEventFields)
         {
-            // Optimization: generate INSERT statement and SqlCommand only once
-            // and reuse it with different values and SqlConnections because
-            // the structure does not change.
-            if (_sqlCommand == null)
+            InitializeSqlCommandText(logEventFields);
+
+            var sqlCommand = _sqlCommandFactory.CreateCommand(_sqlCommandText, sqlConnection);
+            var index = 0;
+            foreach (var field in logEventFields)
             {
-                _sqlCommand = _sqlCommandFactory.CreateCommand(sqlConnection);
-                _sqlCommand.CommandType = CommandType.Text;
-
-                var fieldList = new StringBuilder(Invariant($"INSERT INTO [{_schemaName}].[{_tableName}] ("));
-                var parameterList = new StringBuilder(") VALUES (");
-
-                var index = 0;
-                foreach (var field in logEventFields)
-                {
-                    if (index != 0)
-                    {
-                        fieldList.Append(',');
-                        parameterList.Append(',');
-                    }
-
-                    fieldList.Append(Invariant($"[{field.Key}]"));
-                    parameterList.Append("@P");
-                    parameterList.Append(index);
-
-                    index++;
-                }
-
-                parameterList.Append(')');
-                fieldList.Append(parameterList);
-
-                _sqlCommand.CommandText = fieldList.ToString();
+                sqlCommand.AddParameter(Invariant($"@P{index}"), field.Value);
+                index++;
             }
 
-            _sqlCommand.SetConnection(sqlConnection);
+            return sqlCommand;
+        }
+
+        private void InitializeSqlCommandText(IEnumerable<KeyValuePair<string, object>> logEventFields)
+        {
+            if (_sqlCommandText != null)
+            {
+                return;
+            }
+
+            var fieldList = new StringBuilder(Invariant($"INSERT INTO [{_schemaName}].[{_tableName}] ("));
+            var parameterList = new StringBuilder(") VALUES (");
+
+            var index = 0;
+            foreach (var field in logEventFields)
+            {
+                if (index != 0)
+                {
+                    fieldList.Append(',');
+                    parameterList.Append(',');
+                }
+
+                fieldList.Append(Invariant($"[{field.Key}]"));
+                parameterList.Append("@P");
+                parameterList.Append(index);
+
+                index++;
+            }
+
+            parameterList.Append(')');
+            fieldList.Append(parameterList);
+
+            _sqlCommandText = fieldList.ToString();
         }
     }
 }
