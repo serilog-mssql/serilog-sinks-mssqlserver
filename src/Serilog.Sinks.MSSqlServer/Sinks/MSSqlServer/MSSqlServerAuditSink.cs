@@ -26,7 +26,7 @@ namespace Serilog.Sinks.MSSqlServer
     /// Writes log events as rows in a table of MSSqlServer database using Audit logic, meaning that each row is synchronously committed
     /// and any errors that occur are propagated to the caller.
     /// </summary>
-    public class MSSqlServerAuditSink : ILogEventSink
+    public class MSSqlServerAuditSink : ILogEventSink, IDisposable
     {
         private readonly ISqlLogEventWriter _sqlLogEventWriter;
 
@@ -96,6 +96,25 @@ namespace Serilog.Sinks.MSSqlServer
         /// <param name="logEvent">The log event to write.</param>
         public void Emit(LogEvent logEvent) =>
             _sqlLogEventWriter.WriteEvent(logEvent);
+
+        /// <summary>
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Releases the unmanaged resources used by the Serilog.Sinks.MSSqlServer.MSSqlServerAuditSink and optionally
+        /// releases the managed resources.
+        /// </summary>
+        /// <param name="disposing">True to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            // This class needn't to dispose anything. This is just here for sink interface compatibility.
+        }
 
         private static void ValidateParameters(MSSqlServerSinkOptions sinkOptions, ColumnOptions columnOptions)
         {
