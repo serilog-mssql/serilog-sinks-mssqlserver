@@ -1,4 +1,5 @@
 ﻿using System;
+using Microsoft.Data.SqlClient;
 using Serilog.Core;
 
 namespace Serilog.Sinks.MSSqlServer
@@ -83,5 +84,10 @@ namespace Serilog.Sinks.MSSqlServer
         /// Flag to use <see cref="Microsoft.Data.SqlClient.SqlBulkCopy"/> instead of individual INSERT statements (default: true)
         /// </summary>
         public bool UseSqlBulkCopy { get; set; }
+
+        /// <summary>
+        /// Supplies an extension point for customizing the underyling SqlConnection
+        /// </summary>
+        public Action<SqlConnection> ConnectionConfiguration { get; set; }
     }
 }
