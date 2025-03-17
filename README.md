@@ -249,6 +249,7 @@ Basic settings of the sink are configured using the properties in a `MSSqlServer
 * `EagerlyEmitFirstEvent`
 * `LevelSwitch`
 * `UseSqlBulkCopy`
+* `ConnectionConfiguration`
 
 ### TableName
 
@@ -298,6 +299,10 @@ A switch allowing the pass-through minimum level to be changed at runtime. If th
 
 A flag to use `SqlBulkCopy` instead of individual INSERT statements when writing log events.  The default is `true`.
 This setting is not used by the audit sink as it always uses INSERT statements to write events.
+
+### ConnectionConfiguration
+
+An optional action to customize the underlying SqlConnection object. Can be used to set properties such as `AccessTokenCallback`.
 
 ## ColumnOptions Object
 
