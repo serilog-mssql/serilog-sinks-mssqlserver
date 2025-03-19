@@ -22,7 +22,7 @@ namespace Serilog.Sinks.MSSqlServer.Dependencies
             // unless sink option EnlistInTransaction is set to true.
             var sqlConnectionStringBuilderWrapper = new SqlConnectionStringBuilderWrapper(
                 connectionString, sinkOptions.EnlistInTransaction);
-            var sqlConnectionFactory = new SqlConnectionFactory(sqlConnectionStringBuilderWrapper);
+            var sqlConnectionFactory = new SqlConnectionFactory(sqlConnectionStringBuilderWrapper, sinkOptions.ConnectionConfiguration);
             var sqlCommandFactory = new SqlCommandFactory();
             var dataTableCreator = new DataTableCreator(sinkOptions.TableName, columnOptions);
             var sqlCreateTableWriter = new SqlCreateTableWriter(sinkOptions.SchemaName,
@@ -34,7 +34,7 @@ namespace Serilog.Sinks.MSSqlServer.Dependencies
                 InitialCatalog = ""
             };
             var sqlConnectionFactoryNoDb =
-                new SqlConnectionFactory(sqlConnectionStringBuilderWrapperNoDb);
+                new SqlConnectionFactory(sqlConnectionStringBuilderWrapperNoDb, sinkOptions.ConnectionConfiguration);
             var sqlCreateDatabaseWriter = new SqlCreateDatabaseWriter(sqlConnectionStringBuilderWrapper.InitialCatalog);
 
             var logEventDataGenerator =

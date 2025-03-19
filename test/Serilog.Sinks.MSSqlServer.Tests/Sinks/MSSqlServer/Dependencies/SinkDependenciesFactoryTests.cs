@@ -1,7 +1,10 @@
-﻿using Serilog.Sinks.MSSqlServer.Dependencies;
+﻿using Moq;
+using System;
+using Serilog.Sinks.MSSqlServer.Dependencies;
 using Serilog.Sinks.MSSqlServer.Platform;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
+using Microsoft.Data.SqlClient;
 
 namespace Serilog.Sinks.MSSqlServer.Tests.Dependencies
 {
@@ -67,6 +70,20 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Dependencies
         {
             // Act (should not throw)
             SinkDependenciesFactory.Create(_connectionString, _sinkOptions, null, null, null);
+        }
+
+        [Fact]
+        public void CreatesSinkDependenciesWithSqlConnectionConfiguration()
+        {
+            // Arrange
+            var mockConfigurationAction = new Mock<Action<SqlConnection>>();
+            var sinkOptions = new MSSqlServerSinkOptions { TableName = "LogEvents", ConnectionConfiguration = mockConfigurationAction.Object };
+
+            // Act
+            var result = SinkDependenciesFactory.Create(_connectionString, sinkOptions, null, _columnOptions, null);
+
+            // Assert
+            Assert.NotNull(result.SqlDatabaseCreator);
         }
     }
 }
