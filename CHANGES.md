@@ -1,3 +1,6 @@
+# 8.2.0
+* Added `ConnectionConfiguration` sink option to customize SqlConnection before use (thanks to @nhart12)
+
 # 8.1.1
 * Fixed concurrency issue #607 in audit sink
 
