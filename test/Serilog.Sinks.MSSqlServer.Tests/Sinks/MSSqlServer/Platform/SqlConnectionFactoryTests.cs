@@ -1,4 +1,5 @@
 ﻿using System;
+using Microsoft.Data.SqlClient;
 using Moq;
 using Serilog.Sinks.MSSqlServer.Platform;
 using Serilog.Sinks.MSSqlServer.Platform.SqlClient;
@@ -36,6 +37,24 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Platform
                 // Assert
                 Assert.NotNull(connection);
                 Assert.IsAssignableFrom<ISqlConnectionWrapper>(connection);
+            }
+        }
+
+
+        [Fact]
+        public void CreateConnectionCallsCustomConfigurationAction()
+        {
+            // Arrange
+            var mockAction = new Mock<Action<SqlConnection>>();
+            var sut = new SqlConnectionFactory(_sqlConnectionStringBuilderWrapperMock.Object, mockAction.Object);
+
+            // Act
+            using (var connection = sut.Create())
+            {
+                // Assert
+                Assert.NotNull(connection);
+                Assert.IsAssignableFrom<ISqlConnectionWrapper>(connection);
+                mockAction.Verify(m => m.Invoke(connection.SqlConnection), Times.Once);
             }
         }
     }
