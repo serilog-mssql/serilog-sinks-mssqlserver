@@ -76,5 +76,4 @@ dotnet_naming_symbols.public_constant_static_fields.required_modifiers = const, 
 dotnet_naming_style.pascal_case.capitalization = pascal_case
 
 dotnet_sort_system_directives_first = true
-dotnet_style_require_accessibility_modifiers = always:error
-
+dotnet_style_require_accessibility_modifiers = for_non_interface_members:error
