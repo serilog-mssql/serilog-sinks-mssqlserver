@@ -9,7 +9,7 @@ namespace Serilog.Sinks.MSSqlServer.Output
 {
     internal class XmlPropertyFormatter : IXmlPropertyFormatter
     {
-        private static readonly Regex _invalidXMLChars = new Regex(
+        private static readonly Regex _invalidXmlChars = new Regex(
             @"(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F\uFEFF\uFFFE\uFFFF]",
             RegexOptions.Compiled);
 
@@ -61,7 +61,7 @@ namespace Serilog.Sinks.MSSqlServer.Output
         {
             if (value == null) return null;
 
-            return new XText(_invalidXMLChars.Replace(value.ToString(), m => "\\u" + ((ushort)m.Value[0]).ToString("x4", CultureInfo.InvariantCulture))).ToString();
+            return new XText(_invalidXmlChars.Replace(value.ToString(), m => "\\u" + ((ushort)m.Value[0]).ToString("x4", CultureInfo.InvariantCulture))).ToString();
         }
 
         private string SimplifyDictionary(ColumnOptions.PropertiesColumnOptions options, DictionaryValue dict)
