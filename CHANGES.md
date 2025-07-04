@@ -1,3 +1,10 @@
+# 8.2.1
+* Updated SqlClient to 5.2.3 (thanks to @cancakar35)
+* Fixes in .editorconfig (thanks to @cancakar35)
+* Convert AppConfigDemo to SDK style (thanks to @cancakar35)
+* Removed obsolete SourceLink package references
+* Small code style fixes
+
 # 8.2.0
 * Added `ConnectionConfiguration` sink option to customize SqlConnection before use (thanks to @nhart12)
 
