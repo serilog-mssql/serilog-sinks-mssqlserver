@@ -48,7 +48,7 @@ namespace Serilog.Sinks.MSSqlServer.Platform
                 {
                     var common = (SqlColumn)column.ExtendedProperties["SqlColumn"];
 
-                    sql.Append(GetColumnDDL(common));
+                    sql.Append(GetColumnDdl(common));
                     if (dataTable.Columns.Count > i++) sql.Append(',');
                     sql.AppendLine();
 
@@ -84,7 +84,7 @@ namespace Serilog.Sinks.MSSqlServer.Platform
         // Examples of possible output:
         // [Id] BIGINT IDENTITY(1,1) NOT NULL
         // [Message] VARCHAR(1024) NULL
-        private static string GetColumnDDL(SqlColumn column)
+        private static string GetColumnDdl(SqlColumn column)
         {
             var sb = new StringBuilder();
 
