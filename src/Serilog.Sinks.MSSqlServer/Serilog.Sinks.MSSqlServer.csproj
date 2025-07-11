@@ -36,6 +36,7 @@
     <PackageReference Include="Microsoft.Data.SqlClient" />
     <PackageReference Include="Microsoft.Extensions.Configuration" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" />
+    <PackageReference Include="Microsoft.Identity.Client" />
     <PackageReference Include="Serilog" />
   </ItemGroup>
 
