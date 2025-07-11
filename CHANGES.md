@@ -1,3 +1,6 @@
+# 8.2.2
+* Fixed issue #624: Enforce new version of transient dependency to fix vulnerability and avoid nuget.org version de-listing until SqlClient 6.1 is released.
+
 # 8.2.1
 * Updated SqlClient to 5.2.3 (thanks to @cancakar35)
 * Fixes in .editorconfig (thanks to @cancakar35)
