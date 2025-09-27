@@ -54,7 +54,7 @@ namespace Serilog.Sinks.MSSqlServer.Platform
 
                     // collect non-PK indexes for separate output after the table DDL
                     if (common != null && common.NonClusteredIndex && common != _columnOptions.PrimaryKey)
-                        ix.AppendLine(Invariant($"CREATE NONCLUSTERED INDEX [IX{indexCount++}_{_tableName}] ON [{_schemaName}].[{_tableName}] ([{common.ColumnName}]);"));
+                        ix.AppendLine(Invariant($"CREATE NONCLUSTERED INDEX [IX{indexCount++}_{_tableName}] ON [{_schemaName}].[{_tableName}] ([{common.ColumnName}] {common.NonClusteredIndexDirection});"));
                 }
             }
 
