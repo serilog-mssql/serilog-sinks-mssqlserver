@@ -110,6 +110,7 @@ columnOpts.Store.Add(StandardColumn.LogEvent);
 columnOpts.LogEvent.DataLength = 2048;
 columnOpts.PrimaryKey = columnOpts.TimeStamp;
 columnOpts.TimeStamp.NonClusteredIndex = true;
+columnOpts.TimeStamp.NonClusteredIndexDirection = SqlIndexDirection.Desc;
 
 var log = new LoggerConfiguration()
     .WriteTo.MSSqlServer(
@@ -349,6 +350,7 @@ Each Standard Column in the `ColumnOptions.Store` list and any custom columns yo
 * `AllowNull`
 * `DataLength`
 * `NonClusteredIndex`
+* `NonClusteredIndexDirection`
 
 ### ColumnName
 
@@ -411,6 +413,17 @@ Supported SQL column data types that use this property:
 ### NonClusteredIndex
 
 Any individual column can be defined as a non-clustered index, including the table primary key. Use this with caution, indexing carries a relatively high write-throughput penalty. One way to mitigate this is to keep non-clustered indexes offline and use batch reindexing on a scheduled basis.
+
+### NonClusteredIndexDirection
+
+Specifies the sort direction (`ASC` or `DESC`) for a non-clustered index on the SQL column.
+The default value is `ASC`.
+
+It is especially useful for the timestamp column,
+where choosing the correct sort direction can optimize query performance for workloads that typically scan
+recent data first.
+
+This only has effect if `NonClusteredIndex` is true.
 
 ## Standard Columns
 
