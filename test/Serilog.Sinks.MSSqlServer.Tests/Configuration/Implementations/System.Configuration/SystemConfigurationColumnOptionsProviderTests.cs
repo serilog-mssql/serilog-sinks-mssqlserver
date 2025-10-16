@@ -28,6 +28,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.System.C
             _configurationSection.TraceId.ColumnName = columnName;
             _configurationSection.TraceId.AllowNull = "false";
             _configurationSection.TraceId.DataType = "22"; // VarChar
+            _configurationSection.TraceId.NonClusteredIndex = "true";
+            _configurationSection.TraceId.NonClusteredIndexDirection = "Desc";
             var columnOptions = new MSSqlServer.ColumnOptions();
 
             // Act
@@ -37,6 +39,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.System.C
             Assert.Equal(columnName, columnOptions.TraceId.ColumnName);
             Assert.False(columnOptions.TraceId.AllowNull);
             Assert.Equal(SqlDbType.VarChar, columnOptions.TraceId.DataType);
+            Assert.True(columnOptions.TraceId.NonClusteredIndex);
+            Assert.Equal(SqlIndexDirection.Desc, columnOptions.TraceId.NonClusteredIndexDirection);
         }
 
         [Fact]
@@ -47,6 +51,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.System.C
             _configurationSection.SpanId.ColumnName = columnName;
             _configurationSection.SpanId.AllowNull = "false";
             _configurationSection.SpanId.DataType = "22"; // VarChar
+            _configurationSection.SpanId.NonClusteredIndex = "true";
+            _configurationSection.SpanId.NonClusteredIndexDirection = "Desc";
             var columnOptions = new MSSqlServer.ColumnOptions();
 
             // Act
@@ -56,6 +62,8 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.System.C
             Assert.Equal(columnName, columnOptions.SpanId.ColumnName);
             Assert.False(columnOptions.SpanId.AllowNull);
             Assert.Equal(SqlDbType.VarChar, columnOptions.SpanId.DataType);
+            Assert.True(columnOptions.SpanId.NonClusteredIndex);
+            Assert.Equal(SqlIndexDirection.Desc, columnOptions.SpanId.NonClusteredIndexDirection);
         }
 
         [Fact]
@@ -99,6 +107,31 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.System.C
             var additionalColumn1 = columnOptions.AdditionalColumns.SingleOrDefault(c => c.ColumnName == columnName);
             additionalColumn1.Should().NotBeNull();
             additionalColumn1.ResolveHierarchicalPropertyName.Should().Be(true);
+        }
+
+        [Fact]
+        public void ConfigureColumnOptionsReadsAdditionalColumnsNonClusteredIndex()
+        {
+            // Arrange
+            const string columnName = "AdditionalColumn1";
+            var columnConfig = new ColumnConfig
+            {
+                ColumnName = columnName,
+                ResolveHierarchicalPropertyName = "false",
+                NonClusteredIndex = "true",
+                NonClusteredIndexDirection = "Desc"
+            };
+            _configurationSection.Columns.Add(columnConfig);
+            var columnOptions = new MSSqlServer.ColumnOptions();
+
+            // Act
+            _sut.ConfigureColumnOptions(_configurationSection, columnOptions);
+
+            // Assert
+            var additionalColumn1 = columnOptions.AdditionalColumns.SingleOrDefault(c => c.ColumnName == columnName);
+            additionalColumn1.Should().NotBeNull();
+            additionalColumn1.NonClusteredIndex.Should().Be(true);
+            additionalColumn1.NonClusteredIndexDirection.Should().Be(SqlIndexDirection.Desc);
         }
     }
 }
