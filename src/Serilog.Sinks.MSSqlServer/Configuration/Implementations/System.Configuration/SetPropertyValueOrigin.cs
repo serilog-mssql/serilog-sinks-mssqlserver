@@ -23,6 +23,22 @@ namespace Serilog.Sinks.MSSqlServer
         }
 
         /// <summary>
+        /// Test the underlying enum property collection's value-origin flag for a non-default string value. Empty strings allowed.
+        /// </summary>
+        public static void IfEnumProvided<T>(ConfigurationElement element, string propertyName, PropertySetter<T> setter)
+            where T : System.Enum
+        {
+            if (element == null)
+            {
+                return;
+            }
+
+            var property = element.ElementInformation.Properties[propertyName];
+            if (property.ValueOrigin == PropertyValueOrigin.Default) return;
+            IfEnumNotNull((string)property.Value, setter);
+        }
+
+        /// <summary>
         /// Test the underlying property collection's value-origin flag for a non-default, non-null, non-empty string value.
         /// </summary>
         public static void IfProvidedNotEmpty<T>(ConfigurationElement element, string propertyName, PropertySetter<T> setter)
