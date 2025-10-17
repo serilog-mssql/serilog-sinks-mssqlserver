@@ -101,6 +101,12 @@ namespace Serilog.Sinks.MSSqlServer
         public bool NonClusteredIndex { get; set; }
 
         /// <summary>
+        /// Specifies the sort direction for a non-clustered index on the SQL column.
+        /// The default value is <see cref="SqlIndexDirection.Asc"/>. This property is only used when auto-creating a log table.
+        /// </summary>
+        public SqlIndexDirection NonClusteredIndexDirection { get; set; }
+
+        /// <summary>
         /// The name of the Serilog property to use as the value when filling the DataTable.
         /// If not specified, the ColumnName and PropertyName are the same.
         /// </summary>

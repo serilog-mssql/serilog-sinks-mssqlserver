@@ -160,8 +160,58 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Platform
                 + "[IndexCol2] NVARCHAR(50) NOT NULL\r\n"
                 + " CONSTRAINT [PK_TestTableName] PRIMARY KEY CLUSTERED ([Id])\r\n"
                 + ");\r\n"
-                + "CREATE NONCLUSTERED INDEX [IX1_TestTableName] ON [TestSchemaName].[TestTableName] ([IndexCol1]);\r\n"
-                + "CREATE NONCLUSTERED INDEX [IX2_TestTableName] ON [TestSchemaName].[TestTableName] ([IndexCol2]);\r\n"
+                + "CREATE NONCLUSTERED INDEX [IX1_TestTableName] ON [TestSchemaName].[TestTableName] ([IndexCol1] Asc);\r\n"
+                + "CREATE NONCLUSTERED INDEX [IX2_TestTableName] ON [TestSchemaName].[TestTableName] ([IndexCol2] Asc);\r\n"
+                + "END";
+            SetupSut();
+
+            // Act
+            var result = _sut.GetSql();
+
+            // Assert
+            Assert.Contains(expectedResult, result, StringComparison.InvariantCulture);
+        }
+
+        [Fact]
+        public void GetSqlCreatesIdNonClusteredIndexDirectionColumnCorrectly()
+        {
+            // Arrange
+            var sqlColumnId = new SqlColumn { AllowNull = false, ColumnName = "Id", DataType = SqlDbType.Int };
+            _columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions { PrimaryKey = sqlColumnId };
+            var dataColumnId = new DataColumn();
+            dataColumnId.ExtendedProperties["SqlColumn"] = sqlColumnId;
+            var dataColumnIndexCol1 = new DataColumn();
+            var sqlColumnIndexCol1 = new SqlColumn
+            {
+                AllowNull = false,
+                ColumnName = "IndexCol1",
+                DataType = SqlDbType.NVarChar,
+                DataLength = 100,
+                NonClusteredIndex = true,
+                NonClusteredIndexDirection = SqlIndexDirection.Desc
+            };
+            dataColumnIndexCol1.ExtendedProperties["SqlColumn"] = sqlColumnIndexCol1;
+            var dataColumnIndexCol2 = new DataColumn();
+            var sqlColumnIndexCol2 = new SqlColumn
+            {
+                AllowNull = false,
+                ColumnName = "IndexCol2",
+                DataType = SqlDbType.NVarChar,
+                DataLength = 50,
+                NonClusteredIndex = true
+            };
+            dataColumnIndexCol2.ExtendedProperties["SqlColumn"] = sqlColumnIndexCol2;
+            _dataTable.Columns.Add(dataColumnId);
+            _dataTable.Columns.Add(dataColumnIndexCol1);
+            _dataTable.Columns.Add(dataColumnIndexCol2);
+            var expectedResult = "CREATE TABLE [TestSchemaName].[TestTableName] ( \r\n"
+                + "[Id] INT NOT NULL,\r\n"
+                + "[IndexCol1] NVARCHAR(100) NOT NULL,\r\n"
+                + "[IndexCol2] NVARCHAR(50) NOT NULL\r\n"
+                + " CONSTRAINT [PK_TestTableName] PRIMARY KEY CLUSTERED ([Id])\r\n"
+                + ");\r\n"
+                + "CREATE NONCLUSTERED INDEX [IX1_TestTableName] ON [TestSchemaName].[TestTableName] ([IndexCol1] Desc);\r\n"
+                + "CREATE NONCLUSTERED INDEX [IX2_TestTableName] ON [TestSchemaName].[TestTableName] ([IndexCol2] Asc);\r\n"
                 + "END";
             SetupSut();
 

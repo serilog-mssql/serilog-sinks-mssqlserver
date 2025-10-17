@@ -6,7 +6,7 @@ Whenever the `dev` branch is updated (after merging a pull request), the `Releas
 
 ## Creating a latest Release
 
-### Normal Update (no major version change) {#normal-update}
+### Normal Update (no major version change)
 
 1. On the `dev` branch, update CHANGES.md and `VersionPrefix` in Serilog.Sinks.MSSqlServer.csproj.
 
@@ -18,6 +18,6 @@ Whenever the `dev` branch is updated (after merging a pull request), the `Releas
 
 1. On the `dev` branch, update CHANGES.md and increase the major version in `VersionPrefix` in Serilog.Sinks.MSSqlServer.csproj. Also set `EnablePackageValidation` to false because on an intial release of a new major version you don't have a baseline version yet on nuget.org to compare with.
 
-1. Create a PR to merge the `dev` branch into `main`. The `Release` action will be triggered. This works the same as described above under [Normal Update]({#normal-update).
+1. Create a PR to merge the `dev` branch into `main`. The `Release` action will be triggered. This works the same as described above under [Normal Update](#normal-update-no-major-version-change).
 
 1. After the release is done make some changes in Serilog.Sinks.MSSqlServer.csproj on the `dev` branch. Set `EnablePackageValidation` back to true and `PackageValidationBaselineVersion` to the version of the new major release you just created (e.g. 7.0.0). Then also increase the patch version number in `VersionPrefix` (e.g. 7.0.1).

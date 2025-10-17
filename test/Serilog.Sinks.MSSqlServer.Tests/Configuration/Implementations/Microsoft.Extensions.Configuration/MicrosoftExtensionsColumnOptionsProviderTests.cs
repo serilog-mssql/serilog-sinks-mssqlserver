@@ -105,15 +105,16 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
             var dataType = SqlDbType.Bit;
             var allowNull = false;
             var nonClusteredIndex = true;
+            var nonClusteredIndexDirection = SqlIndexDirection.Asc;
             SetupConfigurationSectionMocks();
-            SetupColumnSectionMock("id", columnName, dataType, allowNull, nonClusteredIndex);
+            SetupColumnSectionMock("id", columnName, dataType, allowNull, nonClusteredIndex, nonClusteredIndexDirection);
             var sut = new MicrosoftExtensionsColumnOptionsProvider();
 
             // Act
             var result = sut.ConfigureColumnOptions(new Serilog.Sinks.MSSqlServer.ColumnOptions(), _configurationSectionMock.Object);
 
             // Assert
-            AssertColumnSqlOptions(columnName, dataType, allowNull, nonClusteredIndex, result.Id);
+            AssertColumnSqlOptions(columnName, dataType, allowNull, nonClusteredIndex, nonClusteredIndexDirection, result.Id);
         }
 
         [Fact]
@@ -157,15 +158,18 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
             var dataType = SqlDbType.Bit;
             var allowNull = true;
             var nonClusteredIndex = true;
+            var nonClusteredIndexDirection = SqlIndexDirection.Asc;
             SetupConfigurationSectionMocks();
-            SetupColumnSectionMock("level", columnName, dataType, allowNull, nonClusteredIndex);
+            SetupColumnSectionMock("level", columnName, dataType, allowNull,
+                nonClusteredIndex, nonClusteredIndexDirection);
             var sut = new MicrosoftExtensionsColumnOptionsProvider();
 
             // Act
             var result = sut.ConfigureColumnOptions(new Serilog.Sinks.MSSqlServer.ColumnOptions(), _configurationSectionMock.Object);
 
             // Assert
-            AssertColumnSqlOptions(columnName, dataType, allowNull, nonClusteredIndex, result.Level);
+            AssertColumnSqlOptions(columnName, dataType, allowNull,
+                nonClusteredIndex, nonClusteredIndexDirection, result.Level);
         }
 
         [Fact]
@@ -192,15 +196,18 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
             var dataType = SqlDbType.Bit;
             var allowNull = true;
             var nonClusteredIndex = true;
+            var nonClusteredIndexDirection = SqlIndexDirection.Asc;
             SetupConfigurationSectionMocks();
-            SetupColumnSectionMock("properties", columnName, dataType, allowNull, nonClusteredIndex);
+            SetupColumnSectionMock("properties", columnName, dataType, allowNull,
+                nonClusteredIndex, nonClusteredIndexDirection);
             var sut = new MicrosoftExtensionsColumnOptionsProvider();
 
             // Act
             var result = sut.ConfigureColumnOptions(new Serilog.Sinks.MSSqlServer.ColumnOptions(), _configurationSectionMock.Object);
 
             // Assert
-            AssertColumnSqlOptions(columnName, dataType, allowNull, nonClusteredIndex, result.Properties);
+            AssertColumnSqlOptions(columnName, dataType, allowNull, nonClusteredIndex,
+                nonClusteredIndexDirection, result.Properties);
         }
 
         [Fact]
@@ -410,15 +417,18 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
             var dataType = SqlDbType.Bit;
             var allowNull = true;
             var nonClusteredIndex = true;
+            var nonClusteredIndexDirection = SqlIndexDirection.Desc;
             SetupConfigurationSectionMocks();
-            SetupColumnSectionMock("timeStamp", columnName, dataType, allowNull, nonClusteredIndex);
+            SetupColumnSectionMock("timeStamp", columnName, dataType, allowNull,
+                nonClusteredIndex, nonClusteredIndexDirection);
             var sut = new MicrosoftExtensionsColumnOptionsProvider();
 
             // Act
             var result = sut.ConfigureColumnOptions(new Serilog.Sinks.MSSqlServer.ColumnOptions(), _configurationSectionMock.Object);
 
             // Assert
-            AssertColumnSqlOptions(columnName, dataType, allowNull, nonClusteredIndex, result.TimeStamp);
+            AssertColumnSqlOptions(columnName, dataType, allowNull,
+                nonClusteredIndex, nonClusteredIndexDirection, result.TimeStamp);
         }
 
         [Fact]
@@ -445,15 +455,18 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
             var dataType = SqlDbType.Bit;
             var allowNull = true;
             var nonClusteredIndex = true;
+            var nonClusteredIndexDirection = SqlIndexDirection.Asc;
             SetupConfigurationSectionMocks();
-            SetupColumnSectionMock("logEvent", columnName, dataType, allowNull, nonClusteredIndex);
+            SetupColumnSectionMock("logEvent", columnName, dataType, allowNull,
+                nonClusteredIndex, nonClusteredIndexDirection);
             var sut = new MicrosoftExtensionsColumnOptionsProvider();
 
             // Act
             var result = sut.ConfigureColumnOptions(new Serilog.Sinks.MSSqlServer.ColumnOptions(), _configurationSectionMock.Object);
 
             // Assert
-            AssertColumnSqlOptions(columnName, dataType, allowNull, nonClusteredIndex, result.LogEvent);
+            AssertColumnSqlOptions(columnName, dataType, allowNull,
+                nonClusteredIndex, nonClusteredIndexDirection, result.LogEvent);
         }
 
         [Fact]
@@ -496,15 +509,18 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
             var dataType = SqlDbType.NVarChar;
             var allowNull = true;
             var nonClusteredIndex = true;
+            var nonClusteredIndexDirection = SqlIndexDirection.Asc;
             SetupConfigurationSectionMocks();
-            SetupColumnSectionMock("traceId", columnName, dataType, allowNull, nonClusteredIndex);
+            SetupColumnSectionMock("traceId", columnName, dataType, allowNull,
+                nonClusteredIndex, nonClusteredIndexDirection);
             var sut = new MicrosoftExtensionsColumnOptionsProvider();
 
             // Act
             var result = sut.ConfigureColumnOptions(new Serilog.Sinks.MSSqlServer.ColumnOptions(), _configurationSectionMock.Object);
 
             // Assert
-            AssertColumnSqlOptions(columnName, dataType, allowNull, nonClusteredIndex, result.TraceId);
+            AssertColumnSqlOptions(columnName, dataType, allowNull,
+                nonClusteredIndex, nonClusteredIndexDirection, result.TraceId);
         }
 
         [Fact]
@@ -515,15 +531,18 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
             var dataType = SqlDbType.NVarChar;
             var allowNull = true;
             var nonClusteredIndex = true;
+            var nonClusteredIndexDirection = SqlIndexDirection.Desc;
             SetupConfigurationSectionMocks();
-            SetupColumnSectionMock("spanId", columnName, dataType, allowNull, nonClusteredIndex);
+            SetupColumnSectionMock("spanId", columnName, dataType, allowNull,
+                nonClusteredIndex, nonClusteredIndexDirection);
             var sut = new MicrosoftExtensionsColumnOptionsProvider();
 
             // Act
             var result = sut.ConfigureColumnOptions(new Serilog.Sinks.MSSqlServer.ColumnOptions(), _configurationSectionMock.Object);
 
             // Assert
-            AssertColumnSqlOptions(columnName, dataType, allowNull, nonClusteredIndex, result.SpanId);
+            AssertColumnSqlOptions(columnName, dataType, allowNull,
+                nonClusteredIndex, nonClusteredIndexDirection, result.SpanId);
         }
 
         [Fact]
@@ -534,15 +553,18 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
             var dataType = SqlDbType.Bit;
             var allowNull = true;
             var nonClusteredIndex = true;
+            var nonClusteredIndexDirection = SqlIndexDirection.Asc;
             SetupConfigurationSectionMocks();
-            SetupColumnSectionMock("message", columnName, dataType, allowNull, nonClusteredIndex);
+            SetupColumnSectionMock("message", columnName, dataType, allowNull,
+                nonClusteredIndex, nonClusteredIndexDirection);
             var sut = new MicrosoftExtensionsColumnOptionsProvider();
 
             // Act
             var result = sut.ConfigureColumnOptions(new Serilog.Sinks.MSSqlServer.ColumnOptions(), _configurationSectionMock.Object);
 
             // Assert
-            AssertColumnSqlOptions(columnName, dataType, allowNull, nonClusteredIndex, result.Message);
+            AssertColumnSqlOptions(columnName, dataType, allowNull,
+                nonClusteredIndex, nonClusteredIndexDirection, result.Message);
         }
 
         [Fact]
@@ -553,15 +575,18 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
             var dataType = SqlDbType.Bit;
             var allowNull = true;
             var nonClusteredIndex = true;
+            var nonClusteredIndexDirection = SqlIndexDirection.Asc;
             SetupConfigurationSectionMocks();
-            SetupColumnSectionMock("exception", columnName, dataType, allowNull, nonClusteredIndex);
+            SetupColumnSectionMock("exception", columnName, dataType, allowNull,
+                nonClusteredIndex, nonClusteredIndexDirection);
             var sut = new MicrosoftExtensionsColumnOptionsProvider();
 
             // Act
             var result = sut.ConfigureColumnOptions(new Serilog.Sinks.MSSqlServer.ColumnOptions(), _configurationSectionMock.Object);
 
             // Assert
-            AssertColumnSqlOptions(columnName, dataType, allowNull, nonClusteredIndex, result.Exception);
+            AssertColumnSqlOptions(columnName, dataType, allowNull,
+                nonClusteredIndex, nonClusteredIndexDirection, result.Exception);
         }
 
         [Fact]
@@ -572,15 +597,18 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
             var dataType = SqlDbType.Bit;
             var allowNull = true;
             var nonClusteredIndex = true;
+            var nonClusteredIndexDirection = SqlIndexDirection.Asc;
             SetupConfigurationSectionMocks();
-            SetupColumnSectionMock("messageTemplate", columnName, dataType, allowNull, nonClusteredIndex);
+            SetupColumnSectionMock("messageTemplate", columnName, dataType, allowNull,
+                nonClusteredIndex, nonClusteredIndexDirection);
             var sut = new MicrosoftExtensionsColumnOptionsProvider();
 
             // Act
             var result = sut.ConfigureColumnOptions(new Serilog.Sinks.MSSqlServer.ColumnOptions(), _configurationSectionMock.Object);
 
             // Assert
-            AssertColumnSqlOptions(columnName, dataType, allowNull, nonClusteredIndex, result.MessageTemplate);
+            AssertColumnSqlOptions(columnName, dataType, allowNull,
+                nonClusteredIndex, nonClusteredIndexDirection, result.MessageTemplate);
         }
 
         [Fact]
@@ -697,12 +725,19 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
             Assert.Throws<ArgumentException>(() => sut.ConfigureColumnOptions(columnOptions, _configurationSectionMock.Object));
         }
 
-        private static void AssertColumnSqlOptions(string expectedColumnName, SqlDbType expectedDataType, bool expectedAllowNull, bool expectedNonClusteredIndex, SqlColumn actualColumn)
+        private static void AssertColumnSqlOptions(
+            string expectedColumnName,
+            SqlDbType expectedDataType,
+            bool expectedAllowNull,
+            bool expectedNonClusteredIndex,
+            SqlIndexDirection expectedNonClusteredIndexDirection,
+            SqlColumn actualColumn)
         {
             Assert.Equal(expectedColumnName, actualColumn.ColumnName);
             Assert.Equal(expectedDataType, actualColumn.DataType);
             Assert.Equal(expectedAllowNull, actualColumn.AllowNull);
             Assert.Equal(expectedNonClusteredIndex, actualColumn.NonClusteredIndex);
+            Assert.Equal(expectedNonClusteredIndexDirection, actualColumn.NonClusteredIndexDirection);
         }
 
         private void SetupConfigurationSectionMocks()
@@ -723,7 +758,13 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
                 });
         }
 
-        private Mock<IConfigurationSection> SetupColumnSectionMock(string columnSectionName, string columnName = null, SqlDbType? dataType = null, bool? allowNull = null, bool? nonClusteredIndex = null)
+        private Mock<IConfigurationSection> SetupColumnSectionMock(
+            string columnSectionName,
+            string columnName = null,
+            SqlDbType? dataType = null,
+            bool? allowNull = null,
+            bool? nonClusteredIndex = null,
+            SqlIndexDirection? nonClusteredIndexDirection = null)
         {
             var columnSectionMock = new Mock<IConfigurationSection>();
 
@@ -742,6 +783,10 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Configuration.Implementations.Microsof
             if (nonClusteredIndex != null)
             {
                 columnSectionMock.Setup(s => s["nonClusteredIndex"]).Returns(nonClusteredIndex.Value.ToString(CultureInfo.InvariantCulture));
+            }
+            if (nonClusteredIndexDirection != null)
+            {
+                columnSectionMock.Setup(s => s["nonClusteredIndexDirection"]).Returns(nonClusteredIndexDirection.Value.ToString());
             }
 
             _configurationSectionMock.Setup(s => s.GetSection(columnSectionName)).Returns(columnSectionMock.Object);

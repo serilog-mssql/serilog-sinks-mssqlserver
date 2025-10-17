@@ -29,7 +29,25 @@ namespace Serilog.Sinks.MSSqlServer
                 var setting = (T)Convert.ChangeType(value, typeof(T), CultureInfo.InvariantCulture);
                 setter(setting);
             }
-            // don't change the property if the conversion fails 
+            // don't change the property if the conversion fails
+            catch (InvalidCastException) { }
+            catch (OverflowException) { }
+        }
+
+        /// <summary>
+        /// This will only set a value (execute the PropertySetter delegate) if the value is non-null.
+        /// It also converts the provided value to the requested enum type. This allows configuration to only
+        /// apply property changes when external configuration has actually provided a value.
+        /// </summary>
+        public static void IfEnumNotNull<T>(string value, PropertySetter<T> setter) where T : System.Enum
+        {
+            if (value == null || setter == null) return;
+            try
+            {
+                var setting = (T)Enum.Parse(typeof(T), value, ignoreCase: true);
+                setter(setting);
+            }
+            // don't change the property if the conversion fails
             catch (InvalidCastException) { }
             catch (OverflowException) { }
         }

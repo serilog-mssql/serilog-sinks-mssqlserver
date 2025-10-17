@@ -34,6 +34,8 @@ namespace Serilog.Sinks.MSSqlServer.Configuration
             SetProperty.IfNotNull<bool>(section["allowNull"], (val) => target.AllowNull = val);
             SetProperty.IfNotNull<int>(section["dataLength"], (val) => target.DataLength = val);
             SetProperty.IfNotNull<bool>(section["nonClusteredIndex"], (val) => target.NonClusteredIndex = val);
+            SetProperty.IfEnumNotNull<SqlIndexDirection>(section["nonClusteredIndexDirection"],
+                (val) => target.NonClusteredIndexDirection = val);
         }
 
         private static void AddRemoveStandardColumns(IConfigurationSection config, ColumnOptions columnOptions)
