@@ -1,6 +1,7 @@
 # 9.0.0
 * Updated SqlClient to 6.1.1 and removed Azure.Identity workaround for issue #624
 * Updated all dependencies except .NET 9 NuGets
+* Implemented #636: Added support for non-clustered index sort direction (thanks to @gumbarros)
 
 # 8.2.2
 * Fixed issue #624: Enforce new version of transient dependency to fix vulnerability and avoid nuget.org version de-listing until SqlClient 6.1 is released.

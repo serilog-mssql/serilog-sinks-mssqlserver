@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Description>A Serilog sink that writes events to Microsoft SQL Server and Azure SQL</Description>
     <VersionPrefix>9.0.0</VersionPrefix>
-    <EnablePackageValidation>true</EnablePackageValidation>
+    <EnablePackageValidation>false</EnablePackageValidation>
     <PackageValidationBaselineVersion>8.0.0</PackageValidationBaselineVersion>
     <Authors>Michiel van Oudheusden;Christian Kadluba;Serilog Contributors</Authors>
     <TargetFrameworks>netstandard2.0;net462;net472;net8.0</TargetFrameworks>
