@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Description>A Serilog sink that writes events to Microsoft SQL Server and Azure SQL</Description>
-    <VersionPrefix>9.0.1</VersionPrefix>
+    <VersionPrefix>9.0.2</VersionPrefix>
     <EnablePackageValidation>true</EnablePackageValidation>
     <PackageValidationBaselineVersion>9.0.0</PackageValidationBaselineVersion>
     <Authors>Michiel van Oudheusden;Christian Kadluba;Serilog Contributors</Authors>
