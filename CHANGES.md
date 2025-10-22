@@ -1,3 +1,7 @@
+# 9.0.1
+* Fixed issue #642: NuGet package downgrade System.Configuration.ConfigurationManager error
+* Updated sample apps to .NET 9
+
 # 9.0.0
 * Updated SqlClient to 6.1.1 and removed Azure.Identity workaround for issue #624
 * Updated all dependencies except .NET 9 NuGets
