@@ -283,6 +283,25 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Output
         }
 
         [Fact]
+        public void GetStandardColumnNameAndNullValueForTraceIdReturnsLogLevelKeyValue()
+        {
+            // Arrange
+            var traceId = default(ActivityTraceId);
+            var logEvent = new LogEvent(
+                new DateTimeOffset(2020, 1, 1, 0, 0, 0, 0, TimeSpan.Zero),
+                LogEventLevel.Debug, null, new MessageTemplate(new List<MessageTemplateToken>() { new TextToken("Test message") }),
+                new List<LogEventProperty>(), traceId, ActivitySpanId.CreateRandom());
+            SetupSut(new MSSqlServer.ColumnOptions(), CultureInfo.InvariantCulture);
+
+            // Act
+            var result = _sut.GetStandardColumnNameAndValue(StandardColumn.TraceId, logEvent);
+
+            // Assert
+            Assert.Equal("TraceId", result.Key);
+            Assert.Null(result.Value);
+        }
+
+        [Fact]
         public void GetStandardColumnNameAndValueForSpanIdReturnsLogLevelKeyValue()
         {
             // Arrange
@@ -299,6 +318,25 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Output
             // Assert
             Assert.Equal("SpanId", result.Key);
             Assert.Equal("0390190b09823700", result.Value);
+        }
+
+        [Fact]
+        public void GetStandardColumnNameAndNullValueForSpanIdReturnsLogLevelKeyValue()
+        {
+            // Arrange
+            var spanId = default(ActivitySpanId);
+            var logEvent = new LogEvent(
+                new DateTimeOffset(2020, 1, 1, 0, 0, 0, 0, TimeSpan.Zero),
+                LogEventLevel.Debug, null, new MessageTemplate(new List<MessageTemplateToken>() { new TextToken("Test message") }),
+                new List<LogEventProperty>(), ActivityTraceId.CreateRandom(), spanId);
+            SetupSut(new MSSqlServer.ColumnOptions(), CultureInfo.InvariantCulture);
+
+            // Act
+            var result = _sut.GetStandardColumnNameAndValue(StandardColumn.SpanId, logEvent);
+
+            // Assert
+            Assert.Equal("SpanId", result.Key);
+            Assert.Null(result.Value);
         }
 
         [Fact]

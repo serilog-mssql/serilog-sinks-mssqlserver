@@ -51,9 +51,9 @@ namespace Serilog.Sinks.MSSqlServer.Output
                 case StandardColumn.Level:
                     return new KeyValuePair<string, object>(_columnOptions.Level.ColumnName, _columnOptions.Level.StoreAsEnum ? (object)logEvent.Level : logEvent.Level.ToString());
                 case StandardColumn.TraceId:
-                    return new KeyValuePair<string, object>(_columnOptions.TraceId.ColumnName, logEvent.TraceId.ToString());
+                    return new KeyValuePair<string, object>(_columnOptions.TraceId.ColumnName, logEvent.TraceId?.ToString());
                 case StandardColumn.SpanId:
-                    return new KeyValuePair<string, object>(_columnOptions.SpanId.ColumnName, logEvent.SpanId.ToString());
+                    return new KeyValuePair<string, object>(_columnOptions.SpanId.ColumnName, logEvent.SpanId?.ToString());
                 case StandardColumn.TimeStamp:
                     return GetTimeStampStandardColumnNameAndValue(logEvent);
                 case StandardColumn.Exception:
