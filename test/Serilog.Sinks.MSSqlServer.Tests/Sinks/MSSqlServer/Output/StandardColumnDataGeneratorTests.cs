@@ -302,6 +302,27 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Output
         }
 
         [Fact]
+        public void GetStandardColumnNameAndNullValueForTraceIdWithoutAllowNullReturnsLogLevelKeyValueEmpty()
+        {
+            // Arrange
+            var traceId = default(ActivityTraceId);
+            var logEvent = new LogEvent(
+                new DateTimeOffset(2020, 1, 1, 0, 0, 0, 0, TimeSpan.Zero),
+                LogEventLevel.Debug, null, new MessageTemplate(new List<MessageTemplateToken>() { new TextToken("Test message") }),
+                new List<LogEventProperty>(), traceId, ActivitySpanId.CreateRandom());
+            var columnOptions = new MSSqlServer.ColumnOptions();
+            columnOptions.TraceId.AllowNull = false;
+            SetupSut(columnOptions, CultureInfo.InvariantCulture);
+
+            // Act
+            var result = _sut.GetStandardColumnNameAndValue(StandardColumn.TraceId, logEvent);
+
+            // Assert
+            Assert.Equal("TraceId", result.Key);
+            Assert.Equal(string.Empty, result.Value);
+        }
+
+        [Fact]
         public void GetStandardColumnNameAndValueForSpanIdReturnsLogLevelKeyValue()
         {
             // Arrange
@@ -337,6 +358,27 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Output
             // Assert
             Assert.Equal("SpanId", result.Key);
             Assert.Null(result.Value);
+        }
+
+        [Fact]
+        public void GetStandardColumnNameAndNullValueForSpanIdWithoutAllowNullReturnsLogLevelKeyValueEmpty()
+        {
+            // Arrange
+            var spanId = default(ActivitySpanId);
+            var logEvent = new LogEvent(
+                new DateTimeOffset(2020, 1, 1, 0, 0, 0, 0, TimeSpan.Zero),
+                LogEventLevel.Debug, null, new MessageTemplate(new List<MessageTemplateToken>() { new TextToken("Test message") }),
+                new List<LogEventProperty>(), ActivityTraceId.CreateRandom(), spanId);
+            var columnOptions = new MSSqlServer.ColumnOptions();
+            columnOptions.SpanId.AllowNull = false;
+            SetupSut(columnOptions, CultureInfo.InvariantCulture);
+
+            // Act
+            var result = _sut.GetStandardColumnNameAndValue(StandardColumn.SpanId, logEvent);
+
+            // Assert
+            Assert.Equal("SpanId", result.Key);
+            Assert.Equal(string.Empty, result.Value);
         }
 
         [Fact]
@@ -485,6 +527,27 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Output
             // Assert
             Assert.Equal("Exception", result.Key);
             Assert.Null(result.Value);
+        }
+
+        [Fact]
+        public void GetStandardColumnNameAndValueForExceptionWhenCalledWithoutExceptionAndNotAllowedNullReturnsEmptyValue()
+        {
+            // Arrange
+            var logEvent = new LogEvent(
+                new DateTimeOffset(2020, 1, 1, 0, 0, 0, 0, TimeSpan.Zero),
+                LogEventLevel.Debug, null, new MessageTemplate(new List<MessageTemplateToken>() { new TextToken("Test message") }),
+                new List<LogEventProperty>());
+            var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions();
+            columnOptions.Level.StoreAsEnum = true;
+            columnOptions.Exception.AllowNull = false;
+            SetupSut(columnOptions, CultureInfo.InvariantCulture);
+
+            // Act
+            var result = _sut.GetStandardColumnNameAndValue(StandardColumn.Exception, logEvent);
+
+            // Assert
+            Assert.Equal("Exception", result.Key);
+            Assert.Equal(string.Empty, result.Value);
         }
 
         [Fact]
