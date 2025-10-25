@@ -51,16 +51,16 @@ namespace Serilog.Sinks.MSSqlServer.Output
                 case StandardColumn.Level:
                     return new KeyValuePair<string, object>(_columnOptions.Level.ColumnName, _columnOptions.Level.StoreAsEnum ? (object)logEvent.Level : logEvent.Level.ToString());
                 case StandardColumn.TraceId:
-                    var userDefaultTraceIdValue = logEvent.TraceId is null && !_columnOptions.TraceId.AllowNull;
-                    return new KeyValuePair<string, object>(_columnOptions.TraceId.ColumnName, userDefaultTraceIdValue ? _columnOptions.TraceId.AsDataColumn().DefaultValue.ToString() : logEvent.TraceId?.ToString());
+                    var useDefaultTraceIdValue = logEvent.TraceId is null && !_columnOptions.TraceId.AllowNull;
+                    return new KeyValuePair<string, object>(_columnOptions.TraceId.ColumnName, useDefaultTraceIdValue ? _columnOptions.TraceId.AsDataColumn().DefaultValue.ToString() : logEvent.TraceId?.ToString());
                 case StandardColumn.SpanId:
-                    var userDefaultSpanIdValue = logEvent.SpanId is null && !_columnOptions.SpanId.AllowNull;
-                    return new KeyValuePair<string, object>(_columnOptions.SpanId.ColumnName, userDefaultSpanIdValue ? _columnOptions.SpanId.AsDataColumn().DefaultValue.ToString() : logEvent.SpanId?.ToString());
+                    var useDefaultSpanIdValue = logEvent.SpanId is null && !_columnOptions.SpanId.AllowNull;
+                    return new KeyValuePair<string, object>(_columnOptions.SpanId.ColumnName, useDefaultSpanIdValue ? _columnOptions.SpanId.AsDataColumn().DefaultValue.ToString() : logEvent.SpanId?.ToString());
                 case StandardColumn.TimeStamp:
                     return GetTimeStampStandardColumnNameAndValue(logEvent);
                 case StandardColumn.Exception:
-                    var userDefaultExceptionValue = logEvent.Exception is null && !_columnOptions.Exception.AllowNull;
-                    return new KeyValuePair<string, object>(_columnOptions.Exception.ColumnName, userDefaultExceptionValue ? _columnOptions.Exception.AsDataColumn().DefaultValue.ToString() : logEvent.Exception?.ToString().TruncateOutput(_columnOptions.Exception.DataLength));
+                    var useDefaultExceptionValue = logEvent.Exception is null && !_columnOptions.Exception.AllowNull;
+                    return new KeyValuePair<string, object>(_columnOptions.Exception.ColumnName, useDefaultExceptionValue ? _columnOptions.Exception.AsDataColumn().DefaultValue.ToString() : logEvent.Exception?.ToString().TruncateOutput(_columnOptions.Exception.DataLength));
                 case StandardColumn.Properties:
                     return new KeyValuePair<string, object>(_columnOptions.Properties.ColumnName, ConvertPropertiesToXmlStructure(logEvent.Properties));
                 case StandardColumn.LogEvent:
