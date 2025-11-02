@@ -1,3 +1,6 @@
+# 9.0.2
+* Fixed issue #643: TraceId and SpanId are saved as empty string instead of NULL (thanks to @nanny07)
+
 # 9.0.1
 * Fixed issue #642: NuGet package downgrade System.Configuration.ConfigurationManager error
 * Updated sample apps to .NET 9
