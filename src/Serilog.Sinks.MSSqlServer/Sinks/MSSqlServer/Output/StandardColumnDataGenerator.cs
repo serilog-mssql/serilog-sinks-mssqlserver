@@ -77,7 +77,7 @@ namespace Serilog.Sinks.MSSqlServer.Output
             if (_columnOptions.TimeStamp.DataType == SqlDbType.DateTimeOffset)
                 return new KeyValuePair<string, object>(_columnOptions.TimeStamp.ColumnName, dateTimeOffset);
 
-            return new KeyValuePair<string, object>(_columnOptions.TimeStamp.ColumnName, dateTimeOffset.DateTime);
+            return new KeyValuePair<string, object>(_columnOptions.TimeStamp.ColumnName, _columnOptions.TimeStamp.ConvertToUtc ? dateTimeOffset.UtcDateTime : dateTimeOffset.DateTime);
         }
 
         private string RenderLogEventColumn(LogEvent logEvent)
