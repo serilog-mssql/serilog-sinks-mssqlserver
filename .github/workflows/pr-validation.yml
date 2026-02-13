@@ -25,7 +25,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: bin
-          path: src\Serilog.Sinks.MSSqlServer\bin\Release\net8.0
+          path: src\Serilog.Sinks.MSSqlServer\bin\Release\net10.0
 
       - name: Upload testresults artifact with code coverage file
         uses: actions/upload-artifact@v4
