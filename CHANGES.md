@@ -1,3 +1,9 @@
+# 9.0.3
+* Fixed issue #659: If Timestamp column is set to UTC, Timestamp property in LogEvent column should be UTC too (thanks to @marcominerva)
+* Implemented #658: Preset in 16 or 20 as DataLength for LevelColumn
+* Updated to Serilog 4.3.1
+* Added .NET 10 target framework
+
 # 9.0.2
 * Fixed issue #643: TraceId and SpanId are saved as empty string instead of NULL (thanks to @nanny07)
 

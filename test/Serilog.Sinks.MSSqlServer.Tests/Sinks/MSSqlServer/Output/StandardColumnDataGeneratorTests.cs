@@ -487,6 +487,29 @@ namespace Serilog.Sinks.MSSqlServer.Tests.Output
             Assert.Equal(new TimeSpan(0), timeStampColumnOffset.Offset);
         }
 
+        [Trait("Bugfix", "#659")]
+        [Fact]
+        public void GetStandardColumnNameAndValueForTimeStampCreatesUtcDateTimeUsingUtcDateTimeProperty()
+        {
+            // Arrange
+            var options = new Serilog.Sinks.MSSqlServer.ColumnOptions
+            {
+                TimeStamp = { ConvertToUtc = true }
+            };
+            var testDateTimeOffset = new DateTimeOffset(2020, 1, 1, 9, 0, 0, new TimeSpan(1, 0, 0)); // Timezone +1:00
+            var logEvent = CreateLogEvent(testDateTimeOffset);
+            SetupSut(options, CultureInfo.InvariantCulture);
+
+            // Act
+            var column = _sut.GetStandardColumnNameAndValue(StandardColumn.TimeStamp, logEvent);
+
+            // Assert
+            Assert.IsType<DateTime>(column.Value);
+            var timestamp = (DateTime)column.Value;
+            Assert.Equal(testDateTimeOffset.Hour - 1, timestamp.Hour);
+            Assert.Equal(DateTimeKind.Utc, timestamp.Kind);
+        }
+
         [Fact]
         public void GetStandardColumnNameAndValueForExceptionReturnsExceptionKeyValue()
         {

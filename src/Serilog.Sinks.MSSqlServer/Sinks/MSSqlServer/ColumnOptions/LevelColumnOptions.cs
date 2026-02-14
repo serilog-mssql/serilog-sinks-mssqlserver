@@ -17,6 +17,7 @@ namespace Serilog.Sinks.MSSqlServer
             {
                 StandardColumnIdentifier = StandardColumn.Level;
                 DataType = SqlDbType.NVarChar;
+                DataLength = 16;
             }
 
             /// <summary>
