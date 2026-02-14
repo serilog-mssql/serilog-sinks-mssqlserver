@@ -73,7 +73,7 @@ try
 
             # Run tests for different targets in sequence to avoid database tests
             # to fail because of concurrency problems
-            foreach ($tfm in @( "net462", "net472", "net8.0" ))
+            foreach ($tfm in @( "net462", "net472", "net8.0", "net10.0" ))
             {
                 echo "build: Testing project in $testProjectPath for target $tfm"
                 & dotnet test -c Release --collect "XPlat Code Coverage" --framework "$tfm" --results-directory "./TestResults/$tfm"
