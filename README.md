@@ -850,9 +850,23 @@ WHERE
 
 ## Breaking Changes
 
+### Release 10.0.0
+
+`Microsoft.Data.SqlClient` was upgraded to >=7.0.1 which introduces a breaking change regarding Azure Entra Id authentication. If you use this, you will have to add a reference to the library `Microsoft.Data.SqlClient.Extensions.Azure` in your project. Otherwise the connection will fail with a [TBD] exception.
+
+```csharp
+using Serilog;
+using Serilog.Sinks.MSSqlServer;
+using Microsoft.Data.SqlClient.Extensions.Azure; // Add this to use Azure authentication
+
+// Serilog and MSSqlSink init code
+```
+
+Refer to the [SqlClient 7.0.1 documentation](https://github.com/dotnet/SqlClient/blob/main/release-notes/7.0/7.0.0.md#cumulative-changes-since-61) for details.
+
 ### Release 6.0.0
 
-`Microsoft.Data.SqlClient` was upgraded to >4.0.0 which introduces a breaking change regarding connection strings. If your SQL Server does not use encryption you have to explicitly specify this in the connection string by adding `Encrypt=False`. Otherwise the connection will fail with a `SqlException`. Refer to the [SqlClient documentation](https://github.com/dotnet/SqlClient/blob/main/release-notes/4.0/4.0.0.md#breaking-changes) for details.
+`Microsoft.Data.SqlClient` was upgraded to >=4.0.0 which introduces a breaking change regarding connection strings. If your SQL Server does not use encryption you have to explicitly specify this in the connection string by adding `Encrypt=False`. Otherwise the connection will fail with a `SqlException`. Refer to the [SqlClient documentation](https://github.com/dotnet/SqlClient/blob/main/release-notes/4.0/4.0.0.md#breaking-changes) for details.
 
 ## Deprecated Features
 

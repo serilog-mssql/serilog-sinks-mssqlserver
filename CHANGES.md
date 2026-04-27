@@ -1,3 +1,9 @@
+# 10.0.0
+* Updated SqlClient from 6 to 7 including breaking changes around Azure Entra Id authentication.
+* Updated minimum SDK to 10.0.7 because of CVEs in .NET
+* Replaced FluentAssertions with AwesomeAssertions for license reasons
+* Updated other dependencies
+
 # 9.0.3
 * Fixed issue #659: If Timestamp column is set to UTC, Timestamp property in LogEvent column should be UTC too (thanks to @marcominerva)
 * Implemented #658: Preset in 16 or 20 as DataLength for LevelColumn
