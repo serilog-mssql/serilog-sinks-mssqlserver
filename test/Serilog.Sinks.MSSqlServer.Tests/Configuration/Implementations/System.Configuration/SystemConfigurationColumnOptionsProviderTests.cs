@@ -1,6 +1,6 @@
 ﻿using System.Data;
 using System.Linq;
-using FluentAssertions;
+using AwesomeAssertions;
 using Serilog.Configuration;
 using Serilog.Sinks.MSSqlServer.Configuration;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;

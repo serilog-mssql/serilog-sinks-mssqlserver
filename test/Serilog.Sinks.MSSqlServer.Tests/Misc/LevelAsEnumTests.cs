@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using System.IO;
-using FluentAssertions;
+using AwesomeAssertions;
 using Serilog.Events;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
