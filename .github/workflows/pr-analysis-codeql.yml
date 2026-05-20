@@ -24,6 +24,11 @@ jobs:
         with:
           languages: 'csharp'
 
+      # Necessary until GitHub runners have .NET SDK 10.0.203 or higher
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.203
+
       - name: Run build
         run: ./Build.ps1 -SkipTests
         shell: pwsh

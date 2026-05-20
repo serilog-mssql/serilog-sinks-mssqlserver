@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using Dapper;
-using FluentAssertions;
+using AwesomeAssertions;
 using Microsoft.Data.SqlClient;
 using Xunit;
 using Xunit.Abstractions;
@@ -170,11 +170,11 @@ namespace Serilog.Sinks.MSSqlServer.Tests.TestUtils
             {
                 conn.Execute($"CREATE TABLE {logTriggerTableName} ([Id] [UNIQUEIDENTIFIER] NOT NULL, [Data] [NVARCHAR](50) NOT NULL)");
                 conn.Execute($@"
-CREATE TRIGGER {logTriggerName} ON {DatabaseFixture.LogTableName} 
-AFTER INSERT 
+CREATE TRIGGER {logTriggerName} ON {DatabaseFixture.LogTableName}
+AFTER INSERT
 AS
-BEGIN 
-INSERT INTO {logTriggerTableName} VALUES (NEWID(), 'Data') 
+BEGIN
+INSERT INTO {logTriggerTableName} VALUES (NEWID(), 'Data')
 END");
             }
         }
