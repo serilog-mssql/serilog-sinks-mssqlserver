@@ -1,6 +1,6 @@
 ﻿using System.Globalization;
 using System.Transactions;
-using FluentAssertions;
+using AwesomeAssertions;
 using Serilog.Sinks.MSSqlServer.Tests.TestUtils;
 using Xunit;
 using Xunit.Abstractions;
