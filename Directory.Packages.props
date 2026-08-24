@@ -5,7 +5,7 @@
   <ItemGroup>
     <PackageVersion Include="AwesomeAssertions" Version="9.5.0" />
     <PackageVersion Include="BenchmarkDotNet" Version="0.15.8" />
-    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.4.0" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.9.0" />
     <PackageVersion Include="System.Configuration.ConfigurationManager" Version="9.0.15" />
     <PackageVersion Include="Microsoft.Data.SqlClient" Version="7.0.2" />
     <PackageVersion Include="Microsoft.Extensions.Configuration" Version="10.0.11" />
