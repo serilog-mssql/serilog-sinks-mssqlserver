@@ -1,3 +1,7 @@
+# 10.0.1
+* Update .NET dependencies to 10.0.13 to fix CVEs (https://github.com/dotnet/core/blob/main/release-notes/10.0/10.0.13/10.0.13.md?utm_source=chatgpt.com#notable-changes)
+* Minor version updates of various other dependencies
+
 # 10.0.0
 * Updated SqlClient from 6 to 7 including breaking changes around Azure Entra Id authentication. (thanks to @david-brink-talogy for Azure auth testing)
 * Updated minimum SDK to 10.0.7 because of CVEs in .NET
