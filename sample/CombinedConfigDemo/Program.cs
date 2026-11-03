@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading;
 using Microsoft.Extensions.Configuration;
 using Serilog;
 using Serilog.Sinks.MSSqlServer;
