@@ -15,6 +15,10 @@
     <PackageVersion Include="coverlet.collector" Version="10.1.0" />
     <PackageVersion Include="Dapper.StrongName" Version="2.1.89" />
     <PackageVersion Include="Moq" Version="4.21.0" />
+    <!-- Fixes https://github.com/advisories/GHSA-846f-f764-76mx. Remove after Serilog core updated this package -->
+    <PackageVersion Include="System.Configuration.ConfigurationManager" Version="10.0.14" />
+    <PackageVersion Include="System.Configuration.ConfigurationManager" Version="10.0.14" />
+    <PackageVersion Include="System.Security.Cryptography.Pkcs" Version="10.0.14" />
     <PackageVersion Include="xunit" Version="2.9.3" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="2.8.2" />
     <PackageVersion Include="Serilog" Version="4.4.0" />
