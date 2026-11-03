@@ -37,6 +37,10 @@
     <PackageReference Include="Microsoft.Extensions.Configuration" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" />
     <PackageReference Include="Serilog" />
+
+    <!-- Fixes https://github.com/advisories/GHSA-846f-f764-76mx. Remove after Serilog core updated this package -->
+    <PackageReference Include="System.Security.Cryptography.Pkcs" />
+
   </ItemGroup>
 
   <ItemGroup>
