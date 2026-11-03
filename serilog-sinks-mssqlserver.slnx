@@ -1,0 +1,36 @@
+<Solution>
+  <Folder Name="/sample/">
+    <Project Path="sample/AppConfigDemo/AppConfigDemo.csproj" />
+    <Project Path="sample/CombinedConfigDemo/CombinedConfigDemo.csproj" />
+    <Project Path="sample/CustomLogEventFormatterDemo/CustomLogEventFormatterDemo.csproj" />
+    <Project Path="sample/WorkerServiceDemo/WorkerServiceDemo.csproj" />
+  </Folder>
+  <Folder Name="/sample/NetStandardDemo/">
+    <Project Path="sample/NetStandardDemo/NetStandardDemoApp/NetStandardDemoApp.csproj" />
+    <Project Path="sample/NetStandardDemo/NetStandardDemoLib/NetStandardDemoLib.csproj" />
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path=".github/ISSUE_TEMPLATE.md" />
+    <File Path=".github/workflows/perftests.yml" />
+    <File Path=".github/workflows/pr-analysis-codeql.yml" />
+    <File Path=".github/workflows/pr-analysis-devskim.yml" />
+    <File Path=".github/workflows/pr-validation.yml" />
+    <File Path=".github/workflows/release.yml" />
+    <File Path="Build.ps1" />
+    <File Path="CHANGES.md" />
+    <File Path="DEVELOPMENT.md" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+    <File Path="global.json" />
+    <File Path="README.md" />
+    <File Path="RunPerfTests.ps1" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/Serilog.Sinks.MSSqlServer/Serilog.Sinks.MSSqlServer.csproj" />
+  </Folder>
+  <Folder Name="/test/">
+    <Project Path="test/Serilog.Sinks.MSSqlServer.PerformanceTests/Serilog.Sinks.MSSqlServer.PerformanceTests.csproj" />
+    <Project Path="test/Serilog.Sinks.MSSqlServer.Tests/Serilog.Sinks.MSSqlServer.Tests.csproj" />
+  </Folder>
+</Solution>
