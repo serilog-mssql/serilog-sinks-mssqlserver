@@ -1,5 +1,10 @@
+# 10.0.1
+* Activated dependabot
+* Use nuget.org trusted publishing instead of API key
+* Updated various dependencies (.NET 9 -> 10, etc.)
+
 # 10.0.0
-* Updated SqlClient from 6 to 7 including breaking changes around Azure Entra Id authentication.
+* Updated SqlClient from 6 to 7 including breaking changes around Azure Entra Id authentication. (thanks to @david-brink-talogy for Azure auth testing)
 * Updated minimum SDK to 10.0.7 because of CVEs in .NET
 * Replaced FluentAssertions with AwesomeAssertions for license reasons
 * Updated other dependencies
