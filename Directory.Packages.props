@@ -22,7 +22,7 @@
     <PackageVersion Include="xunit" Version="2.9.3" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="2.8.2" />
     <PackageVersion Include="Serilog" Version="4.4.0" />
-    <PackageVersion Include="Serilog.Extensions.Hosting" Version="10.0.0" />
+    <PackageVersion Include="Serilog.Extensions.Hosting" Version="11.0.0" />
     <PackageVersion Include="Serilog.Settings.Configuration" Version="10.0.1" />
   </ItemGroup>
 </Project>
